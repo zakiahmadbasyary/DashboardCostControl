@@ -40,12 +40,11 @@ export default function LocationAnalysis({
             onChange={(e) =>
               onFilterChange({
                 ...locationFilters,
-                umur: e.target.value === "all" ? "all" : Number(e.target.value),
+                umur: Number(e.target.value),
               })
             }
             className="bg-[#F7F9F7] border border-[#DDE5DF] rounded-lg px-2.5 py-1.5 text-xs font-medium text-[#17231B] focus:outline-none focus:border-[#16823B]"
           >
-            <option value="all">Semua Umur</option>
             {Array.from({ length: 22 }, (_, i) => (
               <option key={i} value={i}>
                 Umur {i} Bulan
@@ -63,7 +62,6 @@ export default function LocationAnalysis({
             }
             className="bg-[#F7F9F7] border border-[#DDE5DF] rounded-lg px-2.5 py-1.5 text-xs font-medium text-[#17231B] focus:outline-none focus:border-[#16823B]"
           >
-            <option value="all">Semua Wilayah</option>
             <option value="AW01">AW01</option>
             <option value="AW02">AW02</option>
             <option value="AW03">AW03</option>

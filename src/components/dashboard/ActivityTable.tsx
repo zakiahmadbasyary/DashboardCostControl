@@ -1,16 +1,18 @@
 "use client";
 
-import { ActivityData, GroupCostData } from "@/types/dashboard";
+import { ActivityData, GroupCostData, LocationData } from "@/types/dashboard";
 import { ListChecks, AlertCircle } from "lucide-react";
 
 interface ActivityTableProps {
   selectedGroupCost: GroupCostData | null;
+  selectedLocation?: LocationData | null;
   activities: ActivityData[];
   loading?: boolean;
 }
 
 export default function ActivityTable({
   selectedGroupCost,
+  selectedLocation,
   activities,
   loading,
 }: ActivityTableProps) {
@@ -41,7 +43,11 @@ export default function ActivityTable({
             <div>
               <h3 className="font-bold text-base text-[#17231B]">Aktivitas Lapangan</h3>
               <p className="text-xs text-[#5F6B63]">
-                Rincian pekerjaan untuk Group Cost <span className="font-bold text-[#16823B]">{selectedGroupCost.groupCost}</span> (Cost/Ha = Cost ÷ Luas)
+                Rincian pekerjaan untuk Group Cost <span className="font-bold text-[#16823B]">{selectedGroupCost.groupCost}</span>
+                {selectedLocation && (
+                  <> di Lokasi <span className="font-bold text-[#16823B]">{selectedLocation.lokasi}</span></>
+                )}{" "}
+                (Cost/Ha = Cost ÷ Luas)
               </p>
             </div>
           </div>
@@ -54,7 +60,10 @@ export default function ActivityTable({
           </div>
         ) : activities.length === 0 ? (
           <div className="p-6 text-center bg-[#F7F9F7] rounded-xl border border-dashed border-[#DDE5DF]">
-            <p className="text-xs text-[#5F6B63]">Tidak ada rincian aktivitas untuk Group Cost ini.</p>
+            <p className="text-xs text-[#5F6B63]">
+              Tidak ada rincian aktivitas untuk Group Cost <strong>{selectedGroupCost.groupCost}</strong>
+              {selectedLocation ? ` di lokasi ${selectedLocation.lokasi}` : ""}.
+            </p>
           </div>
         ) : (
           <div className="overflow-x-auto rounded-xl border border-[#DDE5DF]">

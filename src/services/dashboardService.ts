@@ -111,10 +111,10 @@ export const dashboardService = {
       }
 
       // Location-specific filters
-      if (locationFilters.umur !== "all" && loc.umur !== locationFilters.umur) {
+      if (locationFilters.umur !== undefined && (locationFilters.umur as number | string) !== "all" && loc.umur !== locationFilters.umur) {
         return false;
       }
-      if (locationFilters.wilayah !== "all" && loc.wilayah !== locationFilters.wilayah) {
+      if (locationFilters.wilayah && locationFilters.wilayah !== "all" && loc.wilayah !== locationFilters.wilayah) {
         return false;
       }
 
@@ -188,9 +188,9 @@ export const dashboardService = {
       if (
         lokasi &&
         lokasi !== "all" &&
-        item.lokasi !== lokasi &&
-        `LOC-${item.id}` !== lokasi &&
-        item.id !== lokasi
+        item.lokasi.toLowerCase() !== lokasi.toLowerCase() &&
+        `LOC-${item.id}`.toLowerCase() !== lokasi.toLowerCase() &&
+        item.id.toLowerCase() !== lokasi.toLowerCase()
       ) {
         return false;
       }
@@ -214,6 +214,17 @@ export const dashboardService = {
       }));
     }
 
-    return mockActivitiesMap[groupCost] || [];
+    const fallback = mockActivitiesMap[groupCost] || [];
+    if (lokasi && lokasi !== "all") {
+      return fallback.filter(
+        (item) =>
+          !item.lokasi ||
+          item.lokasi.toLowerCase() === lokasi.toLowerCase() ||
+          `LOC-${item.idAktivitas}`.toLowerCase() === lokasi.toLowerCase()
+      );
+    }
+
+    return fallback;
   },
 };
+

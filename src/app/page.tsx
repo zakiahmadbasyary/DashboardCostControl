@@ -30,8 +30,8 @@ export default function PublicDashboardPage() {
 
   // Location-specific sub-filters state
   const [locationFilters, setLocationFilters] = useState<LocationFilter>({
-    umur: "all",
-    wilayah: "all",
+    umur: 0,
+    wilayah: "AW01",
   });
 
   // Data states
@@ -106,7 +106,10 @@ export default function PublicDashboardPage() {
     setLoadingActivities(true);
 
     try {
-      const actRes = await dashboardService.getActivities(gc.groupCost);
+      const actRes = await dashboardService.getActivities(
+        gc.groupCost,
+        selectedLocation?.lokasi || selectedLocation?.idLokasi
+      );
       setActivities(actRes);
     } catch (err) {
       console.error("Error fetching activities:", err);
@@ -162,6 +165,7 @@ export default function PublicDashboardPage() {
 
           <ActivityTable
             selectedGroupCost={selectedGroupCost}
+            selectedLocation={selectedLocation}
             activities={activities}
             loading={loadingActivities}
           />
