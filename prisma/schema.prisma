@@ -1,0 +1,87 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String        @id @default(uuid())
+  username     String        @unique
+  password     String
+  role         String        @default("admin")
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  activityLogs ActivityLog[]
+
+  @@map("users")
+}
+
+model ActivityLog {
+  id          String   @id @default(uuid())
+  userId      String
+  action      String
+  dataSource  String?
+  fileName    String?
+  description String?
+  createdAt   DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("activity_logs")
+}
+
+model DataLokasi {
+  id         String   @id @default(uuid())
+  lokasi     String
+  status     String
+  kelasBibit String
+  jenisBibit String
+  umur       Int
+  luas       Float
+  groupCost  String
+  cost       Float
+  codeSbt    String
+  pupuk      String
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@map("data_lokasi")
+}
+
+model DataAktivitas {
+  id         String   @id @default(uuid())
+  lokasi     String
+  status     String
+  wilayah    String
+  luas       Float
+  kelasBibit String
+  aktivitas  String
+  biaya      Float
+  groupCost  String
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@map("data_aktivitas")
+}
+
+model DataSBT {
+  id        String   @id @default(uuid())
+  codeSbt   String   @unique
+  status    String
+  pupuk     String
+  jenis     String
+  kelas     String
+  groupCost String
+  umur      Int
+  nilaiSbt  Float
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("data_sbt")
+}
