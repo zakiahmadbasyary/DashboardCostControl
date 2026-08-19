@@ -14,6 +14,20 @@ export const authService = {
       if (typeof window !== "undefined") {
         localStorage.setItem(SESSION_KEY, JSON.stringify(MOCK_ADMIN_USER));
       }
+
+      // Log LOGIN activity
+      try {
+        const { activityLogService } = await import("./activityLogService");
+        await activityLogService.addLog({
+          adminUsername: MOCK_ADMIN_USER.username,
+          action: "LOGIN",
+          dataSource: "-",
+          description: "Admin login ke sistem panel",
+        });
+      } catch (e) {
+        console.error("Failed to record login log:", e);
+      }
+
       return {
         success: true,
         message: "Login berhasil. Selamat datang di Admin Panel GGF AgroMetric.",

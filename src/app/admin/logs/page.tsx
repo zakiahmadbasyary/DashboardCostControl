@@ -70,11 +70,8 @@ export default function AdminLogsPage() {
               className="w-full bg-[#F7F9F7] border border-[#DDE5DF] rounded-xl px-3 py-2 text-xs text-[#17231B] focus:outline-none focus:border-[#16823B]"
             >
               <option value="all">Semua Aktivitas</option>
-              <option value="UPLOAD_DATA">UPLOAD_DATA</option>
-              <option value="REPLACE_DATA">REPLACE_DATA</option>
-              <option value="VALIDATE_DATA">VALIDATE_DATA</option>
               <option value="LOGIN">LOGIN</option>
-              <option value="LOGOUT">LOGOUT</option>
+              <option value="UPLOAD_DATA">UPLOAD_DATA</option>
             </select>
           </div>
 

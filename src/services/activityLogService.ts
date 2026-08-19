@@ -1,48 +1,34 @@
 import { ActivityLogItem, LogFilter } from "@/types/activityLog";
-import { mockActivityLogs } from "@/mocks/activityLogs";
-
-let logsStorage: ActivityLogItem[] = [...mockActivityLogs];
 
 export const activityLogService = {
   async getLogs(filter?: LogFilter): Promise<ActivityLogItem[]> {
-    await new Promise((resolve) => setTimeout(resolve, 200));
+    const params = new URLSearchParams();
+    if (filter?.admin && filter.admin !== "all") params.set("admin", filter.admin);
+    if (filter?.action && filter.action !== "all") params.set("action", filter.action);
+    if (filter?.dataSource && filter.dataSource !== "all") params.set("dataSource", filter.dataSource);
+    if (filter?.searchQuery) params.set("searchQuery", filter.searchQuery);
 
-    let result = [...logsStorage];
+    const res = await fetch(`/api/admin/logs?${params.toString()}`, {
+      cache: "no-store",
+    });
 
-    if (filter) {
-      if (filter.admin && filter.admin !== "all") {
-        result = result.filter((l) => l.adminUsername === filter.admin);
-      }
-      if (filter.action && filter.action !== "all") {
-        result = result.filter((l) => l.action === filter.action);
-      }
-      if (filter.dataSource && filter.dataSource !== "all") {
-        result = result.filter((l) => l.dataSource === filter.dataSource);
-      }
-      if (filter.searchQuery) {
-        const q = filter.searchQuery.toLowerCase();
-        result = result.filter(
-          (l) =>
-            l.description.toLowerCase().includes(q) ||
-            (l.fileName && l.fileName.toLowerCase().includes(q))
-        );
-      }
+    if (!res.ok) {
+      throw new Error("Failed to fetch activity logs");
     }
 
-    return result;
+    const data = await res.json();
+    return data.logs || [];
   },
 
-  async addLog(logData: Omit<ActivityLogItem, "id" | "timestamp">): Promise<ActivityLogItem> {
-    const now = new Date();
-    const formattedDate = `${now.getDate()} ${now.toLocaleString("en-US", { month: "short" })} ${now.getFullYear()}, ${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}`;
-
-    const newLog: ActivityLogItem = {
-      id: `LOG-${Date.now()}`,
-      timestamp: formattedDate,
-      ...logData,
-    };
-
-    logsStorage = [newLog, ...logsStorage];
-    return newLog;
+  async addLog(logData: Omit<ActivityLogItem, "id" | "timestamp">): Promise<void> {
+    try {
+      await fetch("/api/admin/logs", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(logData),
+      });
+    } catch (err) {
+      console.error("Error creating activity log:", err);
+    }
   },
 };

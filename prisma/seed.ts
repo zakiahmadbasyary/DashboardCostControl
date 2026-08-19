@@ -219,7 +219,7 @@ async function main() {
 
   // 5. Seed Default Admin User
   console.log("👤 Creating default admin user...");
-  await prisma.user.upsert({
+  const adminUser = await prisma.user.upsert({
     where: { username: "admin" },
     update: {},
     create: {
@@ -229,6 +229,46 @@ async function main() {
     },
   });
   console.log("✅ Seeded default admin user (admin / admin123).");
+
+  // 6. Seed Initial Activity Logs (LOGIN & UPLOAD_DATA)
+  console.log("📋 Seeding default activity logs...");
+  await prisma.activityLog.deleteMany({
+    where: { userId: adminUser.id },
+  });
+
+  await prisma.activityLog.createMany({
+    data: [
+      {
+        userId: adminUser.id,
+        action: "LOGIN",
+        dataSource: "-",
+        fileName: null,
+        description: "Admin login ke sistem panel",
+      },
+      {
+        userId: adminUser.id,
+        action: "UPLOAD_DATA",
+        dataSource: "Data Lokasi",
+        fileName: "DataLokasi.xlsx",
+        description: "Berhasil mengunggah file DataLokasi.xlsx (18,315 baris data)",
+      },
+      {
+        userId: adminUser.id,
+        action: "UPLOAD_DATA",
+        dataSource: "Data SBT",
+        fileName: "DataSBT.xlsx",
+        description: "Berhasil mengunggah file DataSBT.xlsx (4,290 acuan SBT)",
+      },
+      {
+        userId: adminUser.id,
+        action: "UPLOAD_DATA",
+        dataSource: "Data Aktivitas",
+        fileName: "DataAktivitas.xlsx",
+        description: "Berhasil mengunggah file DataAktivitas.xlsx (32,167 rincian aktivitas)",
+      },
+    ],
+  });
+  console.log("✅ Seeded default activity logs.");
 
   console.log("🎉 Database seeding completed successfully!");
 }

@@ -64,7 +64,7 @@ export default function AdminPreviewPage() {
       <div className="bg-white border border-[#DDE5DF] rounded-2xl p-5 shadow-xs space-y-4">
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 border-b border-[#DDE5DF] pb-4">
           {/* 4 Tabs */}
-          <div className="flex flex-wrap items-center gap-2">
+          <div className="flex items-center gap-2 overflow-x-auto pb-1 sm:pb-0 max-w-full shrink-0 scrollbar-none">
             <button
               onClick={() => handleTabChange("mastersheet")}
               className={`inline-flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${

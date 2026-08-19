@@ -34,7 +34,7 @@ export default function LocationAnalysis({
         </div>
 
         {/* Location Specific Sub-Filters */}
-        <div className="flex items-center gap-2">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
           <select
             value={locationFilters.umur}
             onChange={(e) =>
@@ -43,7 +43,7 @@ export default function LocationAnalysis({
                 umur: Number(e.target.value),
               })
             }
-            className="bg-[#F7F9F7] border border-[#DDE5DF] rounded-lg px-2.5 py-1.5 text-xs font-medium text-[#17231B] focus:outline-none focus:border-[#16823B]"
+            className="w-full sm:w-auto bg-[#F7F9F7] border border-[#DDE5DF] rounded-lg px-2.5 py-1.5 text-xs font-medium text-[#17231B] focus:outline-none focus:border-[#16823B]"
           >
             {Array.from({ length: 22 }, (_, i) => (
               <option key={i} value={i}>
@@ -60,7 +60,7 @@ export default function LocationAnalysis({
                 wilayah: e.target.value,
               })
             }
-            className="bg-[#F7F9F7] border border-[#DDE5DF] rounded-lg px-2.5 py-1.5 text-xs font-medium text-[#17231B] focus:outline-none focus:border-[#16823B]"
+            className="w-full sm:w-auto bg-[#F7F9F7] border border-[#DDE5DF] rounded-lg px-2.5 py-1.5 text-xs font-medium text-[#17231B] focus:outline-none focus:border-[#16823B]"
           >
             <option value="AW01">AW01</option>
             <option value="AW02">AW02</option>

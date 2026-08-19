@@ -118,17 +118,17 @@ export default function GlobalFilters({ initialFilters, onApplyFilters }: Global
         </div>
       </div>
 
-      <div className="flex items-center justify-end gap-3 mt-4 pt-3 border-t border-[#DDE5DF]/60">
+      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-end gap-2.5 sm:gap-3 mt-4 pt-3 border-t border-[#DDE5DF]/60">
         <button
           onClick={handleReset}
-          className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg border border-[#DDE5DF] text-[#5F6B63] hover:bg-[#F7F9F7] text-xs font-semibold transition-colors cursor-pointer"
+          className="inline-flex items-center justify-center gap-1.5 px-3.5 py-2 sm:py-1.5 rounded-lg border border-[#DDE5DF] text-[#5F6B63] hover:bg-[#F7F9F7] text-xs font-semibold transition-colors cursor-pointer w-full sm:w-auto"
         >
           <RotateCcw className="w-3.5 h-3.5" />
           <span>Reset</span>
         </button>
         <button
           onClick={handleApply}
-          className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-lg bg-[#16823B] hover:bg-[#0B6B32] text-white text-xs font-bold transition-all shadow-xs active:scale-95 cursor-pointer"
+          className="inline-flex items-center justify-center gap-1.5 px-4 py-2 sm:py-1.5 rounded-lg bg-[#16823B] hover:bg-[#0B6B32] text-white text-xs font-bold transition-all shadow-xs active:scale-95 cursor-pointer w-full sm:w-auto"
         >
           <Check className="w-3.5 h-3.5" />
           <span>Terapkan Filter</span>
