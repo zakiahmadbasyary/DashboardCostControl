@@ -1,42 +1,33 @@
-import { LocationSourceItem, SbtSourceItem, ActivitySourceItem } from "@/types/sourceData";
-import { mockLocationSourceData, mockSbtSourceData, mockActivitySourceData } from "@/mocks/sourceData";
+export interface PreviewResponse<T = Record<string, unknown>> {
+  data: T[];
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+}
 
 export const previewService = {
-  async getLocationData(search?: string): Promise<LocationSourceItem[]> {
-    await new Promise((resolve) => setTimeout(resolve, 200));
-    if (!search) return mockLocationSourceData;
-    const query = search.toLowerCase();
-    return mockLocationSourceData.filter(
-      (item) =>
-        item.lokasi.toLowerCase().includes(query) ||
-        item.wilayah.toLowerCase().includes(query) ||
-        item.groupCost.toLowerCase().includes(query) ||
-        item.status.toLowerCase().includes(query)
-    );
-  },
+  async getTableData<T = Record<string, unknown>>(
+    table: "mastersheet" | "lokasi" | "sbt" | "aktivitas",
+    search = "",
+    page = 1,
+    limit = 50
+  ): Promise<PreviewResponse<T>> {
+    const params = new URLSearchParams({
+      table,
+      search,
+      page: String(page),
+      limit: String(limit),
+    });
 
-  async getSbtData(search?: string): Promise<SbtSourceItem[]> {
-    await new Promise((resolve) => setTimeout(resolve, 200));
-    if (!search) return mockSbtSourceData;
-    const query = search.toLowerCase();
-    return mockSbtSourceData.filter(
-      (item) =>
-        item.codeSbt.toLowerCase().includes(query) ||
-        (item.keterangan && item.keterangan.toLowerCase().includes(query)) ||
-        item.groupCost.toLowerCase().includes(query)
-    );
-  },
+    const res = await fetch(`/api/admin/preview?${params.toString()}`, {
+      cache: "no-store",
+    });
 
-  async getActivityData(search?: string): Promise<ActivitySourceItem[]> {
-    await new Promise((resolve) => setTimeout(resolve, 200));
-    if (!search) return mockActivitySourceData;
-    const query = search.toLowerCase();
-    return mockActivitySourceData.filter(
-      (item) =>
-        (item.idAktivitas && item.idAktivitas.toLowerCase().includes(query)) ||
-        item.aktivitas.toLowerCase().includes(query) ||
-        item.groupCost.toLowerCase().includes(query) ||
-        item.lokasi.toLowerCase().includes(query)
-    );
+    if (!res.ok) {
+      throw new Error(`Failed to fetch preview data: ${res.statusText}`);
+    }
+
+    return res.json();
   },
 };
