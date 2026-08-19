@@ -3,7 +3,7 @@
 import { useState, useRef } from "react";
 import { uploadService, DataSourceCategory } from "@/services/uploadService";
 import { UploadProgress } from "@/types/sourceData";
-import { UploadCloud, FileSpreadsheet, CheckCircle2, AlertCircle, RefreshCw, Info, RotateCcw, Trash2 } from "lucide-react";
+import { UploadCloud, FileSpreadsheet, CheckCircle2, AlertCircle, RefreshCw, Info, RotateCcw, Trash2, Download } from "lucide-react";
 
 export default function AdminUploadPage() {
   const [progressState, setProgressState] = useState<Record<DataSourceCategory, UploadProgress | null>>({
@@ -42,6 +42,15 @@ export default function AdminUploadPage() {
     if (isUploading) return;
 
     fileInputRefs[category].current?.click();
+  };
+
+  const handleDownloadTemplate = (category: DataSourceCategory) => {
+    let categoryKey = "mastersheet";
+    if (category === "Data SBT") categoryKey = "sbt";
+    if (category === "Data Lokasi") categoryKey = "lokasi";
+    if (category === "Data Aktivitas") categoryKey = "aktivitas";
+
+    window.open(`/api/admin/template?category=${categoryKey}`, "_blank");
   };
 
   const handleConfirmReset = async () => {
@@ -129,7 +138,7 @@ export default function AdminUploadPage() {
             1. <strong>MasterSheet</strong> (Master Lokasi) &rarr; 2. <strong>Data SBT</strong> (Acuan SBT) &rarr; 3. <strong>Data Lokasi</strong> &rarr; 4. <strong>Data Aktivitas</strong>.
           </p>
           <p className="text-[11px] text-[#5F6B63]">
-            * Riwayat file Excel tersimpan maks <strong>3 file terbaru</strong> per kategori (file terlama dihapus otomatis). Tersedia juga tombol <strong>Reset Data Tabel</strong> jika ingin mengosongkan isi tabel tanpa menghapus struktur kolomnya.
+            * Anda dapat mengunduh <strong>Template Excel</strong> pada setiap kartu di bawah. Riwayat tersimpan maks 3 file terbaru, dan tersedia tombol <strong>Reset Data Tabel</strong> jika ingin mengosongkan tabel.
           </p>
         </div>
       </div>
@@ -239,6 +248,15 @@ export default function AdminUploadPage() {
                     <span>Belum ada file yang diunggah</span>
                   </div>
                 )}
+
+                {/* Download Template Button */}
+                <button
+                  onClick={() => handleDownloadTemplate(card.title)}
+                  className="w-full py-1.5 px-3 rounded-xl border border-[#16823B]/30 bg-[#16823B]/5 hover:bg-[#16823B]/10 text-[#16823B] text-xs font-bold flex items-center justify-center gap-1.5 transition-all cursor-pointer"
+                >
+                  <Download className="w-3.5 h-3.5" />
+                  <span>Unduh Template Excel</span>
+                </button>
 
                 {/* Card Bottom Actions: Upload & Reset Buttons */}
                 <div className="flex items-center justify-between gap-2 pt-1 border-t border-[#DDE5DF]/60">
