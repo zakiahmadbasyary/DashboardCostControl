@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { previewService } from "@/services/previewService";
 import { LocationSourceItem, SbtSourceItem, ActivitySourceItem } from "@/types/sourceData";
-import { Search, Database, Layers, ListChecks, MapPin } from "lucide-react";
+import { Search, Layers, ListChecks, MapPin } from "lucide-react";
 
 type TabType = "location" | "sbt" | "activity";
 
@@ -221,7 +221,7 @@ export default function AdminPreviewPage() {
                         <td className="py-2.5 px-3 font-bold">{item.lokasi}</td>
                         <td className="py-2.5 px-3">{item.status}</td>
                         <td className="py-2.5 px-3">{item.wilayah}</td>
-                        <td className="py-2.5 px-3 text-right font-mono text-[#5F6B63]">{item.luas.toFixed(1)} Ha</td>
+                        <td className="py-2.5 px-3 text-right font-mono text-[#5F6B63]">{item.luas} Ha</td>
                         <td className="py-2.5 px-3">{item.kelasBibit}</td>
                         <td className="py-2.5 px-3 font-bold">{item.aktivitas}</td>
                         <td className="py-2.5 px-3 text-right font-mono font-bold text-[#16823B]">

@@ -50,11 +50,7 @@ export default function PublicDashboardPage() {
   const [loadingGroupCosts, setLoadingGroupCosts] = useState<boolean>(false);
   const [loadingActivities, setLoadingActivities] = useState<boolean>(false);
 
-  // Fetch Trend and Locations when Global Filters or Location Sub-filters change
   const fetchDashboardData = useCallback(async () => {
-    setLoadingTrend(true);
-    setLoadingLocations(true);
-
     try {
       const [trendRes, locRes] = await Promise.all([
         dashboardService.getTrendData(globalFilters),
@@ -80,7 +76,17 @@ export default function PublicDashboardPage() {
   }, [globalFilters, locationFilters, selectedLocation]);
 
   useEffect(() => {
-    fetchDashboardData();
+    let isMounted = true;
+    Promise.resolve().then(() => {
+      if (isMounted) {
+        setLoadingTrend(true);
+        setLoadingLocations(true);
+        fetchDashboardData();
+      }
+    });
+    return () => {
+      isMounted = false;
+    };
   }, [fetchDashboardData]);
 
   // Handle Location selection -> Fetch Group Costs

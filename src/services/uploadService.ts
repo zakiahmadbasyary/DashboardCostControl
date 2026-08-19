@@ -1,4 +1,4 @@
-import { UploadProgress, UploadStatus } from "@/types/sourceData";
+import { UploadProgress } from "@/types/sourceData";
 import { activityLogService } from "@/services/activityLogService";
 
 export const uploadService = {

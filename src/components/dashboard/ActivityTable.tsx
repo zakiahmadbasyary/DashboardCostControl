@@ -70,31 +70,25 @@ export default function ActivityTable({
             <table className="w-full text-xs text-left">
               <thead className="bg-[#F7F9F7] text-[#17231B] uppercase font-bold border-b border-[#DDE5DF]">
                 <tr>
-                  <th className="py-2.5 px-3">ID</th>
                   <th className="py-2.5 px-3">Aktivitas</th>
-                  <th className="py-2.5 px-3">Kelas</th>
                   <th className="py-2.5 px-3 text-right">Luas (Ha)</th>
                   <th className="py-2.5 px-3 text-right">Cost / Ha (Rp)</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-[#DDE5DF]/60 text-[#17231B]">
-                {activities.map((item) => (
-                  <tr key={item.idAktivitas} className="hover:bg-[#F7F9F7] transition-colors">
-                    <td className="py-2.5 px-3 font-mono text-[11px] text-[#5F6B63]">{item.idAktivitas}</td>
-                    <td className="py-2.5 px-3 font-medium">{item.aktivitas}</td>
-                    <td className="py-2.5 px-3">
-                      <span className="px-2 py-0.5 rounded bg-[#F7F9F7] border border-[#DDE5DF] text-[10px] font-semibold">
-                        {item.kelas}
-                      </span>
-                    </td>
-                    <td className="py-2.5 px-3 text-right font-mono text-[#5F6B63]">
-                      {item.luas.toFixed(1)}
-                    </td>
-                    <td className="py-2.5 px-3 text-right font-mono font-bold text-[#16823B]">
-                      Rp {item.costHa.toLocaleString("id-ID")}
-                    </td>
-                  </tr>
-                ))}
+                {[...activities]
+                  .sort((a, b) => b.costHa - a.costHa)
+                  .map((item) => (
+                    <tr key={item.idAktivitas} className="hover:bg-[#F7F9F7] transition-colors">
+                      <td className="py-2.5 px-3 font-medium">{item.aktivitas}</td>
+                      <td className="py-2.5 px-3 text-right font-mono text-[#5F6B63]">
+                        {item.luas}
+                      </td>
+                      <td className="py-2.5 px-3 text-right font-mono font-bold text-[#16823B]">
+                        Rp {item.costHa.toLocaleString("id-ID")}
+                      </td>
+                    </tr>
+                  ))}
               </tbody>
             </table>
           </div>

@@ -10,12 +10,17 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const [authorized, setAuthorized] = useState<boolean>(false);
 
   useEffect(() => {
-    // Check mock authentication status
-    if (!authService.isAuthenticated()) {
-      router.push("/login");
-    } else {
-      setAuthorized(true);
-    }
+    let isMounted = true;
+    Promise.resolve().then(() => {
+      if (!authService.isAuthenticated()) {
+        router.push("/login");
+      } else if (isMounted) {
+        setAuthorized(true);
+      }
+    });
+    return () => {
+      isMounted = false;
+    };
   }, [router]);
 
   if (!authorized) {

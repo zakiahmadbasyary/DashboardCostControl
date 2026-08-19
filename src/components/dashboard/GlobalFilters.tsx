@@ -48,8 +48,9 @@ export default function GlobalFilters({ initialFilters, onApplyFilters }: Global
             className="w-full bg-[#F7F9F7] border border-[#DDE5DF] rounded-lg px-3 py-2 text-sm text-[#17231B] focus:outline-none focus:border-[#16823B] transition-colors"
           >
             <option value="all">Semua Status</option>
-            <option value="NS">NS</option>
-            <option value="Status lainnya">Status lainnya</option>
+            <option value="NSFC">NSFC</option>
+            <option value="NSSC">NSSC</option>
+            <option value="NS">NS (NSFC & NSSC)</option>
           </select>
         </div>
 
@@ -92,14 +93,27 @@ export default function GlobalFilters({ initialFilters, onApplyFilters }: Global
             className="w-full bg-[#F7F9F7] border border-[#DDE5DF] rounded-lg px-3 py-2 text-sm text-[#17231B] focus:outline-none focus:border-[#16823B] transition-colors"
           >
             <option value="all">Total Cost (Semua Group)</option>
-            <option value="Fertilization">Fertilization</option>
-            <option value="Plant Pest Control">Plant Pest Control</option>
-            <option value="Road and Drainage">Road and Drainage</option>
-            <option value="Weed Control">Weed Control</option>
-            <option value="Planting">Planting</option>
-            <option value="Land Preparation">Land Preparation</option>
-            <option value="Maintenance">Maintenance</option>
-            <option value="Harvesting">Harvesting</option>
+            <option value="Exclude Land Rehab">Exclude Land Rehab</option>
+            <option value="Direct">Direct (Kode ZN)</option>
+            <option value="Indirect">Indirect (Kode ZW)</option>
+            <optgroup label="Keterangan Group Cost">
+              <option value="Land Preparation">Land Preparation</option>
+              <option value="Seedling Allocation">Seedling Allocation</option>
+              <option value="Planting">Planting</option>
+              <option value="Road and Drainage">Road and Drainage</option>
+              <option value="Fertilization">Fertilization</option>
+              <option value="Weed Control">Weed Control</option>
+              <option value="Plant Pest Control">Plant Pest Control</option>
+              <option value="Forcing">Forcing</option>
+              <option value="Pre Harvesting">Pre Harvesting</option>
+              <option value="Harvesting">Harvesting</option>
+              <option value="Observation">Observation</option>
+              <option value="Plant Selection">Plant Selection</option>
+              <option value="Springkle/Irrigation">Springkle/Irrigation</option>
+              <option value="Guard/Pull/Labour Transportasion">Guard/Pull/Labour Transportasion</option>
+              <option value="Land Rehabilitation">Land Rehabilitation</option>
+              <option value="others">others</option>
+            </optgroup>
           </select>
         </div>
       </div>

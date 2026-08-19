@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { activityLogService } from "@/services/activityLogService";
 import { ActivityLogItem, LogFilter } from "@/types/activityLog";
-import { History, Search, Filter, ShieldCheck } from "lucide-react";
+import { Search, Filter, ShieldCheck } from "lucide-react";
 
 export default function AdminLogsPage() {
   const [logs, setLogs] = useState<ActivityLogItem[]>([]);

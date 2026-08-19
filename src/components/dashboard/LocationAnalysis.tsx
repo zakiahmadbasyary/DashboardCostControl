@@ -121,7 +121,7 @@ export default function LocationAnalysis({
                     <td className="py-3 px-4 text-right font-mono font-semibold">
                       Rp {item.costHa.toLocaleString("id-ID")}
                     </td>
-                    <td className="py-3 px-4 text-right font-mono">{item.luas.toFixed(1)}</td>
+                    <td className="py-3 px-4 text-right font-mono">{item.luas}</td>
                     <td className="py-3 px-4 text-right font-mono text-[#16823B] font-bold">
                       Rp {item.cost.toLocaleString("id-ID")}
                     </td>

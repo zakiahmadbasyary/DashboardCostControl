@@ -8,7 +8,7 @@ import { UploadCloud, FileSpreadsheet, CheckCircle2, AlertCircle, RefreshCw } fr
 type DataSourceCategory = "Data Lokasi" | "Data SBT" | "Data Aktivitas";
 
 export default function AdminUploadPage() {
-  const [selectedCategory, setSelectedCategory] = useState<DataSourceCategory>("Data Lokasi");
+
   const [progressState, setProgressState] = useState<Record<DataSourceCategory, UploadProgress | null>>({
     "Data Lokasi": null,
     "Data SBT": null,

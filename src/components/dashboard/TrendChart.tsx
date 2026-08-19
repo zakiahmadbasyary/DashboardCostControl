@@ -78,7 +78,10 @@ export default function TrendChart({ data, loading }: TrendChartProps) {
                 boxShadow: "0 10px 15px -3px rgba(0, 0, 0, 0.1)",
                 fontSize: "12px",
               }}
-              formatter={(value: any, name: any) => [`Rp ${Number(value).toLocaleString("id-ID")} Juta`, `Wilayah ${name}`]}
+              formatter={(value, name) => [
+                `Rp ${Number(value ?? 0).toLocaleString("id-ID")} Juta`,
+                `Wilayah ${name ?? ""}`,
+              ]}
               labelFormatter={(label) => `Umur Tanaman: ${label} Bulan`}
             />
             <Legend wrapperStyle={{ paddingTop: "10px", fontSize: "12px" }} />

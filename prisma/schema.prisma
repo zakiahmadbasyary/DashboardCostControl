@@ -36,52 +36,69 @@ model ActivityLog {
   @@map("activity_logs")
 }
 
-model DataLokasi {
-  id         String   @id @default(uuid())
-  lokasi     String
-  status     String
-  kelasBibit String
-  jenisBibit String
-  umur       Int
-  luas       Float
-  groupCost  String
-  cost       Float
-  codeSbt    String
-  pupuk      String
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
+model MasterSheet {
+  lokasi        String      @id @map("lokasi")
+  wilayah       String      @map("wilayah")
+  luas          Float       @map("luas")
+  kodeBibit     String      @map("kode_bibit")
+  jenisBibit    String      @map("jenis_bibit")
+  kelasBibit    String      @map("kelas_bibit")
+  createdAt     DateTime    @default(now()) @map("created_at")
+  updatedAt     DateTime    @updatedAt @map("updated_at")
 
-  @@map("data_lokasi")
+  lokasiDetails Lokasi[]
+  aktivitasList Aktivitas[]
+
+  @@map("mastersheet")
 }
 
-model DataAktivitas {
-  id         String   @id @default(uuid())
-  lokasi     String
-  status     String
-  wilayah    String
-  luas       Float
-  kelasBibit String
-  aktivitas  String
-  biaya      Float
-  groupCost  String
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
+model Sbt {
+  kodeSbt       String      @id @map("kode_sbt")
+  nilaiSbt      Float       @map("nilai_sbt")
+  status        String?     @map("status")
+  pupuk         String?     @map("pupuk")
+  jenis         String?     @map("jenis")
+  kelas         String?     @map("kelas")
+  groupCost     String?     @map("group_cost")
+  umur          Int?        @map("umur")
+  createdAt     DateTime    @default(now()) @map("created_at")
+  updatedAt     DateTime    @updatedAt @map("updated_at")
 
-  @@map("data_aktivitas")
+  lokasiDetails Lokasi[]
+
+  @@map("sbt")
 }
 
-model DataSBT {
-  id        String   @id @default(uuid())
-  codeSbt   String   @unique
-  status    String
-  pupuk     String
-  jenis     String
-  kelas     String
-  groupCost String
-  umur      Int
-  nilaiSbt  Float
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+model Lokasi {
+  idLokasi            Int         @id @default(autoincrement()) @map("id_lokasi")
+  lokasi              String      @map("lokasi")
+  status              String      @default("") @map("status")
+  kodeSbt             String      @map("kode_sbt")
+  umur                Int         @map("umur")
+  groupCost           String      @map("group_cost")
+  keteranganGroupCost String?     @map("keterangan_group_cost")
+  cost                Float       @map("cost")
+  pupuk               String?     @map("pupuk")
+  createdAt           DateTime    @default(now()) @map("created_at")
+  updatedAt           DateTime    @updatedAt @map("updated_at")
 
-  @@map("data_sbt")
+  masterSheet MasterSheet @relation(fields: [lokasi], references: [lokasi], onDelete: Cascade)
+  sbt         Sbt         @relation(fields: [kodeSbt], references: [kodeSbt], onDelete: Cascade)
+
+  @@map("lokasi")
+}
+
+model Aktivitas {
+  idAktivitas         Int         @id @default(autoincrement()) @map("id_aktivitas")
+  lokasi              String      @map("lokasi")
+  aktivitas           String      @map("aktivitas")
+  groupCost           String      @map("group_cost")
+  keteranganGroupCost String?     @map("keterangan_group_cost")
+  biaya               Float       @map("biaya")
+  createdAt           DateTime    @default(now()) @map("created_at")
+  updatedAt           DateTime    @updatedAt @map("updated_at")
+
+  masterSheet MasterSheet @relation(fields: [lokasi], references: [lokasi], onDelete: Cascade)
+
+  @@map("aktivitas")
 }
