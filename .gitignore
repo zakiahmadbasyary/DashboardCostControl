@@ -46,3 +46,8 @@ next-env.d.ts
 .agents/
 .claude/
 src/data/*.xlsx
+
+# storage uploaded files (keep template files in git)
+/storage/excelWIP/*
+!/storage/excelWIP/template/
+

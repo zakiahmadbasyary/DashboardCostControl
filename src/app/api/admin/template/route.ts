@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import * as fs from "fs";
-import * as path from "path";
+import { storage } from "@/lib/storage";
 
 export async function GET(request: NextRequest) {
   try {
@@ -20,15 +19,13 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ success: false, message: `Kategori '${category}' tidak dikenal.` }, { status: 400 });
     }
 
-    const filePath = path.join(process.cwd(), "storage", "excelWIP", "template", fileName);
+    const fileBuffer = storage.readTemplateFile(fileName);
 
-    if (!fs.existsSync(filePath)) {
+    if (!fileBuffer) {
       return NextResponse.json({ success: false, message: `File template ${fileName} tidak ditemukan.` }, { status: 404 });
     }
 
-    const fileBuffer = fs.readFileSync(filePath);
-
-    return new NextResponse(fileBuffer, {
+    return new NextResponse(new Uint8Array(fileBuffer), {
       status: 200,
       headers: {
         "Content-Type": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",

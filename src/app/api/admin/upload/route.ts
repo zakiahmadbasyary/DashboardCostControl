@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import * as XLSX from "xlsx";
-import * as fs from "fs";
 import * as path from "path";
+import { storage } from "@/lib/storage";
 
 export async function POST(request: NextRequest) {
   try {
@@ -41,39 +41,8 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ success: false, message: "File Excel tidak memiliki baris data." }, { status: 400 });
     }
 
-    // 2. Save file archive to storage/excelWIP/{category}/ & rotate (max 3 files)
-    const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
-    const safeCategory = category.replace(/[^a-z0-9]/gi, "_");
-    const archiveDir = path.join(process.cwd(), "storage", "excelWIP", safeCategory);
-    fs.mkdirSync(archiveDir, { recursive: true });
-
-    const archiveFilePath = path.join(archiveDir, `${timestamp}_${fileName}`);
-    fs.writeFileSync(archiveFilePath, buffer);
-
-    // Rotate: keep max 3 newest files
-    try {
-      const archiveFiles = fs
-        .readdirSync(archiveDir)
-        .map((f) => ({
-          name: f,
-          filePath: path.join(archiveDir, f),
-          mtime: fs.statSync(path.join(archiveDir, f)).mtimeMs,
-        }))
-        .sort((a, b) => b.mtime - a.mtime);
-
-      if (archiveFiles.length > 3) {
-        const filesToDelete = archiveFiles.slice(3);
-        filesToDelete.forEach((f) => {
-          try {
-            fs.unlinkSync(f.filePath);
-          } catch (err) {
-            console.error("Failed to delete old archive file:", f.filePath, err);
-          }
-        });
-      }
-    } catch (err) {
-      console.error("Error rotating archive files:", err);
-    }
+    // 2. Save file archive to storage and rotate (max 3 files) via centralized storage helper
+    storage.saveArchiveFile(category, fileName, buffer);
 
     // 3. Process database import per Category
     let importedCount = 0;
