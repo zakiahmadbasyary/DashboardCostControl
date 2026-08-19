@@ -56,7 +56,7 @@ export async function GET(request: NextRequest) {
         if (totalLuasWilayah > 0 && totalCostWilayah > 0) {
           const costHaRp = totalCostWilayah / totalLuasWilayah;
           const costHaJuta = costHaRp / 1000000;
-          point[region] = Math.round(costHaJuta * 10) / 10;
+          point[region] = costHaJuta < 1 ? Number(costHaJuta.toFixed(2)) : Number(costHaJuta.toFixed(1));
         } else {
           point[region] = 0;
         }

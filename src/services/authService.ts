@@ -1,48 +1,52 @@
 import { LoginCredentials, AuthResponse, UserSession } from "@/types/auth";
-import { MOCK_ADMIN_USER, MOCK_VALID_CREDENTIALS } from "@/mocks/users";
+import { activityLogService } from "@/services/activityLogService";
 
 const SESSION_KEY = "ggf_agrometric_session";
 
 export const authService = {
   async login(credentials: LoginCredentials): Promise<AuthResponse> {
-    await new Promise((resolve) => setTimeout(resolve, 400));
+    try {
+      const res = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(credentials),
+      });
 
-    if (
-      credentials.username === MOCK_VALID_CREDENTIALS.username &&
-      credentials.password === MOCK_VALID_CREDENTIALS.password
-    ) {
-      if (typeof window !== "undefined") {
-        localStorage.setItem(SESSION_KEY, JSON.stringify(MOCK_ADMIN_USER));
-      }
+      const data: AuthResponse = await res.json();
 
-      // Log LOGIN activity
-      try {
-        const { activityLogService } = await import("./activityLogService");
-        await activityLogService.addLog({
-          adminUsername: MOCK_ADMIN_USER.username,
-          action: "LOGIN",
-          dataSource: "-",
-          description: "Admin login ke sistem panel",
-        });
-      } catch (e) {
-        console.error("Failed to record login log:", e);
+      if (data.success && data.user) {
+        if (typeof window !== "undefined") {
+          localStorage.setItem(SESSION_KEY, JSON.stringify(data.user));
+        }
+
+        // Record LOGIN activity log
+        try {
+          await activityLogService.addLog({
+            adminUsername: data.user.username,
+            action: "LOGIN",
+            dataSource: "-",
+            description: "Admin login ke sistem panel",
+          });
+        } catch (e) {
+          console.error("Failed to record login log:", e);
+        }
+
+        return data;
       }
 
       return {
-        success: true,
-        message: "Login berhasil. Selamat datang di Admin Panel GGF AgroMetric.",
-        user: MOCK_ADMIN_USER,
+        success: false,
+        message: data.message || "Username atau password salah. Silakan coba lagi.",
+      };
+    } catch {
+      return {
+        success: false,
+        message: "Terjadi kesalahan koneksi saat login.",
       };
     }
-
-    return {
-      success: false,
-      message: "Username atau password salah. Silakan coba lagi.",
-    };
   },
 
   async logout(): Promise<void> {
-    await new Promise((resolve) => setTimeout(resolve, 200));
     if (typeof window !== "undefined") {
       localStorage.removeItem(SESSION_KEY);
     }
