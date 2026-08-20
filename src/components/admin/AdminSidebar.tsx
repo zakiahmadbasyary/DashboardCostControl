@@ -4,7 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { authService } from "@/services/authService";
-import { Leaf, UploadCloud, Eye, History, LogOut, LayoutDashboard, Menu, X } from "lucide-react";
+import { Leaf, UploadCloud, Eye, History, LogOut, LayoutDashboard, Menu, X, UserCheck } from "lucide-react";
 
 export default function AdminSidebar() {
   const pathname = usePathname();
@@ -20,6 +20,7 @@ export default function AdminSidebar() {
     { label: "Upload Data", href: "/admin/upload", icon: UploadCloud },
     { label: "Preview Data", href: "/admin/preview", icon: Eye },
     { label: "Log Aktivitas", href: "/admin/logs", icon: History },
+    { label: "Pengaturan Akun", href: "/admin/account", icon: UserCheck },
   ];
 
   const sidebarContent = (

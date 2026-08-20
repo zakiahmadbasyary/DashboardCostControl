@@ -160,9 +160,11 @@ export default function AdminPreviewPage() {
                         <td className="py-2.5 px-3 font-bold">{String(item.lokasi ?? "")}</td>
                         <td className="py-2.5 px-3">{String(item.wilayah ?? "")}</td>
                         <td className="py-2.5 px-3 text-right font-mono">{Number(item.luas ?? 0)} Ha</td>
-                        <td className="py-2.5 px-3 font-mono text-[11px] text-[#5F6B63]">{String(item.kodeBibit ?? "")}</td>
-                        <td className="py-2.5 px-3 font-medium">{String(item.jenisBibit ?? "")}</td>
-                        <td className="py-2.5 px-3">{String(item.kelasBibit ?? "")}</td>
+                        <td className="py-2.5 px-3 font-mono text-[11px] text-[#5F6B63]">
+                          {item.kodeBibit ? String(item.kodeBibit) : "-"}
+                        </td>
+                        <td className="py-2.5 px-3 font-medium">{item.jenisBibit ? String(item.jenisBibit) : "-"}</td>
+                        <td className="py-2.5 px-3">{item.kelasBibit ? String(item.kelasBibit) : "-"}</td>
                       </tr>
                     ))}
                   </tbody>

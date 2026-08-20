@@ -79,7 +79,17 @@ export async function POST(request: NextRequest) {
             lokasi,
             wilayah: String(getVal(row, ["wilayah", "Wilayah"]) || "").trim(),
             luas: Number(getVal(row, ["luas", "Luas"])) || 0,
-            kodeBibit: String(getVal(row, ["kode_bibit", "kode bibit", "Kode Bibit"]) || "").trim(),
+            kodeBibit: String(
+              getVal(row, [
+                "kode_bibit",
+                "kode bibit",
+                "Kode Bibit",
+                "kode bibit lokasi",
+                "Kode bibit lokasi",
+                "Kode Bibit Lokasi",
+                "kode_bibit_lokasi",
+              ]) || ""
+            ).trim(),
             jenisBibit: String(getVal(row, ["jenis_bibit", "jenis", "Jenis Bibit"]) || "").trim(),
             kelasBibit: String(getVal(row, ["kelas_bibit", "kelas", "Kelas Bibit"]) || "").trim(),
           };

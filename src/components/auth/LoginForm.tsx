@@ -4,12 +4,13 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { authService } from "@/services/authService";
-import { Leaf, Lock, User, ArrowLeft, AlertCircle, CheckCircle } from "lucide-react";
+import { Leaf, Lock, User, ArrowLeft, AlertCircle, CheckCircle, Eye, EyeOff } from "lucide-react";
 
 export default function LoginForm() {
   const router = useRouter();
   const [username, setUsername] = useState<string>("");
   const [password, setPassword] = useState<string>("");
+  const [showPassword, setShowPassword] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
@@ -95,20 +96,21 @@ export default function LoginForm() {
               <div className="relative">
                 <Lock className="w-4 h-4 text-[#89938D] absolute left-3.5 top-3" />
                 <input
-                  type="password"
+                  type={showPassword ? "text" : "password"}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••"
-                  className="w-full bg-[#F7F9F7] border border-[#DDE5DF] rounded-xl pl-10 pr-4 py-2.5 text-sm text-[#17231B] focus:outline-none focus:border-[#16823B] transition-colors"
+                  className="w-full bg-[#F7F9F7] border border-[#DDE5DF] rounded-xl pl-10 pr-10 py-2.5 text-sm text-[#17231B] focus:outline-none focus:border-[#16823B] transition-colors"
                 />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-2.5 text-[#89938D] hover:text-[#17231B] transition-colors cursor-pointer"
+                  title={showPassword ? "Sembunyikan password" : "Tampilkan password"}
+                >
+                  {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                </button>
               </div>
-            </div>
-
-            {/* Dummy Account Helper */}
-            <div className="p-3 rounded-xl bg-[#F7F9F7] border border-[#DDE5DF] text-[11px] text-[#5F6B63] space-y-1">
-              <p className="font-semibold text-[#16823B]">💡 Credential Frontend Phase:</p>
-              <p>Username: <code className="font-mono font-bold text-[#17231B]">admin</code></p>
-              <p>Password: <code className="font-mono font-bold text-[#17231B]">admin123</code></p>
             </div>
 
             <button

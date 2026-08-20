@@ -29,7 +29,7 @@ async function main() {
     lokasi: String(row["Lokasi"] || "").trim(),
     wilayah: String(row["Wilayah"] || "").trim(),
     luas: Number(row["Luas"]) || 0,
-    kodeBibit: String(row["Kode bibit lokasi"] || "").trim(),
+    kodeBibit: String(row["Kode bibit lokasi"] || row["Kode bibit"] || row["kode_bibit"] || row["kode bibit"] || "").trim(),
     jenisBibit: String(row["Jenis"] || "").trim(),
     kelasBibit: String(row["Kelas"] || "").trim(),
   }));

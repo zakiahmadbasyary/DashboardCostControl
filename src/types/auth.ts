@@ -15,3 +15,10 @@ export interface AuthResponse {
   message: string;
   user?: UserSession;
 }
+
+export interface ChangePasswordPayload {
+  username: string;
+  currentPassword: string;
+  newPassword: string;
+}
+

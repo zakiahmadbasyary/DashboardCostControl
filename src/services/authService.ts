@@ -1,4 +1,4 @@
-import { LoginCredentials, AuthResponse, UserSession } from "@/types/auth";
+import { LoginCredentials, AuthResponse, UserSession, ChangePasswordPayload } from "@/types/auth";
 import { activityLogService } from "@/services/activityLogService";
 
 const SESSION_KEY = "ggf_agrometric_session";
@@ -65,5 +65,23 @@ export const authService = {
 
   isAuthenticated(): boolean {
     return this.getCurrentUser() !== null;
+  },
+
+  async changePassword(payload: ChangePasswordPayload): Promise<AuthResponse> {
+    try {
+      const res = await fetch("/api/auth/change-password", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+
+      const data: AuthResponse = await res.json();
+      return data;
+    } catch {
+      return {
+        success: false,
+        message: "Terjadi kesalahan koneksi saat mengubah password.",
+      };
+    }
   },
 };
