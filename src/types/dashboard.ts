@@ -6,8 +6,8 @@ export interface DashboardFilter {
 }
 
 export interface LocationFilter {
-  umur: number;
-  wilayah: string;
+  umur: number | number[] | string | string[];
+  wilayah: string | string[];
 }
 
 export interface TrendDataPoint {

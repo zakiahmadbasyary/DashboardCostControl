@@ -11,9 +11,13 @@ export async function GET(request: NextRequest) {
     const kelasBibit = searchParams.get("kelasBibit");
     const groupCost = searchParams.get("groupCost");
     const umurStr = searchParams.get("umur");
-    const wilayah = searchParams.get("wilayah");
+    const umurArr =
+      umurStr !== null && umurStr !== "all" && umurStr !== ""
+        ? umurStr.split(",").map(Number).filter((n) => !isNaN(n))
+        : [];
 
-    const umurNum = umurStr !== null && umurStr !== "all" ? Number(umurStr) : undefined;
+    const wilayahStr = searchParams.get("wilayah");
+    const wilayahArr = wilayahStr ? wilayahStr.split(",").map((w) => w.trim()).filter(Boolean) : [];
 
     const dbLokasi = await prisma.lokasi.findMany({
       include: {
@@ -46,8 +50,12 @@ export async function GET(request: NextRequest) {
       if (kelasBibit && kelasBibit !== "all" && ms.kelasBibit !== kelasBibit) return;
       if (!matchesGroupCost(item, groupCost)) return;
 
-      if (umurNum !== undefined && item.umur !== umurNum) return;
-      if (wilayah && wilayah !== "all" && ms.wilayah !== wilayah) return;
+      if (umurArr.length > 0 && !umurStr?.includes("all")) {
+        if (!umurArr.includes(item.umur)) return;
+      }
+      if (wilayahArr.length > 0 && !wilayahArr.includes("all")) {
+        if (!wilayahArr.includes(ms.wilayah)) return;
+      }
 
       const key = `${item.lokasi}`;
       if (!locGroupMap.has(key)) {

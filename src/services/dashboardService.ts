@@ -43,8 +43,18 @@ export const dashboardService = {
       if (globalFilters.jenisBibit) params.set("jenisBibit", globalFilters.jenisBibit);
       if (globalFilters.kelasBibit) params.set("kelasBibit", globalFilters.kelasBibit);
       if (globalFilters.groupCost) params.set("groupCost", globalFilters.groupCost);
-      if (locationFilters.umur !== undefined) params.set("umur", String(locationFilters.umur));
-      if (locationFilters.wilayah) params.set("wilayah", locationFilters.wilayah);
+      if (locationFilters.umur !== undefined && locationFilters.umur !== null) {
+        const uVal = Array.isArray(locationFilters.umur)
+          ? locationFilters.umur.join(",")
+          : String(locationFilters.umur);
+        params.set("umur", uVal);
+      }
+      if (locationFilters.wilayah) {
+        const wVal = Array.isArray(locationFilters.wilayah)
+          ? locationFilters.wilayah.join(",")
+          : locationFilters.wilayah;
+        params.set("wilayah", wVal);
+      }
 
       const res = await fetch(`/api/dashboard/locations?${params.toString()}`, {
         cache: "no-store",
