@@ -24,8 +24,67 @@ const REGION_COLORS: Record<string, string> = {
   AW03: "#F9A91B", // Orange
   AW04: "#A8D437", // Light Green
   AW05: "#0B6B32", // Dark Green
-  AW06: "#D7E515", // Yellow Green
+  AW06: "#053916ff",
   AW07: "#89938D", // Gray
+};
+
+interface CustomTooltipProps {
+  active?: boolean;
+  payload?: any[];
+  label?: string | number;
+}
+
+const CustomTooltip = ({ active, payload, label }: CustomTooltipProps) => {
+  if (!active || !payload || !payload.length) return null;
+
+  const validValues = payload
+    .map((p) => Number(p.value ?? 0))
+    .filter((v) => !isNaN(v) && v > 0);
+
+  const maxValue = validValues.length > 0 ? Math.max(...validValues) : 0;
+
+  return (
+    <div className="bg-white border border-[#DDE5DF] rounded-xl p-3 shadow-lg text-xs min-w-[210px]">
+      <div className="font-bold text-[#17231B] pb-2 mb-2 border-b border-[#DDE5DF] flex items-center justify-between">
+        <span>Umur Tanaman: <strong className="text-[#16823B] font-extrabold">{label} Bulan</strong></span>
+      </div>
+
+      <div className="flex flex-col gap-1.5">
+        {payload.map((entry, index) => {
+          const val = Number(entry.value ?? 0);
+          const isMax = maxValue > 0 && val === maxValue;
+
+          return (
+            <div key={`item-${index}`} className="flex items-center justify-between gap-3">
+              <div className="flex items-center gap-1.5">
+                <span
+                  className="w-2.5 h-2.5 rounded-full shrink-0"
+                  style={{ backgroundColor: entry.color || entry.fill }}
+                />
+                <span className="text-[#5F6B63] font-medium">Wilayah {entry.name}:</span>
+              </div>
+              <div className="flex items-center gap-1">
+                <span
+                  className={`font-mono ${
+                    isMax
+                      ? "text-rose-600 font-extrabold bg-rose-50 px-1.5 py-0.5 rounded border border-rose-200"
+                      : "text-[#17231B] font-semibold"
+                  }`}
+                >
+                  Rp {val.toLocaleString("id-ID")} Juta
+                </span>
+                {isMax && (
+                  <span className="text-[9px] font-black text-rose-600 bg-rose-100 px-1 rounded uppercase tracking-tighter">
+                    MAX
+                  </span>
+                )}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
 };
 
 export default function TrendChart({ data, loading }: TrendChartProps) {
@@ -70,20 +129,7 @@ export default function TrendChart({ data, loading }: TrendChartProps) {
               unit="M"
               label={{ value: "Cost / Ha (Juta Rp)", angle: -90, position: "insideLeft", offset: 10, fill: "#5F6B63", fontSize: 11 }}
             />
-            <Tooltip
-              contentStyle={{
-                backgroundColor: "#FFFFFF",
-                borderColor: "#DDE5DF",
-                borderRadius: "12px",
-                boxShadow: "0 10px 15px -3px rgba(0, 0, 0, 0.1)",
-                fontSize: "12px",
-              }}
-              formatter={(value, name) => [
-                `Rp ${Number(value ?? 0).toLocaleString("id-ID")} Juta`,
-                `Wilayah ${name ?? ""}`,
-              ]}
-              labelFormatter={(label) => `Umur Tanaman: ${label} Bulan`}
-            />
+            <Tooltip content={<CustomTooltip />} />
             <Legend wrapperStyle={{ paddingTop: "10px", fontSize: "12px" }} />
             {Object.keys(REGION_COLORS).map((region) => (
               <Bar

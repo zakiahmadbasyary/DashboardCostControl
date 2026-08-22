@@ -3,8 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import DashboardHeader from "@/components/dashboard/DashboardHeader";
 import GlobalFilters from "@/components/dashboard/GlobalFilters";
-import TrendChart from "@/components/dashboard/TrendChart";
-import TrendTable from "@/components/dashboard/TrendTable";
+import TrendCard from "@/components/dashboard/TrendCard";
 import LocationAnalysis from "@/components/dashboard/LocationAnalysis";
 import GroupCostTable from "@/components/dashboard/GroupCostTable";
 import ActivityTable from "@/components/dashboard/ActivityTable";
@@ -135,16 +134,15 @@ export default function PublicDashboardPage() {
       <DashboardHeader />
 
       {/* Main Container */}
-      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 flex flex-col gap-8">
-        {/* Global Filters Section */}
-        <section>
+      <main className="flex-1 max-w-[95%] w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 flex flex-col gap-8">
+        {/* Global Filters Section (Sticky / Freeze) */}
+        <section className="sticky top-16 z-20 bg-[#F7F9F7] py-2 -my-2">
           <GlobalFilters initialFilters={globalFilters} onApplyFilters={handleApplyGlobalFilters} />
         </section>
 
-        {/* Trend Section (Chart & Table) */}
-        <section className="flex flex-col gap-6">
-          <TrendChart data={trendData} loading={loadingTrend} />
-          <TrendTable data={trendData} loading={loadingTrend} />
+        {/* Trend Section (Unified Chart & Table Card) */}
+        <section>
+          <TrendCard data={trendData} loading={loadingTrend} />
         </section>
 
         {/* Location Analysis Section */}
@@ -180,7 +178,7 @@ export default function PublicDashboardPage() {
 
       {/* Footer */}
       <footer className="border-t border-[#DDE5DF] bg-white py-6 px-4 text-center text-xs text-[#5F6B63] mt-12">
-        <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-2">
+        <div className="max-w-[95%] mx-auto flex flex-col sm:flex-row items-center justify-between gap-2">
           <span>© 2026 Great Giant Foods (GGF) — AgroMetric WIP ACC Cost Control. All rights reserved.</span>
           <span className="font-semibold text-[#16823B]">Integrated Database System • PostgreSQL & Prisma Engine</span>
         </div>

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { GroupCostData } from "@/types/dashboard";
+import { normalizeGroupCostName, getZnSortOrder } from "@/lib/filterUtils";
 
 export async function GET(request: NextRequest) {
   try {
@@ -26,14 +27,15 @@ export async function GET(request: NextRequest) {
       const gcMap: Record<string, { totalCost: number; luas: number; sbtVal: number; codeSbt: string }> = {};
 
       locMatches.forEach((item) => {
-        const gcName = item.keteranganGroupCost?.trim();
-        if (!gcName) return;
+        const rawGcName = item.keteranganGroupCost?.trim();
+        if (!rawGcName) return;
+        const gcName = normalizeGroupCostName(rawGcName);
 
         const luas = item.masterSheet?.luas || 1;
         const sbtVal = item.sbt?.nilaiSbt || 0;
 
         if (!gcMap[gcName]) {
-          gcMap[gcName] = { totalCost: 0, luas, sbtVal, codeSbt: item.kodeSbt };
+          gcMap[gcName] = { totalCost: 0, luas, sbtVal: sbtVal || 0, codeSbt: item.kodeSbt || "" };
         }
         gcMap[gcName].totalCost += item.cost;
       });
@@ -49,7 +51,14 @@ export async function GET(request: NextRequest) {
             codeSbt: entry.codeSbt,
           };
         })
-        .sort((a, b) => b.costHa - b.sbt - (a.costHa - a.sbt));
+        .sort((a, b) => {
+          const orderA = getZnSortOrder(a);
+          const orderB = getZnSortOrder(b);
+          if (orderA !== orderB) {
+            return orderA - orderB;
+          }
+          return a.groupCost.localeCompare(b.groupCost);
+        });
 
       return NextResponse.json(result);
     }

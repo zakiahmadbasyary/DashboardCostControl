@@ -2,6 +2,7 @@
 
 import { GroupCostData, LocationData } from "@/types/dashboard";
 import { Layers, CheckCircle2, AlertCircle } from "lucide-react";
+import { getZnSortOrder } from "@/lib/filterUtils";
 
 interface GroupCostTableProps {
   selectedLocation: LocationData | null;
@@ -18,6 +19,15 @@ export default function GroupCostTable({
   onSelectGroupCost,
   loading,
 }: GroupCostTableProps) {
+  const sortedGroupCosts = [...groupCosts].sort((a, b) => {
+    const orderA = getZnSortOrder(a);
+    const orderB = getZnSortOrder(b);
+    if (orderA !== orderB) {
+      return orderA - orderB;
+    }
+    return a.groupCost.localeCompare(b.groupCost);
+  });
+
   if (!selectedLocation) {
     return (
       <div className="bg-white border border-[#DDE5DF] rounded-2xl p-6 shadow-xs h-full flex flex-col items-center justify-center text-center">
@@ -54,7 +64,7 @@ export default function GroupCostTable({
             <div className="w-5 h-5 border-2 border-[#16823B] border-t-transparent rounded-full animate-spin mx-auto mb-2" />
             <p className="text-xs text-[#5F6B63]">Memuat Group Cost...</p>
           </div>
-        ) : groupCosts.length === 0 ? (
+        ) : sortedGroupCosts.length === 0 ? (
           <div className="p-6 text-center bg-[#F7F9F7] rounded-xl border border-dashed border-[#DDE5DF]">
             <p className="text-xs text-[#5F6B63]">Tidak ada data Group Cost untuk lokasi ini.</p>
           </div>
@@ -70,18 +80,17 @@ export default function GroupCostTable({
                 </tr>
               </thead>
               <tbody className="divide-y divide-[#DDE5DF]/60">
-                {groupCosts.map((item) => {
+                {sortedGroupCosts.map((item) => {
                   const isSelected = selectedGroupCost?.groupCost === item.groupCost;
                   const isOverSbt = item.costHa > item.sbt;
                   return (
                     <tr
                       key={item.groupCost}
                       onClick={() => onSelectGroupCost(item)}
-                      className={`cursor-pointer transition-all ${
-                        isSelected
+                      className={`cursor-pointer transition-all ${isSelected
                           ? "bg-[#A8D437]/20 border-l-4 border-l-[#16823B] font-semibold text-[#0B6B32]"
                           : "hover:bg-[#F7F9F7] text-[#17231B]"
-                      }`}
+                        }`}
                     >
                       <td className="py-2.5 px-3 font-bold">{item.groupCost}</td>
                       <td className="py-2.5 px-3 text-right font-mono">

@@ -53,7 +53,7 @@ export default function TrendTable({ data, loading }: TrendTableProps) {
                   </td>
                   {row.values.map((val, idx) => (
                     <td key={idx} className="py-2 px-2 text-center border-r border-[#DDE5DF]/40 font-mono text-[11px]">
-                      {val === 0 ? "0" : val < 0.1 ? val.toFixed(2) : val.toFixed(1)}
+                      {val === 0 ? <span className="text-[#89938D] font-normal">-</span> : val < 0.1 ? val.toFixed(2) : val.toFixed(1)}
                     </td>
                   ))}
                 </tr>

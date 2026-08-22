@@ -1,23 +1,27 @@
 "use client";
 
 import Link from "next/link";
-import { LogIn, Leaf } from "lucide-react";
+import Image from "next/image";
+import { LogIn } from "lucide-react";
+import logoImg from "@/assets/logo.png";
 
 export default function DashboardHeader() {
   return (
     <header className="bg-white border-b border-[#DDE5DF] sticky top-0 z-30 shadow-xs">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+      <div className="max-w-[95%] mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
         {/* Brand & Module */}
         <div className="flex items-center gap-2.5 sm:gap-3">
-          <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-[#16823B] flex items-center justify-center text-white shadow-sm shadow-[#16823B]/30 shrink-0">
-            <Leaf className="w-4 h-4 sm:w-5 sm:h-5 text-[#A8D437]" />
+          <div className="h-9 sm:h-10 w-auto flex items-center shrink-0">
+            <Image
+              src={logoImg}
+              alt="GGF Logo"
+              className="h-full w-auto object-contain"
+              priority
+            />
           </div>
           <div>
             <div className="flex items-center gap-1.5 sm:gap-2">
-              <span className="font-extrabold text-base sm:text-lg text-[#17231B] tracking-tight">GGF AgroMetric</span>
-              <span className="text-[10px] sm:text-xs px-1.5 sm:px-2 py-0.5 rounded-full bg-[#16823B]/10 text-[#16823B] font-semibold border border-[#16823B]/20">
-                WIP ACC
-              </span>
+              <span className="font-extrabold text-base sm:text-lg text-[#17231B] tracking-tight">Dashboard WIP ACC</span>
             </div>
             <p className="text-[10px] sm:text-xs text-[#5F6B63] hidden xs:block sm:block">Cost Control Dashboard & Data Analysis</p>
           </div>

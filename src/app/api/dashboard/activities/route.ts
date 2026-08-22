@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { ActivityData } from "@/types/dashboard";
+import { getGroupCostVariants, normalizeGroupCostName } from "@/lib/filterUtils";
 
 export async function GET(request: NextRequest) {
   try {
@@ -13,15 +14,16 @@ export async function GET(request: NextRequest) {
     }
 
     const cleanLokasi = lokasi ? lokasi.replace("LOC-", "") : undefined;
+    const gcVariants = groupCost && groupCost !== "all" ? getGroupCostVariants(groupCost) : [];
 
     const actMatches = await prisma.aktivitas.findMany({
       where: {
-        ...(groupCost && groupCost !== "all"
+        ...(gcVariants.length > 0
           ? {
-              OR: [
-                { groupCost: { equals: groupCost, mode: "insensitive" } },
-                { keteranganGroupCost: { equals: groupCost, mode: "insensitive" } },
-              ],
+              OR: gcVariants.flatMap((v) => [
+                { groupCost: { equals: v, mode: "insensitive" } },
+                { keteranganGroupCost: { equals: v, mode: "insensitive" } },
+              ]),
             }
           : {}),
         ...(cleanLokasi && cleanLokasi !== "all"
@@ -43,6 +45,7 @@ export async function GET(request: NextRequest) {
     const result: ActivityData[] = actMatches
       .map((item) => {
         const luas = item.masterSheet?.luas || 1;
+        const rawGc = item.keteranganGroupCost || item.groupCost || "";
         return {
           idAktivitas: `ACT-${item.idAktivitas}`,
           aktivitas: item.aktivitas,
@@ -52,7 +55,7 @@ export async function GET(request: NextRequest) {
           biaya: item.biaya,
           luas: luas,
           costHa: luas > 0 ? Math.round(item.biaya / luas) : 0,
-          groupCost: item.keteranganGroupCost || item.groupCost,
+          groupCost: normalizeGroupCostName(rawGc),
           lokasi: item.lokasi,
           status: locStatusMap.get(item.lokasi) || "",
           wilayah: item.masterSheet?.wilayah,

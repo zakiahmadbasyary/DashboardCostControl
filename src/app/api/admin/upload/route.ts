@@ -108,12 +108,19 @@ export async function POST(request: NextRequest) {
       parsedRows.forEach((r) => uniqueMap.set(r.lokasi, r));
       const uniqueMasterSheets = Array.from(uniqueMap.values());
 
-      await prisma.$transaction(async (tx) => {
-        await tx.masterSheet.deleteMany();
-        await tx.masterSheet.createMany({
-          data: uniqueMasterSheets,
-        });
-      });
+      await prisma.$transaction(
+        async (tx) => {
+          await tx.masterSheet.deleteMany();
+          const chunkSize = 1000;
+          for (let i = 0; i < uniqueMasterSheets.length; i += chunkSize) {
+            const chunk = uniqueMasterSheets.slice(i, i + chunkSize);
+            await tx.masterSheet.createMany({
+              data: chunk,
+            });
+          }
+        },
+        { maxWait: 15000, timeout: 60000 }
+      );
 
       importedCount = uniqueMasterSheets.length;
     } else if (category === "sbt") {
@@ -149,12 +156,19 @@ export async function POST(request: NextRequest) {
       parsedRows.forEach((r) => uniqueMap.set(r.kodeSbt, r));
       const uniqueSbts = Array.from(uniqueMap.values());
 
-      await prisma.$transaction(async (tx) => {
-        await tx.sbt.deleteMany();
-        await tx.sbt.createMany({
-          data: uniqueSbts,
-        });
-      });
+      await prisma.$transaction(
+        async (tx) => {
+          await tx.sbt.deleteMany();
+          const chunkSize = 1000;
+          for (let i = 0; i < uniqueSbts.length; i += chunkSize) {
+            const chunk = uniqueSbts.slice(i, i + chunkSize);
+            await tx.sbt.createMany({
+              data: chunk,
+            });
+          }
+        },
+        { maxWait: 15000, timeout: 60000 }
+      );
 
       importedCount = uniqueSbts.length;
     } else if (category === "lokasi") {
@@ -278,16 +292,19 @@ export async function POST(request: NextRequest) {
         });
       }
 
-      await prisma.$transaction(async (tx) => {
-        await tx.lokasi.deleteMany();
-        const chunkSize = 1000;
-        for (let i = 0; i < parsedRows.length; i += chunkSize) {
-          const chunk = parsedRows.slice(i, i + chunkSize);
-          await tx.lokasi.createMany({
-            data: chunk,
-          });
-        }
-      });
+      await prisma.$transaction(
+        async (tx) => {
+          await tx.lokasi.deleteMany();
+          const chunkSize = 1000;
+          for (let i = 0; i < parsedRows.length; i += chunkSize) {
+            const chunk = parsedRows.slice(i, i + chunkSize);
+            await tx.lokasi.createMany({
+              data: chunk,
+            });
+          }
+        },
+        { maxWait: 15000, timeout: 60000 }
+      );
 
       importedCount = parsedRows.length;
     } else if (category === "aktivitas") {
@@ -333,16 +350,19 @@ export async function POST(request: NextRequest) {
         );
       }
 
-      await prisma.$transaction(async (tx) => {
-        await tx.aktivitas.deleteMany();
-        const chunkSize = 1000;
-        for (let i = 0; i < parsedRows.length; i += chunkSize) {
-          const chunk = parsedRows.slice(i, i + chunkSize);
-          await tx.aktivitas.createMany({
-            data: chunk,
-          });
-        }
-      });
+      await prisma.$transaction(
+        async (tx) => {
+          await tx.aktivitas.deleteMany();
+          const chunkSize = 1000;
+          for (let i = 0; i < parsedRows.length; i += chunkSize) {
+            const chunk = parsedRows.slice(i, i + chunkSize);
+            await tx.aktivitas.createMany({
+              data: chunk,
+            });
+          }
+        },
+        { maxWait: 15000, timeout: 60000 }
+      );
 
       importedCount = parsedRows.length;
     } else {
