@@ -128,6 +128,21 @@ export default function PublicDashboardPage() {
     setGlobalFilters(newFilters);
   };
 
+  // Handle click on Umur in Trend Chart/Table -> Filter Location Table for clicked Umur & all Wilayah, then scroll down
+  const handleSelectUmurFromTrend = (umur: number) => {
+    setLocationFilters({
+      umur: [umur],
+      wilayah: "all",
+    });
+
+    setTimeout(() => {
+      const locationSection = document.getElementById("location-analysis-section");
+      if (locationSection) {
+        locationSection.scrollIntoView({ behavior: "smooth", block: "start" });
+      }
+    }, 150);
+  };
+
   return (
     <div className="min-h-screen bg-[#F7F9F7] text-[#17231B] flex flex-col font-sans">
       {/* Header */}
@@ -142,7 +157,11 @@ export default function PublicDashboardPage() {
 
         {/* Trend Section (Unified Chart & Table Card) */}
         <section>
-          <TrendCard data={trendData} loading={loadingTrend} />
+          <TrendCard
+            data={trendData}
+            loading={loadingTrend}
+            onSelectUmur={handleSelectUmurFromTrend}
+          />
         </section>
 
         {/* Location Analysis Section */}

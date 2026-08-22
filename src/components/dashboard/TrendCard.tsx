@@ -17,6 +17,7 @@ import { BarChart3, Table as TableIcon, LayoutGrid } from "lucide-react";
 interface TrendCardProps {
   data: TrendDataPoint[];
   loading?: boolean;
+  onSelectUmur?: (umur: number) => void;
 }
 
 const REGION_COLORS: Record<string, string> = {
@@ -35,11 +36,13 @@ interface CustomTooltipProps {
   active?: boolean;
   payload?: any[];
   label?: string | number;
+  onSelectUmur?: (umur: number) => void;
 }
 
-const CustomTooltip = ({ active, payload, label }: CustomTooltipProps) => {
+const CustomTooltip = ({ active, payload, label, onSelectUmur }: CustomTooltipProps) => {
   if (!active || !payload || !payload.length) return null;
 
+  const ageNum = Number(label ?? 0);
   const validValues = payload
     .map((p) => Number(p.value ?? 0))
     .filter((v) => !isNaN(v) && v > 0);
@@ -47,24 +50,36 @@ const CustomTooltip = ({ active, payload, label }: CustomTooltipProps) => {
   const maxValue = validValues.length > 0 ? Math.max(...validValues) : 0;
 
   return (
-    <div className="bg-white border border-[#DDE5DF] rounded-xl p-3 shadow-lg text-xs min-w-[210px]">
+    <div
+      onClick={() => onSelectUmur?.(ageNum)}
+      title={`Klik untuk filter tabel lokasi pada Umur ${ageNum} Bulan (Semua Wilayah)`}
+      className="translate-x-6 -translate-y-6 bg-white border border-[#DDE5DF] rounded-xl p-3.5 shadow-xl text-xs min-w-[230px] cursor-pointer hover:border-[#16823B] transition-all group pointer-events-auto z-50"
+    >
       <div className="font-bold text-[#17231B] pb-2 mb-2 border-b border-[#DDE5DF] flex items-center justify-between">
-        <span>Umur Tanaman: <strong className="text-[#16823B] font-extrabold">{label} Bulan</strong></span>
+        <span>Umur Tanaman: <strong className="text-[#16823B] font-extrabold text-sm">{label} Bulan</strong></span>
+        <span className="text-[10px] bg-[#16823B]/10 text-[#16823B] px-1.5 py-0.5 rounded-full font-bold group-hover:bg-[#16823B] group-hover:text-white transition-colors">
+          Pilih Umur Ini
+        </span>
       </div>
 
-      <div className="flex flex-col gap-1.5">
+      <div className="flex flex-col gap-1">
         {payload.map((entry, index) => {
           const val = Number(entry.value ?? 0);
           const isMax = maxValue > 0 && val === maxValue;
 
           return (
-            <div key={`item-${index}`} className="flex items-center justify-between gap-3">
+            <div
+              key={`item-${index}`}
+              className="flex items-center justify-between gap-3 p-1 rounded hover:bg-[#F7F9F7]"
+            >
               <div className="flex items-center gap-1.5">
                 <span
                   className="w-2.5 h-2.5 rounded-full shrink-0"
                   style={{ backgroundColor: entry.color || entry.fill }}
                 />
-                <span className="text-[#5F6B63] font-medium">Wilayah {entry.name}:</span>
+                <span className="text-[#5F6B63] font-semibold">
+                  Wilayah {entry.name}:
+                </span>
               </div>
               <div className="flex items-center gap-1">
                 <span
@@ -86,11 +101,15 @@ const CustomTooltip = ({ active, payload, label }: CustomTooltipProps) => {
           );
         })}
       </div>
+
+      <div className="text-[10px] text-[#16823B] font-bold text-center pt-2 mt-2 border-t border-[#DDE5DF]/80 group-hover:underline">
+        👇 Klik untuk filter Umur {label} Bulan (Semua Wilayah)
+      </div>
     </div>
   );
 };
 
-export default function TrendCard({ data, loading }: TrendCardProps) {
+export default function TrendCard({ data, loading, onSelectUmur }: TrendCardProps) {
   const [activeTab, setActiveTab] = useState<"all" | "chart" | "table">("all");
 
   // Transpose data to region -> ages 0..21
@@ -122,7 +141,7 @@ export default function TrendCard({ data, loading }: TrendCardProps) {
           <div>
             <h3 className="font-bold text-base text-[#17231B]">Trend Cost per Umur Tanaman</h3>
             <p className="text-xs text-[#5F6B63]">
-              Perbandingan diagram batang &amp; tabel data akumulasi cost per Ha berdasarkan umur tanaman (0 - 21 Bulan) per Wilayah
+              Perbandingan diagram batang &amp; tabel data akumulasi cost per Ha berdasarkan umur tanaman (0 - 21 Bulan) per Wilayah. <strong>Klik pada umur di batang atau tabel untuk filter tabel lokasi.</strong>
             </p>
           </div>
         </div>
@@ -173,7 +192,16 @@ export default function TrendCard({ data, loading }: TrendCardProps) {
           </div>
           <div className="h-80 w-full">
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={data} margin={{ top: 10, right: 30, left: 0, bottom: 10 }}>
+              <BarChart
+                data={data}
+                margin={{ top: 10, right: 30, left: 0, bottom: 10 }}
+                onClick={(e) => {
+                  if (e && e.activeLabel !== undefined) {
+                    onSelectUmur?.(Number(e.activeLabel));
+                  }
+                }}
+                className="cursor-pointer"
+              >
                 <CartesianGrid strokeDasharray="3 3" stroke="#EAEFEF" vertical={false} />
                 <XAxis
                   dataKey="umur"
@@ -189,7 +217,11 @@ export default function TrendCard({ data, loading }: TrendCardProps) {
                   unit="M"
                   label={{ value: "Cost / Ha (Juta Rp)", angle: -90, position: "insideLeft", offset: 10, fill: "#5F6B63", fontSize: 11 }}
                 />
-                <Tooltip content={<CustomTooltip />} />
+                <Tooltip
+                  content={<CustomTooltip onSelectUmur={onSelectUmur} />}
+                  offset={25}
+                  wrapperStyle={{ outline: "none", zIndex: 50 }}
+                />
                 <Legend wrapperStyle={{ paddingTop: "10px", fontSize: "12px" }} />
                 {Object.keys(REGION_COLORS).map((region) => (
                   <Bar
@@ -198,6 +230,12 @@ export default function TrendCard({ data, loading }: TrendCardProps) {
                     name={region}
                     fill={REGION_COLORS[region]}
                     radius={[3, 3, 0, 0]}
+                    onClick={(_, idx) => {
+                      if (data[idx] && data[idx].umur !== undefined) {
+                        onSelectUmur?.(Number(data[idx].umur));
+                      }
+                    }}
+                    className="cursor-pointer hover:opacity-85 transition-opacity"
                   />
                 ))}
               </BarChart>
@@ -225,7 +263,12 @@ export default function TrendCard({ data, loading }: TrendCardProps) {
                 <tr>
                   <th className="py-2.5 px-3 sticky left-0 bg-[#F7F9F7] z-10 border-r border-[#DDE5DF]">Wilayah</th>
                   {Array.from({ length: 22 }, (_, i) => (
-                    <th key={i} className="py-2.5 px-3 text-center border-r border-[#DDE5DF]/60 min-w-[50px]">
+                    <th
+                      key={i}
+                      onClick={() => onSelectUmur?.(i)}
+                      title={`Klik untuk filter tabel lokasi pada Umur ${i} Bulan (Semua Wilayah)`}
+                      className="py-2.5 px-3 text-center border-r border-[#DDE5DF]/60 min-w-[50px] cursor-pointer hover:bg-[#16823B]/10 hover:text-[#16823B] transition-colors"
+                    >
                       {i}
                     </th>
                   ))}
@@ -234,11 +277,16 @@ export default function TrendCard({ data, loading }: TrendCardProps) {
               <tbody className="divide-y divide-[#DDE5DF]/60 text-[#17231B]">
                 {regionRows.map((row) => (
                   <tr key={row.region} className="hover:bg-[#F7F9F7]/80 transition-colors">
-                    <td className="py-2 px-3 font-bold sticky left-0 bg-white shadow-xs border-r border-[#DDE5DF]">
+                    <td className="py-2 px-3 font-bold sticky left-0 bg-white shadow-xs border-r border-[#DDE5DF] text-[#16823B]">
                       {row.region}
                     </td>
                     {row.values.map((val, idx) => (
-                      <td key={idx} className="py-2 px-2 text-center border-r border-[#DDE5DF]/40 font-mono text-[11px]">
+                      <td
+                        key={idx}
+                        onClick={() => onSelectUmur?.(idx)}
+                        title={`Klik untuk filter tabel lokasi pada Umur ${idx} Bulan (Semua Wilayah)`}
+                        className="py-2 px-2 text-center border-r border-[#DDE5DF]/40 font-mono text-[11px] cursor-pointer hover:bg-[#A8D437]/20 hover:font-bold transition-colors"
+                      >
                         {val === 0 ? <span className="text-[#89938D] font-normal">-</span> : val < 0.1 ? val.toFixed(2) : val.toFixed(1)}
                       </td>
                     ))}
