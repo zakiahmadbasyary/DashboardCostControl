@@ -140,7 +140,7 @@ export default function PublicDashboardPage() {
       if (locationSection) {
         locationSection.scrollIntoView({ behavior: "smooth", block: "start" });
       }
-    }, 150);
+    }, 2000);
   };
 
   return (
