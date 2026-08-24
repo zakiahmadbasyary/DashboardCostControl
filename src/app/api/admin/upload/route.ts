@@ -3,6 +3,9 @@ import prisma from "@/lib/prisma";
 import * as XLSX from "xlsx";
 import * as path from "path";
 import { storage } from "@/lib/storage";
+import { getAdminSessionFromRequest } from "@/lib/auth";
+
+const MAX_FILE_SIZE_BYTES = 15 * 1024 * 1024; // 15MB Limit
 
 export async function POST(request: NextRequest) {
   try {
@@ -12,6 +15,13 @@ export async function POST(request: NextRequest) {
 
     if (!file) {
       return NextResponse.json({ success: false, message: "File wajib diunggah." }, { status: 400 });
+    }
+
+    if (file.size > MAX_FILE_SIZE_BYTES) {
+      return NextResponse.json(
+        { success: false, message: "Ukuran file terlalu besar. Batas maksimal ukuran file adalah 15 MB." },
+        { status: 400 }
+      );
     }
 
     const fileName = file.name;
@@ -48,10 +58,11 @@ export async function POST(request: NextRequest) {
     let importedCount = 0;
     let categoryTitle = "";
 
-    // Find default admin user for logging
-    const adminUser = await prisma.user.findFirst({
-      where: { role: "admin" },
-    });
+    // Find logged-in admin user from session for activity logging
+    const session = getAdminSessionFromRequest(request);
+    const adminUser = session
+      ? await prisma.user.findFirst({ where: { id: session.id } })
+      : await prisma.user.findFirst({ where: { role: "admin" } });
     const userId = adminUser?.id;
 
     // Normalize keys helper
@@ -389,8 +400,10 @@ export async function POST(request: NextRequest) {
       totalRows: rawRows.length,
     });
   } catch (error: unknown) {
-    const message = error instanceof Error ? error.message : String(error);
     console.error("Error in upload API route:", error);
-    return NextResponse.json({ success: false, message: `Gagal memproses import: ${message}` }, { status: 500 });
+    return NextResponse.json(
+      { success: false, message: "Gagal memproses import data karena kesalahan server internal. Silakan periksa format file Anda." },
+      { status: 500 }
+    );
   }
 }

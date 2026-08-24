@@ -1,8 +1,19 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
+import bcrypt from "bcryptjs";
+import { getAdminSessionFromRequest } from "@/lib/auth";
 
 export async function POST(request: NextRequest) {
   try {
+    // 1. Verify server-side session
+    const session = getAdminSessionFromRequest(request);
+    if (!session) {
+      return NextResponse.json(
+        { success: false, message: "Akses ditolak: Autentikasi diperlukan." },
+        { status: 401 }
+      );
+    }
+
     const { username, currentPassword, newPassword } = await request.json();
 
     if (!username || !currentPassword || !newPassword) {
@@ -19,7 +30,15 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Find target user
+    // Ensure user changes their own password
+    if (session.username !== username.trim()) {
+      return NextResponse.json(
+        { success: false, message: "Anda hanya dapat mengedit kata sandi akun Anda sendiri." },
+        { status: 403 }
+      );
+    }
+
+    // Find target user in DB
     const user = await prisma.user.findFirst({
       where: { username: username.trim() },
     });
@@ -31,8 +50,15 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Verify current password
-    if (user.password !== currentPassword.trim()) {
+    // 2. Verify current password with bcrypt (or plain text fallback)
+    let isCurrentValid = false;
+    if (user.password.startsWith("$2a$") || user.password.startsWith("$2b$")) {
+      isCurrentValid = await bcrypt.compare(currentPassword.trim(), user.password);
+    } else {
+      isCurrentValid = user.password === currentPassword.trim();
+    }
+
+    if (!isCurrentValid) {
       return NextResponse.json(
         { success: false, message: "Password saat ini tidak sesuai." },
         { status: 400 }
@@ -47,10 +73,13 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // 3. Hash new password
+    const hashedNewPassword = await bcrypt.hash(newPassword.trim(), 10);
+
     // Update password in DB
     await prisma.user.update({
       where: { id: user.id },
-      data: { password: newPassword.trim() },
+      data: { password: hashedNewPassword },
     });
 
     // Record Activity Log
@@ -68,10 +97,9 @@ export async function POST(request: NextRequest) {
       message: "Password berhasil diperbarui! Silakan gunakan password baru ini untuk login berikutnya.",
     });
   } catch (error: unknown) {
-    const message = error instanceof Error ? error.message : String(error);
     console.error("Error changing password:", error);
     return NextResponse.json(
-      { success: false, message: `Gagal memperbarui password: ${message}` },
+      { success: false, message: "Gagal memperbarui password karena kesalahan server." },
       { status: 500 }
     );
   }

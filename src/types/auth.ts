@@ -3,6 +3,7 @@ export interface UserSession {
   username: string;
   name: string;
   role: "admin" | "user";
+  token?: string;
 }
 
 export interface LoginCredentials {

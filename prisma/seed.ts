@@ -1,6 +1,7 @@
 import { PrismaClient } from "@prisma/client";
 import * as XLSX from "xlsx";
 import * as path from "path";
+import bcrypt from "bcryptjs";
 
 const prisma = new PrismaClient();
 
@@ -219,16 +220,19 @@ async function main() {
 
   // 5. Seed Default Admin User
   console.log("👤 Creating default admin user...");
+  const hashedPassword = await bcrypt.hash("admin123", 10);
   const adminUser = await prisma.user.upsert({
     where: { username: "admin" },
-    update: {},
+    update: {
+      password: hashedPassword,
+    },
     create: {
       username: "admin",
-      password: "admin123",
+      password: hashedPassword,
       role: "admin",
     },
   });
-  console.log("✅ Seeded default admin user (admin / admin123).");
+  console.log("✅ Seeded default admin user (admin / admin123) with bcrypt password hash.");
 
   // 6. Seed Initial Activity Logs (LOGIN & UPLOAD_DATA)
   console.log("📋 Seeding default activity logs...");

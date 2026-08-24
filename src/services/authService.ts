@@ -49,6 +49,8 @@ export const authService = {
   async logout(): Promise<void> {
     if (typeof window !== "undefined") {
       localStorage.removeItem(SESSION_KEY);
+      // Clear cookie client-side
+      document.cookie = "admin_session=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT;";
     }
   },
 
@@ -69,9 +71,15 @@ export const authService = {
 
   async changePassword(payload: ChangePasswordPayload): Promise<AuthResponse> {
     try {
+      const currentUser = this.getCurrentUser();
+      const headers: Record<string, string> = { "Content-Type": "application/json" };
+      if (currentUser?.token) {
+        headers["Authorization"] = `Bearer ${currentUser.token}`;
+      }
+
       const res = await fetch("/api/auth/change-password", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers,
         body: JSON.stringify(payload),
       });
 

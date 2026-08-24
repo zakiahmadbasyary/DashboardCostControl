@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
+import { getAdminSessionFromRequest } from "@/lib/auth";
 
 export async function GET(request: NextRequest) {
   try {
@@ -57,23 +58,25 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({ logs });
   } catch (error: unknown) {
-    const message = error instanceof Error ? error.message : String(error);
-    return NextResponse.json({ error: message }, { status: 500 });
+    console.error("Error fetching activity logs:", error);
+    return NextResponse.json({ error: "Gagal mengambil log aktivitas internal." }, { status: 500 });
   }
 }
 
 export async function POST(request: NextRequest) {
   try {
+    const session = getAdminSessionFromRequest(request);
     const body = await request.json();
-    const { action, dataSource, fileName, description, adminUsername } = body;
+    const { action, dataSource, fileName, description } = body;
 
-    // Find admin user
+    // Pull verified user from session if available, else fallback to default admin
+    const usernameToFind = session?.username || "admin";
     const user = await prisma.user.findFirst({
-      where: { username: adminUsername || "admin" },
+      where: { username: usernameToFind },
     });
 
     if (!user) {
-      return NextResponse.json({ error: "User admin not found" }, { status: 404 });
+      return NextResponse.json({ error: "User admin tidak ditemukan." }, { status: 404 });
     }
 
     const newLog = await prisma.activityLog.create({
@@ -88,7 +91,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ success: true, log: newLog });
   } catch (error: unknown) {
-    const message = error instanceof Error ? error.message : String(error);
-    return NextResponse.json({ error: message }, { status: 500 });
+    console.error("Error creating activity log:", error);
+    return NextResponse.json({ error: "Gagal menambahkan log aktivitas." }, { status: 500 });
   }
 }

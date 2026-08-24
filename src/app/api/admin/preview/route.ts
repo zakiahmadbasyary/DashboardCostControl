@@ -149,7 +149,7 @@ export async function GET(request: NextRequest) {
       totalPages,
     });
   } catch (error: unknown) {
-    const message = error instanceof Error ? error.message : String(error);
-    return NextResponse.json({ error: message }, { status: 500 });
+    console.error("Error in admin preview API route:", error);
+    return NextResponse.json({ error: "Gagal memuat data preview." }, { status: 500 });
   }
 }

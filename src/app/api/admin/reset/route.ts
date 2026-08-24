@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
+import { getAdminSessionFromRequest } from "@/lib/auth";
 
 export async function POST(request: NextRequest) {
   try {
@@ -33,9 +34,10 @@ export async function POST(request: NextRequest) {
     }
 
     // Log Activity in PostgreSQL database
-    const adminUser = await prisma.user.findFirst({
-      where: { role: "admin" },
-    });
+    const session = getAdminSessionFromRequest(request);
+    const adminUser = session
+      ? await prisma.user.findFirst({ where: { id: session.id } })
+      : await prisma.user.findFirst({ where: { role: "admin" } });
 
     if (adminUser) {
       await prisma.activityLog.create({
@@ -55,10 +57,9 @@ export async function POST(request: NextRequest) {
       count: deletedCount,
     });
   } catch (error: unknown) {
-    const message = error instanceof Error ? error.message : String(error);
     console.error("Error in reset API route:", error);
     return NextResponse.json(
-      { success: false, message: `Gagal mengosongkan data: ${message}` },
+      { success: false, message: "Gagal mengosongkan data karena kesalahan server internal." },
       { status: 500 }
     );
   }
