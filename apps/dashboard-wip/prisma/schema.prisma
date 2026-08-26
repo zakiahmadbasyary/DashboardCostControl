@@ -1,5 +1,5 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
+// This is your Prisma schema file for Dashboard WIP (Cost Control)
+// Stores ONLY business data for WIP Cost Control platform
 
 generator client {
   provider = "prisma-client-js"
@@ -8,32 +8,6 @@ generator client {
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
-}
-
-model User {
-  id           String        @id @default(uuid())
-  username     String        @unique
-  password     String
-  role         String        @default("admin")
-  createdAt    DateTime      @default(now())
-  updatedAt    DateTime      @updatedAt
-  activityLogs ActivityLog[]
-
-  @@map("users")
-}
-
-model ActivityLog {
-  id          String   @id @default(uuid())
-  userId      String
-  action      String
-  dataSource  String?
-  fileName    String?
-  description String?
-  createdAt   DateTime @default(now())
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@map("activity_logs")
 }
 
 model MasterSheet {

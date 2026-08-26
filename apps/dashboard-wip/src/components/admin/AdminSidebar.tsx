@@ -3,8 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { authService } from "@/services/authService";
-import { Leaf, UploadCloud, Eye, History, LogOut, LayoutDashboard, Menu, X, UserCheck, Shield } from "lucide-react";
+import { Leaf, UploadCloud, Eye, LogOut, LayoutDashboard, Menu, X, Shield } from "lucide-react";
 
 export default function AdminSidebar() {
   const pathname = usePathname();
@@ -12,15 +11,13 @@ export default function AdminSidebar() {
   const [mobileOpen, setMobileOpen] = useState(false);
 
   const handleLogout = async () => {
-    await authService.logout();
-    router.push("/login");
+    window.location.href = "http://localhost:3001/login";
   };
 
   const navItems = [
-    { label: "Upload Data", href: "/admin/upload", icon: UploadCloud },
+    { label: "Review Data (Admin)", href: "/admin/upload", icon: LayoutDashboard },
+    { label: "Upload Data Excel", href: "/admin/upload", icon: UploadCloud },
     { label: "Preview Data", href: "/admin/preview", icon: Eye },
-    { label: "Log Aktivitas", href: "/admin/logs", icon: History },
-    { label: "Pengaturan Akun", href: "/admin/account", icon: UserCheck },
   ];
 
   const sidebarContent = (

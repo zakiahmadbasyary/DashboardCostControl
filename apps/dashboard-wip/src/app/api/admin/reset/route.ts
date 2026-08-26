@@ -33,23 +33,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Log Activity in PostgreSQL database
-    const session = getAdminSessionFromRequest(request);
-    const adminUser = session
-      ? await prisma.user.findFirst({ where: { id: session.id } })
-      : await prisma.user.findFirst({ where: { role: "admin" } });
-
-    if (adminUser) {
-      await prisma.activityLog.create({
-        data: {
-          userId: adminUser.id,
-          action: "RESET_DATA",
-          dataSource: categoryTitle,
-          fileName: null,
-          description: `Berhasil mengosongkan ${deletedCount.toLocaleString("id-ID")} baris data pada tabel ${categoryTitle} (Struktur kolom tetap terjaga).`,
-        },
-      });
-    }
+    // Reset data operation completed cleanly in WIP database
 
     return NextResponse.json({
       success: true,

@@ -58,13 +58,6 @@ export async function POST(request: NextRequest) {
     let importedCount = 0;
     let categoryTitle = "";
 
-    // Find logged-in admin user from session for activity logging
-    const session = getAdminSessionFromRequest(request);
-    const adminUser = session
-      ? await prisma.user.findFirst({ where: { id: session.id } })
-      : await prisma.user.findFirst({ where: { role: "admin" } });
-    const userId = adminUser?.id;
-
     // Normalize keys helper
     const getVal = (row: Record<string, unknown>, keys: string[]): unknown => {
       for (const k of keys) {
@@ -380,18 +373,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ success: false, message: `Kategori '${category}' tidak dikenal.` }, { status: 400 });
     }
 
-    // 4. Log Activity in PostgreSQL database
-    if (userId) {
-      await prisma.activityLog.create({
-        data: {
-          userId,
-          action: "UPLOAD_DATA",
-          dataSource: categoryTitle,
-          fileName,
-          description: `Berhasil mengganti data ${categoryTitle} dari file ${fileName} (${importedCount.toLocaleString("id-ID")} baris data diproses).`,
-        },
-      });
-    }
+    // 4. Activity Log is handled centrally by Central Admin Governance Platform
 
     return NextResponse.json({
       success: true,
