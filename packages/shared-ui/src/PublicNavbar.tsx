@@ -2,25 +2,27 @@
 
 import React, { useState } from "react";
 import { getDashboardNavConfig } from "./config";
-import { LayoutGrid, Menu, X } from "lucide-react";
+import { LayoutGrid, Menu, X, ShieldCheck } from "lucide-react";
 
 export interface PublicNavbarProps {
-  currentDashboard: "wip" | "dashboard_a" | "dashboard_b" | "dashboard_c";
+  currentDashboard?: "wip" | "dashboard_a" | "dashboard_b" | "dashboard_c" | "portal" | string;
   brandTitle?: string;
   brandSubtitle?: string;
   logoElement?: React.ReactNode;
   showPortalLink?: boolean;
+  showAdminLink?: boolean;
 }
 
 export const PublicNavbar: React.FC<PublicNavbarProps> = ({
-  currentDashboard,
+  currentDashboard = "portal",
   brandTitle = "GGF AgroMetric",
   brandSubtitle = "Enterprise Dashboard Platform",
   logoElement,
   showPortalLink = true,
+  showAdminLink = true,
 }) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const { navItems, portalUrl } = getDashboardNavConfig();
+  const { navItems, portalUrl, adminUrl } = getDashboardNavConfig();
 
   return (
     <header className="sticky top-0 z-50 bg-white border-b border-[#DDE5DF] shadow-sm w-full relative opacity-100">
@@ -32,8 +34,8 @@ export const PublicNavbar: React.FC<PublicNavbarProps> = ({
             {logoElement ? (
               logoElement
             ) : (
-              <div className="w-11 h-11 rounded-xl bg-[#16823B] text-white flex items-center justify-center font-extrabold text-base shadow-xs">
-                GP
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-[#16823B] to-[#27A74C] text-white flex items-center justify-center font-black text-sm shadow-xs tracking-tight">
+                AM
               </div>
             )}
             <div>
@@ -74,9 +76,9 @@ export const PublicNavbar: React.FC<PublicNavbarProps> = ({
             })}
           </nav>
 
-          {/* Right Action: Portal Link */}
+          {/* Right Action Buttons */}
           <div className="hidden sm:flex items-center gap-3 shrink-0">
-            {showPortalLink && (
+            {showPortalLink && currentDashboard !== "portal" && (
               <a
                 href={portalUrl}
                 className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-[#DDE5DF] bg-[#F8FAF9] hover:bg-[#EEF4F0] text-[#2C3830] font-semibold text-xs transition-all shadow-xs"
@@ -84,6 +86,19 @@ export const PublicNavbar: React.FC<PublicNavbarProps> = ({
               >
                 <LayoutGrid className="w-3.5 h-3.5 text-[#5F6B63]" />
                 <span>Portal Utama</span>
+              </a>
+            )}
+
+            {showAdminLink && (
+              <a
+                href={adminUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 px-3.5 py-2 rounded-lg bg-[#16823B] hover:bg-[#126B30] text-white font-semibold text-xs transition-all shadow-md shadow-[#16823B]/15"
+                title="Buka Control Panel Admin Pusat"
+              >
+                <ShieldCheck className="w-4 h-4 text-emerald-200" />
+                <span>Admin Pusat</span>
               </a>
             )}
           </div>
@@ -132,8 +147,8 @@ export const PublicNavbar: React.FC<PublicNavbarProps> = ({
             })}
           </div>
 
-          {showPortalLink && (
-            <div className="pt-2 border-t border-[#E3EBE5]">
+          <div className="pt-2 border-t border-[#E3EBE5] flex flex-col gap-2">
+            {showPortalLink && currentDashboard !== "portal" && (
               <a
                 href={portalUrl}
                 className="w-full text-center py-2.5 rounded-xl border border-[#DDE5DF] bg-[#F8FAF9] text-[#2C3830] font-semibold text-xs flex items-center justify-center gap-1.5"
@@ -141,8 +156,20 @@ export const PublicNavbar: React.FC<PublicNavbarProps> = ({
                 <LayoutGrid className="w-3.5 h-3.5 text-[#5F6B63]" />
                 <span>Portal Utama</span>
               </a>
-            </div>
-          )}
+            )}
+
+            {showAdminLink && (
+              <a
+                href={adminUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-full text-center py-2.5 rounded-xl bg-[#16823B] text-white font-semibold text-xs flex items-center justify-center gap-2 shadow-xs"
+              >
+                <ShieldCheck className="w-4 h-4 text-emerald-200" />
+                <span>Admin Pusat</span>
+              </a>
+            )}
+          </div>
         </div>
       )}
     </header>

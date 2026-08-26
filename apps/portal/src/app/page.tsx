@@ -1,11 +1,11 @@
-import Link from "next/link";
+import { PublicNavbar } from "@dashboard/shared-ui";
 import { LayoutDashboard, ShieldCheck, Database, Layers, ExternalLink, Activity, ArrowRight } from "lucide-react";
 
 export default function PortalHomePage() {
   const dashboards = [
     {
       id: "wip",
-      name: "Dashboard WIP (Cost Control)",
+      name: "Dashboard WIP ACC (Cost Control)",
       description: "Monitoring Work In Progress, analisis biaya lokasi, sbt, dan aktivitas lapangan secara real-time.",
       status: "Aktif / Production",
       url: "http://localhost:3000",
@@ -15,7 +15,7 @@ export default function PortalHomePage() {
     },
     {
       id: "dashboard-a",
-      name: "Dashboard A",
+      name: "Dashboard WIP PG1 (Operasional)",
       description: "Modul analisis operasional & performa produksi wilayah A.",
       status: "Pengembangan",
       url: "http://localhost:3002",
@@ -25,7 +25,7 @@ export default function PortalHomePage() {
     },
     {
       id: "dashboard-b",
-      name: "Dashboard B",
+      name: "Dashboard HPP PG1 (Logistik)",
       description: "Modul manajemen inventaris & logistik terintegrasi.",
       status: "Pengembangan",
       url: "http://localhost:3003",
@@ -35,7 +35,7 @@ export default function PortalHomePage() {
     },
     {
       id: "dashboard-c",
-      name: "Dashboard C",
+      name: "Dashboard HPP M3 (Finansial)",
       description: "Modul pelaporan eksekutif & audit finansial.",
       status: "Pengembangan",
       url: "http://localhost:3004",
@@ -47,32 +47,14 @@ export default function PortalHomePage() {
 
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col justify-between selection:bg-emerald-500 selection:text-white">
-      {/* Header / Navbar */}
-      <header className="border-b border-slate-800 bg-slate-900/60 backdrop-blur-md sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-emerald-500 to-teal-400 flex items-center justify-center text-slate-950 shadow-lg shadow-emerald-500/20 font-bold">
-              GP
-            </div>
-            <div>
-              <h1 className="font-bold text-lg leading-none tracking-tight">GGF AgroMetric Platform</h1>
-              <span className="text-xs text-slate-400">Enterprise Dashboard Portal & Central Admin</span>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-4">
-            <a
-              href="http://localhost:3001"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 px-4 py-2 text-xs font-semibold rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white transition-all shadow-md shadow-emerald-600/20"
-            >
-              <ShieldCheck className="w-4 h-4" />
-              Admin Pusat
-            </a>
-          </div>
-        </div>
-      </header>
+      {/* Shared Public Header / Navbar */}
+      <PublicNavbar
+        currentDashboard="portal"
+        brandTitle="GGF AgroMetric"
+        brandSubtitle="Enterprise Dashboard Portal"
+        showPortalLink={false}
+        showAdminLink={true}
+      />
 
       {/* Hero Section */}
       <main className="max-w-7xl mx-auto px-6 py-12 flex-1 w-full">
@@ -163,10 +145,10 @@ export default function PortalHomePage() {
         <div className="max-w-7xl mx-auto px-6 flex flex-col sm:flex-row items-center justify-between gap-4">
           <p>© 2026 GGF AgroMetric Platform. Monorepo Architecture.</p>
           <div className="flex gap-6">
-            <span>Dashboard WIP</span>
-            <span>Dashboard A</span>
-            <span>Dashboard B</span>
-            <span>Dashboard C</span>
+            <span>WIP ACC</span>
+            <span>WIP PG1</span>
+            <span>HPP PG1</span>
+            <span>HPP M3</span>
             <span>Admin Pusat</span>
           </div>
         </div>
