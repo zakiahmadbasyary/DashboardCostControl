@@ -6,7 +6,7 @@ import { PublicNavbar } from "@dashboard/shared-ui";
 
 export default function DashboardHeader() {
   const customLogo = (
-    <div className="h-9 sm:h-10 w-auto flex items-center shrink-0">
+    <div className="h-11 sm:h-12 w-auto flex items-center shrink-0">
       <Image
         src={logoImg}
         alt="GGF Logo"

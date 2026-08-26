@@ -23,16 +23,16 @@ export const PublicNavbar: React.FC<PublicNavbarProps> = ({
   const { navItems, portalUrl } = getDashboardNavConfig();
 
   return (
-    <header className="sticky top-0 z-[100] bg-white border-b border-[#DDE5DF] shadow-xs isolate">
+    <header className="sticky top-0 z-[100] bg-white border-b border-[#DDE5DF] shadow-sm isolate">
       <div className="max-w-[95%] mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="h-16 flex items-center justify-between gap-6">
+        <div className="h-20 flex items-center justify-between gap-6">
           
           {/* Brand Logo & Title */}
-          <div className="flex items-center gap-3 shrink-0">
+          <div className="flex items-center gap-3.5 shrink-0 bg-white py-1">
             {logoElement ? (
               logoElement
             ) : (
-              <div className="w-9 h-9 rounded-xl bg-[#16823B] text-white flex items-center justify-center font-bold text-sm shadow-xs">
+              <div className="w-11 h-11 rounded-xl bg-[#16823B] text-white flex items-center justify-center font-extrabold text-base shadow-xs">
                 GP
               </div>
             )}

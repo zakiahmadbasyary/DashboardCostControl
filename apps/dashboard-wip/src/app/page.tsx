@@ -151,7 +151,7 @@ export default function PublicDashboardPage() {
       {/* Main Container */}
       <main className="flex-1 max-w-[95%] w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 flex flex-col gap-8">
         {/* Global Filters Section (Sticky / Freeze) */}
-        <section className="sticky top-16 z-20 bg-[#F7F9F7] py-2 -my-2">
+        <section className="sticky top-20 z-20 bg-[#F7F9F7] py-2 -my-2">
           <GlobalFilters initialFilters={globalFilters} onApplyFilters={handleApplyGlobalFilters} />
         </section>
 
