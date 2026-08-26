@@ -1,5 +1,5 @@
 export interface DashboardNavItem {
-  key: "wip" | "dashboard_a" | "dashboard_b" | "dashboard_c";
+  key: "portal" | "wip" | "dashboard_a" | "dashboard_b" | "dashboard_c";
   label: string;
   url: string;
   description: string;
@@ -25,25 +25,25 @@ export const getDashboardNavConfig = (): DashboardNavConfig => {
         key: "wip",
         label: "WIP ACC",
         url: wipUrl,
-        description: "Dashboard WIP ACC (Cost Control)",
+        description: "Monitoring Cost Control WIP ACC",
       },
       {
         key: "dashboard_a",
         label: "WIP PG1",
         url: dashboardAUrl,
-        description: "Dashboard WIP PG1 (Operasional)",
+        description: "Operasional & Performa Produksi PG1",
       },
       {
         key: "dashboard_b",
         label: "HPP PG1",
         url: dashboardBUrl,
-        description: "Dashboard HPP PG1 (Inventaris & Logistik)",
+        description: "Harga Pokok Produksi & Inventaris PG1",
       },
       {
         key: "dashboard_c",
         label: "HPP M3",
         url: dashboardCUrl,
-        description: "Dashboard HPP M3 (Audit & Finansial)",
+        description: "Audit Finansial & Laporan Eksekutif M3",
       },
     ],
     portalUrl,

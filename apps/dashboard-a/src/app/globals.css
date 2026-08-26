@@ -1,9 +1,57 @@
 @import "tailwindcss";
 
-@layer base {
-  body {
-    background-color: #0b1528;
-    color: #f8fafc;
-    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  }
+:root {
+  --ggf-primary: #16823b;
+  --ggf-dark: #0b6b32;
+  --ggf-light: #a8d437;
+  --ggf-orange: #f9a91b;
+  --ggf-yellow: #d7e515;
+  --ggf-blue: #29a9d6;
+  --ggf-bg: #f7f9f7;
+  --ggf-card: #ffffff;
+  --ggf-border: #dde5df;
+  --ggf-text: #17231b;
+  --ggf-text-secondary: #5f6b63;
+  --ggf-text-muted: #89938d;
+
+  --background: var(--ggf-bg);
+  --foreground: var(--ggf-text);
+}
+
+@theme inline {
+  --color-ggf-primary: #16823b;
+  --color-ggf-dark: #0b6b32;
+  --color-ggf-light: #a8d437;
+  --color-ggf-orange: #f9a91b;
+  --color-ggf-yellow: #d7e515;
+  --color-ggf-blue: #29a9d6;
+  --color-ggf-bg: #f7f9f7;
+  --color-ggf-card: #ffffff;
+  --color-ggf-border: #dde5df;
+  --color-ggf-text: #17231b;
+  --color-ggf-text-secondary: #5f6b63;
+  --color-ggf-text-muted: #89938d;
+}
+
+body {
+  background-color: var(--ggf-bg);
+  color: var(--ggf-text);
+  font-family: var(--font-sans), system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+  min-height: 100vh;
+}
+
+/* Custom Scrollbars */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #f1f5f2;
+}
+::-webkit-scrollbar-thumb {
+  background: #c2d4c7;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #16823b;
 }
