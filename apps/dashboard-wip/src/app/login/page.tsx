@@ -1,5 +1,6 @@
-import LoginForm from "@/components/auth/LoginForm";
+import { redirect } from "next/navigation";
 
 export default function LoginPage() {
-  return <LoginForm />;
+  // Single Login Policy: Redirect to Central Admin Login
+  redirect("http://localhost:3001/login");
 }

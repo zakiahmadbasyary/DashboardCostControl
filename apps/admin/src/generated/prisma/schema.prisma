@@ -10,38 +10,55 @@ datasource db {
 
 model AdminUser {
   id        String   @id @default(uuid())
+  name      String
   username  String   @unique
+  email     String   @unique
   password  String
-  role      String   @default("SUPER_ADMIN") // SUPER_ADMIN, DASHBOARD_ADMIN
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  role      String   @default("ADMIN") // SUPER_ADMIN, ADMIN
+  status    String   @default("ACTIVE") // ACTIVE, INACTIVE
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
 
-  accessList DashboardAccess[]
-  sessions   AdminSession[]
-  logs       AdminActivityLog[]
+  dashboardAccess UserDashboardAccess[]
+  sessions        AdminSession[]
+  activityLogs    AdminActivityLog[]
 
   @@map("admin_users")
 }
 
-model DashboardAccess {
-  id           String   @id @default(uuid())
-  userId       String
-  dashboardKey String // "wip", "dashboard_a", "dashboard_b", "dashboard_c"
-  accessLevel  String   @default("FULL") // "READ_ONLY", "FULL", "NONE"
-  grantedAt    DateTime @default(now())
+model Dashboard {
+  id        String   @id @default(uuid())
+  code      String   @unique // "wip", "dashboard_a", "dashboard_b", "dashboard_c"
+  name      String
+  adminUrl  String   @map("admin_url")
+  publicUrl String   @map("public_url")
+  status    String   @default("ACTIVE")
+  createdAt DateTime @default(now()) @map("created_at")
 
-  user AdminUser @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userAccess UserDashboardAccess[]
 
-  @@unique([userId, dashboardKey])
-  @@map("admin_dashboard_access")
+  @@map("dashboards")
+}
+
+model UserDashboardAccess {
+  id          String   @id @default(uuid())
+  userId      String   @map("user_id")
+  dashboardId String   @map("dashboard_id")
+  grantedAt   DateTime @default(now()) @map("granted_at")
+
+  user      AdminUser @relation(fields: [userId], references: [id], onDelete: Cascade)
+  dashboard Dashboard @relation(fields: [dashboardId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, dashboardId])
+  @@map("user_dashboard_access")
 }
 
 model AdminSession {
   id        String   @id @default(uuid())
   token     String   @unique
-  userId    String
-  expiresAt DateTime
-  createdAt DateTime @default(now())
+  userId    String   @map("user_id")
+  expiresAt DateTime @map("expires_at")
+  createdAt DateTime @default(now()) @map("created_at")
 
   user AdminUser @relation(fields: [userId], references: [id], onDelete: Cascade)
 
@@ -49,12 +66,13 @@ model AdminSession {
 }
 
 model AdminActivityLog {
-  id              String   @id @default(uuid())
-  userId          String
-  action          String
-  targetDashboard String?
-  description     String?
-  createdAt       DateTime @default(now())
+  id            String   @id @default(uuid())
+  userId        String   @map("user_id")
+  action        String
+  dashboardCode String?  @map("dashboard_code")
+  description   String?
+  ipAddress     String?  @map("ip_address")
+  createdAt     DateTime @default(now()) @map("created_at")
 
   user AdminUser @relation(fields: [userId], references: [id], onDelete: Cascade)
 

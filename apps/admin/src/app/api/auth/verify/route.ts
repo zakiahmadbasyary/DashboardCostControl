@@ -22,7 +22,11 @@ export async function GET(request: Request) {
       include: {
         user: {
           include: {
-            accessList: true,
+            dashboardAccess: {
+              include: {
+                dashboard: true,
+              },
+            },
           },
         },
       },
@@ -32,18 +36,28 @@ export async function GET(request: Request) {
       return NextResponse.json({ authenticated: false, error: "Session expired or invalid" }, { status: 401 });
     }
 
-    const accessMap: Record<string, string> = {};
-    session.user.accessList.forEach((acc) => {
-      accessMap[acc.dashboardKey] = acc.accessLevel;
-    });
+    if (session.user.status !== "ACTIVE") {
+      return NextResponse.json({ authenticated: false, error: "Account inactive" }, { status: 403 });
+    }
+
+    let allowedDashboards: string[] = [];
+    if (session.user.role === "SUPER_ADMIN") {
+      const allDashboards = await prismaAdmin.dashboard.findMany({ select: { code: true } });
+      allowedDashboards = allDashboards.map((d) => d.code);
+    } else {
+      allowedDashboards = session.user.dashboardAccess.map((acc) => acc.dashboard.code);
+    }
 
     return NextResponse.json({
       authenticated: true,
       user: {
         id: session.user.id,
+        name: session.user.name,
         username: session.user.username,
+        email: session.user.email,
         role: session.user.role,
-        access: accessMap,
+        status: session.user.status,
+        allowedDashboards,
       },
     });
   } catch (error: any) {

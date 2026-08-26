@@ -9,27 +9,46 @@ export async function POST(request: Request) {
 
     if (!username || !password) {
       return NextResponse.json(
-        { error: "Username dan password wajib diisi" },
+        { error: "Username/Email dan password wajib diisi" },
         { status: 400 }
       );
     }
 
-    const admin = await prismaAdmin.adminUser.findUnique({
-      where: { username },
-      include: { accessList: true },
+    // Lookup by username or email
+    const admin = await prismaAdmin.adminUser.findFirst({
+      where: {
+        OR: [
+          { username: username.trim() },
+          { email: username.trim().toLowerCase() },
+        ],
+      },
+      include: {
+        dashboardAccess: {
+          include: {
+            dashboard: true,
+          },
+        },
+      },
     });
 
     if (!admin) {
       return NextResponse.json(
-        { error: "Username atau password salah" },
+        { error: "Username/Email atau password tidak ditemukan" },
         { status: 401 }
+      );
+    }
+
+    if (admin.status !== "ACTIVE") {
+      return NextResponse.json(
+        { error: "Akun Anda dinonaktifkan. Hubungi Super Admin." },
+        { status: 403 }
       );
     }
 
     const isMatch = await bcrypt.compare(password, admin.password);
     if (!isMatch) {
       return NextResponse.json(
-        { error: "Username atau password salah" },
+        { error: "Username/Email atau password salah" },
         { status: 401 }
       );
     }
@@ -51,17 +70,29 @@ export async function POST(request: Request) {
       data: {
         userId: admin.id,
         action: "LOGIN",
-        description: `Admin ${admin.username} berhasil login ke Admin Pusat.`,
+        description: `Admin ${admin.username} (${admin.name}) berhasil login. Role: ${admin.role}.`,
       },
     });
+
+    // Determine allowed dashboards
+    let allowedDashboards: string[] = [];
+    if (admin.role === "SUPER_ADMIN") {
+      const allDashboards = await prismaAdmin.dashboard.findMany({ select: { code: true } });
+      allowedDashboards = allDashboards.map((d) => d.code);
+    } else {
+      allowedDashboards = admin.dashboardAccess.map((acc) => acc.dashboard.code);
+    }
 
     const response = NextResponse.json({
       success: true,
       user: {
         id: admin.id,
+        name: admin.name,
         username: admin.username,
+        email: admin.email,
         role: admin.role,
-        accessList: admin.accessList,
+        status: admin.status,
+        allowedDashboards,
       },
       token,
     });

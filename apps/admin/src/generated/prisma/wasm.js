@@ -95,18 +95,30 @@ exports.Prisma.TransactionIsolationLevel = makeStrictEnum({
 
 exports.Prisma.AdminUserScalarFieldEnum = {
   id: 'id',
+  name: 'name',
   username: 'username',
+  email: 'email',
   password: 'password',
   role: 'role',
+  status: 'status',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 };
 
-exports.Prisma.DashboardAccessScalarFieldEnum = {
+exports.Prisma.DashboardScalarFieldEnum = {
+  id: 'id',
+  code: 'code',
+  name: 'name',
+  adminUrl: 'adminUrl',
+  publicUrl: 'publicUrl',
+  status: 'status',
+  createdAt: 'createdAt'
+};
+
+exports.Prisma.UserDashboardAccessScalarFieldEnum = {
   id: 'id',
   userId: 'userId',
-  dashboardKey: 'dashboardKey',
-  accessLevel: 'accessLevel',
+  dashboardId: 'dashboardId',
   grantedAt: 'grantedAt'
 };
 
@@ -122,8 +134,9 @@ exports.Prisma.AdminActivityLogScalarFieldEnum = {
   id: 'id',
   userId: 'userId',
   action: 'action',
-  targetDashboard: 'targetDashboard',
+  dashboardCode: 'dashboardCode',
   description: 'description',
+  ipAddress: 'ipAddress',
   createdAt: 'createdAt'
 };
 
@@ -145,7 +158,8 @@ exports.Prisma.NullsOrder = {
 
 exports.Prisma.ModelName = {
   AdminUser: 'AdminUser',
-  DashboardAccess: 'DashboardAccess',
+  Dashboard: 'Dashboard',
+  UserDashboardAccess: 'UserDashboardAccess',
   AdminSession: 'AdminSession',
   AdminActivityLog: 'AdminActivityLog'
 };
@@ -178,7 +192,7 @@ const config = {
     "isCustomOutput": true
   },
   "relativeEnvPaths": {
-    "rootEnvPath": "../../../.env",
+    "rootEnvPath": null,
     "schemaEnvPath": "../../../.env"
   },
   "relativePath": "../../../prisma",
@@ -197,13 +211,13 @@ const config = {
       }
     }
   },
-  "inlineSchema": "generator client {\n  provider = \"prisma-client-js\"\n  output   = \"../src/generated/prisma\"\n}\n\ndatasource db {\n  provider = \"postgresql\"\n  url      = env(\"DATABASE_URL\")\n}\n\nmodel AdminUser {\n  id        String   @id @default(uuid())\n  username  String   @unique\n  password  String\n  role      String   @default(\"SUPER_ADMIN\") // SUPER_ADMIN, DASHBOARD_ADMIN\n  createdAt DateTime @default(now())\n  updatedAt DateTime @updatedAt\n\n  accessList DashboardAccess[]\n  sessions   AdminSession[]\n  logs       AdminActivityLog[]\n\n  @@map(\"admin_users\")\n}\n\nmodel DashboardAccess {\n  id           String   @id @default(uuid())\n  userId       String\n  dashboardKey String // \"wip\", \"dashboard_a\", \"dashboard_b\", \"dashboard_c\"\n  accessLevel  String   @default(\"FULL\") // \"READ_ONLY\", \"FULL\", \"NONE\"\n  grantedAt    DateTime @default(now())\n\n  user AdminUser @relation(fields: [userId], references: [id], onDelete: Cascade)\n\n  @@unique([userId, dashboardKey])\n  @@map(\"admin_dashboard_access\")\n}\n\nmodel AdminSession {\n  id        String   @id @default(uuid())\n  token     String   @unique\n  userId    String\n  expiresAt DateTime\n  createdAt DateTime @default(now())\n\n  user AdminUser @relation(fields: [userId], references: [id], onDelete: Cascade)\n\n  @@map(\"admin_sessions\")\n}\n\nmodel AdminActivityLog {\n  id              String   @id @default(uuid())\n  userId          String\n  action          String\n  targetDashboard String?\n  description     String?\n  createdAt       DateTime @default(now())\n\n  user AdminUser @relation(fields: [userId], references: [id], onDelete: Cascade)\n\n  @@map(\"admin_activity_logs\")\n}\n",
-  "inlineSchemaHash": "192d99a328ce389d71e91da7862dd12bfe032ed433622b11a0c39ffb435b6da3",
+  "inlineSchema": "generator client {\n  provider = \"prisma-client-js\"\n  output   = \"../src/generated/prisma\"\n}\n\ndatasource db {\n  provider = \"postgresql\"\n  url      = env(\"DATABASE_URL\")\n}\n\nmodel AdminUser {\n  id        String   @id @default(uuid())\n  name      String\n  username  String   @unique\n  email     String   @unique\n  password  String\n  role      String   @default(\"ADMIN\") // SUPER_ADMIN, ADMIN\n  status    String   @default(\"ACTIVE\") // ACTIVE, INACTIVE\n  createdAt DateTime @default(now()) @map(\"created_at\")\n  updatedAt DateTime @updatedAt @map(\"updated_at\")\n\n  dashboardAccess UserDashboardAccess[]\n  sessions        AdminSession[]\n  activityLogs    AdminActivityLog[]\n\n  @@map(\"admin_users\")\n}\n\nmodel Dashboard {\n  id        String   @id @default(uuid())\n  code      String   @unique // \"wip\", \"dashboard_a\", \"dashboard_b\", \"dashboard_c\"\n  name      String\n  adminUrl  String   @map(\"admin_url\")\n  publicUrl String   @map(\"public_url\")\n  status    String   @default(\"ACTIVE\")\n  createdAt DateTime @default(now()) @map(\"created_at\")\n\n  userAccess UserDashboardAccess[]\n\n  @@map(\"dashboards\")\n}\n\nmodel UserDashboardAccess {\n  id          String   @id @default(uuid())\n  userId      String   @map(\"user_id\")\n  dashboardId String   @map(\"dashboard_id\")\n  grantedAt   DateTime @default(now()) @map(\"granted_at\")\n\n  user      AdminUser @relation(fields: [userId], references: [id], onDelete: Cascade)\n  dashboard Dashboard @relation(fields: [dashboardId], references: [id], onDelete: Cascade)\n\n  @@unique([userId, dashboardId])\n  @@map(\"user_dashboard_access\")\n}\n\nmodel AdminSession {\n  id        String   @id @default(uuid())\n  token     String   @unique\n  userId    String   @map(\"user_id\")\n  expiresAt DateTime @map(\"expires_at\")\n  createdAt DateTime @default(now()) @map(\"created_at\")\n\n  user AdminUser @relation(fields: [userId], references: [id], onDelete: Cascade)\n\n  @@map(\"admin_sessions\")\n}\n\nmodel AdminActivityLog {\n  id            String   @id @default(uuid())\n  userId        String   @map(\"user_id\")\n  action        String\n  dashboardCode String?  @map(\"dashboard_code\")\n  description   String?\n  ipAddress     String?  @map(\"ip_address\")\n  createdAt     DateTime @default(now()) @map(\"created_at\")\n\n  user AdminUser @relation(fields: [userId], references: [id], onDelete: Cascade)\n\n  @@map(\"admin_activity_logs\")\n}\n",
+  "inlineSchemaHash": "1a80acb24df411562aaaf98d612ceff067c6124c71794dd0c24bb13a25b7a4ac",
   "copyEngine": true
 }
 config.dirname = '/'
 
-config.runtimeDataModel = JSON.parse("{\"models\":{\"AdminUser\":{\"fields\":[{\"name\":\"id\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"username\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"password\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"role\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"createdAt\",\"kind\":\"scalar\",\"type\":\"DateTime\"},{\"name\":\"updatedAt\",\"kind\":\"scalar\",\"type\":\"DateTime\"},{\"name\":\"accessList\",\"kind\":\"object\",\"type\":\"DashboardAccess\",\"relationName\":\"AdminUserToDashboardAccess\"},{\"name\":\"sessions\",\"kind\":\"object\",\"type\":\"AdminSession\",\"relationName\":\"AdminSessionToAdminUser\"},{\"name\":\"logs\",\"kind\":\"object\",\"type\":\"AdminActivityLog\",\"relationName\":\"AdminActivityLogToAdminUser\"}],\"dbName\":\"admin_users\"},\"DashboardAccess\":{\"fields\":[{\"name\":\"id\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"userId\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"dashboardKey\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"accessLevel\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"grantedAt\",\"kind\":\"scalar\",\"type\":\"DateTime\"},{\"name\":\"user\",\"kind\":\"object\",\"type\":\"AdminUser\",\"relationName\":\"AdminUserToDashboardAccess\"}],\"dbName\":\"admin_dashboard_access\"},\"AdminSession\":{\"fields\":[{\"name\":\"id\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"token\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"userId\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"expiresAt\",\"kind\":\"scalar\",\"type\":\"DateTime\"},{\"name\":\"createdAt\",\"kind\":\"scalar\",\"type\":\"DateTime\"},{\"name\":\"user\",\"kind\":\"object\",\"type\":\"AdminUser\",\"relationName\":\"AdminSessionToAdminUser\"}],\"dbName\":\"admin_sessions\"},\"AdminActivityLog\":{\"fields\":[{\"name\":\"id\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"userId\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"action\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"targetDashboard\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"description\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"createdAt\",\"kind\":\"scalar\",\"type\":\"DateTime\"},{\"name\":\"user\",\"kind\":\"object\",\"type\":\"AdminUser\",\"relationName\":\"AdminActivityLogToAdminUser\"}],\"dbName\":\"admin_activity_logs\"}},\"enums\":{},\"types\":{}}")
+config.runtimeDataModel = JSON.parse("{\"models\":{\"AdminUser\":{\"fields\":[{\"name\":\"id\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"name\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"username\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"email\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"password\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"role\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"status\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"createdAt\",\"kind\":\"scalar\",\"type\":\"DateTime\",\"dbName\":\"created_at\"},{\"name\":\"updatedAt\",\"kind\":\"scalar\",\"type\":\"DateTime\",\"dbName\":\"updated_at\"},{\"name\":\"dashboardAccess\",\"kind\":\"object\",\"type\":\"UserDashboardAccess\",\"relationName\":\"AdminUserToUserDashboardAccess\"},{\"name\":\"sessions\",\"kind\":\"object\",\"type\":\"AdminSession\",\"relationName\":\"AdminSessionToAdminUser\"},{\"name\":\"activityLogs\",\"kind\":\"object\",\"type\":\"AdminActivityLog\",\"relationName\":\"AdminActivityLogToAdminUser\"}],\"dbName\":\"admin_users\"},\"Dashboard\":{\"fields\":[{\"name\":\"id\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"code\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"name\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"adminUrl\",\"kind\":\"scalar\",\"type\":\"String\",\"dbName\":\"admin_url\"},{\"name\":\"publicUrl\",\"kind\":\"scalar\",\"type\":\"String\",\"dbName\":\"public_url\"},{\"name\":\"status\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"createdAt\",\"kind\":\"scalar\",\"type\":\"DateTime\",\"dbName\":\"created_at\"},{\"name\":\"userAccess\",\"kind\":\"object\",\"type\":\"UserDashboardAccess\",\"relationName\":\"DashboardToUserDashboardAccess\"}],\"dbName\":\"dashboards\"},\"UserDashboardAccess\":{\"fields\":[{\"name\":\"id\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"userId\",\"kind\":\"scalar\",\"type\":\"String\",\"dbName\":\"user_id\"},{\"name\":\"dashboardId\",\"kind\":\"scalar\",\"type\":\"String\",\"dbName\":\"dashboard_id\"},{\"name\":\"grantedAt\",\"kind\":\"scalar\",\"type\":\"DateTime\",\"dbName\":\"granted_at\"},{\"name\":\"user\",\"kind\":\"object\",\"type\":\"AdminUser\",\"relationName\":\"AdminUserToUserDashboardAccess\"},{\"name\":\"dashboard\",\"kind\":\"object\",\"type\":\"Dashboard\",\"relationName\":\"DashboardToUserDashboardAccess\"}],\"dbName\":\"user_dashboard_access\"},\"AdminSession\":{\"fields\":[{\"name\":\"id\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"token\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"userId\",\"kind\":\"scalar\",\"type\":\"String\",\"dbName\":\"user_id\"},{\"name\":\"expiresAt\",\"kind\":\"scalar\",\"type\":\"DateTime\",\"dbName\":\"expires_at\"},{\"name\":\"createdAt\",\"kind\":\"scalar\",\"type\":\"DateTime\",\"dbName\":\"created_at\"},{\"name\":\"user\",\"kind\":\"object\",\"type\":\"AdminUser\",\"relationName\":\"AdminSessionToAdminUser\"}],\"dbName\":\"admin_sessions\"},\"AdminActivityLog\":{\"fields\":[{\"name\":\"id\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"userId\",\"kind\":\"scalar\",\"type\":\"String\",\"dbName\":\"user_id\"},{\"name\":\"action\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"dashboardCode\",\"kind\":\"scalar\",\"type\":\"String\",\"dbName\":\"dashboard_code\"},{\"name\":\"description\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"ipAddress\",\"kind\":\"scalar\",\"type\":\"String\",\"dbName\":\"ip_address\"},{\"name\":\"createdAt\",\"kind\":\"scalar\",\"type\":\"DateTime\",\"dbName\":\"created_at\"},{\"name\":\"user\",\"kind\":\"object\",\"type\":\"AdminUser\",\"relationName\":\"AdminActivityLogToAdminUser\"}],\"dbName\":\"admin_activity_logs\"}},\"enums\":{},\"types\":{}}")
 defineDmmfProperty(exports.Prisma, config.runtimeDataModel)
 config.engineWasm = {
   getRuntime: async () => require('./query_engine_bg.js'),

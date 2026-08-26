@@ -4,7 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { authService } from "@/services/authService";
-import { Leaf, UploadCloud, Eye, History, LogOut, LayoutDashboard, Menu, X, UserCheck } from "lucide-react";
+import { Leaf, UploadCloud, Eye, History, LogOut, LayoutDashboard, Menu, X, UserCheck, Shield } from "lucide-react";
 
 export default function AdminSidebar() {
   const pathname = usePathname();
@@ -73,6 +73,13 @@ export default function AdminSidebar() {
 
       {/* Footer / Actions */}
       <div className="p-4 border-t border-[#DDE5DF] space-y-2">
+        <a
+          href="http://localhost:3001/dashboard"
+          className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-semibold text-[#16823B] bg-[#EAF3EC] hover:bg-[#D5E7DA] transition-colors"
+        >
+          <Shield className="w-4 h-4 text-[#16823B]" />
+          <span>Ke Admin Pusat</span>
+        </a>
         <Link
           href="/"
           onClick={() => setMobileOpen(false)}

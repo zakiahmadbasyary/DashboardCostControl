@@ -123,18 +123,30 @@ exports.Prisma.TransactionIsolationLevel = makeStrictEnum({
 
 exports.Prisma.AdminUserScalarFieldEnum = {
   id: 'id',
+  name: 'name',
   username: 'username',
+  email: 'email',
   password: 'password',
   role: 'role',
+  status: 'status',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 };
 
-exports.Prisma.DashboardAccessScalarFieldEnum = {
+exports.Prisma.DashboardScalarFieldEnum = {
+  id: 'id',
+  code: 'code',
+  name: 'name',
+  adminUrl: 'adminUrl',
+  publicUrl: 'publicUrl',
+  status: 'status',
+  createdAt: 'createdAt'
+};
+
+exports.Prisma.UserDashboardAccessScalarFieldEnum = {
   id: 'id',
   userId: 'userId',
-  dashboardKey: 'dashboardKey',
-  accessLevel: 'accessLevel',
+  dashboardId: 'dashboardId',
   grantedAt: 'grantedAt'
 };
 
@@ -150,8 +162,9 @@ exports.Prisma.AdminActivityLogScalarFieldEnum = {
   id: 'id',
   userId: 'userId',
   action: 'action',
-  targetDashboard: 'targetDashboard',
+  dashboardCode: 'dashboardCode',
   description: 'description',
+  ipAddress: 'ipAddress',
   createdAt: 'createdAt'
 };
 
@@ -173,7 +186,8 @@ exports.Prisma.NullsOrder = {
 
 exports.Prisma.ModelName = {
   AdminUser: 'AdminUser',
-  DashboardAccess: 'DashboardAccess',
+  Dashboard: 'Dashboard',
+  UserDashboardAccess: 'UserDashboardAccess',
   AdminSession: 'AdminSession',
   AdminActivityLog: 'AdminActivityLog'
 };
