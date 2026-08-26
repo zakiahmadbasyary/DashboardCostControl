@@ -51,3 +51,5 @@ src/data/*.xlsx
 /storage/excelWIP/*
 !/storage/excelWIP/template/
 
+# dokumentasi struktur
+*.docx
