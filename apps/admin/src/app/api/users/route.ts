@@ -136,19 +136,26 @@ export async function PUT(request: Request) {
       return NextResponse.json({ error: "Akses ditolak. Khusus Super Admin." }, { status: 403 });
     }
 
-    const { id, name, email, role, status, newPassword, dashboardCodes } = await request.json();
+    const body = await request.json();
+    const { id, name, email, role, status, password, newPassword, dashboardCodes } = body;
 
     if (!id) {
       return NextResponse.json({ error: "User ID wajib diisi." }, { status: 400 });
     }
+
+    const pwd = newPassword || password;
 
     const updateData: any = {};
     if (name) updateData.name = name.trim();
     if (email) updateData.email = email.trim().toLowerCase();
     if (role) updateData.role = role;
     if (status) updateData.status = status;
-    if (newPassword && newPassword.trim().length >= 6) {
-      updateData.password = await bcrypt.hash(newPassword.trim(), 10);
+
+    if (pwd && typeof pwd === "string" && pwd.trim().length > 0) {
+      if (pwd.trim().length < 6) {
+        return NextResponse.json({ error: "Password minimal 6 karakter." }, { status: 400 });
+      }
+      updateData.password = await bcrypt.hash(pwd.trim(), 10);
     }
 
     const updatedUser = await prismaAdmin.adminUser.update({
@@ -181,13 +188,13 @@ export async function PUT(request: Request) {
       data: {
         userId: superAdmin.id,
         action: "UPDATE_USER",
-        description: `Super Admin ${superAdmin.username} memperbarui user: ${updatedUser.username}. Role: ${updatedUser.role}, Status: ${updatedUser.status}.`,
+        description: `Super Admin ${superAdmin.username} memperbarui user: ${updatedUser.username}.${pwd ? " Password diperbarui." : ""}`,
       },
     });
 
     return NextResponse.json({ success: true, user: updatedUser });
   } catch (error: any) {
     console.error("PUT User Error:", error);
-    return NextResponse.json({ error: "Server error" }, { status: 500 });
+    return NextResponse.json({ error: error.message || "Gagal memperbarui user" }, { status: 500 });
   }
 }

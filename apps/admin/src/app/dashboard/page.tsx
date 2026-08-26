@@ -19,6 +19,7 @@ import {
   CheckCircle2,
   AlertCircle,
   X,
+  Trash2,
 } from "lucide-react";
 
 interface AdminUser {
@@ -120,7 +121,7 @@ export default function AdminDashboardPage() {
   const fetchLogs = useCallback(async () => {
     setLoadingLogs(true);
     try {
-      const res = await fetch("/api/activity-logs");
+      const res = await fetch("/api/logs");
       if (res.ok) {
         const data = await res.json();
         setLogsList(data.logs || []);
@@ -131,6 +132,30 @@ export default function AdminDashboardPage() {
       setLoadingLogs(false);
     }
   }, []);
+
+  const [clearingLogs, setClearingLogs] = useState(false);
+
+  const handleResetLogs = async () => {
+    if (!window.confirm("Apakah Anda yakin ingin menghapus seluruh riwayat log aktivitas? Aksi ini tidak dapat dibatalkan.")) {
+      return;
+    }
+
+    setClearingLogs(true);
+    try {
+      const res = await fetch("/api/logs", { method: "DELETE" });
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.error || "Gagal menghapus log aktivitas");
+      }
+
+      fetchLogs();
+    } catch (err: any) {
+      alert(err.message);
+    } finally {
+      setClearingLogs(false);
+    }
+  };
 
   useEffect(() => {
     if (!currentUser) return;
@@ -187,7 +212,7 @@ export default function AdminDashboardPage() {
     setSubmitting(true);
 
     try {
-      const url = editingUser ? `/api/users/${editingUser.id}` : "/api/users";
+      const url = "/api/users";
       const method = editingUser ? "PUT" : "POST";
 
       const payload: any = {
@@ -199,8 +224,13 @@ export default function AdminDashboardPage() {
         dashboardCodes: formData.role === "SUPER_ADMIN" ? [] : formData.dashboardCodes,
       };
 
+      if (editingUser) {
+        payload.id = editingUser.id;
+      }
+
       if (formData.password) {
         payload.password = formData.password;
+        payload.newPassword = formData.password;
       }
 
       const res = await fetch(url, {
@@ -259,21 +289,21 @@ export default function AdminDashboardPage() {
       code: "dashboard_a",
       name: "Dashboard A (Operasional)",
       desc: "Manajemen operasional & performa produksi wilayah A",
-      url: (process.env.NEXT_PUBLIC_WIP_PG1_URL || process.env.NEXT_PUBLIC_DASHBOARD_A_URL || "http://localhost:3002") + "/admin",
+      url: process.env.NEXT_PUBLIC_WIP_PG1_URL || process.env.NEXT_PUBLIC_DASHBOARD_A_URL || "http://localhost:3002",
       icon: Layers,
     },
     {
       code: "dashboard_b",
       name: "Dashboard B (Inventaris)",
       desc: "Manajemen logistik & pergerakan inventaris sarana produksi",
-      url: (process.env.NEXT_PUBLIC_HPP_PG1_URL || process.env.NEXT_PUBLIC_DASHBOARD_B_URL || "http://localhost:3003") + "/admin",
+      url: process.env.NEXT_PUBLIC_HPP_PG1_URL || process.env.NEXT_PUBLIC_DASHBOARD_B_URL || "http://localhost:3003",
       icon: Database,
     },
     {
       code: "dashboard_c",
       name: "Dashboard C (Finansial)",
       desc: "Audit finansial terpadu & laporan eksekutif",
-      url: (process.env.NEXT_PUBLIC_HPP_M3_URL || process.env.NEXT_PUBLIC_DASHBOARD_C_URL || "http://localhost:3004") + "/admin",
+      url: process.env.NEXT_PUBLIC_HPP_M3_URL || process.env.NEXT_PUBLIC_DASHBOARD_C_URL || "http://localhost:3004",
       icon: Shield,
     },
   ];
@@ -592,13 +622,27 @@ export default function AdminDashboardPage() {
         {/* TAB 3: AUDIT LOG AKTIVITAS */}
         {activeTab === "logs" && (
           <div className="space-y-6">
-            <div>
-              <h3 className="text-lg font-bold text-[#17231B] flex items-center gap-2">
-                <Clock className="w-5 h-5 text-[#16823B]" /> Log Aktivitas Terpusat
-              </h3>
-              <p className="text-[#5F6B63] text-xs mt-0.5">
-                Riwayat aksi login, logout, pembuatan user, dan perubahan hak akses terpusat.
-              </p>
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div>
+                <h3 className="text-lg font-bold text-[#17231B] flex items-center gap-2">
+                  <Clock className="w-5 h-5 text-[#16823B]" /> Log Aktivitas Terpusat
+                </h3>
+                <p className="text-[#5F6B63] text-xs mt-0.5">
+                  Riwayat aksi login, logout, pembuatan user, dan perubahan hak akses terpusat.
+                </p>
+              </div>
+
+              {isSuperAdmin && (
+                <button
+                  onClick={handleResetLogs}
+                  disabled={clearingLogs || logsList.length === 0}
+                  className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-red-50 hover:bg-red-100 text-red-700 font-semibold text-xs transition-colors border border-red-200 disabled:opacity-50 disabled:cursor-not-allowed shrink-0"
+                  title="Bersihkan seluruh riwayat aktivitas"
+                >
+                  <Trash2 className="w-4 h-4 text-red-600" />
+                  <span>{clearingLogs ? "Membersihkan..." : "Reset / Hapus Log"}</span>
+                </button>
+              )}
             </div>
 
             {loadingLogs ? (

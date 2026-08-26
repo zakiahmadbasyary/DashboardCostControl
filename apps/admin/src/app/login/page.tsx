@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Lock, User, AlertCircle, ArrowRight, Eye, EyeOff } from "lucide-react";
+import { Lock, User, AlertCircle, ArrowRight, ArrowLeft, Eye, EyeOff } from "lucide-react";
 
 export default function AdminLoginPage() {
   const [username, setUsername] = useState("");
@@ -11,6 +11,8 @@ export default function AdminLoginPage() {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const router = useRouter();
+
+  const portalUrl = process.env.NEXT_PUBLIC_PORTAL_URL || "http://localhost:3000";
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -45,6 +47,17 @@ export default function AdminLoginPage() {
       <div className="absolute -bottom-40 -right-40 w-96 h-96 bg-[#A8D437]/10 rounded-full blur-3xl pointer-events-none" />
 
       <div className="w-full max-w-md bg-white border border-[#DDE5DF] rounded-3xl p-8 sm:p-10 shadow-lg shadow-black/5 relative z-10">
+        {/* Back Button to Portal */}
+        <div className="mb-6">
+          <a
+            href={portalUrl}
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold text-[#5F6B63] hover:text-[#17231B] bg-[#F8FAF9] hover:bg-[#EEF4F0] border border-[#DDE5DF] transition-all shadow-2xs"
+          >
+            <ArrowLeft className="w-3.5 h-3.5 text-[#16823B]" />
+            <span>Kembali ke Portal Utama</span>
+          </a>
+        </div>
+
         {/* Logo & Header */}
         <div className="text-center mb-8">
           <div className="flex justify-center mb-4">
