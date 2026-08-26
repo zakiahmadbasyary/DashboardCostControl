@@ -29,7 +29,7 @@ export default function AdminLoginPage() {
         throw new Error(data.error || "Gagal melakukan login");
       }
 
-      router.push("/dashboard");
+      window.location.href = "/dashboard";
     } catch (err: any) {
       setError(err.message);
     } finally {
@@ -69,6 +69,7 @@ export default function AdminLoginPage() {
               <input
                 type="text"
                 required
+                suppressHydrationWarning
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
                 placeholder="Masukkan username"
@@ -86,6 +87,7 @@ export default function AdminLoginPage() {
               <input
                 type="password"
                 required
+                suppressHydrationWarning
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="••••••••"
