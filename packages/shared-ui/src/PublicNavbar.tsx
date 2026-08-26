@@ -60,17 +60,15 @@ export const PublicNavbar: React.FC<PublicNavbarProps> = ({
             <div className="h-9 max-h-9 w-auto flex items-center shrink-0 overflow-hidden" style={{ height: "36px", maxHeight: "36px" }}>
               {logoElement || defaultLogo}
             </div>
-            <div>
-              <div className="flex items-center gap-2">
-                <span className="font-extrabold text-sm sm:text-base text-[#17231B] group-hover:text-[#16823B] tracking-tight leading-none transition-colors">
-                  {brandTitle}
+            <div className="flex flex-col justify-center">
+              <span className="font-extrabold text-sm sm:text-base text-[#17231B] group-hover:text-[#16823B] tracking-tight leading-snug transition-colors block">
+                {brandTitle}
+              </span>
+              {brandSubtitle && (
+                <span className="text-[10px] sm:text-xs text-[#5F6B63] hidden sm:block font-medium leading-tight mt-0.5">
+                  {brandSubtitle}
                 </span>
-                {brandSubtitle && (
-                  <p className="text-[10px] text-[#5F6B63] hidden xs:block mt-0.5 font-medium">
-                    {brandSubtitle}
-                  </p>
-                )}
-              </div>
+              )}
             </div>
           </a>
 
