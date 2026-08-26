@@ -110,8 +110,6 @@ export default function PortalHomePage() {
                 <div>
                   <a
                     href={dash.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
                     className="w-full py-2.5 px-4 rounded-xl bg-[#16823B] hover:bg-[#126B30] text-white font-semibold text-xs flex items-center justify-center gap-2 transition-all shadow-2xs group-hover:shadow-xs"
                   >
                     <span>Buka Dashboard</span>
@@ -141,8 +139,6 @@ export default function PortalHomePage() {
 
           <a
             href={adminUrl}
-            target="_blank"
-            rel="noopener noreferrer"
             className="whitespace-nowrap py-2.5 px-5 rounded-xl bg-white border border-[#16823B] hover:bg-[#F4F9F5] text-[#16823B] font-semibold text-xs flex items-center justify-center gap-2 transition-all shrink-0"
           >
             <span>Kelola Sistem Admin</span>

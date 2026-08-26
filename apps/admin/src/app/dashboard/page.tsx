@@ -453,8 +453,6 @@ export default function AdminDashboardPage() {
                       {hasAccess ? (
                         <a
                           href={dash.url}
-                          target="_blank"
-                          rel="noopener noreferrer"
                           className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-[#16823B] hover:bg-[#126B30] text-white font-bold text-xs transition-all shadow-2xs"
                         >
                           <span>Kelola Dashboard</span>

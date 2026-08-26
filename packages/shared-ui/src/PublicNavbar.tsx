@@ -114,8 +114,6 @@ export const PublicNavbar: React.FC<PublicNavbarProps> = ({
             {showAdminLink && (
               <a
                 href={adminUrl}
-                target="_blank"
-                rel="noopener noreferrer"
                 className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-[#16823B] hover:bg-[#126B30] text-white font-semibold text-xs transition-all shadow-xs"
                 title="Buka Admin Pusat"
               >
@@ -183,8 +181,6 @@ export const PublicNavbar: React.FC<PublicNavbarProps> = ({
             {showAdminLink && (
               <a
                 href={adminUrl}
-                target="_blank"
-                rel="noopener noreferrer"
                 className="w-full text-center py-2 rounded-lg bg-[#16823B] hover:bg-[#126B30] text-white font-semibold text-xs flex items-center justify-center gap-2 shadow-xs"
               >
                 <ShieldCheck className="w-4 h-4 text-emerald-200" />
