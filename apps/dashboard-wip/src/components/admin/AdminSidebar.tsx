@@ -15,7 +15,6 @@ export default function AdminSidebar() {
   };
 
   const navItems = [
-    { label: "Review Data (Admin)", href: "/admin/upload", icon: LayoutDashboard },
     { label: "Upload Data Excel", href: "/admin/upload", icon: UploadCloud },
     { label: "Preview Data", href: "/admin/preview", icon: Eye },
   ];
@@ -48,10 +47,10 @@ export default function AdminSidebar() {
           <p className="px-3 text-[10px] font-bold text-[#89938D] uppercase tracking-wider mb-2">Data Management</p>
           {navItems.map((item) => {
             const Icon = item.icon;
-            const isActive = pathname === item.href || pathname.startsWith(`${item.href}/`);
+            const isActive = pathname === item.href || (item.href !== "/admin" && pathname.startsWith(`${item.href}`));
             return (
               <Link
-                key={item.href}
+                key={item.label}
                 href={item.href}
                 onClick={() => setMobileOpen(false)}
                 className={`flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-semibold transition-all ${
