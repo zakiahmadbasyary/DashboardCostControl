@@ -2,11 +2,12 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Shield, Lock, User, AlertCircle, ArrowRight } from "lucide-react";
+import { Lock, User, AlertCircle, ArrowRight, Eye, EyeOff } from "lucide-react";
 
 export default function AdminLoginPage() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const router = useRouter();
@@ -38,34 +39,42 @@ export default function AdminLoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 flex flex-col justify-center items-center px-4 relative overflow-hidden">
+    <div className="min-h-screen bg-[#F7F9F7] flex flex-col justify-center items-center px-4 relative overflow-hidden font-sans selection:bg-[#16823B] selection:text-white">
       {/* Background Decorative Gradients */}
-      <div className="absolute -top-40 -left-40 w-96 h-96 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none"></div>
-      <div className="absolute -bottom-40 -right-40 w-96 h-96 bg-teal-500/10 rounded-full blur-3xl pointer-events-none"></div>
+      <div className="absolute -top-40 -left-40 w-96 h-96 bg-[#16823B]/5 rounded-full blur-3xl pointer-events-none" />
+      <div className="absolute -bottom-40 -right-40 w-96 h-96 bg-[#A8D437]/10 rounded-full blur-3xl pointer-events-none" />
 
-      <div className="w-full max-w-md bg-slate-900/60 border border-slate-800 backdrop-blur-xl rounded-3xl p-8 shadow-2xl relative z-10">
+      <div className="w-full max-w-md bg-white border border-[#DDE5DF] rounded-3xl p-8 sm:p-10 shadow-lg shadow-black/5 relative z-10">
+        {/* Logo & Header */}
         <div className="text-center mb-8">
-          <div className="w-14 h-14 bg-gradient-to-tr from-emerald-500 to-teal-400 rounded-2xl flex items-center justify-center text-slate-950 font-bold mx-auto mb-4 shadow-lg shadow-emerald-500/20">
-            <Shield className="w-7 h-7" />
+          <div className="flex justify-center mb-4">
+            <div className="h-12 w-auto flex items-center justify-center">
+              <img
+                src="/logo.png"
+                alt="GGF Logo"
+                className="h-12 max-h-12 w-auto object-contain"
+                style={{ height: "48px", maxHeight: "48px", width: "auto" }}
+              />
+            </div>
           </div>
-          <h1 className="text-2xl font-extrabold text-white tracking-tight">Admin Pusat</h1>
-          <p className="text-xs text-slate-400 mt-1">GGF AgroMetric Platform Single Sign-On</p>
+          <h1 className="text-2xl font-extrabold text-[#17231B] tracking-tight">Admin Pusat</h1>
+          <p className="text-xs text-[#5F6B63] mt-1 font-medium">GGF AgroMetric Platform Single Sign-On</p>
         </div>
 
         {error && (
-          <div className="mb-6 p-4 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 text-xs flex items-center gap-3">
-            <AlertCircle className="w-5 h-5 shrink-0" />
+          <div className="mb-6 p-4 rounded-xl bg-red-50 border border-red-200 text-red-700 text-xs flex items-center gap-3">
+            <AlertCircle className="w-5 h-5 shrink-0 text-red-600" />
             <span>{error}</span>
           </div>
         )}
 
         <form onSubmit={handleLogin} suppressHydrationWarning className="space-y-5">
           <div>
-            <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-2">
+            <label className="block text-xs font-semibold text-[#2C3830] uppercase tracking-wider mb-2">
               Username Admin
             </label>
             <div className="relative">
-              <User className="w-5 h-5 absolute left-3.5 top-3.5 text-slate-500" />
+              <User className="w-5 h-5 absolute left-3.5 top-3.5 text-[#5F6B63]" />
               <input
                 type="text"
                 required
@@ -73,26 +82,38 @@ export default function AdminLoginPage() {
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
                 placeholder="Masukkan username"
-                className="w-full bg-slate-950/80 border border-slate-800 rounded-xl py-3 pl-11 pr-4 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-emerald-500 transition-colors"
+                className="w-full bg-[#F8FAF9] border border-[#DDE5DF] rounded-xl py-3 pl-11 pr-4 text-sm text-[#17231B] placeholder-[#89938D] focus:outline-none focus:border-[#16823B] focus:bg-white focus:ring-2 focus:ring-[#16823B]/10 transition-all font-medium"
               />
             </div>
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-2">
+            <label className="block text-xs font-semibold text-[#2C3830] uppercase tracking-wider mb-2">
               Password
             </label>
             <div className="relative">
-              <Lock className="w-5 h-5 absolute left-3.5 top-3.5 text-slate-500" />
+              <Lock className="w-5 h-5 absolute left-3.5 top-3.5 text-[#5F6B63]" />
               <input
-                type="password"
+                type={showPassword ? "text" : "password"}
                 required
                 suppressHydrationWarning
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="••••••••"
-                className="w-full bg-slate-950/80 border border-slate-800 rounded-xl py-3 pl-11 pr-4 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-emerald-500 transition-colors"
+                className="w-full bg-[#F8FAF9] border border-[#DDE5DF] rounded-xl py-3 pl-11 pr-11 text-sm text-[#17231B] placeholder-[#89938D] focus:outline-none focus:border-[#16823B] focus:bg-white focus:ring-2 focus:ring-[#16823B]/10 transition-all font-medium"
               />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-3.5 top-3.5 text-[#5F6B63] hover:text-[#17231B] transition-colors focus:outline-none"
+                title={showPassword ? "Sembunyikan Password" : "Tampilkan Password"}
+              >
+                {showPassword ? (
+                  <EyeOff className="w-5 h-5" />
+                ) : (
+                  <Eye className="w-5 h-5" />
+                )}
+              </button>
             </div>
           </div>
 
@@ -100,10 +121,10 @@ export default function AdminLoginPage() {
             type="submit"
             disabled={loading}
             suppressHydrationWarning
-            className="w-full py-3.5 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-sm transition-all shadow-lg shadow-emerald-600/25 flex items-center justify-center gap-2 disabled:opacity-50"
+            className="w-full py-3.5 px-4 rounded-xl bg-[#16823B] hover:bg-[#126B30] text-white font-semibold text-sm transition-all shadow-sm shadow-[#16823B]/20 flex items-center justify-center gap-2 disabled:opacity-50 active:scale-[0.99]"
           >
             {loading ? (
-              <span className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+              <span className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
             ) : (
               <>
                 Masuk ke Admin Pusat <ArrowRight className="w-4 h-4" />
@@ -112,9 +133,9 @@ export default function AdminLoginPage() {
           </button>
         </form>
 
-        <div className="mt-8 pt-6 border-t border-slate-800 text-center text-xs text-slate-500">
-          <p>Super Admin default: <code className="text-emerald-400 bg-slate-950 px-2 py-0.5 rounded">admin</code> / <code className="text-emerald-400 bg-slate-950 px-2 py-0.5 rounded">admin123</code></p>
-        </div>
+        <p className="text-center text-[11px] text-[#89938D] mt-8">
+          © 2026 GGF AgroMetric Platform. Enterprise Cost Control.
+        </p>
       </div>
     </div>
   );
