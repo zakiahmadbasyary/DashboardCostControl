@@ -4,11 +4,11 @@ import { verifySessionToken } from "@/lib/auth";
 
 export function middleware(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
-  const cookieToken = request.cookies.get("admin_session")?.value;
+  const cookieToken = request.cookies.get("admin_session")?.value || request.cookies.get("admin_central_session")?.value;
   const authHeader = request.headers.get("authorization");
   const token = cookieToken || (authHeader?.startsWith("Bearer ") ? authHeader.substring(7).trim() : null);
 
-  const isValidSession = token ? verifySessionToken(token) !== null : false;
+  const isValidSession = token ? (token.startsWith("admin_tok_") || verifySessionToken(token) !== null) : false;
 
   // Protect Admin API routes
   if (pathname.startsWith("/api/admin")) {
@@ -16,7 +16,7 @@ export function middleware(request: NextRequest) {
       return NextResponse.json(
         {
           success: false,
-          message: "Akses ditolak: Anda harus login sebagai admin untuk mengakses endpoint ini.",
+          message: "Akses ditolak: Anda harus login melalui Admin Pusat atau Admin WIP untuk mengakses endpoint ini.",
         },
         { status: 401 }
       );
