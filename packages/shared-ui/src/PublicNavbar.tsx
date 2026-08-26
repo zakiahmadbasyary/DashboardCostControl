@@ -23,8 +23,8 @@ export const PublicNavbar: React.FC<PublicNavbarProps> = ({
   const { navItems, portalUrl } = getDashboardNavConfig();
 
   return (
-    <header className="sticky top-0 z-[9999] bg-white border-b border-[#DDE5DF] shadow-sm w-full">
-      <div className="max-w-[95%] mx-auto px-4 sm:px-6 lg:px-8">
+    <header className="sticky top-0 z-50 bg-white border-b border-[#DDE5DF] shadow-sm w-full relative opacity-100">
+      <div className="max-w-[95%] mx-auto px-4 sm:px-6 lg:px-8 bg-white opacity-100">
         <div className="h-20 flex items-center justify-between gap-6">
           
           {/* Brand Logo & Title */}

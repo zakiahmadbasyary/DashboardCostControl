@@ -53,7 +53,7 @@ const CustomTooltip = ({ active, payload, label, onSelectUmur }: CustomTooltipPr
     <div
       onClick={() => onSelectUmur?.(ageNum)}
       title={`Klik untuk filter tabel lokasi pada Umur ${ageNum} Bulan (Semua Wilayah)`}
-      className="translate-x-6 -translate-y-6 bg-white border border-[#DDE5DF] rounded-xl p-3.5 shadow-xl text-xs min-w-[230px] cursor-pointer hover:border-[#16823B] transition-all group pointer-events-auto z-50"
+      className="translate-x-6 -translate-y-6 bg-white border border-[#DDE5DF] rounded-xl p-3.5 shadow-xl text-xs min-w-[230px] cursor-pointer hover:border-[#16823B] transition-all group pointer-events-auto z-20"
     >
       <div className="font-bold text-[#17231B] pb-2 mb-2 border-b border-[#DDE5DF] flex items-center justify-between">
         <span>Umur Tanaman: <strong className="text-[#16823B] font-extrabold text-sm">{label} Bulan</strong></span>
