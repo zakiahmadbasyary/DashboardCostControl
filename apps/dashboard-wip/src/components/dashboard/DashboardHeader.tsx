@@ -22,7 +22,6 @@ export default function DashboardHeader() {
       brandTitle="Dashboard WIP ACC"
       brandSubtitle="Cost Control Dashboard & Data Analysis"
       logoElement={customLogo}
-      showAdminLink={true}
       showPortalLink={true}
     />
   );
