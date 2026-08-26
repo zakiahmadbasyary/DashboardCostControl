@@ -63,6 +63,7 @@ async function main() {
   const superAdmin = await prisma.adminUser.upsert({
     where: { username: "admin" },
     update: {
+      password: hashedPassword,
       role: "SUPER_ADMIN",
       status: "ACTIVE",
     },
@@ -79,7 +80,7 @@ async function main() {
   // 3. Seed Sample Normal Admin (WIP Only)
   const adminWip = await prisma.adminUser.upsert({
     where: { username: "admin_wip" },
-    update: { role: "ADMIN", status: "ACTIVE" },
+    update: { password: hashedPassword, role: "ADMIN", status: "ACTIVE" },
     create: {
       name: "Admin WIP Cost Control",
       username: "admin_wip",
@@ -107,7 +108,7 @@ async function main() {
   // 4. Seed Sample Normal Admin (Dashboard A & B Only)
   const adminOps = await prisma.adminUser.upsert({
     where: { username: "admin_ops" },
-    update: { role: "ADMIN", status: "ACTIVE" },
+    update: { password: hashedPassword, role: "ADMIN", status: "ACTIVE" },
     create: {
       name: "Admin Ops & Logistik",
       username: "admin_ops",

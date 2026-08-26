@@ -630,27 +630,30 @@ Sebelum production, periksa:
 
 | ID | Kategori | Skenario | Status | Catatan |
 |---|---|---|---|---|
-| F-01 | Fungsional | Login Super Admin | | |
-| F-02 | Fungsional | Tampilan Super Admin | | |
-| F-03 | Fungsional | Tampilan Admin | | |
-| F-04 | Fungsional | Tambah Pengguna | | |
-| F-06 | Fungsional | Pengaturan Hak Akses | | |
-| F-08 | Fungsional | Akses Dashboard Diizinkan | | |
-| F-09 | Fungsional | Penolakan Dashboard Tidak Diizinkan | | |
-| F-10 | Fungsional | Review Data | | |
-| F-11 | Fungsional | Upload File Valid | | |
-| F-12 | Fungsional | Upload File Tidak Valid | | |
-| F-13 | Fungsional | Activity Log | | |
-| F-14 | Fungsional | Logout | | |
-| S-01 | Keamanan | Akses Tanpa Login | | |
-| S-02 | Keamanan | Bypass URL | | |
-| S-03 | Keamanan | Proteksi API | | |
-| S-04 | Keamanan | Manipulasi Identitas/Akses | | |
-| S-05 | Keamanan | Session Setelah Logout | | |
-| S-07 | Keamanan | Validasi Upload | | |
-| S-08 | Keamanan | Validasi Input | | |
-| S-09 | Keamanan | Information Disclosure | | |
-| S-10 | Keamanan | Role Tidak Dipercaya dari Frontend | | |
+| F-01 | Fungsional | Login Super Admin | PASS | Login berhasil dengan kredensial Super Admin `admin` & cookie `admin_central_session` diset. |
+| F-02 | Fungsional | Tampilan Super Admin | PASS | Menampilkan menu Manajemen User, Hak Akses, Audit Log, dan seluruh dashboard platform. |
+| F-03 | Fungsional | Tampilan Admin | PASS | Admin biasa (`admin_wip`) hanya melihat profil, hak akses miliknya, & ditolak dari Manajemen User (403). |
+| F-04 | Fungsional | Tambah Pengguna | PASS | Super Admin dapat menambah user baru dan langsung tercermin di daftar pengguna & database. |
+| F-05 | Fungsional | Validasi Tambah Pengguna | PASS | Menolak input password < 6 karakter atau email/username duplikat dengan respons HTTP 400. |
+| F-06 | Fungsional | Pengaturan Hak Akses | PASS | Pemetaan `UserDashboardAccess` tersimpan dengan benar di Prisma database. |
+| F-07 | Fungsional | Perubahan Hak Akses | PASS | Perubahan hak akses tersimpan & diverifikasi via `/api/auth/verify?token=...`. |
+| F-08 | Fungsional | Akses Dashboard Diizinkan | PASS | Token verifikasi mengembalikan `authenticated: true` & `allowedDashboards` yang sesuai. |
+| F-09 | Fungsional | Penolakan Dashboard Tidak Diizinkan | PASS | Middleware `dashboard-wip` me-rewrite ke `/403` jika user tidak memiliki akses `wip`. |
+| F-10 | Fungsional | Review Data | PASS | Data lokasi, sbt, & aktivitas dimuat dari API operasional dashboard. |
+| F-11 | Fungsional | Upload File Valid | PASS | File Excel `.xlsx` valid diproses oleh parser XLSX dan tersimpan di storage lokal. |
+| F-12 | Fungsional | Upload File Tidak Valid | PASS | Menolak file dengan ekstensi atau header kolom tidak sesuai aturan parser. |
+| F-13 | Fungsional | Activity Log | PASS | Setiap aksi login, user update, & reset log tercatat rapi di `AdminActivityLog` tanpa mencatat password. |
+| F-14 | Fungsional | Logout | PASS | POST `/api/auth/logout` menghapus session token dari DB & mereset cookie di browser. |
+| S-01 | Keamanan | Akses Tanpa Login | PASS | Seluruh endpoint sensitif (`/api/users`, `/api/logs`) menolak request tanpa token (401/403). |
+| S-02 | Keamanan | Bypass URL | PASS | Server-side API & Next.js Middleware menolak request tanpa otorisasi terlepas dari manipulasi URL. |
+| S-03 | Keamanan | Proteksi API | PASS | Endpoint `/api/users` & `DELETE /api/logs` mengembalikan HTTP 403 Forbidden untuk role ADMIN biasa. |
+| S-04 | Keamanan | Manipulasi Identitas/Akses | PASS | Server mengidentifikasi user strictly dari token sesi di database, bukan dari parameter client. |
+| S-05 | Keamanan | Session Setelah Logout | PASS | Session token dihapus secara permanen di database saat logout, request berikutnya ditolak. |
+| S-06 | Keamanan | Session Kedaluwarsa | PASS | Session dengan `expiresAt < now()` ditolak oleh `/api/auth/verify` & API routes. |
+| S-07 | Keamanan | Validasi Upload | PASS | Parsing & skema file divalidasi penuh di server-side (Node.js/Next.js). |
+| S-08 | Keamanan | Validasi Input | PASS | Divalidasi di server (`bcrypt.hash` min 6 char, trim string, email lowercase). |
+| S-09 | Keamanan | Information Disclosure | PASS | Response error tidak mengekspos connection string, password hash, atau token secret. |
+| S-10 | Keamanan | Role Tidak Dipercaya dari Frontend | PASS | Otorisasi selalu diperiksa di level server (Prisma DB check + token cookie). |
 
 ---
 
