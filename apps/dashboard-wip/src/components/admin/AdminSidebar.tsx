@@ -10,8 +10,10 @@ export default function AdminSidebar() {
   const router = useRouter();
   const [mobileOpen, setMobileOpen] = useState(false);
 
+  const adminBaseUrl = process.env.NEXT_PUBLIC_ADMIN_URL || "http://localhost:3005";
+
   const handleLogout = async () => {
-    window.location.href = "http://localhost:3001/login";
+    window.location.href = `${adminBaseUrl}/login`;
   };
 
   const navItems = [
@@ -70,7 +72,7 @@ export default function AdminSidebar() {
       {/* Footer / Actions */}
       <div className="p-4 border-t border-[#DDE5DF] space-y-2">
         <a
-          href="http://localhost:3001/dashboard"
+          href={`${adminBaseUrl}/dashboard`}
           className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-semibold text-[#16823B] bg-[#EAF3EC] hover:bg-[#D5E7DA] transition-colors"
         >
           <Shield className="w-4 h-4 text-[#16823B]" />

@@ -4,6 +4,8 @@ import Link from "next/link";
 import { ShieldAlert, ArrowLeft, Lock } from "lucide-react";
 
 export default function ForbiddenPage() {
+  const adminBaseUrl = process.env.NEXT_PUBLIC_ADMIN_URL || "http://localhost:3005";
+
   return (
     <div className="min-h-screen bg-[#F7F9F7] text-[#17231B] flex flex-col items-center justify-center p-6 font-sans">
       <div className="max-w-md w-full bg-white border border-[#DDE5DF] rounded-3xl p-8 shadow-xl text-center space-y-6">
@@ -30,7 +32,7 @@ export default function ForbiddenPage() {
 
         <div className="pt-2 flex flex-col gap-2">
           <a
-            href="http://localhost:3001/dashboard"
+            href={`${adminBaseUrl}/dashboard`}
             className="w-full py-3 rounded-xl bg-[#16823B] hover:bg-[#126B30] text-white font-bold text-xs transition-all shadow-md flex items-center justify-center gap-2"
           >
             <ArrowLeft className="w-4 h-4" />

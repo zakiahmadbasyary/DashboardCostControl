@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { PublicNavbar } from "@dashboard/shared-ui";
+import { PublicNavbar, getDashboardNavConfig } from "@dashboard/shared-ui";
 import {
   LineChart,
   BarChart3,
@@ -13,6 +13,8 @@ import {
 } from "lucide-react";
 
 export default function PortalHomePage() {
+  const { wipAccUrl, wipPg1Url, hppPg1Url, hppM3Url, adminUrl } = getDashboardNavConfig();
+
   const publicDashboards = [
     {
       id: "wip-acc",
@@ -20,7 +22,7 @@ export default function PortalHomePage() {
       subtitle: "Cost Control",
       description:
         "Monitoring Work in Process (WIP) costs untuk wilayah ACC. Melacak pengeluaran operasional harian dan efisiensi.",
-      url: process.env.NEXT_PUBLIC_WIP_URL || "http://localhost:3000",
+      url: wipAccUrl,
       icon: LineChart,
     },
     {
@@ -29,7 +31,7 @@ export default function PortalHomePage() {
       subtitle: "Operasional",
       description:
         "Analisis detail Work in Process untuk operasional PG1. Dilengkapi analisis varians dan pelacakan anggaran.",
-      url: process.env.NEXT_PUBLIC_DASHBOARD_A_URL || "http://localhost:3002",
+      url: wipPg1Url,
       icon: BarChart3,
     },
     {
@@ -38,7 +40,7 @@ export default function PortalHomePage() {
       subtitle: "Inventaris & Logistik",
       description:
         "Pelacakan Harga Pokok Produksi (HPP) untuk PG1. Evaluasi biaya produksi akhir dengan standar historis.",
-      url: process.env.NEXT_PUBLIC_DASHBOARD_B_URL || "http://localhost:3003",
+      url: hppPg1Url,
       icon: Banknote,
     },
     {
@@ -47,12 +49,10 @@ export default function PortalHomePage() {
       subtitle: "Audit Finansial",
       description:
         "Analisis Harga Pokok Produksi fasilitas M3. Fokus pada hasil material dan distribusi biaya tenaga kerja.",
-      url: process.env.NEXT_PUBLIC_DASHBOARD_C_URL || "http://localhost:3004",
+      url: hppM3Url,
       icon: Landmark,
     },
   ];
-
-  const adminUrl = process.env.NEXT_PUBLIC_ADMIN_URL || "http://localhost:3001";
 
   return (
     <div className="min-h-screen bg-[#F7F9F7] text-[#17231B] flex flex-col justify-between font-sans selection:bg-[#16823B] selection:text-white">
@@ -156,10 +156,10 @@ export default function PortalHomePage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4">
           <p>© 2026 GGF AgroMetric Platform. Enterprise Cost Control Portal.</p>
           <div className="flex flex-wrap justify-center gap-6 font-medium text-[#17231B]">
-            <a href={process.env.NEXT_PUBLIC_WIP_URL || "http://localhost:3000"} className="hover:text-[#16823B]">WIP ACC</a>
-            <a href={process.env.NEXT_PUBLIC_DASHBOARD_A_URL || "http://localhost:3002"} className="hover:text-[#16823B]">WIP PG1</a>
-            <a href={process.env.NEXT_PUBLIC_DASHBOARD_B_URL || "http://localhost:3003"} className="hover:text-[#16823B]">HPP PG1</a>
-            <a href={process.env.NEXT_PUBLIC_DASHBOARD_C_URL || "http://localhost:3004"} className="hover:text-[#16823B]">HPP M3</a>
+            <a href={wipAccUrl} className="hover:text-[#16823B]">WIP ACC</a>
+            <a href={wipPg1Url} className="hover:text-[#16823B]">WIP PG1</a>
+            <a href={hppPg1Url} className="hover:text-[#16823B]">HPP PG1</a>
+            <a href={hppM3Url} className="hover:text-[#16823B]">HPP M3</a>
             <a href={adminUrl} className="hover:text-[#16823B]">Admin Pusat</a>
           </div>
         </div>

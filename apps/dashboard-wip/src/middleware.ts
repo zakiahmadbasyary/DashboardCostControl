@@ -10,6 +10,8 @@ export async function middleware(request: NextRequest) {
   const token =
     cookieToken || (authHeader?.startsWith("Bearer ") ? authHeader.substring(7).trim() : null);
 
+  const adminBaseUrl = process.env.NEXT_PUBLIC_ADMIN_URL || "http://localhost:3005";
+
   // If no token at all, redirect UI requests to Central Admin login
   if (!token) {
     if (pathname.startsWith("/api/admin")) {
@@ -22,13 +24,12 @@ export async function middleware(request: NextRequest) {
       );
     }
 
-    const centralLoginUrl = new URL("http://localhost:3001/login");
-    return NextResponse.redirect(centralLoginUrl);
+    return NextResponse.redirect(new URL(`${adminBaseUrl}/login`));
   }
 
   try {
     // Verify token with Admin Pusat Central Auth API
-    const verifyRes = await fetch(`http://localhost:3001/api/auth/verify?token=${token}`, {
+    const verifyRes = await fetch(`${adminBaseUrl}/api/auth/verify?token=${token}`, {
       headers: { "Cache-Control": "no-cache" },
     });
 
@@ -36,7 +37,7 @@ export async function middleware(request: NextRequest) {
       if (pathname.startsWith("/api/admin")) {
         return NextResponse.json({ success: false, error: "Session tidak valid" }, { status: 401 });
       }
-      return NextResponse.redirect(new URL("http://localhost:3001/login"));
+      return NextResponse.redirect(new URL(`${adminBaseUrl}/login`));
     }
 
     const data = await verifyRes.json();
@@ -44,7 +45,7 @@ export async function middleware(request: NextRequest) {
       if (pathname.startsWith("/api/admin")) {
         return NextResponse.json({ success: false, error: "Sesi telah berakhir" }, { status: 401 });
       }
-      return NextResponse.redirect(new URL("http://localhost:3001/login"));
+      return NextResponse.redirect(new URL(`${adminBaseUrl}/login`));
     }
 
     const user = data.user;

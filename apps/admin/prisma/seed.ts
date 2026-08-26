@@ -6,34 +6,39 @@ const prisma = new PrismaClient();
 async function main() {
   const hashedPassword = await bcrypt.hash("admin123", 10);
 
+  const wipAccUrl = process.env.NEXT_PUBLIC_WIP_ACC_URL || process.env.NEXT_PUBLIC_WIP_URL || "http://localhost:3001";
+  const wipPg1Url = process.env.NEXT_PUBLIC_WIP_PG1_URL || process.env.NEXT_PUBLIC_DASHBOARD_A_URL || "http://localhost:3002";
+  const hppPg1Url = process.env.NEXT_PUBLIC_HPP_PG1_URL || process.env.NEXT_PUBLIC_DASHBOARD_B_URL || "http://localhost:3003";
+  const hppM3Url = process.env.NEXT_PUBLIC_HPP_M3_URL || process.env.NEXT_PUBLIC_DASHBOARD_C_URL || "http://localhost:3004";
+
   // 1. Seed Master Dashboards
   const dashboards = [
     {
       code: "wip",
       name: "Dashboard WIP (Cost Control)",
-      adminUrl: "http://localhost:3000/admin",
-      publicUrl: "http://localhost:3000",
+      adminUrl: `${wipAccUrl}/admin`,
+      publicUrl: wipAccUrl,
       status: "ACTIVE",
     },
     {
       code: "dashboard_a",
       name: "Dashboard A (Operasional)",
-      adminUrl: "http://localhost:3002/admin",
-      publicUrl: "http://localhost:3002",
+      adminUrl: `${wipPg1Url}/admin`,
+      publicUrl: wipPg1Url,
       status: "DEVELOPMENT",
     },
     {
       code: "dashboard_b",
       name: "Dashboard B (Inventaris)",
-      adminUrl: "http://localhost:3003/admin",
-      publicUrl: "http://localhost:3003",
+      adminUrl: `${hppPg1Url}/admin`,
+      publicUrl: hppPg1Url,
       status: "DEVELOPMENT",
     },
     {
       code: "dashboard_c",
       name: "Dashboard C (Finansial)",
-      adminUrl: "http://localhost:3004/admin",
-      publicUrl: "http://localhost:3004",
+      adminUrl: `${hppM3Url}/admin`,
+      publicUrl: hppM3Url,
       status: "DEVELOPMENT",
     },
   ];
