@@ -1,0 +1,62 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model AdminUser {
+  id        String   @id @default(uuid())
+  username  String   @unique
+  password  String
+  role      String   @default("SUPER_ADMIN") // SUPER_ADMIN, DASHBOARD_ADMIN
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  accessList DashboardAccess[]
+  sessions   AdminSession[]
+  logs       AdminActivityLog[]
+
+  @@map("admin_users")
+}
+
+model DashboardAccess {
+  id           String   @id @default(uuid())
+  userId       String
+  dashboardKey String // "wip", "dashboard_a", "dashboard_b", "dashboard_c"
+  accessLevel  String   @default("FULL") // "READ_ONLY", "FULL", "NONE"
+  grantedAt    DateTime @default(now())
+
+  user AdminUser @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, dashboardKey])
+  @@map("admin_dashboard_access")
+}
+
+model AdminSession {
+  id        String   @id @default(uuid())
+  token     String   @unique
+  userId    String
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  user AdminUser @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("admin_sessions")
+}
+
+model AdminActivityLog {
+  id              String   @id @default(uuid())
+  userId          String
+  action          String
+  targetDashboard String?
+  description     String?
+  createdAt       DateTime @default(now())
+
+  user AdminUser @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("admin_activity_logs")
+}
