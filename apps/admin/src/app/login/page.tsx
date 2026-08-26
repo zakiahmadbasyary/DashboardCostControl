@@ -104,6 +104,7 @@ export default function AdminLoginPage() {
               />
               <button
                 type="button"
+                suppressHydrationWarning
                 onClick={() => setShowPassword(!showPassword)}
                 className="absolute right-3.5 top-3.5 text-[#5F6B63] hover:text-[#17231B] transition-colors focus:outline-none"
                 title={showPassword ? "Sembunyikan Password" : "Tampilkan Password"}

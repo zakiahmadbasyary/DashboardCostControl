@@ -19,7 +19,6 @@ import {
   CheckCircle2,
   AlertCircle,
   X,
-  KeyRound,
 } from "lucide-react";
 
 interface AdminUser {
@@ -121,7 +120,7 @@ export default function AdminDashboardPage() {
   const fetchLogs = useCallback(async () => {
     setLoadingLogs(true);
     try {
-      const res = await fetch("/api/logs");
+      const res = await fetch("/api/activity-logs");
       if (res.ok) {
         const data = await res.json();
         setLogsList(data.logs || []);
@@ -134,16 +133,22 @@ export default function AdminDashboardPage() {
   }, []);
 
   useEffect(() => {
-    if (activeTab === "users" && currentUser?.role === "SUPER_ADMIN") {
+    if (!currentUser) return;
+    if (activeTab === "users" && currentUser.role === "SUPER_ADMIN") {
       fetchUsers();
     } else if (activeTab === "logs") {
       fetchLogs();
     }
-  }, [activeTab, currentUser?.role, fetchUsers, fetchLogs]);
+  }, [activeTab, currentUser, fetchUsers, fetchLogs]);
 
   const handleLogout = async () => {
-    await fetch("/api/auth/logout", { method: "POST" });
-    router.push("/login");
+    try {
+      await fetch("/api/auth/logout", { method: "POST" });
+    } catch (e) {
+      console.error(e);
+    } finally {
+      window.location.href = "/login";
+    }
   };
 
   const handleOpenAddModal = () => {
@@ -155,24 +160,22 @@ export default function AdminDashboardPage() {
       password: "",
       role: "ADMIN",
       status: "ACTIVE",
-      dashboardCodes: ["wip"],
+      dashboardCodes: [],
     });
     setModalError("");
     setIsModalOpen(true);
   };
 
-  const handleOpenEditModal = (user: AdminUser) => {
-    setEditingUser(user);
+  const handleOpenEditModal = (userToEdit: AdminUser) => {
+    setEditingUser(userToEdit);
     setFormData({
-      name: user.name,
-      username: user.username,
-      email: user.email,
+      name: userToEdit.name,
+      username: userToEdit.username,
+      email: userToEdit.email,
       password: "",
-      role: user.role,
-      status: user.status,
-      dashboardCodes: user.allowedDashboards.includes("ALL")
-        ? ["wip", "dashboard_a", "dashboard_b", "dashboard_c"]
-        : user.allowedDashboards,
+      role: userToEdit.role,
+      status: userToEdit.status,
+      dashboardCodes: userToEdit.allowedDashboards || [],
     });
     setModalError("");
     setIsModalOpen(true);
@@ -184,12 +187,21 @@ export default function AdminDashboardPage() {
     setSubmitting(true);
 
     try {
-      const isEdit = Boolean(editingUser);
-      const url = "/api/users";
-      const method = isEdit ? "PUT" : "POST";
-      const payload = isEdit
-        ? { id: editingUser?.id, ...formData, newPassword: formData.password }
-        : formData;
+      const url = editingUser ? `/api/users/${editingUser.id}` : "/api/users";
+      const method = editingUser ? "PUT" : "POST";
+
+      const payload: any = {
+        name: formData.name,
+        username: formData.username,
+        email: formData.email,
+        role: formData.role,
+        status: formData.status,
+        dashboardCodes: formData.role === "SUPER_ADMIN" ? [] : formData.dashboardCodes,
+      };
+
+      if (formData.password) {
+        payload.password = formData.password;
+      }
 
       const res = await fetch(url, {
         method,
@@ -198,6 +210,7 @@ export default function AdminDashboardPage() {
       });
 
       const data = await res.json();
+
       if (!res.ok) {
         throw new Error(data.error || "Gagal menyimpan data user");
       }
@@ -225,9 +238,9 @@ export default function AdminDashboardPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-slate-950 flex items-center justify-center text-slate-400">
+      <div className="min-h-screen bg-[#F7F9F7] flex items-center justify-center text-[#5F6B63]">
         <div className="flex flex-col items-center gap-3">
-          <div className="w-8 h-8 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin"></div>
+          <div className="w-8 h-8 border-4 border-[#16823B] border-t-transparent rounded-full animate-spin"></div>
           <span className="text-xs font-semibold">Memverifikasi sesi Admin Pusat...</span>
         </div>
       </div>
@@ -239,32 +252,28 @@ export default function AdminDashboardPage() {
       code: "wip",
       name: "Dashboard WIP (Cost Control)",
       desc: "Manajemen data lokasi, sbt, aktivitas, dan upload excel cost control",
-      url: "http://localhost:3000/admin",
-      color: "from-emerald-500/20 to-teal-500/10 border-emerald-500/30",
+      url: process.env.NEXT_PUBLIC_WIP_URL ? `${process.env.NEXT_PUBLIC_WIP_URL}/admin` : "http://localhost:3000/admin",
       icon: Activity,
     },
     {
       code: "dashboard_a",
       name: "Dashboard A (Operasional)",
       desc: "Manajemen operasional & performa produksi wilayah A",
-      url: "http://localhost:3002/admin",
-      color: "from-blue-500/20 to-indigo-500/10 border-blue-500/30",
+      url: process.env.NEXT_PUBLIC_DASHBOARD_A_URL ? `${process.env.NEXT_PUBLIC_DASHBOARD_A_URL}/admin` : "http://localhost:3002/admin",
       icon: Layers,
     },
     {
       code: "dashboard_b",
       name: "Dashboard B (Inventaris)",
       desc: "Manajemen logistik & pergerakan inventaris sarana produksi",
-      url: "http://localhost:3003/admin",
-      color: "from-purple-500/20 to-pink-500/10 border-purple-500/30",
+      url: process.env.NEXT_PUBLIC_DASHBOARD_B_URL ? `${process.env.NEXT_PUBLIC_DASHBOARD_B_URL}/admin` : "http://localhost:3003/admin",
       icon: Database,
     },
     {
       code: "dashboard_c",
       name: "Dashboard C (Finansial)",
       desc: "Audit finansial terpadu & laporan eksekutif",
-      url: "http://localhost:3004/admin",
-      color: "from-amber-500/20 to-orange-500/10 border-amber-500/30",
+      url: process.env.NEXT_PUBLIC_DASHBOARD_C_URL ? `${process.env.NEXT_PUBLIC_DASHBOARD_C_URL}/admin` : "http://localhost:3004/admin",
       icon: Shield,
     },
   ];
@@ -272,34 +281,41 @@ export default function AdminDashboardPage() {
   const isSuperAdmin = currentUser?.role === "SUPER_ADMIN";
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col font-sans">
-      {/* Header Bar */}
-      <header className="border-b border-slate-800 bg-slate-900/80 backdrop-blur-md sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-emerald-500 to-teal-400 flex items-center justify-center text-slate-950 shadow-lg shadow-emerald-500/20 font-bold">
-              <Shield className="w-5 h-5" />
+    <div className="min-h-screen bg-[#F7F9F7] text-[#17231B] flex flex-col font-sans selection:bg-[#16823B] selection:text-white">
+      {/* Header Bar with Logo */}
+      <header className="border-b border-[#DDE5DF] bg-white sticky top-0 z-50 shadow-2xs">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3.5 flex items-center justify-between gap-4">
+          {/* Logo & Title */}
+          <a href="/dashboard" className="flex items-center gap-3 shrink-0 py-1 group">
+            <div className="h-9 w-auto flex items-center shrink-0">
+              <img
+                src="/logo.png"
+                alt="GGF Logo"
+                className="h-9 max-h-9 w-auto object-contain"
+                style={{ height: "36px", maxHeight: "36px", width: "auto" }}
+              />
             </div>
             <div>
-              <h1 className="font-extrabold text-lg leading-none text-white tracking-tight">
+              <h1 className="font-extrabold text-base sm:text-lg leading-none text-[#17231B] tracking-tight group-hover:text-[#16823B] transition-colors">
                 Admin Pusat
               </h1>
-              <span className="text-[11px] text-slate-400 font-medium">
-                GGF AgroMetric Multi-Dashboard Governance
+              <span className="text-[10px] sm:text-xs text-[#5F6B63] font-medium hidden sm:block mt-0.5">
+                GGF AgroMetric Platform Governance
               </span>
             </div>
-          </div>
+          </a>
 
-          <div className="flex items-center gap-4">
+          {/* User Info & Logout */}
+          <div className="flex items-center gap-3">
             <div className="text-right hidden sm:block">
-              <div className="text-xs font-bold text-slate-200">{currentUser?.name}</div>
+              <div className="text-xs font-bold text-[#17231B]">{currentUser?.name}</div>
               <div className="flex items-center justify-end gap-1.5 mt-0.5">
-                <span className="text-[10px] text-slate-400">@{currentUser?.username}</span>
+                <span className="text-[10px] text-[#5F6B63]">@{currentUser?.username}</span>
                 <span
                   className={`text-[9px] px-2 py-0.5 rounded font-extrabold uppercase border ${
                     isSuperAdmin
-                      ? "bg-emerald-500/20 text-emerald-400 border-emerald-500/30"
-                      : "bg-blue-500/20 text-blue-400 border-blue-500/30"
+                      ? "bg-[#EAF3EC] text-[#16823B] border-[#CBE0D1]"
+                      : "bg-blue-50 text-blue-700 border-blue-200"
                   }`}
                 >
                   {currentUser?.role}
@@ -309,7 +325,7 @@ export default function AdminDashboardPage() {
 
             <button
               onClick={handleLogout}
-              className="p-2.5 rounded-xl bg-slate-800 hover:bg-red-500/20 hover:text-red-400 text-slate-400 transition-all border border-slate-700 flex items-center gap-2 text-xs font-semibold"
+              className="p-2 sm:px-3 sm:py-2 rounded-lg bg-[#F8FAF9] hover:bg-red-50 hover:text-red-600 hover:border-red-200 text-[#2C3830] transition-all border border-[#DDE5DF] flex items-center gap-1.5 text-xs font-semibold"
               title="Logout dari Admin Pusat"
             >
               <LogOut className="w-4 h-4" />
@@ -320,26 +336,26 @@ export default function AdminDashboardPage() {
       </header>
 
       {/* Main Content Area */}
-      <main className="max-w-7xl mx-auto px-6 py-8 flex-1 w-full space-y-8">
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-1 w-full space-y-6">
         {/* Banner Section */}
-        <div className="bg-gradient-to-r from-slate-900 via-slate-900 to-emerald-950/40 border border-slate-800 rounded-3xl p-6 sm:p-8 shadow-xl flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+        <div className="bg-white border border-[#DDE5DF] border-l-4 border-l-[#16823B] rounded-2xl p-6 sm:p-8 shadow-2xs flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
           <div className="space-y-2">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-semibold">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#EAF3EC] border border-[#CBE0D1] text-[#16823B] text-xs font-semibold">
               <CheckCircle2 className="w-3.5 h-3.5" />
               <span>Satu Akun Single Sign-On (SSO) Terpusat</span>
             </div>
-            <h2 className="text-2xl sm:text-3xl font-extrabold text-white">
-              Selamat Datang, <span className="text-emerald-400">{currentUser?.name}</span>
+            <h2 className="text-2xl sm:text-3xl font-extrabold text-[#17231B] tracking-tight">
+              Selamat Datang, <span className="text-[#16823B]">{currentUser?.name}</span>
             </h2>
-            <p className="text-slate-400 text-xs sm:text-sm max-w-2xl leading-relaxed">
-              Anda terautentikasi sebagai <strong className="text-slate-200">{currentUser?.role}</strong>. Seluruh identitas administrator dikelola secara terpusat dari Admin Pusat.
+            <p className="text-[#5F6B63] text-xs sm:text-sm max-w-2xl leading-relaxed">
+              Anda terautentikasi sebagai <strong className="text-[#17231B]">{currentUser?.role}</strong>. Seluruh identitas administrator dikelola secara terpusat dari Admin Pusat.
             </p>
           </div>
 
-          <div className="flex items-center gap-3 bg-slate-950/60 p-3 rounded-2xl border border-slate-800 shrink-0">
+          <div className="flex items-center gap-3 bg-[#F8FAF9] p-3.5 rounded-xl border border-[#DDE5DF] shrink-0">
             <div className="text-right text-xs">
-              <div className="text-slate-400">Akses Terdaftar</div>
-              <div className="font-bold text-emerald-400">
+              <div className="text-[#5F6B63] font-medium">Akses Terdaftar</div>
+              <div className="font-bold text-[#16823B]">
                 {isSuperAdmin ? "Seluruh Dashboard (Super)" : `${currentUser?.allowedDashboards.length} Dashboard`}
               </div>
             </div>
@@ -347,13 +363,13 @@ export default function AdminDashboardPage() {
         </div>
 
         {/* Tab Navigation */}
-        <div className="flex items-center gap-3 border-b border-slate-800 pb-4">
+        <div className="flex flex-wrap items-center gap-2 border-b border-[#DDE5DF] pb-4">
           <button
             onClick={() => setActiveTab("dashboards")}
-            className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition-all ${
+            className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all ${
               activeTab === "dashboards"
-                ? "bg-emerald-500 text-slate-950 shadow-lg shadow-emerald-500/20"
-                : "bg-slate-900 hover:bg-slate-800 text-slate-400 hover:text-slate-200 border border-slate-800"
+                ? "bg-[#16823B] text-white shadow-2xs"
+                : "bg-white hover:bg-[#F8FAF9] text-[#5F6B63] hover:text-[#17231B] border border-[#DDE5DF]"
             }`}
           >
             <Layers className="w-4 h-4" />
@@ -363,10 +379,10 @@ export default function AdminDashboardPage() {
           {isSuperAdmin && (
             <button
               onClick={() => setActiveTab("users")}
-              className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition-all ${
+              className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all ${
                 activeTab === "users"
-                  ? "bg-emerald-500 text-slate-950 shadow-lg shadow-emerald-500/20"
-                  : "bg-slate-900 hover:bg-slate-800 text-slate-400 hover:text-slate-200 border border-slate-800"
+                  ? "bg-[#16823B] text-white shadow-2xs"
+                  : "bg-white hover:bg-[#F8FAF9] text-[#5F6B63] hover:text-[#17231B] border border-[#DDE5DF]"
               }`}
             >
               <Users className="w-4 h-4" />
@@ -376,10 +392,10 @@ export default function AdminDashboardPage() {
 
           <button
             onClick={() => setActiveTab("logs")}
-            className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition-all ${
+            className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all ${
               activeTab === "logs"
-                ? "bg-emerald-500 text-slate-950 shadow-lg shadow-emerald-500/20"
-                : "bg-slate-900 hover:bg-slate-800 text-slate-400 hover:text-slate-200 border border-slate-800"
+                ? "bg-[#16823B] text-white shadow-2xs"
+                : "bg-white hover:bg-[#F8FAF9] text-[#5F6B63] hover:text-[#17231B] border border-[#DDE5DF]"
             }`}
           >
             <Clock className="w-4 h-4" />
@@ -390,13 +406,11 @@ export default function AdminDashboardPage() {
         {/* TAB 1: DASHBOARD SAYA */}
         {activeTab === "dashboards" && (
           <div className="space-y-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <h3 className="text-lg font-bold text-white">Daftar Dashboard Platform</h3>
-                <p className="text-slate-400 text-xs mt-0.5">
-                  Klik "Kelola Dashboard" untuk membuka halaman administrasi masing-masing dashboard tanpa perlu login ulang.
-                </p>
-              </div>
+            <div>
+              <h3 className="text-lg font-bold text-[#17231B]">Daftar Dashboard Platform</h3>
+              <p className="text-[#5F6B63] text-xs mt-0.5">
+                Klik "Kelola Dashboard" untuk membuka halaman administrasi masing-masing dashboard tanpa perlu login ulang.
+              </p>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -408,47 +422,47 @@ export default function AdminDashboardPage() {
                 return (
                   <div
                     key={dash.code}
-                    className={`bg-gradient-to-br ${dash.color} bg-slate-900/60 border rounded-2xl p-6 flex flex-col justify-between shadow-lg relative overflow-hidden transition-all ${
-                      !hasAccess ? "opacity-60 border-slate-800" : "hover:border-emerald-500/50"
+                    className={`bg-white border border-[#DDE5DF] rounded-2xl p-6 flex flex-col justify-between shadow-2xs transition-all ${
+                      !hasAccess ? "opacity-60 bg-gray-50" : "hover:shadow-md hover:border-[#CBE0D1]"
                     }`}
                   >
                     <div>
                       <div className="flex items-center justify-between mb-4">
-                        <div className="w-10 h-10 rounded-xl bg-slate-800 border border-slate-700 flex items-center justify-center text-emerald-400">
+                        <div className="w-10 h-10 rounded-xl bg-[#EAF3EC] border border-[#CBE0D1] flex items-center justify-center text-[#16823B]">
                           <IconComponent className="w-5 h-5" />
                         </div>
                         <span
                           className={`text-[11px] font-bold px-3 py-1 rounded-full border ${
                             hasAccess
-                              ? "bg-emerald-500/20 text-emerald-400 border-emerald-500/30"
-                              : "bg-red-500/20 text-red-400 border-red-500/30"
+                              ? "bg-[#EAF3EC] text-[#16823B] border-[#CBE0D1]"
+                              : "bg-red-50 text-red-700 border-red-200"
                           }`}
                         >
                           {hasAccess ? "Akses Diizinkan" : "Akses Dibatasi (403)"}
                         </span>
                       </div>
 
-                      <h4 className="text-base sm:text-lg font-extrabold text-slate-100 mb-1">
+                      <h4 className="text-base sm:text-lg font-extrabold text-[#17231B] mb-1">
                         {dash.name}
                       </h4>
-                      <p className="text-slate-400 text-xs leading-relaxed mb-6">{dash.desc}</p>
+                      <p className="text-[#5F6B63] text-xs leading-relaxed mb-6">{dash.desc}</p>
                     </div>
 
-                    <div className="pt-4 border-t border-slate-800 flex items-center justify-between">
-                      <span className="text-[11px] text-slate-500">Database: Terpisah</span>
+                    <div className="pt-4 border-t border-[#EAEFEB] flex items-center justify-between">
+                      <span className="text-[11px] text-[#89938D]">Database: Terpisah</span>
                       {hasAccess ? (
                         <a
                           href={dash.url}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs transition-all shadow-md"
+                          className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-[#16823B] hover:bg-[#126B30] text-white font-bold text-xs transition-all shadow-2xs"
                         >
                           <span>Kelola Dashboard</span>
                           <ExternalLink className="w-3.5 h-3.5" />
                         </a>
                       ) : (
-                        <span className="text-xs text-slate-500 flex items-center gap-1.5 bg-slate-800 px-3 py-1.5 rounded-xl border border-slate-700 font-semibold">
-                          <Lock className="w-3.5 h-3.5 text-red-400" />
+                        <span className="text-xs text-[#89938D] flex items-center gap-1.5 bg-[#F8FAF9] px-3 py-1.5 rounded-xl border border-[#DDE5DF] font-semibold">
+                          <Lock className="w-3.5 h-3.5 text-red-500" />
                           <span>Dibatasi Server</span>
                         </span>
                       )}
@@ -465,17 +479,17 @@ export default function AdminDashboardPage() {
           <div className="space-y-6">
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
               <div>
-                <h3 className="text-lg font-bold text-white flex items-center gap-2">
-                  <Users className="w-5 h-5 text-emerald-400" /> Tata Kelola Administrator & Hak Akses
+                <h3 className="text-lg font-bold text-[#17231B] flex items-center gap-2">
+                  <Users className="w-5 h-5 text-[#16823B]" /> Tata Kelola Administrator & Hak Akses
                 </h3>
-                <p className="text-slate-400 text-xs mt-0.5">
+                <p className="text-[#5F6B63] text-xs mt-0.5">
                   Super Admin dapat menambah akun, mengubah role, menonaktifkan akun, dan menentukan dashboard mana yang boleh dikelola oleh Admin biasa.
                 </p>
               </div>
 
               <button
                 onClick={handleOpenAddModal}
-                className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-extrabold text-xs transition-all shadow-lg"
+                className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[#16823B] hover:bg-[#126B30] text-white font-extrabold text-xs transition-all shadow-2xs"
               >
                 <Plus className="w-4 h-4" />
                 <span>Tambah Administrator Baru</span>
@@ -483,14 +497,14 @@ export default function AdminDashboardPage() {
             </div>
 
             {loadingUsers ? (
-              <div className="text-center py-12 text-slate-500 text-xs">
+              <div className="text-center py-12 text-[#5F6B63] text-xs font-medium">
                 Memuat daftar pengguna admin...
               </div>
             ) : (
-              <div className="bg-slate-900/60 border border-slate-800 rounded-2xl overflow-hidden shadow-xl">
+              <div className="bg-white border border-[#DDE5DF] rounded-2xl overflow-hidden shadow-2xs">
                 <div className="overflow-x-auto">
                   <table className="w-full text-left text-xs">
-                    <thead className="bg-slate-950 text-slate-400 uppercase font-semibold border-b border-slate-800">
+                    <thead className="bg-[#F8FAF9] text-[#5F6B63] uppercase font-semibold border-b border-[#DDE5DF]">
                       <tr>
                         <th className="px-6 py-4">Nama & Username</th>
                         <th className="px-6 py-4">Email</th>
@@ -500,24 +514,24 @@ export default function AdminDashboardPage() {
                         <th className="px-6 py-4 text-right">Aksi</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-slate-800/80 text-slate-200">
+                    <tbody className="divide-y divide-[#EAEFEB] text-[#17231B]">
                       {usersList.map((u) => {
                         const isSuper = u.role === "SUPER_ADMIN";
                         const isActive = u.status === "ACTIVE";
 
                         return (
-                          <tr key={u.id} className="hover:bg-slate-800/40 transition-colors">
+                          <tr key={u.id} className="hover:bg-[#F8FAF9] transition-colors">
                             <td className="px-6 py-4">
-                              <div className="font-bold text-white">{u.name}</div>
-                              <div className="text-[11px] text-slate-400 font-mono">@{u.username}</div>
+                              <div className="font-bold text-[#17231B]">{u.name}</div>
+                              <div className="text-[11px] text-[#5F6B63] font-mono">@{u.username}</div>
                             </td>
-                            <td className="px-6 py-4 text-slate-300">{u.email}</td>
+                            <td className="px-6 py-4 text-[#2C3830]">{u.email}</td>
                             <td className="px-6 py-4">
                               <span
                                 className={`px-2.5 py-1 rounded font-extrabold text-[10px] uppercase border ${
                                   isSuper
-                                    ? "bg-emerald-500/20 text-emerald-400 border-emerald-500/30"
-                                    : "bg-blue-500/20 text-blue-400 border-blue-500/30"
+                                    ? "bg-[#EAF3EC] text-[#16823B] border-[#CBE0D1]"
+                                    : "bg-blue-50 text-blue-700 border-blue-200"
                                 }`}
                               >
                                 {u.role}
@@ -527,8 +541,8 @@ export default function AdminDashboardPage() {
                               <span
                                 className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold border ${
                                   isActive
-                                    ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
-                                    : "bg-red-500/10 text-red-400 border-red-500/20"
+                                    ? "bg-[#EAF3EC] text-[#16823B] border-[#CBE0D1]"
+                                    : "bg-red-50 text-red-700 border-red-200"
                                 }`}
                               >
                                 {isActive ? <UserCheck className="w-3 h-3" /> : <UserX className="w-3 h-3" />}
@@ -537,18 +551,18 @@ export default function AdminDashboardPage() {
                             </td>
                             <td className="px-6 py-4">
                               {isSuper ? (
-                                <span className="text-[11px] font-bold text-emerald-400">
+                                <span className="text-[11px] font-bold text-[#16823B]">
                                   Semua Dashboard (Akses Penuh)
                                 </span>
                               ) : (
                                 <div className="flex flex-wrap gap-1">
                                   {u.allowedDashboards.length === 0 ? (
-                                    <span className="text-slate-500 italic">Tidak ada akses</span>
+                                    <span className="text-[#89938D] italic">Tidak ada akses</span>
                                   ) : (
                                     u.allowedDashboards.map((code) => (
                                       <span
                                         key={code}
-                                        className="text-[10px] bg-slate-800 text-slate-300 px-2 py-0.5 rounded border border-slate-700 font-mono uppercase"
+                                        className="text-[10px] bg-[#F8FAF9] text-[#2C3830] px-2 py-0.5 rounded border border-[#DDE5DF] font-mono uppercase"
                                       >
                                         {code}
                                       </span>
@@ -560,9 +574,9 @@ export default function AdminDashboardPage() {
                             <td className="px-6 py-4 text-right">
                               <button
                                 onClick={() => handleOpenEditModal(u)}
-                                className="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 font-semibold text-xs transition-colors border border-slate-700 inline-flex items-center gap-1.5"
+                                className="px-3 py-1.5 rounded-lg bg-white hover:bg-[#F8FAF9] text-[#2C3830] font-semibold text-xs transition-colors border border-[#DDE5DF] inline-flex items-center gap-1.5"
                               >
-                                <Edit className="w-3.5 h-3.5" />
+                                <Edit className="w-3.5 h-3.5 text-[#5F6B63]" />
                                 <span>Edit</span>
                               </button>
                             </td>
@@ -581,23 +595,23 @@ export default function AdminDashboardPage() {
         {activeTab === "logs" && (
           <div className="space-y-6">
             <div>
-              <h3 className="text-lg font-bold text-white flex items-center gap-2">
-                <Clock className="w-5 h-5 text-emerald-400" /> Log Aktivitas Terpusat
+              <h3 className="text-lg font-bold text-[#17231B] flex items-center gap-2">
+                <Clock className="w-5 h-5 text-[#16823B]" /> Log Aktivitas Terpusat
               </h3>
-              <p className="text-slate-400 text-xs mt-0.5">
+              <p className="text-[#5F6B63] text-xs mt-0.5">
                 Riwayat aksi login, logout, pembuatan user, dan perubahan hak akses terpusat.
               </p>
             </div>
 
             {loadingLogs ? (
-              <div className="text-center py-12 text-slate-500 text-xs">
+              <div className="text-center py-12 text-[#5F6B63] text-xs font-medium">
                 Memuat log aktivitas...
               </div>
             ) : (
-              <div className="bg-slate-900/60 border border-slate-800 rounded-2xl overflow-hidden shadow-xl">
+              <div className="bg-white border border-[#DDE5DF] rounded-2xl overflow-hidden shadow-2xs">
                 <div className="overflow-x-auto">
                   <table className="w-full text-left text-xs">
-                    <thead className="bg-slate-950 text-slate-400 uppercase font-semibold border-b border-slate-800">
+                    <thead className="bg-[#F8FAF9] text-[#5F6B63] uppercase font-semibold border-b border-[#DDE5DF]">
                       <tr>
                         <th className="px-6 py-4">Waktu</th>
                         <th className="px-6 py-4">Administrator</th>
@@ -605,22 +619,22 @@ export default function AdminDashboardPage() {
                         <th className="px-6 py-4">Deskripsi Aktivitas</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-slate-800/80 text-slate-300">
+                    <tbody className="divide-y divide-[#EAEFEB] text-[#2C3830]">
                       {logsList.map((log) => (
-                        <tr key={log.id} className="hover:bg-slate-800/40 transition-colors">
-                          <td className="px-6 py-4 text-slate-400 whitespace-nowrap font-mono text-[11px]">
+                        <tr key={log.id} className="hover:bg-[#F8FAF9] transition-colors">
+                          <td className="px-6 py-4 text-[#5F6B63] whitespace-nowrap font-mono text-[11px]">
                             {new Date(log.createdAt).toLocaleString("id-ID")}
                           </td>
                           <td className="px-6 py-4">
-                            <div className="font-bold text-white">{log.user?.name || log.user?.username}</div>
-                            <div className="text-[10px] text-slate-400">@{log.user?.username} ({log.user?.role})</div>
+                            <div className="font-bold text-[#17231B]">{log.user?.name || log.user?.username}</div>
+                            <div className="text-[10px] text-[#5F6B63]">@{log.user?.username} ({log.user?.role})</div>
                           </td>
                           <td className="px-6 py-4">
-                            <span className="px-2 py-0.5 rounded font-mono font-bold text-[10px] bg-slate-800 text-emerald-400 border border-slate-700">
+                            <span className="px-2 py-0.5 rounded font-mono font-bold text-[10px] bg-[#EAF3EC] text-[#16823B] border border-[#CBE0D1]">
                               {log.action}
                             </span>
                           </td>
-                          <td className="px-6 py-4 text-slate-300">{log.description}</td>
+                          <td className="px-6 py-4 text-[#2C3830]">{log.description}</td>
                         </tr>
                       ))}
                     </tbody>
@@ -634,70 +648,70 @@ export default function AdminDashboardPage() {
 
       {/* MODAL USER FORM (ADD / EDIT) */}
       {isModalOpen && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/75 backdrop-blur-xs animate-in fade-in duration-150">
-          <div className="bg-slate-900 border border-slate-800 rounded-3xl max-w-lg w-full p-6 shadow-2xl space-y-6 relative">
-            <div className="flex items-center justify-between border-b border-slate-800 pb-4">
-              <h3 className="text-lg font-bold text-white flex items-center gap-2">
-                <Users className="w-5 h-5 text-emerald-400" />
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/40 backdrop-blur-xs animate-in fade-in duration-150">
+          <div className="bg-white border border-[#DDE5DF] rounded-3xl max-w-lg w-full p-6 shadow-xl space-y-6 relative">
+            <div className="flex items-center justify-between border-b border-[#DDE5DF] pb-4">
+              <h3 className="text-lg font-bold text-[#17231B] flex items-center gap-2">
+                <Users className="w-5 h-5 text-[#16823B]" />
                 <span>{editingUser ? "Edit User & Hak Akses" : "Tambah Administrator Baru"}</span>
               </h3>
               <button
                 onClick={() => setIsModalOpen(false)}
-                className="p-1.5 text-slate-400 hover:text-white rounded-lg hover:bg-slate-800"
+                className="p-1.5 text-[#5F6B63] hover:text-[#17231B] rounded-lg hover:bg-[#F8FAF9]"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
 
             {modalError && (
-              <div className="p-3 bg-red-500/10 border border-red-500/20 rounded-xl text-red-400 text-xs flex items-center gap-2">
-                <AlertCircle className="w-4 h-4 shrink-0" />
+              <div className="p-3 bg-red-50 border border-red-200 rounded-xl text-red-700 text-xs flex items-center gap-2">
+                <AlertCircle className="w-4 h-4 shrink-0 text-red-600" />
                 <span>{modalError}</span>
               </div>
             )}
 
             <form onSubmit={handleSubmitUser} className="space-y-4 text-xs">
               <div>
-                <label className="block text-slate-300 font-semibold mb-1">Nama Lengkap</label>
+                <label className="block text-[#2C3830] font-semibold mb-1">Nama Lengkap</label>
                 <input
                   type="text"
                   required
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  className="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-white focus:outline-none focus:border-emerald-500"
+                  className="w-full px-3.5 py-2.5 bg-[#F8FAF9] border border-[#DDE5DF] rounded-xl text-[#17231B] focus:outline-none focus:border-[#16823B] focus:bg-white"
                   placeholder="Contoh: Budi Santoso"
                 />
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-slate-300 font-semibold mb-1">Username</label>
+                  <label className="block text-[#2C3830] font-semibold mb-1">Username</label>
                   <input
                     type="text"
                     required
                     disabled={Boolean(editingUser)}
                     value={formData.username}
                     onChange={(e) => setFormData({ ...formData, username: e.target.value })}
-                    className="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-white focus:outline-none focus:border-emerald-500 disabled:opacity-50"
+                    className="w-full px-3.5 py-2.5 bg-[#F8FAF9] border border-[#DDE5DF] rounded-xl text-[#17231B] focus:outline-none focus:border-[#16823B] focus:bg-white disabled:opacity-50"
                     placeholder="budi_admin"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-slate-300 font-semibold mb-1">Email</label>
+                  <label className="block text-[#2C3830] font-semibold mb-1">Email</label>
                   <input
                     type="email"
                     required
                     value={formData.email}
                     onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                    className="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-white focus:outline-none focus:border-emerald-500"
+                    className="w-full px-3.5 py-2.5 bg-[#F8FAF9] border border-[#DDE5DF] rounded-xl text-[#17231B] focus:outline-none focus:border-[#16823B] focus:bg-white"
                     placeholder="budi@ggf.co.id"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-slate-300 font-semibold mb-1">
+                <label className="block text-[#2C3830] font-semibold mb-1">
                   {editingUser ? "Password Baru (Kosongkan jika tidak diubah)" : "Password"}
                 </label>
                 <input
@@ -705,14 +719,14 @@ export default function AdminDashboardPage() {
                   required={!editingUser}
                   value={formData.password}
                   onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                  className="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-white focus:outline-none focus:border-emerald-500"
+                  className="w-full px-3.5 py-2.5 bg-[#F8FAF9] border border-[#DDE5DF] rounded-xl text-[#17231B] focus:outline-none focus:border-[#16823B] focus:bg-white"
                   placeholder="••••••••"
                 />
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-slate-300 font-semibold mb-1">Role Utama</label>
+                  <label className="block text-[#2C3830] font-semibold mb-1">Role Utama</label>
                   <select
                     value={formData.role}
                     onChange={(e) =>
@@ -721,7 +735,7 @@ export default function AdminDashboardPage() {
                         role: e.target.value as "SUPER_ADMIN" | "ADMIN",
                       })
                     }
-                    className="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-white focus:outline-none focus:border-emerald-500"
+                    className="w-full px-3.5 py-2.5 bg-[#F8FAF9] border border-[#DDE5DF] rounded-xl text-[#17231B] focus:outline-none focus:border-[#16823B] focus:bg-white"
                   >
                     <option value="ADMIN">ADMIN (Biasa)</option>
                     <option value="SUPER_ADMIN">SUPER_ADMIN (Penuh)</option>
@@ -729,7 +743,7 @@ export default function AdminDashboardPage() {
                 </div>
 
                 <div>
-                  <label className="block text-slate-300 font-semibold mb-1">Status Akun</label>
+                  <label className="block text-[#2C3830] font-semibold mb-1">Status Akun</label>
                   <select
                     value={formData.status}
                     onChange={(e) =>
@@ -738,7 +752,7 @@ export default function AdminDashboardPage() {
                         status: e.target.value as "ACTIVE" | "INACTIVE",
                       })
                     }
-                    className="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-white focus:outline-none focus:border-emerald-500"
+                    className="w-full px-3.5 py-2.5 bg-[#F8FAF9] border border-[#DDE5DF] rounded-xl text-[#17231B] focus:outline-none focus:border-[#16823B] focus:bg-white"
                   >
                     <option value="ACTIVE">ACTIVE (Aktif)</option>
                     <option value="INACTIVE">INACTIVE (Nonaktif)</option>
@@ -748,8 +762,8 @@ export default function AdminDashboardPage() {
 
               {/* Dashboard Access Checkboxes */}
               {formData.role !== "SUPER_ADMIN" && (
-                <div className="space-y-2 pt-2 border-t border-slate-800">
-                  <label className="block text-slate-300 font-semibold">
+                <div className="space-y-2 pt-2 border-t border-[#DDE5DF]">
+                  <label className="block text-[#2C3830] font-semibold">
                     Alokasi Akses Dashboard (Role Admin)
                   </label>
 
@@ -766,15 +780,15 @@ export default function AdminDashboardPage() {
                           key={dash.code}
                           className={`flex items-center gap-2 p-2.5 rounded-xl border cursor-pointer transition-all ${
                             isChecked
-                              ? "bg-emerald-500/10 border-emerald-500/40 text-emerald-300"
-                              : "bg-slate-950 border-slate-800 text-slate-400 hover:text-slate-200"
+                              ? "bg-[#EAF3EC] border-[#CBE0D1] text-[#16823B]"
+                              : "bg-[#F8FAF9] border-[#DDE5DF] text-[#5F6B63] hover:text-[#17231B]"
                           }`}
                         >
                           <input
                             type="checkbox"
                             checked={isChecked}
                             onChange={() => toggleDashboardCode(dash.code)}
-                            className="rounded border-slate-700 text-emerald-500 focus:ring-0 bg-slate-900"
+                            className="rounded border-[#DDE5DF] text-[#16823B] focus:ring-0"
                           />
                           <span className="font-semibold">{dash.label}</span>
                         </label>
@@ -784,18 +798,18 @@ export default function AdminDashboardPage() {
                 </div>
               )}
 
-              <div className="pt-4 border-t border-slate-800 flex items-center justify-end gap-3">
+              <div className="pt-4 border-t border-[#DDE5DF] flex items-center justify-end gap-3">
                 <button
                   type="button"
                   onClick={() => setIsModalOpen(false)}
-                  className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold"
+                  className="px-4 py-2 rounded-xl bg-[#F8FAF9] hover:bg-gray-100 text-[#2C3830] font-semibold border border-[#DDE5DF]"
                 >
                   Batal
                 </button>
                 <button
                   type="submit"
                   disabled={submitting}
-                  className="px-5 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold shadow-lg disabled:opacity-50"
+                  className="px-5 py-2 rounded-xl bg-[#16823B] hover:bg-[#126B30] text-white font-bold shadow-2xs disabled:opacity-50"
                 >
                   {submitting ? "Menyimpan..." : "Simpan Perubahan"}
                 </button>
