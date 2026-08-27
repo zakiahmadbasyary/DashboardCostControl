@@ -198,7 +198,7 @@ export default function PublicDashboardPage() {
       {/* Footer */}
       <footer className="border-t border-[#DDE5DF] bg-white py-6 px-4 text-center text-xs text-[#5F6B63] mt-12">
         <div className="max-w-[95%] mx-auto flex flex-col sm:flex-row items-center justify-between gap-2">
-          <span>© 2026 Great Giant Foods (GGF) — AgroMetric WIP ACC Cost Control. All rights reserved.</span>
+          <span>© 2026 Great Giant Foods (GGF).</span>
           <span className="font-semibold text-[#16823B]">Integrated Database System • PostgreSQL & Prisma Engine</span>
         </div>
       </footer>

@@ -31,10 +31,10 @@ export default function DashboardHeader() {
             </div>
             <div className="flex flex-col justify-center">
               <span className="font-extrabold text-sm sm:text-base text-[#17231B] group-hover:text-[#16823B] tracking-tight leading-snug transition-colors block">
-                GGF AgroMetric
+                Dashboard WIP ACC
               </span>
               <span className="text-[10px] sm:text-xs text-[#5F6B63] hidden sm:block font-medium leading-tight mt-0.5">
-                Dashboard WIP ACC (Cost Control)
+                Dashboard Cost Control
               </span>
             </div>
           </a>
