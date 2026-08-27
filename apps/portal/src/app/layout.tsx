@@ -4,6 +4,11 @@ import "./globals.css";
 export const metadata: Metadata = {
   title: "GGF AgroMetric Platform | Enterprise Portal",
   description: "Portal Utama Akses Seluruh Dashboard Analytics & Management",
+  icons: {
+    icon: "/logo.png",
+    shortcut: "/logo.png",
+    apple: "/logo.png",
+  },
 };
 
 export default function RootLayout({

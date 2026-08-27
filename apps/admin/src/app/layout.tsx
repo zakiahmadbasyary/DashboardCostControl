@@ -4,6 +4,11 @@ import "./globals.css";
 export const metadata: Metadata = {
   title: "Admin Pusat | GGF AgroMetric Platform",
   description: "Manajemen Autentikasi Terpusat, Pengguna Administrator, dan Hak Akses Dashboard",
+  icons: {
+    icon: "/logo.png",
+    shortcut: "/logo.png",
+    apple: "/logo.png",
+  },
 };
 
 export default function RootLayout({

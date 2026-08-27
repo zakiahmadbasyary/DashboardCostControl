@@ -24,7 +24,7 @@ export default function PortalHomePage() {
       name: "WIP ACC",
       subtitle: "Cost Control",
       description:
-        "Monitoring Work in Process (WIP) costs untuk wilayah ACC. Melacak pengeluaran operasional harian dan efisiensi.",
+        "Monitoring Work in Process (WIP) costs untuk setiap lokasi di PG1 yang dimana datanya diperoleh dari data accounting",
       url: wipAccUrl,
       icon: LineChart,
     },
@@ -33,7 +33,7 @@ export default function PortalHomePage() {
       name: "WIP PG1",
       subtitle: "Operasional",
       description:
-        "Analisis detail Work in Process untuk operasional PG1. Dilengkapi analisis varians dan pelacakan anggaran.",
+        "Analisis detail Work in Process untuk operasional PG1 yang dimana data diupdate mingguan",
       url: wipPg1Url,
       icon: BarChart3,
     },
@@ -82,10 +82,10 @@ export default function PortalHomePage() {
               </div>
               <div className="flex flex-col justify-center">
                 <span className="font-extrabold text-sm sm:text-base text-[#17231B] group-hover:text-[#16823B] tracking-tight leading-snug transition-colors block">
-                  GGF AgroMetric
+                  Plantation Group 1
                 </span>
                 <span className="text-[10px] sm:text-xs text-[#5F6B63] hidden sm:block font-medium leading-tight mt-0.5">
-                  Enterprise Cost Control Portal
+                  Cost Control Dashboard Portal
                 </span>
               </div>
             </a>
@@ -168,7 +168,7 @@ export default function PortalHomePage() {
             Cost Control Dashboard Portal
           </h1>
           <p className="text-[#5F6B63] text-sm sm:text-base leading-relaxed">
-            Portal terpusat untuk memantau, menganalisis, dan mengoptimalkan biaya produksi pertanian di seluruh wilayah operasional GGF.
+            Portal terpusat untuk memantau, menganalisis, dan mengoptimalkan biaya produksi di Plantation Group 1 - Great Giant Pineapple.
           </p>
         </div>
 
