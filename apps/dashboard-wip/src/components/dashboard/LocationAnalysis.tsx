@@ -200,7 +200,9 @@ export default function LocationAnalysis({
           </div>
           <div>
             <h3 className="font-bold text-base text-[#17231B]">Analisis Lokasi</h3>
-            <p className="text-xs text-[#5F6B63]">Pilih salah satu baris lokasi untuk melihat rincian Group Cost</p>
+            <p className="text-xs text-[#5F6B63]">
+              Pilih salah satu baris lokasi untuk melihat rincian Group Cost. <span className="font-semibold text-[#16823B]">* Seluruh nilai biaya disajikan dalam Rupiah (Rp)</span>
+            </p>
           </div>
         </div>
 
@@ -350,9 +352,9 @@ export default function LocationAnalysis({
                   <th className="py-3 px-4">Lokasi</th>
                   <th className="py-3 px-4">Wilayah</th>
                   <th className="py-3 px-4">Umur</th>
-                  <th className="py-3 px-4 text-right">Cost / Ha</th>
+                  <th className="py-3 px-4 text-right">Cost / Ha (Rp)</th>
                   <th className="py-3 px-4 text-right">Luas (Ha)</th>
-                  <th className="py-3 px-4 text-right">Total Cost</th>
+                  <th className="py-3 px-4 text-right">Total Cost (Rp)</th>
                   <th className="py-3 px-4">Jenis Bibit</th>
                   <th className="py-3 px-4">Kelas</th>
                   <th className="py-3 px-4 text-center">Status Select</th>
@@ -378,11 +380,11 @@ export default function LocationAnalysis({
                       <td className="py-3 px-4">{item.wilayah}</td>
                       <td className="py-3 px-4">{item.umur} Bln</td>
                       <td className="py-3 px-4 text-right font-mono font-semibold">
-                        Rp {item.costHa.toLocaleString("id-ID")}
+                        {item.costHa.toLocaleString("id-ID")}
                       </td>
                       <td className="py-3 px-4 text-right font-mono">{item.luas}</td>
                       <td className="py-3 px-4 text-right font-mono text-[#16823B] font-bold">
-                        Rp {item.cost.toLocaleString("id-ID")}
+                        {item.cost.toLocaleString("id-ID")}
                       </td>
                       <td className="py-3 px-4">{item.jenisBibit}</td>
                       <td className="py-3 px-4">{item.kelas}</td>

@@ -89,7 +89,7 @@ const CustomTooltip = ({ active, payload, label, onSelectUmur }: CustomTooltipPr
                       : "text-[#17231B] font-semibold"
                   }`}
                 >
-                  Rp {val.toLocaleString("id-ID")} Juta
+                  {val.toLocaleString("id-ID")} Juta
                 </span>
                 {isMax && (
                   <span className="text-[9px] font-black text-rose-600 bg-rose-100 px-1 rounded uppercase tracking-tighter">

@@ -47,7 +47,7 @@ export default function ActivityTable({
                 {selectedLocation && (
                   <> di Lokasi <span className="font-bold text-[#16823B]">{selectedLocation.lokasi}</span></>
                 )}{" "}
-                (Cost/Ha = Cost ÷ Luas)
+                (Cost/Ha dalam Rp = Cost ÷ Luas)
               </p>
             </div>
           </div>
@@ -85,7 +85,7 @@ export default function ActivityTable({
                         {item.luas}
                       </td>
                       <td className="py-2.5 px-3 text-right font-mono font-bold text-[#16823B]">
-                        Rp {item.costHa.toLocaleString("id-ID")}
+                        {item.costHa.toLocaleString("id-ID")}
                       </td>
                     </tr>
                   ))}
@@ -98,7 +98,7 @@ export default function ActivityTable({
       <div className="mt-4 pt-3 border-t border-[#DDE5DF] text-[11px] text-[#5F6B63] flex justify-between items-center">
         <span>Total {activities.length} aktivitas terdaftar</span>
         <span className="font-semibold text-[#17231B]">
-          Total Cost / Ha: <span className="font-bold text-[#16823B]">Rp {totalCostHa.toLocaleString("id-ID")}</span>
+          Total Cost / Ha (Rp): <span className="font-bold text-[#16823B]">{totalCostHa.toLocaleString("id-ID")}</span>
         </span>
       </div>
     </div>

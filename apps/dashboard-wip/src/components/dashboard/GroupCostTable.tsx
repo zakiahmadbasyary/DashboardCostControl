@@ -74,8 +74,8 @@ export default function GroupCostTable({
               <thead className="bg-[#F7F9F7] text-[#17231B] uppercase font-bold border-b border-[#DDE5DF]">
                 <tr>
                   <th className="py-2.5 px-3">Group Cost</th>
-                  <th className="py-2.5 px-3 text-right">Cost / Ha</th>
-                  <th className="py-2.5 px-3 text-right">SBT</th>
+                  <th className="py-2.5 px-3 text-right">Cost / Ha (Rp)</th>
+                  <th className="py-2.5 px-3 text-right">SBT (Rp)</th>
                   <th className="py-2.5 px-3 text-center">Status</th>
                 </tr>
               </thead>
@@ -94,10 +94,10 @@ export default function GroupCostTable({
                     >
                       <td className="py-2.5 px-3 font-bold">{item.groupCost}</td>
                       <td className="py-2.5 px-3 text-right font-mono">
-                        Rp {item.costHa.toLocaleString("id-ID")}
+                        {item.costHa.toLocaleString("id-ID")}
                       </td>
                       <td className="py-2.5 px-3 text-right font-mono text-[#5F6B63]">
-                        Rp {item.sbt.toLocaleString("id-ID")}
+                        {item.sbt.toLocaleString("id-ID")}
                       </td>
                       <td className="py-2.5 px-3 text-center">
                         {isSelected ? (
@@ -124,7 +124,7 @@ export default function GroupCostTable({
       </div>
 
       <div className="mt-4 pt-3 border-t border-[#DDE5DF] text-[11px] text-[#5F6B63] flex justify-between items-center">
-        <span>* SBT = Standar Biaya Tanaman</span>
+        <span>* Nilai disajikan dalam Rupiah (Rp) | SBT = Standar Biaya Tanaman</span>
         {selectedGroupCost && <span className="font-semibold text-[#16823B]">Klik Group Cost lain untuk mengubah aktivitas</span>}
       </div>
     </div>

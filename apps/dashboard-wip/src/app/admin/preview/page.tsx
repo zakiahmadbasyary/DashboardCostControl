@@ -188,8 +188,8 @@ export default function AdminPreviewPage() {
                       <th className="py-2.5 px-3">Kelas Bibit</th>
                       <th className="py-2.5 px-3">Group Cost</th>
                       <th className="py-2.5 px-3">Ket. Group Cost</th>
-                      <th className="py-2.5 px-3 text-right">Cost / Ha</th>
-                      <th className="py-2.5 px-3 text-right">Total Cost</th>
+                      <th className="py-2.5 px-3 text-right">Cost / Ha (Rp)</th>
+                      <th className="py-2.5 px-3 text-right">Total Cost (Rp)</th>
                       <th className="py-2.5 px-3">Pupuk</th>
                       <th className="py-2.5 px-3">Kode SBT</th>
                     </tr>
@@ -208,10 +208,10 @@ export default function AdminPreviewPage() {
                         <td className="py-2.5 px-3 font-mono text-[11px]">{String(item.groupCost ?? "")}</td>
                         <td className="py-2.5 px-3 font-medium">{String(item.keteranganGroupCost ?? "")}</td>
                         <td className="py-2.5 px-3 text-right font-mono font-semibold">
-                          Rp {Number(item.costHa ?? 0).toLocaleString("id-ID")}
+                          {Number(item.costHa ?? 0).toLocaleString("id-ID")}
                         </td>
                         <td className="py-2.5 px-3 text-right font-mono font-bold text-[#16823B]">
-                          Rp {Number(item.cost ?? 0).toLocaleString("id-ID")}
+                          {Number(item.cost ?? 0).toLocaleString("id-ID")}
                         </td>
                         <td className="py-2.5 px-3 text-[#5F6B63]">{String(item.pupuk ?? "")}</td>
                         <td className="py-2.5 px-3 font-mono text-[11px] text-[#16823B] font-medium">{String(item.kodeSbt ?? "")}</td>
@@ -249,7 +249,7 @@ export default function AdminPreviewPage() {
                         <td className="py-2.5 px-3 font-medium">{String(item.groupCost ?? "-")}</td>
                         <td className="py-2.5 px-3">{item.umur !== null && item.umur !== undefined ? `${item.umur} Bln` : "-"}</td>
                         <td className="py-2.5 px-3 text-right font-mono font-bold text-[#16823B]">
-                          Rp {Number(item.nilaiSbt ?? 0).toLocaleString("id-ID")}
+                          {Number(item.nilaiSbt ?? 0).toLocaleString("id-ID")}
                         </td>
                       </tr>
                     ))}
@@ -286,10 +286,10 @@ export default function AdminPreviewPage() {
                         <td className="py-2.5 px-3">{String(item.kelasBibit ?? "")}</td>
                         <td className="py-2.5 px-3 font-bold">{String(item.aktivitas ?? "")}</td>
                         <td className="py-2.5 px-3 text-right font-mono font-bold text-[#16823B]">
-                          Rp {Number(item.biaya ?? 0).toLocaleString("id-ID")}
+                          {Number(item.biaya ?? 0).toLocaleString("id-ID")}
                         </td>
                         <td className="py-2.5 px-3 text-right font-mono font-semibold">
-                          Rp {Number(item.costHa ?? 0).toLocaleString("id-ID")}
+                          {Number(item.costHa ?? 0).toLocaleString("id-ID")}
                         </td>
                         <td className="py-2.5 px-3 font-mono text-[11px]">{String(item.groupCost ?? "")}</td>
                         <td className="py-2.5 px-3 font-medium">{String(item.keteranganGroupCost ?? "")}</td>
