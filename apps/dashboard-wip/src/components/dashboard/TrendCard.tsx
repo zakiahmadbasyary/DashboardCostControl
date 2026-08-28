@@ -23,7 +23,7 @@ interface TrendCardProps {
 const REGION_COLORS: Record<string, string> = {
   AW01: "#16823B", // Primary Green
   AW02: "#29A9D6", // Blue
-  AW03: "#F9A91B", // Orange
+  AW03: "#FCE27A", // Secondary Yellow
   AW04: "#A8D437", // Light Green
   AW05: "#0B6B32", // Dark Green
   AW06: "#053916ff", // Yellow Green

@@ -105,7 +105,7 @@ export default function GroupCostTable({
                             <CheckCircle2 className="w-3 h-3" /> Selected
                           </span>
                         ) : isOverSbt ? (
-                          <span className="px-2 py-0.5 rounded-full bg-[#F9A91B]/15 text-[#F9A91B] border border-[#F9A91B]/30 text-[10px] font-semibold">
+                          <span className="px-2 py-0.5 rounded-full bg-[#FCE27A] text-[#17231B] border border-[#E5C959] text-[10px] font-bold shadow-2xs">
                             Over SBT
                           </span>
                         ) : (

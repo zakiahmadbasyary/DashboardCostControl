@@ -52,7 +52,7 @@ export default function DashboardHeader() {
                 }`}
               >
                 <span>{item.label}</span>
-                {item.active && <span className="w-1.5 h-1.5 rounded-full bg-[#16823B]" />}
+                {item.active && <span className="w-2 h-2 rounded-full bg-[#FCE27A] ring-1 ring-[#16823B]" />}
               </a>
             ))}
           </nav>

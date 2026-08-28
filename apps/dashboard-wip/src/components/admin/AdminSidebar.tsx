@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { Leaf, UploadCloud, Eye, LogOut, LayoutDashboard, Menu, X, Shield } from "lucide-react";
+import { UploadCloud, Eye, LogOut, LayoutDashboard, Menu, X, Shield } from "lucide-react";
 
 export default function AdminSidebar() {
   const pathname = usePathname();
@@ -27,8 +27,13 @@ export default function AdminSidebar() {
         {/* Brand */}
         <div className="p-6 border-b border-[#DDE5DF] flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl bg-[#16823B] text-[#A8D437] flex items-center justify-center font-bold shadow-xs">
-              <Leaf className="w-5 h-5" />
+            <div className="h-9 w-auto flex items-center shrink-0">
+              <img
+                src="/logo.png"
+                alt="GGF Logo"
+                className="h-9 max-h-9 w-auto object-contain"
+                style={{ height: "36px", maxHeight: "36px", width: "auto" }}
+              />
             </div>
             <div>
               <h2 className="font-extrabold text-sm text-[#17231B]">GGF Admin</h2>
@@ -102,8 +107,13 @@ export default function AdminSidebar() {
       {/* Mobile Header Bar */}
       <header className="lg:hidden bg-white border-b border-[#DDE5DF] px-4 py-3 sticky top-0 z-30 flex items-center justify-between shadow-xs w-full">
         <div className="flex items-center gap-2.5">
-          <div className="w-8 h-8 rounded-lg bg-[#16823B] text-[#A8D437] flex items-center justify-center font-bold">
-            <Leaf className="w-4 h-4" />
+          <div className="h-8 w-auto flex items-center shrink-0">
+            <img
+              src="/logo.png"
+              alt="GGF Logo"
+              className="h-8 max-h-8 w-auto object-contain"
+              style={{ height: "32px", maxHeight: "32px", width: "auto" }}
+            />
           </div>
           <span className="font-extrabold text-sm text-[#17231B]">GGF Admin</span>
         </div>

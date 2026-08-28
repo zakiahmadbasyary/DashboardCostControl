@@ -141,6 +141,9 @@ export default function DashboardAPage() {
 
       {/* Main Content Area */}
       <main className="max-w-4xl mx-auto my-12 text-center space-y-6 px-4 flex-1">
+        <span className="inline-flex items-center gap-1.5 px-3 py-1 text-xs font-bold rounded-full bg-[#FCE27A] text-[#17231B] border border-[#E5C959] shadow-2xs">
+          WIP PG1 Secondary Module
+        </span>
         <div className="w-16 h-16 rounded-2xl bg-[#EAF3EC] border border-[#CBE0D1] text-[#16823B] flex items-center justify-center mx-auto shadow-2xs">
           <Database className="w-8 h-8" />
         </div>

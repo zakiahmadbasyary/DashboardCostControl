@@ -41,8 +41,8 @@ export default function GlobalFilters({ initialFilters, onApplyFilters }: Global
       <div className="hidden sm:flex bg-white border border-[#DDE5DF] rounded-xl p-3 sm:p-3.5 shadow-sm shadow-[#16823B]/5 flex-col lg:flex-row lg:items-center gap-3">
         {/* Title / Badge */}
         <div className="flex items-center gap-1.5 shrink-0 pr-1">
-          <div className="p-1.5 rounded-lg bg-[#16823B]/10 text-[#16823B]">
-            <Filter className="w-3.5 h-3.5" />
+          <div className="p-1.5 rounded-lg bg-[#FCE27A] text-[#17231B] border border-[#E5C959] shadow-2xs">
+            <Filter className="w-3.5 h-3.5 text-[#17231B]" />
           </div>
           <span className="font-bold text-xs text-[#17231B] uppercase tracking-wider">Filter Utama</span>
         </div>

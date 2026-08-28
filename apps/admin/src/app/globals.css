@@ -2,10 +2,11 @@
 
 :root {
   --ggf-primary: #16823b;
+  --ggf-secondary: #FCE27A;
   --ggf-dark: #0b6b32;
   --ggf-light: #a8d437;
   --ggf-orange: #f9a91b;
-  --ggf-yellow: #d7e515;
+  --ggf-yellow: #FCE27A;
   --ggf-blue: #29a9d6;
   --ggf-bg: #f7f9f7;
   --ggf-card: #ffffff;
@@ -20,10 +21,11 @@
 
 @theme inline {
   --color-ggf-primary: #16823b;
+  --color-ggf-secondary: #FCE27A;
   --color-ggf-dark: #0b6b32;
   --color-ggf-light: #a8d437;
   --color-ggf-orange: #f9a91b;
-  --color-ggf-yellow: #d7e515;
+  --color-ggf-yellow: #FCE27A;
   --color-ggf-blue: #29a9d6;
   --color-ggf-bg: #f7f9f7;
   --color-ggf-card: #ffffff;

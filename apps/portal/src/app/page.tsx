@@ -161,7 +161,7 @@ export default function PortalHomePage() {
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 flex-1 w-full">
         {/* Title & Subtitle Section */}
         <div className="mb-10 text-center max-w-3xl mx-auto space-y-3">
-          <span className="inline-flex items-center gap-1.5 px-3 py-1 text-xs font-semibold rounded-full bg-[#EAF3EC] text-[#16823B] border border-[#CBE0D1]">
+          <span className="inline-flex items-center gap-1.5 px-3 py-1 text-xs font-bold rounded-full bg-[#FCE27A] text-[#17231B] border border-[#E5C959] shadow-2xs">
             Portal Utama Monitoring Biaya
           </span>
           <h1 className="text-3xl sm:text-4xl font-extrabold text-[#17231B] tracking-tight">
@@ -190,7 +190,7 @@ export default function PortalHomePage() {
                     <h2 className="text-lg font-bold text-[#17231B] tracking-tight leading-snug">
                       {dash.name}
                     </h2>
-                    <span className="text-[11px] font-semibold text-[#16823B] bg-[#EAF3EC] px-2 py-0.5 rounded-md inline-block mt-1">
+                    <span className="text-[11px] font-bold text-[#17231B] bg-[#FCE27A]/90 px-2.5 py-0.5 rounded-md inline-block mt-1">
                       {dash.subtitle}
                     </span>
                   </div>
