@@ -16,7 +16,18 @@ import {
 
 export default function PortalHomePage() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const { portalUrl, wipAccUrl, wipPg1Url, hppPg1Url, hppM3Url, adminUrl } = getDashboardNavConfig();
+  const {
+    portalUrl,
+    wipAccUrl,
+    wipPg1Url,
+    hppPg1Url,
+    hppM3Url,
+    adminUrl,
+    wipAccAdminUrl,
+    wipPg1AdminUrl,
+    hppPg1AdminUrl,
+    hppM3AdminUrl,
+  } = getDashboardNavConfig();
 
   const publicDashboards = [
     {
@@ -26,6 +37,7 @@ export default function PortalHomePage() {
       description:
         "Monitoring Work in Process (WIP) costs untuk setiap lokasi di PG1 yang dimana datanya diperoleh dari data accounting",
       url: wipAccUrl,
+      adminUrl: wipAccAdminUrl,
       icon: LineChart,
     },
     {
@@ -35,6 +47,7 @@ export default function PortalHomePage() {
       description:
         "Analisis detail Work in Process untuk operasional PG1 yang dimana data diupdate mingguan",
       url: wipPg1Url,
+      adminUrl: wipPg1AdminUrl,
       icon: BarChart3,
     },
     {
@@ -44,6 +57,7 @@ export default function PortalHomePage() {
       description:
         "Pelacakan Harga Pokok Produksi (HPP) untuk PG1. Evaluasi biaya produksi akhir dengan standar historis.",
       url: hppPg1Url,
+      adminUrl: hppPg1AdminUrl,
       icon: Banknote,
     },
     {
@@ -53,6 +67,7 @@ export default function PortalHomePage() {
       description:
         "Analisis Harga Pokok Produksi fasilitas M3. Fokus pada hasil material dan distribusi biaya tenaga kerja.",
       url: hppM3Url,
+      adminUrl: hppM3AdminUrl,
       icon: Landmark,
     },
   ];
@@ -199,13 +214,20 @@ export default function PortalHomePage() {
                   </p>
                 </div>
 
-                <div>
+                <div className="space-y-2">
                   <a
                     href={dash.url}
                     className="w-full py-2.5 px-4 rounded-xl bg-[#16823B] hover:bg-[#126B30] text-white font-semibold text-xs flex items-center justify-center gap-2 transition-all shadow-2xs group-hover:shadow-xs"
                   >
                     <span>Buka Dashboard</span>
                     <ArrowRight className="w-4 h-4" />
+                  </a>
+                  <a
+                    href={dash.adminUrl}
+                    className="w-full py-2 px-4 rounded-xl bg-white border border-[#DDE5DF] hover:bg-[#F4F9F5] hover:border-[#16823B] text-[#5F6B63] hover:text-[#16823B] font-semibold text-xs flex items-center justify-center gap-2 transition-all"
+                  >
+                    <Settings className="w-3.5 h-3.5" />
+                    <span>Kelola Dashboard</span>
                   </a>
                 </div>
               </div>

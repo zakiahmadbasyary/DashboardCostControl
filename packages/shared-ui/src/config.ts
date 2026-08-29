@@ -13,6 +13,10 @@ export interface DashboardNavConfig {
   wipPg1Url: string;
   hppPg1Url: string;
   hppM3Url: string;
+  wipAccAdminUrl: string;
+  wipPg1AdminUrl: string;
+  hppPg1AdminUrl: string;
+  hppM3AdminUrl: string;
 }
 
 export const getDashboardNavConfig = (): DashboardNavConfig => {
@@ -34,6 +38,15 @@ export const getDashboardNavConfig = (): DashboardNavConfig => {
     process.env.NEXT_PUBLIC_DASHBOARD_C_URL ||
     "http://localhost:3004";
   const adminUrl = process.env.NEXT_PUBLIC_ADMIN_URL || "http://localhost:3005";
+
+  const wipAccAdminUrl =
+    process.env.NEXT_PUBLIC_WIP_ACC_ADMIN_URL || `${wipAccUrl}/admin`;
+  const wipPg1AdminUrl =
+    process.env.NEXT_PUBLIC_WIP_PG1_ADMIN_URL || `${wipPg1Url}/admin`;
+  const hppPg1AdminUrl =
+    process.env.NEXT_PUBLIC_HPP_PG1_ADMIN_URL || `${hppPg1Url}/admin`;
+  const hppM3AdminUrl =
+    process.env.NEXT_PUBLIC_HPP_M3_ADMIN_URL || `${hppM3Url}/admin`;
 
   return {
     navItems: [
@@ -68,5 +81,9 @@ export const getDashboardNavConfig = (): DashboardNavConfig => {
     wipPg1Url,
     hppPg1Url,
     hppM3Url,
+    wipAccAdminUrl,
+    wipPg1AdminUrl,
+    hppPg1AdminUrl,
+    hppM3AdminUrl,
   };
 };
