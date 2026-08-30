@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
+import { getDashboardNavConfig } from "@dashboard/shared-ui";
 import {
   Shield,
   LogOut,
@@ -277,33 +278,48 @@ export default function AdminDashboardPage() {
     );
   }
 
+  const {
+    wipAccUrl,
+    wipPg1Url,
+    hppPg1Url,
+    hppM3Url,
+    wipAccAdminUrl,
+    wipPg1AdminUrl,
+    hppPg1AdminUrl,
+    hppM3AdminUrl,
+  } = getDashboardNavConfig();
+
   const allDashboardsConfig = [
     {
       code: "wip",
       name: "Dashboard WIP (Cost Control)",
       desc: "Manajemen data lokasi, sbt, aktivitas, dan upload excel cost control",
-      url: (process.env.NEXT_PUBLIC_WIP_ACC_URL || process.env.NEXT_PUBLIC_WIP_URL || "http://localhost:3001") + "/admin",
+      url: wipAccUrl,
+      adminUrl: wipAccAdminUrl,
       icon: Activity,
     },
     {
       code: "dashboard_a",
       name: "Dashboard A (Operasional)",
       desc: "Manajemen operasional & performa produksi wilayah A",
-      url: process.env.NEXT_PUBLIC_WIP_PG1_URL || process.env.NEXT_PUBLIC_DASHBOARD_A_URL || "http://localhost:3002",
+      url: wipPg1Url,
+      adminUrl: wipPg1AdminUrl,
       icon: Layers,
     },
     {
       code: "dashboard_b",
       name: "Dashboard B (Inventaris)",
       desc: "Manajemen logistik & pergerakan inventaris sarana produksi",
-      url: process.env.NEXT_PUBLIC_HPP_PG1_URL || process.env.NEXT_PUBLIC_DASHBOARD_B_URL || "http://localhost:3003",
+      url: hppPg1Url,
+      adminUrl: hppPg1AdminUrl,
       icon: Database,
     },
     {
       code: "dashboard_c",
       name: "Dashboard C (Finansial)",
       desc: "Audit finansial terpadu & laporan eksekutif",
-      url: process.env.NEXT_PUBLIC_HPP_M3_URL || process.env.NEXT_PUBLIC_DASHBOARD_C_URL || "http://localhost:3004",
+      url: hppM3Url,
+      adminUrl: hppM3AdminUrl,
       icon: Shield,
     },
   ];
@@ -482,7 +498,7 @@ export default function AdminDashboardPage() {
                       <span className="text-[11px] text-[#89938D]">Database: Terpisah</span>
                       {hasAccess ? (
                         <a
-                          href={dash.url}
+                          href={dash.adminUrl}
                           className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-[#16823B] hover:bg-[#126B30] text-white font-bold text-xs transition-all shadow-2xs"
                         >
                           <span>Kelola Dashboard</span>
