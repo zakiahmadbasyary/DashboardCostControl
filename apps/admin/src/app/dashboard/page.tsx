@@ -84,6 +84,40 @@ export default function AdminDashboardPage() {
   const [logsList, setLogsList] = useState<ActivityLog[]>([]);
   const [loadingLogs, setLoadingLogs] = useState(false);
 
+  // SSO loading state
+  const [ssoLoadingCode, setSsoLoadingCode] = useState<string | null>(null);
+
+  const handleManageDashboard = async (dash: { code: string; adminUrl: string }) => {
+    setSsoLoadingCode(dash.code);
+    try {
+      const res = await fetch("/api/auth/sso/create", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ dashboardCode: dash.code }),
+      });
+
+      let data: any = {};
+      const contentType = res.headers.get("content-type");
+      if (contentType && contentType.includes("application/json")) {
+        data = await res.json();
+      } else {
+        const text = await res.text();
+        throw new Error(text || `HTTP ${res.status}: Gagal terhubung ke server SSO.`);
+      }
+
+      if (!res.ok || !data.success || !data.token) {
+        throw new Error(data.error || `HTTP ${res.status}: Gagal membuat sesi SSO ke dashboard.`);
+      }
+
+      const targetUrl = new URL(dash.adminUrl);
+      targetUrl.searchParams.set("sso", data.token);
+      window.location.href = targetUrl.toString();
+    } catch (err: any) {
+      alert(err.message);
+      setSsoLoadingCode(null);
+    }
+  };
+
   // Verify auth session
   useEffect(() => {
     fetch("/api/auth/verify")
@@ -497,13 +531,23 @@ export default function AdminDashboardPage() {
                     <div className="pt-4 border-t border-[#EAEFEB] flex items-center justify-between">
                       <span className="text-[11px] text-[#89938D]">Database: Terpisah</span>
                       {hasAccess ? (
-                        <a
-                          href={dash.adminUrl}
-                          className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-[#16823B] hover:bg-[#126B30] text-white font-bold text-xs transition-all shadow-2xs"
+                        <button
+                          onClick={() => handleManageDashboard(dash)}
+                          disabled={Boolean(ssoLoadingCode)}
+                          className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-[#16823B] hover:bg-[#126B30] text-white font-bold text-xs transition-all shadow-2xs disabled:opacity-50"
                         >
-                          <span>Kelola Dashboard</span>
-                          <ExternalLink className="w-3.5 h-3.5" />
-                        </a>
+                          {ssoLoadingCode === dash.code ? (
+                            <>
+                              <div className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                              <span>Menghubungkan...</span>
+                            </>
+                          ) : (
+                            <>
+                              <span>Kelola Dashboard</span>
+                              <ExternalLink className="w-3.5 h-3.5" />
+                            </>
+                          )}
+                        </button>
                       ) : (
                         <span className="text-xs text-[#89938D] flex items-center gap-1.5 bg-[#F8FAF9] px-3 py-1.5 rounded-xl border border-[#DDE5DF] font-semibold">
                           <Lock className="w-3.5 h-3.5 text-red-500" />

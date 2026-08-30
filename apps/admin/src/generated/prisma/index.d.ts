@@ -38,6 +38,11 @@ export type AdminSession = $Result.DefaultSelection<Prisma.$AdminSessionPayload>
  * 
  */
 export type AdminActivityLog = $Result.DefaultSelection<Prisma.$AdminActivityLogPayload>
+/**
+ * Model AdminSsoToken
+ * 
+ */
+export type AdminSsoToken = $Result.DefaultSelection<Prisma.$AdminSsoTokenPayload>
 
 /**
  * ##  Prisma Client ʲˢ
@@ -206,6 +211,16 @@ export class PrismaClient<
     * ```
     */
   get adminActivityLog(): Prisma.AdminActivityLogDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.adminSsoToken`: Exposes CRUD operations for the **AdminSsoToken** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more AdminSsoTokens
+    * const adminSsoTokens = await prisma.adminSsoToken.findMany()
+    * ```
+    */
+  get adminSsoToken(): Prisma.AdminSsoTokenDelegate<ExtArgs, ClientOptions>;
 }
 
 export namespace Prisma {
@@ -651,7 +666,8 @@ export namespace Prisma {
     Dashboard: 'Dashboard',
     UserDashboardAccess: 'UserDashboardAccess',
     AdminSession: 'AdminSession',
-    AdminActivityLog: 'AdminActivityLog'
+    AdminActivityLog: 'AdminActivityLog',
+    AdminSsoToken: 'AdminSsoToken'
   };
 
   export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -670,7 +686,7 @@ export namespace Prisma {
       omit: GlobalOmitOptions
     }
     meta: {
-      modelProps: "adminUser" | "dashboard" | "userDashboardAccess" | "adminSession" | "adminActivityLog"
+      modelProps: "adminUser" | "dashboard" | "userDashboardAccess" | "adminSession" | "adminActivityLog" | "adminSsoToken"
       txIsolationLevel: Prisma.TransactionIsolationLevel
     }
     model: {
@@ -1044,6 +1060,80 @@ export namespace Prisma {
           }
         }
       }
+      AdminSsoToken: {
+        payload: Prisma.$AdminSsoTokenPayload<ExtArgs>
+        fields: Prisma.AdminSsoTokenFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.AdminSsoTokenFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AdminSsoTokenPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.AdminSsoTokenFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AdminSsoTokenPayload>
+          }
+          findFirst: {
+            args: Prisma.AdminSsoTokenFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AdminSsoTokenPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.AdminSsoTokenFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AdminSsoTokenPayload>
+          }
+          findMany: {
+            args: Prisma.AdminSsoTokenFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AdminSsoTokenPayload>[]
+          }
+          create: {
+            args: Prisma.AdminSsoTokenCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AdminSsoTokenPayload>
+          }
+          createMany: {
+            args: Prisma.AdminSsoTokenCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.AdminSsoTokenCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AdminSsoTokenPayload>[]
+          }
+          delete: {
+            args: Prisma.AdminSsoTokenDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AdminSsoTokenPayload>
+          }
+          update: {
+            args: Prisma.AdminSsoTokenUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AdminSsoTokenPayload>
+          }
+          deleteMany: {
+            args: Prisma.AdminSsoTokenDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.AdminSsoTokenUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.AdminSsoTokenUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AdminSsoTokenPayload>[]
+          }
+          upsert: {
+            args: Prisma.AdminSsoTokenUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AdminSsoTokenPayload>
+          }
+          aggregate: {
+            args: Prisma.AdminSsoTokenAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateAdminSsoToken>
+          }
+          groupBy: {
+            args: Prisma.AdminSsoTokenGroupByArgs<ExtArgs>
+            result: $Utils.Optional<AdminSsoTokenGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.AdminSsoTokenCountArgs<ExtArgs>
+            result: $Utils.Optional<AdminSsoTokenCountAggregateOutputType> | number
+          }
+        }
+      }
     }
   } & {
     other: {
@@ -1145,6 +1235,7 @@ export namespace Prisma {
     userDashboardAccess?: UserDashboardAccessOmit
     adminSession?: AdminSessionOmit
     adminActivityLog?: AdminActivityLogOmit
+    adminSsoToken?: AdminSsoTokenOmit
   }
 
   /* Types for Logging */
@@ -1228,12 +1319,14 @@ export namespace Prisma {
     dashboardAccess: number
     sessions: number
     activityLogs: number
+    ssoTokens: number
   }
 
   export type AdminUserCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     dashboardAccess?: boolean | AdminUserCountOutputTypeCountDashboardAccessArgs
     sessions?: boolean | AdminUserCountOutputTypeCountSessionsArgs
     activityLogs?: boolean | AdminUserCountOutputTypeCountActivityLogsArgs
+    ssoTokens?: boolean | AdminUserCountOutputTypeCountSsoTokensArgs
   }
 
   // Custom InputTypes
@@ -1266,6 +1359,13 @@ export namespace Prisma {
    */
   export type AdminUserCountOutputTypeCountActivityLogsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: AdminActivityLogWhereInput
+  }
+
+  /**
+   * AdminUserCountOutputType without action
+   */
+  export type AdminUserCountOutputTypeCountSsoTokensArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: AdminSsoTokenWhereInput
   }
 
 
@@ -1503,6 +1603,7 @@ export namespace Prisma {
     dashboardAccess?: boolean | AdminUser$dashboardAccessArgs<ExtArgs>
     sessions?: boolean | AdminUser$sessionsArgs<ExtArgs>
     activityLogs?: boolean | AdminUser$activityLogsArgs<ExtArgs>
+    ssoTokens?: boolean | AdminUser$ssoTokensArgs<ExtArgs>
     _count?: boolean | AdminUserCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["adminUser"]>
 
@@ -1547,6 +1648,7 @@ export namespace Prisma {
     dashboardAccess?: boolean | AdminUser$dashboardAccessArgs<ExtArgs>
     sessions?: boolean | AdminUser$sessionsArgs<ExtArgs>
     activityLogs?: boolean | AdminUser$activityLogsArgs<ExtArgs>
+    ssoTokens?: boolean | AdminUser$ssoTokensArgs<ExtArgs>
     _count?: boolean | AdminUserCountOutputTypeDefaultArgs<ExtArgs>
   }
   export type AdminUserIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {}
@@ -1558,6 +1660,7 @@ export namespace Prisma {
       dashboardAccess: Prisma.$UserDashboardAccessPayload<ExtArgs>[]
       sessions: Prisma.$AdminSessionPayload<ExtArgs>[]
       activityLogs: Prisma.$AdminActivityLogPayload<ExtArgs>[]
+      ssoTokens: Prisma.$AdminSsoTokenPayload<ExtArgs>[]
     }
     scalars: $Extensions.GetPayloadResult<{
       id: string
@@ -1966,6 +2069,7 @@ export namespace Prisma {
     dashboardAccess<T extends AdminUser$dashboardAccessArgs<ExtArgs> = {}>(args?: Subset<T, AdminUser$dashboardAccessArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$UserDashboardAccessPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     sessions<T extends AdminUser$sessionsArgs<ExtArgs> = {}>(args?: Subset<T, AdminUser$sessionsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$AdminSessionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     activityLogs<T extends AdminUser$activityLogsArgs<ExtArgs> = {}>(args?: Subset<T, AdminUser$activityLogsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$AdminActivityLogPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    ssoTokens<T extends AdminUser$ssoTokensArgs<ExtArgs> = {}>(args?: Subset<T, AdminUser$ssoTokensArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$AdminSsoTokenPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -2461,6 +2565,30 @@ export namespace Prisma {
     take?: number
     skip?: number
     distinct?: AdminActivityLogScalarFieldEnum | AdminActivityLogScalarFieldEnum[]
+  }
+
+  /**
+   * AdminUser.ssoTokens
+   */
+  export type AdminUser$ssoTokensArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AdminSsoToken
+     */
+    select?: AdminSsoTokenSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AdminSsoToken
+     */
+    omit?: AdminSsoTokenOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AdminSsoTokenInclude<ExtArgs> | null
+    where?: AdminSsoTokenWhereInput
+    orderBy?: AdminSsoTokenOrderByWithRelationInput | AdminSsoTokenOrderByWithRelationInput[]
+    cursor?: AdminSsoTokenWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: AdminSsoTokenScalarFieldEnum | AdminSsoTokenScalarFieldEnum[]
   }
 
   /**
@@ -6774,6 +6902,1090 @@ export namespace Prisma {
 
 
   /**
+   * Model AdminSsoToken
+   */
+
+  export type AggregateAdminSsoToken = {
+    _count: AdminSsoTokenCountAggregateOutputType | null
+    _min: AdminSsoTokenMinAggregateOutputType | null
+    _max: AdminSsoTokenMaxAggregateOutputType | null
+  }
+
+  export type AdminSsoTokenMinAggregateOutputType = {
+    id: string | null
+    tokenHash: string | null
+    userId: string | null
+    dashboardCode: string | null
+    expiresAt: Date | null
+    usedAt: Date | null
+    createdAt: Date | null
+  }
+
+  export type AdminSsoTokenMaxAggregateOutputType = {
+    id: string | null
+    tokenHash: string | null
+    userId: string | null
+    dashboardCode: string | null
+    expiresAt: Date | null
+    usedAt: Date | null
+    createdAt: Date | null
+  }
+
+  export type AdminSsoTokenCountAggregateOutputType = {
+    id: number
+    tokenHash: number
+    userId: number
+    dashboardCode: number
+    expiresAt: number
+    usedAt: number
+    createdAt: number
+    _all: number
+  }
+
+
+  export type AdminSsoTokenMinAggregateInputType = {
+    id?: true
+    tokenHash?: true
+    userId?: true
+    dashboardCode?: true
+    expiresAt?: true
+    usedAt?: true
+    createdAt?: true
+  }
+
+  export type AdminSsoTokenMaxAggregateInputType = {
+    id?: true
+    tokenHash?: true
+    userId?: true
+    dashboardCode?: true
+    expiresAt?: true
+    usedAt?: true
+    createdAt?: true
+  }
+
+  export type AdminSsoTokenCountAggregateInputType = {
+    id?: true
+    tokenHash?: true
+    userId?: true
+    dashboardCode?: true
+    expiresAt?: true
+    usedAt?: true
+    createdAt?: true
+    _all?: true
+  }
+
+  export type AdminSsoTokenAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which AdminSsoToken to aggregate.
+     */
+    where?: AdminSsoTokenWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of AdminSsoTokens to fetch.
+     */
+    orderBy?: AdminSsoTokenOrderByWithRelationInput | AdminSsoTokenOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: AdminSsoTokenWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` AdminSsoTokens from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` AdminSsoTokens.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned AdminSsoTokens
+    **/
+    _count?: true | AdminSsoTokenCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: AdminSsoTokenMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: AdminSsoTokenMaxAggregateInputType
+  }
+
+  export type GetAdminSsoTokenAggregateType<T extends AdminSsoTokenAggregateArgs> = {
+        [P in keyof T & keyof AggregateAdminSsoToken]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateAdminSsoToken[P]>
+      : GetScalarType<T[P], AggregateAdminSsoToken[P]>
+  }
+
+
+
+
+  export type AdminSsoTokenGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: AdminSsoTokenWhereInput
+    orderBy?: AdminSsoTokenOrderByWithAggregationInput | AdminSsoTokenOrderByWithAggregationInput[]
+    by: AdminSsoTokenScalarFieldEnum[] | AdminSsoTokenScalarFieldEnum
+    having?: AdminSsoTokenScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: AdminSsoTokenCountAggregateInputType | true
+    _min?: AdminSsoTokenMinAggregateInputType
+    _max?: AdminSsoTokenMaxAggregateInputType
+  }
+
+  export type AdminSsoTokenGroupByOutputType = {
+    id: string
+    tokenHash: string
+    userId: string
+    dashboardCode: string
+    expiresAt: Date
+    usedAt: Date | null
+    createdAt: Date
+    _count: AdminSsoTokenCountAggregateOutputType | null
+    _min: AdminSsoTokenMinAggregateOutputType | null
+    _max: AdminSsoTokenMaxAggregateOutputType | null
+  }
+
+  type GetAdminSsoTokenGroupByPayload<T extends AdminSsoTokenGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<AdminSsoTokenGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof AdminSsoTokenGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], AdminSsoTokenGroupByOutputType[P]>
+            : GetScalarType<T[P], AdminSsoTokenGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type AdminSsoTokenSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    tokenHash?: boolean
+    userId?: boolean
+    dashboardCode?: boolean
+    expiresAt?: boolean
+    usedAt?: boolean
+    createdAt?: boolean
+    user?: boolean | AdminUserDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["adminSsoToken"]>
+
+  export type AdminSsoTokenSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    tokenHash?: boolean
+    userId?: boolean
+    dashboardCode?: boolean
+    expiresAt?: boolean
+    usedAt?: boolean
+    createdAt?: boolean
+    user?: boolean | AdminUserDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["adminSsoToken"]>
+
+  export type AdminSsoTokenSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    tokenHash?: boolean
+    userId?: boolean
+    dashboardCode?: boolean
+    expiresAt?: boolean
+    usedAt?: boolean
+    createdAt?: boolean
+    user?: boolean | AdminUserDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["adminSsoToken"]>
+
+  export type AdminSsoTokenSelectScalar = {
+    id?: boolean
+    tokenHash?: boolean
+    userId?: boolean
+    dashboardCode?: boolean
+    expiresAt?: boolean
+    usedAt?: boolean
+    createdAt?: boolean
+  }
+
+  export type AdminSsoTokenOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "tokenHash" | "userId" | "dashboardCode" | "expiresAt" | "usedAt" | "createdAt", ExtArgs["result"]["adminSsoToken"]>
+  export type AdminSsoTokenInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    user?: boolean | AdminUserDefaultArgs<ExtArgs>
+  }
+  export type AdminSsoTokenIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    user?: boolean | AdminUserDefaultArgs<ExtArgs>
+  }
+  export type AdminSsoTokenIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    user?: boolean | AdminUserDefaultArgs<ExtArgs>
+  }
+
+  export type $AdminSsoTokenPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "AdminSsoToken"
+    objects: {
+      user: Prisma.$AdminUserPayload<ExtArgs>
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      tokenHash: string
+      userId: string
+      dashboardCode: string
+      expiresAt: Date
+      usedAt: Date | null
+      createdAt: Date
+    }, ExtArgs["result"]["adminSsoToken"]>
+    composites: {}
+  }
+
+  type AdminSsoTokenGetPayload<S extends boolean | null | undefined | AdminSsoTokenDefaultArgs> = $Result.GetResult<Prisma.$AdminSsoTokenPayload, S>
+
+  type AdminSsoTokenCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<AdminSsoTokenFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: AdminSsoTokenCountAggregateInputType | true
+    }
+
+  export interface AdminSsoTokenDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['AdminSsoToken'], meta: { name: 'AdminSsoToken' } }
+    /**
+     * Find zero or one AdminSsoToken that matches the filter.
+     * @param {AdminSsoTokenFindUniqueArgs} args - Arguments to find a AdminSsoToken
+     * @example
+     * // Get one AdminSsoToken
+     * const adminSsoToken = await prisma.adminSsoToken.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends AdminSsoTokenFindUniqueArgs>(args: SelectSubset<T, AdminSsoTokenFindUniqueArgs<ExtArgs>>): Prisma__AdminSsoTokenClient<$Result.GetResult<Prisma.$AdminSsoTokenPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one AdminSsoToken that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {AdminSsoTokenFindUniqueOrThrowArgs} args - Arguments to find a AdminSsoToken
+     * @example
+     * // Get one AdminSsoToken
+     * const adminSsoToken = await prisma.adminSsoToken.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends AdminSsoTokenFindUniqueOrThrowArgs>(args: SelectSubset<T, AdminSsoTokenFindUniqueOrThrowArgs<ExtArgs>>): Prisma__AdminSsoTokenClient<$Result.GetResult<Prisma.$AdminSsoTokenPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first AdminSsoToken that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {AdminSsoTokenFindFirstArgs} args - Arguments to find a AdminSsoToken
+     * @example
+     * // Get one AdminSsoToken
+     * const adminSsoToken = await prisma.adminSsoToken.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends AdminSsoTokenFindFirstArgs>(args?: SelectSubset<T, AdminSsoTokenFindFirstArgs<ExtArgs>>): Prisma__AdminSsoTokenClient<$Result.GetResult<Prisma.$AdminSsoTokenPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first AdminSsoToken that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {AdminSsoTokenFindFirstOrThrowArgs} args - Arguments to find a AdminSsoToken
+     * @example
+     * // Get one AdminSsoToken
+     * const adminSsoToken = await prisma.adminSsoToken.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends AdminSsoTokenFindFirstOrThrowArgs>(args?: SelectSubset<T, AdminSsoTokenFindFirstOrThrowArgs<ExtArgs>>): Prisma__AdminSsoTokenClient<$Result.GetResult<Prisma.$AdminSsoTokenPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more AdminSsoTokens that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {AdminSsoTokenFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all AdminSsoTokens
+     * const adminSsoTokens = await prisma.adminSsoToken.findMany()
+     * 
+     * // Get first 10 AdminSsoTokens
+     * const adminSsoTokens = await prisma.adminSsoToken.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const adminSsoTokenWithIdOnly = await prisma.adminSsoToken.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends AdminSsoTokenFindManyArgs>(args?: SelectSubset<T, AdminSsoTokenFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$AdminSsoTokenPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a AdminSsoToken.
+     * @param {AdminSsoTokenCreateArgs} args - Arguments to create a AdminSsoToken.
+     * @example
+     * // Create one AdminSsoToken
+     * const AdminSsoToken = await prisma.adminSsoToken.create({
+     *   data: {
+     *     // ... data to create a AdminSsoToken
+     *   }
+     * })
+     * 
+     */
+    create<T extends AdminSsoTokenCreateArgs>(args: SelectSubset<T, AdminSsoTokenCreateArgs<ExtArgs>>): Prisma__AdminSsoTokenClient<$Result.GetResult<Prisma.$AdminSsoTokenPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many AdminSsoTokens.
+     * @param {AdminSsoTokenCreateManyArgs} args - Arguments to create many AdminSsoTokens.
+     * @example
+     * // Create many AdminSsoTokens
+     * const adminSsoToken = await prisma.adminSsoToken.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends AdminSsoTokenCreateManyArgs>(args?: SelectSubset<T, AdminSsoTokenCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many AdminSsoTokens and returns the data saved in the database.
+     * @param {AdminSsoTokenCreateManyAndReturnArgs} args - Arguments to create many AdminSsoTokens.
+     * @example
+     * // Create many AdminSsoTokens
+     * const adminSsoToken = await prisma.adminSsoToken.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many AdminSsoTokens and only return the `id`
+     * const adminSsoTokenWithIdOnly = await prisma.adminSsoToken.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends AdminSsoTokenCreateManyAndReturnArgs>(args?: SelectSubset<T, AdminSsoTokenCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$AdminSsoTokenPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a AdminSsoToken.
+     * @param {AdminSsoTokenDeleteArgs} args - Arguments to delete one AdminSsoToken.
+     * @example
+     * // Delete one AdminSsoToken
+     * const AdminSsoToken = await prisma.adminSsoToken.delete({
+     *   where: {
+     *     // ... filter to delete one AdminSsoToken
+     *   }
+     * })
+     * 
+     */
+    delete<T extends AdminSsoTokenDeleteArgs>(args: SelectSubset<T, AdminSsoTokenDeleteArgs<ExtArgs>>): Prisma__AdminSsoTokenClient<$Result.GetResult<Prisma.$AdminSsoTokenPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one AdminSsoToken.
+     * @param {AdminSsoTokenUpdateArgs} args - Arguments to update one AdminSsoToken.
+     * @example
+     * // Update one AdminSsoToken
+     * const adminSsoToken = await prisma.adminSsoToken.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends AdminSsoTokenUpdateArgs>(args: SelectSubset<T, AdminSsoTokenUpdateArgs<ExtArgs>>): Prisma__AdminSsoTokenClient<$Result.GetResult<Prisma.$AdminSsoTokenPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more AdminSsoTokens.
+     * @param {AdminSsoTokenDeleteManyArgs} args - Arguments to filter AdminSsoTokens to delete.
+     * @example
+     * // Delete a few AdminSsoTokens
+     * const { count } = await prisma.adminSsoToken.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends AdminSsoTokenDeleteManyArgs>(args?: SelectSubset<T, AdminSsoTokenDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more AdminSsoTokens.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {AdminSsoTokenUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many AdminSsoTokens
+     * const adminSsoToken = await prisma.adminSsoToken.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends AdminSsoTokenUpdateManyArgs>(args: SelectSubset<T, AdminSsoTokenUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more AdminSsoTokens and returns the data updated in the database.
+     * @param {AdminSsoTokenUpdateManyAndReturnArgs} args - Arguments to update many AdminSsoTokens.
+     * @example
+     * // Update many AdminSsoTokens
+     * const adminSsoToken = await prisma.adminSsoToken.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more AdminSsoTokens and only return the `id`
+     * const adminSsoTokenWithIdOnly = await prisma.adminSsoToken.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends AdminSsoTokenUpdateManyAndReturnArgs>(args: SelectSubset<T, AdminSsoTokenUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$AdminSsoTokenPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one AdminSsoToken.
+     * @param {AdminSsoTokenUpsertArgs} args - Arguments to update or create a AdminSsoToken.
+     * @example
+     * // Update or create a AdminSsoToken
+     * const adminSsoToken = await prisma.adminSsoToken.upsert({
+     *   create: {
+     *     // ... data to create a AdminSsoToken
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the AdminSsoToken we want to update
+     *   }
+     * })
+     */
+    upsert<T extends AdminSsoTokenUpsertArgs>(args: SelectSubset<T, AdminSsoTokenUpsertArgs<ExtArgs>>): Prisma__AdminSsoTokenClient<$Result.GetResult<Prisma.$AdminSsoTokenPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of AdminSsoTokens.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {AdminSsoTokenCountArgs} args - Arguments to filter AdminSsoTokens to count.
+     * @example
+     * // Count the number of AdminSsoTokens
+     * const count = await prisma.adminSsoToken.count({
+     *   where: {
+     *     // ... the filter for the AdminSsoTokens we want to count
+     *   }
+     * })
+    **/
+    count<T extends AdminSsoTokenCountArgs>(
+      args?: Subset<T, AdminSsoTokenCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], AdminSsoTokenCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a AdminSsoToken.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {AdminSsoTokenAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends AdminSsoTokenAggregateArgs>(args: Subset<T, AdminSsoTokenAggregateArgs>): Prisma.PrismaPromise<GetAdminSsoTokenAggregateType<T>>
+
+    /**
+     * Group by AdminSsoToken.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {AdminSsoTokenGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends AdminSsoTokenGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: AdminSsoTokenGroupByArgs['orderBy'] }
+        : { orderBy?: AdminSsoTokenGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, AdminSsoTokenGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetAdminSsoTokenGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the AdminSsoToken model
+   */
+  readonly fields: AdminSsoTokenFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for AdminSsoToken.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__AdminSsoTokenClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    user<T extends AdminUserDefaultArgs<ExtArgs> = {}>(args?: Subset<T, AdminUserDefaultArgs<ExtArgs>>): Prisma__AdminUserClient<$Result.GetResult<Prisma.$AdminUserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the AdminSsoToken model
+   */
+  interface AdminSsoTokenFieldRefs {
+    readonly id: FieldRef<"AdminSsoToken", 'String'>
+    readonly tokenHash: FieldRef<"AdminSsoToken", 'String'>
+    readonly userId: FieldRef<"AdminSsoToken", 'String'>
+    readonly dashboardCode: FieldRef<"AdminSsoToken", 'String'>
+    readonly expiresAt: FieldRef<"AdminSsoToken", 'DateTime'>
+    readonly usedAt: FieldRef<"AdminSsoToken", 'DateTime'>
+    readonly createdAt: FieldRef<"AdminSsoToken", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * AdminSsoToken findUnique
+   */
+  export type AdminSsoTokenFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AdminSsoToken
+     */
+    select?: AdminSsoTokenSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AdminSsoToken
+     */
+    omit?: AdminSsoTokenOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AdminSsoTokenInclude<ExtArgs> | null
+    /**
+     * Filter, which AdminSsoToken to fetch.
+     */
+    where: AdminSsoTokenWhereUniqueInput
+  }
+
+  /**
+   * AdminSsoToken findUniqueOrThrow
+   */
+  export type AdminSsoTokenFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AdminSsoToken
+     */
+    select?: AdminSsoTokenSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AdminSsoToken
+     */
+    omit?: AdminSsoTokenOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AdminSsoTokenInclude<ExtArgs> | null
+    /**
+     * Filter, which AdminSsoToken to fetch.
+     */
+    where: AdminSsoTokenWhereUniqueInput
+  }
+
+  /**
+   * AdminSsoToken findFirst
+   */
+  export type AdminSsoTokenFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AdminSsoToken
+     */
+    select?: AdminSsoTokenSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AdminSsoToken
+     */
+    omit?: AdminSsoTokenOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AdminSsoTokenInclude<ExtArgs> | null
+    /**
+     * Filter, which AdminSsoToken to fetch.
+     */
+    where?: AdminSsoTokenWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of AdminSsoTokens to fetch.
+     */
+    orderBy?: AdminSsoTokenOrderByWithRelationInput | AdminSsoTokenOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for AdminSsoTokens.
+     */
+    cursor?: AdminSsoTokenWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` AdminSsoTokens from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` AdminSsoTokens.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of AdminSsoTokens.
+     */
+    distinct?: AdminSsoTokenScalarFieldEnum | AdminSsoTokenScalarFieldEnum[]
+  }
+
+  /**
+   * AdminSsoToken findFirstOrThrow
+   */
+  export type AdminSsoTokenFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AdminSsoToken
+     */
+    select?: AdminSsoTokenSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AdminSsoToken
+     */
+    omit?: AdminSsoTokenOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AdminSsoTokenInclude<ExtArgs> | null
+    /**
+     * Filter, which AdminSsoToken to fetch.
+     */
+    where?: AdminSsoTokenWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of AdminSsoTokens to fetch.
+     */
+    orderBy?: AdminSsoTokenOrderByWithRelationInput | AdminSsoTokenOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for AdminSsoTokens.
+     */
+    cursor?: AdminSsoTokenWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` AdminSsoTokens from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` AdminSsoTokens.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of AdminSsoTokens.
+     */
+    distinct?: AdminSsoTokenScalarFieldEnum | AdminSsoTokenScalarFieldEnum[]
+  }
+
+  /**
+   * AdminSsoToken findMany
+   */
+  export type AdminSsoTokenFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AdminSsoToken
+     */
+    select?: AdminSsoTokenSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AdminSsoToken
+     */
+    omit?: AdminSsoTokenOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AdminSsoTokenInclude<ExtArgs> | null
+    /**
+     * Filter, which AdminSsoTokens to fetch.
+     */
+    where?: AdminSsoTokenWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of AdminSsoTokens to fetch.
+     */
+    orderBy?: AdminSsoTokenOrderByWithRelationInput | AdminSsoTokenOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing AdminSsoTokens.
+     */
+    cursor?: AdminSsoTokenWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` AdminSsoTokens from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` AdminSsoTokens.
+     */
+    skip?: number
+    distinct?: AdminSsoTokenScalarFieldEnum | AdminSsoTokenScalarFieldEnum[]
+  }
+
+  /**
+   * AdminSsoToken create
+   */
+  export type AdminSsoTokenCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AdminSsoToken
+     */
+    select?: AdminSsoTokenSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AdminSsoToken
+     */
+    omit?: AdminSsoTokenOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AdminSsoTokenInclude<ExtArgs> | null
+    /**
+     * The data needed to create a AdminSsoToken.
+     */
+    data: XOR<AdminSsoTokenCreateInput, AdminSsoTokenUncheckedCreateInput>
+  }
+
+  /**
+   * AdminSsoToken createMany
+   */
+  export type AdminSsoTokenCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many AdminSsoTokens.
+     */
+    data: AdminSsoTokenCreateManyInput | AdminSsoTokenCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * AdminSsoToken createManyAndReturn
+   */
+  export type AdminSsoTokenCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AdminSsoToken
+     */
+    select?: AdminSsoTokenSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the AdminSsoToken
+     */
+    omit?: AdminSsoTokenOmit<ExtArgs> | null
+    /**
+     * The data used to create many AdminSsoTokens.
+     */
+    data: AdminSsoTokenCreateManyInput | AdminSsoTokenCreateManyInput[]
+    skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AdminSsoTokenIncludeCreateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * AdminSsoToken update
+   */
+  export type AdminSsoTokenUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AdminSsoToken
+     */
+    select?: AdminSsoTokenSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AdminSsoToken
+     */
+    omit?: AdminSsoTokenOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AdminSsoTokenInclude<ExtArgs> | null
+    /**
+     * The data needed to update a AdminSsoToken.
+     */
+    data: XOR<AdminSsoTokenUpdateInput, AdminSsoTokenUncheckedUpdateInput>
+    /**
+     * Choose, which AdminSsoToken to update.
+     */
+    where: AdminSsoTokenWhereUniqueInput
+  }
+
+  /**
+   * AdminSsoToken updateMany
+   */
+  export type AdminSsoTokenUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update AdminSsoTokens.
+     */
+    data: XOR<AdminSsoTokenUpdateManyMutationInput, AdminSsoTokenUncheckedUpdateManyInput>
+    /**
+     * Filter which AdminSsoTokens to update
+     */
+    where?: AdminSsoTokenWhereInput
+    /**
+     * Limit how many AdminSsoTokens to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * AdminSsoToken updateManyAndReturn
+   */
+  export type AdminSsoTokenUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AdminSsoToken
+     */
+    select?: AdminSsoTokenSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the AdminSsoToken
+     */
+    omit?: AdminSsoTokenOmit<ExtArgs> | null
+    /**
+     * The data used to update AdminSsoTokens.
+     */
+    data: XOR<AdminSsoTokenUpdateManyMutationInput, AdminSsoTokenUncheckedUpdateManyInput>
+    /**
+     * Filter which AdminSsoTokens to update
+     */
+    where?: AdminSsoTokenWhereInput
+    /**
+     * Limit how many AdminSsoTokens to update.
+     */
+    limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AdminSsoTokenIncludeUpdateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * AdminSsoToken upsert
+   */
+  export type AdminSsoTokenUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AdminSsoToken
+     */
+    select?: AdminSsoTokenSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AdminSsoToken
+     */
+    omit?: AdminSsoTokenOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AdminSsoTokenInclude<ExtArgs> | null
+    /**
+     * The filter to search for the AdminSsoToken to update in case it exists.
+     */
+    where: AdminSsoTokenWhereUniqueInput
+    /**
+     * In case the AdminSsoToken found by the `where` argument doesn't exist, create a new AdminSsoToken with this data.
+     */
+    create: XOR<AdminSsoTokenCreateInput, AdminSsoTokenUncheckedCreateInput>
+    /**
+     * In case the AdminSsoToken was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<AdminSsoTokenUpdateInput, AdminSsoTokenUncheckedUpdateInput>
+  }
+
+  /**
+   * AdminSsoToken delete
+   */
+  export type AdminSsoTokenDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AdminSsoToken
+     */
+    select?: AdminSsoTokenSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AdminSsoToken
+     */
+    omit?: AdminSsoTokenOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AdminSsoTokenInclude<ExtArgs> | null
+    /**
+     * Filter which AdminSsoToken to delete.
+     */
+    where: AdminSsoTokenWhereUniqueInput
+  }
+
+  /**
+   * AdminSsoToken deleteMany
+   */
+  export type AdminSsoTokenDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which AdminSsoTokens to delete
+     */
+    where?: AdminSsoTokenWhereInput
+    /**
+     * Limit how many AdminSsoTokens to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * AdminSsoToken without action
+   */
+  export type AdminSsoTokenDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AdminSsoToken
+     */
+    select?: AdminSsoTokenSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AdminSsoToken
+     */
+    omit?: AdminSsoTokenOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AdminSsoTokenInclude<ExtArgs> | null
+  }
+
+
+  /**
    * Enums
    */
 
@@ -6847,6 +8059,19 @@ export namespace Prisma {
   };
 
   export type AdminActivityLogScalarFieldEnum = (typeof AdminActivityLogScalarFieldEnum)[keyof typeof AdminActivityLogScalarFieldEnum]
+
+
+  export const AdminSsoTokenScalarFieldEnum: {
+    id: 'id',
+    tokenHash: 'tokenHash',
+    userId: 'userId',
+    dashboardCode: 'dashboardCode',
+    expiresAt: 'expiresAt',
+    usedAt: 'usedAt',
+    createdAt: 'createdAt'
+  };
+
+  export type AdminSsoTokenScalarFieldEnum = (typeof AdminSsoTokenScalarFieldEnum)[keyof typeof AdminSsoTokenScalarFieldEnum]
 
 
   export const SortOrder: {
@@ -6939,6 +8164,7 @@ export namespace Prisma {
     dashboardAccess?: UserDashboardAccessListRelationFilter
     sessions?: AdminSessionListRelationFilter
     activityLogs?: AdminActivityLogListRelationFilter
+    ssoTokens?: AdminSsoTokenListRelationFilter
   }
 
   export type AdminUserOrderByWithRelationInput = {
@@ -6954,6 +8180,7 @@ export namespace Prisma {
     dashboardAccess?: UserDashboardAccessOrderByRelationAggregateInput
     sessions?: AdminSessionOrderByRelationAggregateInput
     activityLogs?: AdminActivityLogOrderByRelationAggregateInput
+    ssoTokens?: AdminSsoTokenOrderByRelationAggregateInput
   }
 
   export type AdminUserWhereUniqueInput = Prisma.AtLeast<{
@@ -6972,6 +8199,7 @@ export namespace Prisma {
     dashboardAccess?: UserDashboardAccessListRelationFilter
     sessions?: AdminSessionListRelationFilter
     activityLogs?: AdminActivityLogListRelationFilter
+    ssoTokens?: AdminSsoTokenListRelationFilter
   }, "id" | "username" | "email">
 
   export type AdminUserOrderByWithAggregationInput = {
@@ -7243,6 +8471,71 @@ export namespace Prisma {
     createdAt?: DateTimeWithAggregatesFilter<"AdminActivityLog"> | Date | string
   }
 
+  export type AdminSsoTokenWhereInput = {
+    AND?: AdminSsoTokenWhereInput | AdminSsoTokenWhereInput[]
+    OR?: AdminSsoTokenWhereInput[]
+    NOT?: AdminSsoTokenWhereInput | AdminSsoTokenWhereInput[]
+    id?: StringFilter<"AdminSsoToken"> | string
+    tokenHash?: StringFilter<"AdminSsoToken"> | string
+    userId?: StringFilter<"AdminSsoToken"> | string
+    dashboardCode?: StringFilter<"AdminSsoToken"> | string
+    expiresAt?: DateTimeFilter<"AdminSsoToken"> | Date | string
+    usedAt?: DateTimeNullableFilter<"AdminSsoToken"> | Date | string | null
+    createdAt?: DateTimeFilter<"AdminSsoToken"> | Date | string
+    user?: XOR<AdminUserScalarRelationFilter, AdminUserWhereInput>
+  }
+
+  export type AdminSsoTokenOrderByWithRelationInput = {
+    id?: SortOrder
+    tokenHash?: SortOrder
+    userId?: SortOrder
+    dashboardCode?: SortOrder
+    expiresAt?: SortOrder
+    usedAt?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    user?: AdminUserOrderByWithRelationInput
+  }
+
+  export type AdminSsoTokenWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    tokenHash?: string
+    AND?: AdminSsoTokenWhereInput | AdminSsoTokenWhereInput[]
+    OR?: AdminSsoTokenWhereInput[]
+    NOT?: AdminSsoTokenWhereInput | AdminSsoTokenWhereInput[]
+    userId?: StringFilter<"AdminSsoToken"> | string
+    dashboardCode?: StringFilter<"AdminSsoToken"> | string
+    expiresAt?: DateTimeFilter<"AdminSsoToken"> | Date | string
+    usedAt?: DateTimeNullableFilter<"AdminSsoToken"> | Date | string | null
+    createdAt?: DateTimeFilter<"AdminSsoToken"> | Date | string
+    user?: XOR<AdminUserScalarRelationFilter, AdminUserWhereInput>
+  }, "id" | "tokenHash">
+
+  export type AdminSsoTokenOrderByWithAggregationInput = {
+    id?: SortOrder
+    tokenHash?: SortOrder
+    userId?: SortOrder
+    dashboardCode?: SortOrder
+    expiresAt?: SortOrder
+    usedAt?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    _count?: AdminSsoTokenCountOrderByAggregateInput
+    _max?: AdminSsoTokenMaxOrderByAggregateInput
+    _min?: AdminSsoTokenMinOrderByAggregateInput
+  }
+
+  export type AdminSsoTokenScalarWhereWithAggregatesInput = {
+    AND?: AdminSsoTokenScalarWhereWithAggregatesInput | AdminSsoTokenScalarWhereWithAggregatesInput[]
+    OR?: AdminSsoTokenScalarWhereWithAggregatesInput[]
+    NOT?: AdminSsoTokenScalarWhereWithAggregatesInput | AdminSsoTokenScalarWhereWithAggregatesInput[]
+    id?: StringWithAggregatesFilter<"AdminSsoToken"> | string
+    tokenHash?: StringWithAggregatesFilter<"AdminSsoToken"> | string
+    userId?: StringWithAggregatesFilter<"AdminSsoToken"> | string
+    dashboardCode?: StringWithAggregatesFilter<"AdminSsoToken"> | string
+    expiresAt?: DateTimeWithAggregatesFilter<"AdminSsoToken"> | Date | string
+    usedAt?: DateTimeNullableWithAggregatesFilter<"AdminSsoToken"> | Date | string | null
+    createdAt?: DateTimeWithAggregatesFilter<"AdminSsoToken"> | Date | string
+  }
+
   export type AdminUserCreateInput = {
     id?: string
     name: string
@@ -7256,6 +8549,7 @@ export namespace Prisma {
     dashboardAccess?: UserDashboardAccessCreateNestedManyWithoutUserInput
     sessions?: AdminSessionCreateNestedManyWithoutUserInput
     activityLogs?: AdminActivityLogCreateNestedManyWithoutUserInput
+    ssoTokens?: AdminSsoTokenCreateNestedManyWithoutUserInput
   }
 
   export type AdminUserUncheckedCreateInput = {
@@ -7271,6 +8565,7 @@ export namespace Prisma {
     dashboardAccess?: UserDashboardAccessUncheckedCreateNestedManyWithoutUserInput
     sessions?: AdminSessionUncheckedCreateNestedManyWithoutUserInput
     activityLogs?: AdminActivityLogUncheckedCreateNestedManyWithoutUserInput
+    ssoTokens?: AdminSsoTokenUncheckedCreateNestedManyWithoutUserInput
   }
 
   export type AdminUserUpdateInput = {
@@ -7286,6 +8581,7 @@ export namespace Prisma {
     dashboardAccess?: UserDashboardAccessUpdateManyWithoutUserNestedInput
     sessions?: AdminSessionUpdateManyWithoutUserNestedInput
     activityLogs?: AdminActivityLogUpdateManyWithoutUserNestedInput
+    ssoTokens?: AdminSsoTokenUpdateManyWithoutUserNestedInput
   }
 
   export type AdminUserUncheckedUpdateInput = {
@@ -7301,6 +8597,7 @@ export namespace Prisma {
     dashboardAccess?: UserDashboardAccessUncheckedUpdateManyWithoutUserNestedInput
     sessions?: AdminSessionUncheckedUpdateManyWithoutUserNestedInput
     activityLogs?: AdminActivityLogUncheckedUpdateManyWithoutUserNestedInput
+    ssoTokens?: AdminSsoTokenUncheckedUpdateManyWithoutUserNestedInput
   }
 
   export type AdminUserCreateManyInput = {
@@ -7584,6 +8881,75 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
+  export type AdminSsoTokenCreateInput = {
+    id?: string
+    tokenHash: string
+    dashboardCode: string
+    expiresAt: Date | string
+    usedAt?: Date | string | null
+    createdAt?: Date | string
+    user: AdminUserCreateNestedOneWithoutSsoTokensInput
+  }
+
+  export type AdminSsoTokenUncheckedCreateInput = {
+    id?: string
+    tokenHash: string
+    userId: string
+    dashboardCode: string
+    expiresAt: Date | string
+    usedAt?: Date | string | null
+    createdAt?: Date | string
+  }
+
+  export type AdminSsoTokenUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    tokenHash?: StringFieldUpdateOperationsInput | string
+    dashboardCode?: StringFieldUpdateOperationsInput | string
+    expiresAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    usedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    user?: AdminUserUpdateOneRequiredWithoutSsoTokensNestedInput
+  }
+
+  export type AdminSsoTokenUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    tokenHash?: StringFieldUpdateOperationsInput | string
+    userId?: StringFieldUpdateOperationsInput | string
+    dashboardCode?: StringFieldUpdateOperationsInput | string
+    expiresAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    usedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type AdminSsoTokenCreateManyInput = {
+    id?: string
+    tokenHash: string
+    userId: string
+    dashboardCode: string
+    expiresAt: Date | string
+    usedAt?: Date | string | null
+    createdAt?: Date | string
+  }
+
+  export type AdminSsoTokenUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    tokenHash?: StringFieldUpdateOperationsInput | string
+    dashboardCode?: StringFieldUpdateOperationsInput | string
+    expiresAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    usedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type AdminSsoTokenUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    tokenHash?: StringFieldUpdateOperationsInput | string
+    userId?: StringFieldUpdateOperationsInput | string
+    dashboardCode?: StringFieldUpdateOperationsInput | string
+    expiresAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    usedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
   export type StringFilter<$PrismaModel = never> = {
     equals?: string | StringFieldRefInput<$PrismaModel>
     in?: string[] | ListStringFieldRefInput<$PrismaModel>
@@ -7628,6 +8994,12 @@ export namespace Prisma {
     none?: AdminActivityLogWhereInput
   }
 
+  export type AdminSsoTokenListRelationFilter = {
+    every?: AdminSsoTokenWhereInput
+    some?: AdminSsoTokenWhereInput
+    none?: AdminSsoTokenWhereInput
+  }
+
   export type UserDashboardAccessOrderByRelationAggregateInput = {
     _count?: SortOrder
   }
@@ -7637,6 +9009,10 @@ export namespace Prisma {
   }
 
   export type AdminActivityLogOrderByRelationAggregateInput = {
+    _count?: SortOrder
+  }
+
+  export type AdminSsoTokenOrderByRelationAggregateInput = {
     _count?: SortOrder
   }
 
@@ -7866,6 +9242,61 @@ export namespace Prisma {
     _max?: NestedStringNullableFilter<$PrismaModel>
   }
 
+  export type DateTimeNullableFilter<$PrismaModel = never> = {
+    equals?: Date | string | DateTimeFieldRefInput<$PrismaModel> | null
+    in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
+    notIn?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
+    lt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    lte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    not?: NestedDateTimeNullableFilter<$PrismaModel> | Date | string | null
+  }
+
+  export type AdminSsoTokenCountOrderByAggregateInput = {
+    id?: SortOrder
+    tokenHash?: SortOrder
+    userId?: SortOrder
+    dashboardCode?: SortOrder
+    expiresAt?: SortOrder
+    usedAt?: SortOrder
+    createdAt?: SortOrder
+  }
+
+  export type AdminSsoTokenMaxOrderByAggregateInput = {
+    id?: SortOrder
+    tokenHash?: SortOrder
+    userId?: SortOrder
+    dashboardCode?: SortOrder
+    expiresAt?: SortOrder
+    usedAt?: SortOrder
+    createdAt?: SortOrder
+  }
+
+  export type AdminSsoTokenMinOrderByAggregateInput = {
+    id?: SortOrder
+    tokenHash?: SortOrder
+    userId?: SortOrder
+    dashboardCode?: SortOrder
+    expiresAt?: SortOrder
+    usedAt?: SortOrder
+    createdAt?: SortOrder
+  }
+
+  export type DateTimeNullableWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: Date | string | DateTimeFieldRefInput<$PrismaModel> | null
+    in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
+    notIn?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
+    lt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    lte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    not?: NestedDateTimeNullableWithAggregatesFilter<$PrismaModel> | Date | string | null
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _min?: NestedDateTimeNullableFilter<$PrismaModel>
+    _max?: NestedDateTimeNullableFilter<$PrismaModel>
+  }
+
   export type UserDashboardAccessCreateNestedManyWithoutUserInput = {
     create?: XOR<UserDashboardAccessCreateWithoutUserInput, UserDashboardAccessUncheckedCreateWithoutUserInput> | UserDashboardAccessCreateWithoutUserInput[] | UserDashboardAccessUncheckedCreateWithoutUserInput[]
     connectOrCreate?: UserDashboardAccessCreateOrConnectWithoutUserInput | UserDashboardAccessCreateOrConnectWithoutUserInput[]
@@ -7887,6 +9318,13 @@ export namespace Prisma {
     connect?: AdminActivityLogWhereUniqueInput | AdminActivityLogWhereUniqueInput[]
   }
 
+  export type AdminSsoTokenCreateNestedManyWithoutUserInput = {
+    create?: XOR<AdminSsoTokenCreateWithoutUserInput, AdminSsoTokenUncheckedCreateWithoutUserInput> | AdminSsoTokenCreateWithoutUserInput[] | AdminSsoTokenUncheckedCreateWithoutUserInput[]
+    connectOrCreate?: AdminSsoTokenCreateOrConnectWithoutUserInput | AdminSsoTokenCreateOrConnectWithoutUserInput[]
+    createMany?: AdminSsoTokenCreateManyUserInputEnvelope
+    connect?: AdminSsoTokenWhereUniqueInput | AdminSsoTokenWhereUniqueInput[]
+  }
+
   export type UserDashboardAccessUncheckedCreateNestedManyWithoutUserInput = {
     create?: XOR<UserDashboardAccessCreateWithoutUserInput, UserDashboardAccessUncheckedCreateWithoutUserInput> | UserDashboardAccessCreateWithoutUserInput[] | UserDashboardAccessUncheckedCreateWithoutUserInput[]
     connectOrCreate?: UserDashboardAccessCreateOrConnectWithoutUserInput | UserDashboardAccessCreateOrConnectWithoutUserInput[]
@@ -7906,6 +9344,13 @@ export namespace Prisma {
     connectOrCreate?: AdminActivityLogCreateOrConnectWithoutUserInput | AdminActivityLogCreateOrConnectWithoutUserInput[]
     createMany?: AdminActivityLogCreateManyUserInputEnvelope
     connect?: AdminActivityLogWhereUniqueInput | AdminActivityLogWhereUniqueInput[]
+  }
+
+  export type AdminSsoTokenUncheckedCreateNestedManyWithoutUserInput = {
+    create?: XOR<AdminSsoTokenCreateWithoutUserInput, AdminSsoTokenUncheckedCreateWithoutUserInput> | AdminSsoTokenCreateWithoutUserInput[] | AdminSsoTokenUncheckedCreateWithoutUserInput[]
+    connectOrCreate?: AdminSsoTokenCreateOrConnectWithoutUserInput | AdminSsoTokenCreateOrConnectWithoutUserInput[]
+    createMany?: AdminSsoTokenCreateManyUserInputEnvelope
+    connect?: AdminSsoTokenWhereUniqueInput | AdminSsoTokenWhereUniqueInput[]
   }
 
   export type StringFieldUpdateOperationsInput = {
@@ -7958,6 +9403,20 @@ export namespace Prisma {
     deleteMany?: AdminActivityLogScalarWhereInput | AdminActivityLogScalarWhereInput[]
   }
 
+  export type AdminSsoTokenUpdateManyWithoutUserNestedInput = {
+    create?: XOR<AdminSsoTokenCreateWithoutUserInput, AdminSsoTokenUncheckedCreateWithoutUserInput> | AdminSsoTokenCreateWithoutUserInput[] | AdminSsoTokenUncheckedCreateWithoutUserInput[]
+    connectOrCreate?: AdminSsoTokenCreateOrConnectWithoutUserInput | AdminSsoTokenCreateOrConnectWithoutUserInput[]
+    upsert?: AdminSsoTokenUpsertWithWhereUniqueWithoutUserInput | AdminSsoTokenUpsertWithWhereUniqueWithoutUserInput[]
+    createMany?: AdminSsoTokenCreateManyUserInputEnvelope
+    set?: AdminSsoTokenWhereUniqueInput | AdminSsoTokenWhereUniqueInput[]
+    disconnect?: AdminSsoTokenWhereUniqueInput | AdminSsoTokenWhereUniqueInput[]
+    delete?: AdminSsoTokenWhereUniqueInput | AdminSsoTokenWhereUniqueInput[]
+    connect?: AdminSsoTokenWhereUniqueInput | AdminSsoTokenWhereUniqueInput[]
+    update?: AdminSsoTokenUpdateWithWhereUniqueWithoutUserInput | AdminSsoTokenUpdateWithWhereUniqueWithoutUserInput[]
+    updateMany?: AdminSsoTokenUpdateManyWithWhereWithoutUserInput | AdminSsoTokenUpdateManyWithWhereWithoutUserInput[]
+    deleteMany?: AdminSsoTokenScalarWhereInput | AdminSsoTokenScalarWhereInput[]
+  }
+
   export type UserDashboardAccessUncheckedUpdateManyWithoutUserNestedInput = {
     create?: XOR<UserDashboardAccessCreateWithoutUserInput, UserDashboardAccessUncheckedCreateWithoutUserInput> | UserDashboardAccessCreateWithoutUserInput[] | UserDashboardAccessUncheckedCreateWithoutUserInput[]
     connectOrCreate?: UserDashboardAccessCreateOrConnectWithoutUserInput | UserDashboardAccessCreateOrConnectWithoutUserInput[]
@@ -7998,6 +9457,20 @@ export namespace Prisma {
     update?: AdminActivityLogUpdateWithWhereUniqueWithoutUserInput | AdminActivityLogUpdateWithWhereUniqueWithoutUserInput[]
     updateMany?: AdminActivityLogUpdateManyWithWhereWithoutUserInput | AdminActivityLogUpdateManyWithWhereWithoutUserInput[]
     deleteMany?: AdminActivityLogScalarWhereInput | AdminActivityLogScalarWhereInput[]
+  }
+
+  export type AdminSsoTokenUncheckedUpdateManyWithoutUserNestedInput = {
+    create?: XOR<AdminSsoTokenCreateWithoutUserInput, AdminSsoTokenUncheckedCreateWithoutUserInput> | AdminSsoTokenCreateWithoutUserInput[] | AdminSsoTokenUncheckedCreateWithoutUserInput[]
+    connectOrCreate?: AdminSsoTokenCreateOrConnectWithoutUserInput | AdminSsoTokenCreateOrConnectWithoutUserInput[]
+    upsert?: AdminSsoTokenUpsertWithWhereUniqueWithoutUserInput | AdminSsoTokenUpsertWithWhereUniqueWithoutUserInput[]
+    createMany?: AdminSsoTokenCreateManyUserInputEnvelope
+    set?: AdminSsoTokenWhereUniqueInput | AdminSsoTokenWhereUniqueInput[]
+    disconnect?: AdminSsoTokenWhereUniqueInput | AdminSsoTokenWhereUniqueInput[]
+    delete?: AdminSsoTokenWhereUniqueInput | AdminSsoTokenWhereUniqueInput[]
+    connect?: AdminSsoTokenWhereUniqueInput | AdminSsoTokenWhereUniqueInput[]
+    update?: AdminSsoTokenUpdateWithWhereUniqueWithoutUserInput | AdminSsoTokenUpdateWithWhereUniqueWithoutUserInput[]
+    updateMany?: AdminSsoTokenUpdateManyWithWhereWithoutUserInput | AdminSsoTokenUpdateManyWithWhereWithoutUserInput[]
+    deleteMany?: AdminSsoTokenScalarWhereInput | AdminSsoTokenScalarWhereInput[]
   }
 
   export type UserDashboardAccessCreateNestedManyWithoutDashboardInput = {
@@ -8100,6 +9573,24 @@ export namespace Prisma {
     upsert?: AdminUserUpsertWithoutActivityLogsInput
     connect?: AdminUserWhereUniqueInput
     update?: XOR<XOR<AdminUserUpdateToOneWithWhereWithoutActivityLogsInput, AdminUserUpdateWithoutActivityLogsInput>, AdminUserUncheckedUpdateWithoutActivityLogsInput>
+  }
+
+  export type AdminUserCreateNestedOneWithoutSsoTokensInput = {
+    create?: XOR<AdminUserCreateWithoutSsoTokensInput, AdminUserUncheckedCreateWithoutSsoTokensInput>
+    connectOrCreate?: AdminUserCreateOrConnectWithoutSsoTokensInput
+    connect?: AdminUserWhereUniqueInput
+  }
+
+  export type NullableDateTimeFieldUpdateOperationsInput = {
+    set?: Date | string | null
+  }
+
+  export type AdminUserUpdateOneRequiredWithoutSsoTokensNestedInput = {
+    create?: XOR<AdminUserCreateWithoutSsoTokensInput, AdminUserUncheckedCreateWithoutSsoTokensInput>
+    connectOrCreate?: AdminUserCreateOrConnectWithoutSsoTokensInput
+    upsert?: AdminUserUpsertWithoutSsoTokensInput
+    connect?: AdminUserWhereUniqueInput
+    update?: XOR<XOR<AdminUserUpdateToOneWithWhereWithoutSsoTokensInput, AdminUserUpdateWithoutSsoTokensInput>, AdminUserUncheckedUpdateWithoutSsoTokensInput>
   }
 
   export type NestedStringFilter<$PrismaModel = never> = {
@@ -8211,6 +9702,31 @@ export namespace Prisma {
     not?: NestedIntNullableFilter<$PrismaModel> | number | null
   }
 
+  export type NestedDateTimeNullableFilter<$PrismaModel = never> = {
+    equals?: Date | string | DateTimeFieldRefInput<$PrismaModel> | null
+    in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
+    notIn?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
+    lt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    lte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    not?: NestedDateTimeNullableFilter<$PrismaModel> | Date | string | null
+  }
+
+  export type NestedDateTimeNullableWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: Date | string | DateTimeFieldRefInput<$PrismaModel> | null
+    in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
+    notIn?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
+    lt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    lte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    not?: NestedDateTimeNullableWithAggregatesFilter<$PrismaModel> | Date | string | null
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _min?: NestedDateTimeNullableFilter<$PrismaModel>
+    _max?: NestedDateTimeNullableFilter<$PrismaModel>
+  }
+
   export type UserDashboardAccessCreateWithoutUserInput = {
     id?: string
     grantedAt?: Date | string
@@ -8282,6 +9798,34 @@ export namespace Prisma {
 
   export type AdminActivityLogCreateManyUserInputEnvelope = {
     data: AdminActivityLogCreateManyUserInput | AdminActivityLogCreateManyUserInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type AdminSsoTokenCreateWithoutUserInput = {
+    id?: string
+    tokenHash: string
+    dashboardCode: string
+    expiresAt: Date | string
+    usedAt?: Date | string | null
+    createdAt?: Date | string
+  }
+
+  export type AdminSsoTokenUncheckedCreateWithoutUserInput = {
+    id?: string
+    tokenHash: string
+    dashboardCode: string
+    expiresAt: Date | string
+    usedAt?: Date | string | null
+    createdAt?: Date | string
+  }
+
+  export type AdminSsoTokenCreateOrConnectWithoutUserInput = {
+    where: AdminSsoTokenWhereUniqueInput
+    create: XOR<AdminSsoTokenCreateWithoutUserInput, AdminSsoTokenUncheckedCreateWithoutUserInput>
+  }
+
+  export type AdminSsoTokenCreateManyUserInputEnvelope = {
+    data: AdminSsoTokenCreateManyUserInput | AdminSsoTokenCreateManyUserInput[]
     skipDuplicates?: boolean
   }
 
@@ -8367,6 +9911,35 @@ export namespace Prisma {
     createdAt?: DateTimeFilter<"AdminActivityLog"> | Date | string
   }
 
+  export type AdminSsoTokenUpsertWithWhereUniqueWithoutUserInput = {
+    where: AdminSsoTokenWhereUniqueInput
+    update: XOR<AdminSsoTokenUpdateWithoutUserInput, AdminSsoTokenUncheckedUpdateWithoutUserInput>
+    create: XOR<AdminSsoTokenCreateWithoutUserInput, AdminSsoTokenUncheckedCreateWithoutUserInput>
+  }
+
+  export type AdminSsoTokenUpdateWithWhereUniqueWithoutUserInput = {
+    where: AdminSsoTokenWhereUniqueInput
+    data: XOR<AdminSsoTokenUpdateWithoutUserInput, AdminSsoTokenUncheckedUpdateWithoutUserInput>
+  }
+
+  export type AdminSsoTokenUpdateManyWithWhereWithoutUserInput = {
+    where: AdminSsoTokenScalarWhereInput
+    data: XOR<AdminSsoTokenUpdateManyMutationInput, AdminSsoTokenUncheckedUpdateManyWithoutUserInput>
+  }
+
+  export type AdminSsoTokenScalarWhereInput = {
+    AND?: AdminSsoTokenScalarWhereInput | AdminSsoTokenScalarWhereInput[]
+    OR?: AdminSsoTokenScalarWhereInput[]
+    NOT?: AdminSsoTokenScalarWhereInput | AdminSsoTokenScalarWhereInput[]
+    id?: StringFilter<"AdminSsoToken"> | string
+    tokenHash?: StringFilter<"AdminSsoToken"> | string
+    userId?: StringFilter<"AdminSsoToken"> | string
+    dashboardCode?: StringFilter<"AdminSsoToken"> | string
+    expiresAt?: DateTimeFilter<"AdminSsoToken"> | Date | string
+    usedAt?: DateTimeNullableFilter<"AdminSsoToken"> | Date | string | null
+    createdAt?: DateTimeFilter<"AdminSsoToken"> | Date | string
+  }
+
   export type UserDashboardAccessCreateWithoutDashboardInput = {
     id?: string
     grantedAt?: Date | string
@@ -8417,6 +9990,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     sessions?: AdminSessionCreateNestedManyWithoutUserInput
     activityLogs?: AdminActivityLogCreateNestedManyWithoutUserInput
+    ssoTokens?: AdminSsoTokenCreateNestedManyWithoutUserInput
   }
 
   export type AdminUserUncheckedCreateWithoutDashboardAccessInput = {
@@ -8431,6 +10005,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     sessions?: AdminSessionUncheckedCreateNestedManyWithoutUserInput
     activityLogs?: AdminActivityLogUncheckedCreateNestedManyWithoutUserInput
+    ssoTokens?: AdminSsoTokenUncheckedCreateNestedManyWithoutUserInput
   }
 
   export type AdminUserCreateOrConnectWithoutDashboardAccessInput = {
@@ -8486,6 +10061,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     sessions?: AdminSessionUpdateManyWithoutUserNestedInput
     activityLogs?: AdminActivityLogUpdateManyWithoutUserNestedInput
+    ssoTokens?: AdminSsoTokenUpdateManyWithoutUserNestedInput
   }
 
   export type AdminUserUncheckedUpdateWithoutDashboardAccessInput = {
@@ -8500,6 +10076,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     sessions?: AdminSessionUncheckedUpdateManyWithoutUserNestedInput
     activityLogs?: AdminActivityLogUncheckedUpdateManyWithoutUserNestedInput
+    ssoTokens?: AdminSsoTokenUncheckedUpdateManyWithoutUserNestedInput
   }
 
   export type DashboardUpsertWithoutUserAccessInput = {
@@ -8545,6 +10122,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     dashboardAccess?: UserDashboardAccessCreateNestedManyWithoutUserInput
     activityLogs?: AdminActivityLogCreateNestedManyWithoutUserInput
+    ssoTokens?: AdminSsoTokenCreateNestedManyWithoutUserInput
   }
 
   export type AdminUserUncheckedCreateWithoutSessionsInput = {
@@ -8559,6 +10137,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     dashboardAccess?: UserDashboardAccessUncheckedCreateNestedManyWithoutUserInput
     activityLogs?: AdminActivityLogUncheckedCreateNestedManyWithoutUserInput
+    ssoTokens?: AdminSsoTokenUncheckedCreateNestedManyWithoutUserInput
   }
 
   export type AdminUserCreateOrConnectWithoutSessionsInput = {
@@ -8589,6 +10168,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     dashboardAccess?: UserDashboardAccessUpdateManyWithoutUserNestedInput
     activityLogs?: AdminActivityLogUpdateManyWithoutUserNestedInput
+    ssoTokens?: AdminSsoTokenUpdateManyWithoutUserNestedInput
   }
 
   export type AdminUserUncheckedUpdateWithoutSessionsInput = {
@@ -8603,6 +10183,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     dashboardAccess?: UserDashboardAccessUncheckedUpdateManyWithoutUserNestedInput
     activityLogs?: AdminActivityLogUncheckedUpdateManyWithoutUserNestedInput
+    ssoTokens?: AdminSsoTokenUncheckedUpdateManyWithoutUserNestedInput
   }
 
   export type AdminUserCreateWithoutActivityLogsInput = {
@@ -8617,6 +10198,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     dashboardAccess?: UserDashboardAccessCreateNestedManyWithoutUserInput
     sessions?: AdminSessionCreateNestedManyWithoutUserInput
+    ssoTokens?: AdminSsoTokenCreateNestedManyWithoutUserInput
   }
 
   export type AdminUserUncheckedCreateWithoutActivityLogsInput = {
@@ -8631,6 +10213,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     dashboardAccess?: UserDashboardAccessUncheckedCreateNestedManyWithoutUserInput
     sessions?: AdminSessionUncheckedCreateNestedManyWithoutUserInput
+    ssoTokens?: AdminSsoTokenUncheckedCreateNestedManyWithoutUserInput
   }
 
   export type AdminUserCreateOrConnectWithoutActivityLogsInput = {
@@ -8661,6 +10244,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     dashboardAccess?: UserDashboardAccessUpdateManyWithoutUserNestedInput
     sessions?: AdminSessionUpdateManyWithoutUserNestedInput
+    ssoTokens?: AdminSsoTokenUpdateManyWithoutUserNestedInput
   }
 
   export type AdminUserUncheckedUpdateWithoutActivityLogsInput = {
@@ -8675,6 +10259,83 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     dashboardAccess?: UserDashboardAccessUncheckedUpdateManyWithoutUserNestedInput
     sessions?: AdminSessionUncheckedUpdateManyWithoutUserNestedInput
+    ssoTokens?: AdminSsoTokenUncheckedUpdateManyWithoutUserNestedInput
+  }
+
+  export type AdminUserCreateWithoutSsoTokensInput = {
+    id?: string
+    name: string
+    username: string
+    email: string
+    password: string
+    role?: string
+    status?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    dashboardAccess?: UserDashboardAccessCreateNestedManyWithoutUserInput
+    sessions?: AdminSessionCreateNestedManyWithoutUserInput
+    activityLogs?: AdminActivityLogCreateNestedManyWithoutUserInput
+  }
+
+  export type AdminUserUncheckedCreateWithoutSsoTokensInput = {
+    id?: string
+    name: string
+    username: string
+    email: string
+    password: string
+    role?: string
+    status?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    dashboardAccess?: UserDashboardAccessUncheckedCreateNestedManyWithoutUserInput
+    sessions?: AdminSessionUncheckedCreateNestedManyWithoutUserInput
+    activityLogs?: AdminActivityLogUncheckedCreateNestedManyWithoutUserInput
+  }
+
+  export type AdminUserCreateOrConnectWithoutSsoTokensInput = {
+    where: AdminUserWhereUniqueInput
+    create: XOR<AdminUserCreateWithoutSsoTokensInput, AdminUserUncheckedCreateWithoutSsoTokensInput>
+  }
+
+  export type AdminUserUpsertWithoutSsoTokensInput = {
+    update: XOR<AdminUserUpdateWithoutSsoTokensInput, AdminUserUncheckedUpdateWithoutSsoTokensInput>
+    create: XOR<AdminUserCreateWithoutSsoTokensInput, AdminUserUncheckedCreateWithoutSsoTokensInput>
+    where?: AdminUserWhereInput
+  }
+
+  export type AdminUserUpdateToOneWithWhereWithoutSsoTokensInput = {
+    where?: AdminUserWhereInput
+    data: XOR<AdminUserUpdateWithoutSsoTokensInput, AdminUserUncheckedUpdateWithoutSsoTokensInput>
+  }
+
+  export type AdminUserUpdateWithoutSsoTokensInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    username?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    password?: StringFieldUpdateOperationsInput | string
+    role?: StringFieldUpdateOperationsInput | string
+    status?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    dashboardAccess?: UserDashboardAccessUpdateManyWithoutUserNestedInput
+    sessions?: AdminSessionUpdateManyWithoutUserNestedInput
+    activityLogs?: AdminActivityLogUpdateManyWithoutUserNestedInput
+  }
+
+  export type AdminUserUncheckedUpdateWithoutSsoTokensInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    username?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    password?: StringFieldUpdateOperationsInput | string
+    role?: StringFieldUpdateOperationsInput | string
+    status?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    dashboardAccess?: UserDashboardAccessUncheckedUpdateManyWithoutUserNestedInput
+    sessions?: AdminSessionUncheckedUpdateManyWithoutUserNestedInput
+    activityLogs?: AdminActivityLogUncheckedUpdateManyWithoutUserNestedInput
   }
 
   export type UserDashboardAccessCreateManyUserInput = {
@@ -8696,6 +10357,15 @@ export namespace Prisma {
     dashboardCode?: string | null
     description?: string | null
     ipAddress?: string | null
+    createdAt?: Date | string
+  }
+
+  export type AdminSsoTokenCreateManyUserInput = {
+    id?: string
+    tokenHash: string
+    dashboardCode: string
+    expiresAt: Date | string
+    usedAt?: Date | string | null
     createdAt?: Date | string
   }
 
@@ -8762,6 +10432,33 @@ export namespace Prisma {
     dashboardCode?: NullableStringFieldUpdateOperationsInput | string | null
     description?: NullableStringFieldUpdateOperationsInput | string | null
     ipAddress?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type AdminSsoTokenUpdateWithoutUserInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    tokenHash?: StringFieldUpdateOperationsInput | string
+    dashboardCode?: StringFieldUpdateOperationsInput | string
+    expiresAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    usedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type AdminSsoTokenUncheckedUpdateWithoutUserInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    tokenHash?: StringFieldUpdateOperationsInput | string
+    dashboardCode?: StringFieldUpdateOperationsInput | string
+    expiresAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    usedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type AdminSsoTokenUncheckedUpdateManyWithoutUserInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    tokenHash?: StringFieldUpdateOperationsInput | string
+    dashboardCode?: StringFieldUpdateOperationsInput | string
+    expiresAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    usedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 

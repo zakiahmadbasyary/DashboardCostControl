@@ -214,20 +214,13 @@ export default function PortalHomePage() {
                   </p>
                 </div>
 
-                <div className="space-y-2">
+                <div>
                   <a
                     href={dash.url}
                     className="w-full py-2.5 px-4 rounded-xl bg-[#16823B] hover:bg-[#126B30] text-white font-semibold text-xs flex items-center justify-center gap-2 transition-all shadow-2xs group-hover:shadow-xs"
                   >
                     <span>Buka Dashboard</span>
                     <ArrowRight className="w-4 h-4" />
-                  </a>
-                  <a
-                    href={dash.adminUrl}
-                    className="w-full py-2 px-4 rounded-xl bg-white border border-[#DDE5DF] hover:bg-[#F4F9F5] hover:border-[#16823B] text-[#5F6B63] hover:text-[#16823B] font-semibold text-xs flex items-center justify-center gap-2 transition-all"
-                  >
-                    <Settings className="w-3.5 h-3.5" />
-                    <span>Kelola Dashboard</span>
                   </a>
                 </div>
               </div>

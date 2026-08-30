@@ -168,6 +168,16 @@ exports.Prisma.AdminActivityLogScalarFieldEnum = {
   createdAt: 'createdAt'
 };
 
+exports.Prisma.AdminSsoTokenScalarFieldEnum = {
+  id: 'id',
+  tokenHash: 'tokenHash',
+  userId: 'userId',
+  dashboardCode: 'dashboardCode',
+  expiresAt: 'expiresAt',
+  usedAt: 'usedAt',
+  createdAt: 'createdAt'
+};
+
 exports.Prisma.SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -189,7 +199,8 @@ exports.Prisma.ModelName = {
   Dashboard: 'Dashboard',
   UserDashboardAccess: 'UserDashboardAccess',
   AdminSession: 'AdminSession',
-  AdminActivityLog: 'AdminActivityLog'
+  AdminActivityLog: 'AdminActivityLog',
+  AdminSsoToken: 'AdminSsoToken'
 };
 
 /**

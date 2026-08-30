@@ -22,6 +22,7 @@ model AdminUser {
   dashboardAccess UserDashboardAccess[]
   sessions        AdminSession[]
   activityLogs    AdminActivityLog[]
+  ssoTokens       AdminSsoToken[]
 
   @@map("admin_users")
 }
@@ -77,4 +78,18 @@ model AdminActivityLog {
   user AdminUser @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("admin_activity_logs")
+}
+
+model AdminSsoToken {
+  id            String    @id @default(uuid())
+  tokenHash     String    @unique @map("token_hash")
+  userId        String    @map("user_id")
+  dashboardCode String    @map("dashboard_code")
+  expiresAt     DateTime  @map("expires_at")
+  usedAt        DateTime? @map("used_at")
+  createdAt     DateTime  @default(now()) @map("created_at")
+
+  user AdminUser @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("admin_sso_tokens")
 }
