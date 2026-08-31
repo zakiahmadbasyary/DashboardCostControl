@@ -13,7 +13,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Dashboard WIP | Monitoring Cost Control",
+  title: "Dashboard WIP | Monitoring Cost Control WIP ACC",
   description: "Modul Monitoring Cost Control WIP ACC",
   icons: {
     icon: "/logo.png",

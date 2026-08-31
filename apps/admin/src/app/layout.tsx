@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Admin Pusat | GGF AgroMetric Platform",
+  title: "Admin Pusat | Dashboard Cost Control GGF",
   description: "Manajemen Autentikasi Terpusat, Pengguna Administrator, dan Hak Akses Dashboard",
   icons: {
     icon: "/logo.png",

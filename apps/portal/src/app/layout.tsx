@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "GGF AgroMetric Platform | Enterprise Portal",
-  description: "Portal Utama Akses Seluruh Dashboard Analytics & Management",
+  title: "GGF Cost Control Dashboard | Plantation Group 1",
+  description: "Portal Utama Akses Seluruh Dashboard Cost Control",
   icons: {
     icon: "/logo.png",
     shortcut: "/logo.png",
