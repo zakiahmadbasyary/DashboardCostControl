@@ -27,12 +27,12 @@ export default function AdminSidebar() {
         {/* Brand */}
         <div className="p-6 border-b border-[#DDE5DF] flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="h-9 w-auto flex items-center shrink-0">
+            <div className="h-11 w-auto flex items-center shrink-0">
               <img
                 src="/logo.png"
                 alt="GGF Logo"
-                className="h-9 max-h-9 w-auto object-contain"
-                style={{ height: "36px", maxHeight: "36px", width: "auto" }}
+                className="h-11 max-h-11 w-auto object-contain"
+                style={{ height: "44px", maxHeight: "44px", width: "auto" }}
               />
             </div>
             <div>
@@ -107,12 +107,12 @@ export default function AdminSidebar() {
       {/* Mobile Header Bar */}
       <header className="lg:hidden bg-white border-b border-[#DDE5DF] px-4 py-3 sticky top-0 z-30 flex items-center justify-between shadow-xs w-full">
         <div className="flex items-center gap-2.5">
-          <div className="h-8 w-auto flex items-center shrink-0">
+          <div className="h-11 w-auto flex items-center shrink-0">
             <img
               src="/logo.png"
               alt="GGF Logo"
-              className="h-8 max-h-8 w-auto object-contain"
-              style={{ height: "32px", maxHeight: "32px", width: "auto" }}
+              className="h-11 max-h-11 w-auto object-contain"
+              style={{ height: "44px", maxHeight: "44px", width: "auto" }}
             />
           </div>
           <span className="font-extrabold text-sm text-[#17231B]">GGF Admin</span>

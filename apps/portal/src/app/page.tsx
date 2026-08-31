@@ -87,12 +87,12 @@ export default function PortalHomePage() {
           <div className="h-16 sm:h-18 flex items-center justify-between gap-4">
             {/* Left Brand Logo & Title */}
             <a href={portalUrl} className="flex items-center gap-3 shrink-0 py-1 group focus:outline-none">
-              <div className="h-9 w-auto flex items-center shrink-0">
+              <div className="h-13 sm:h-14 w-auto flex items-center shrink-0">
                 <img
                   src="/logo.png"
                   alt="GGF Logo"
-                  className="h-9 max-h-9 w-auto object-contain"
-                  style={{ height: "36px", maxHeight: "36px", width: "auto" }}
+                  className="h-13 sm:h-14 max-h-14 w-auto object-contain"
+                  style={{ height: "52px", maxHeight: "56px", width: "auto" }}
                 />
               </div>
               <div className="flex flex-col justify-center">
@@ -175,10 +175,15 @@ export default function PortalHomePage() {
       {/* Main Content Area */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 flex-1 w-full">
         {/* Title & Subtitle Section */}
-        <div className="mb-10 text-center max-w-3xl mx-auto space-y-3">
-          <span className="inline-flex items-center gap-1.5 px-3 py-1 text-xs font-bold rounded-full bg-[#FCE27A] text-[#17231B] border border-[#E5C959] shadow-2xs">
-            Portal Utama Monitoring Biaya
-          </span>
+        <div className="mb-10 text-center max-w-3xl mx-auto space-y-4">
+          <div className="flex justify-center mb-2">
+            <img
+              src="/logo.png"
+              alt="GGF Logo"
+              className="h-16 sm:h-20 max-h-20 w-auto object-contain"
+              style={{ height: "72px", maxHeight: "80px", width: "auto" }}
+            />
+          </div>
           <h1 className="text-3xl sm:text-4xl font-extrabold text-[#17231B] tracking-tight">
             Cost Control Dashboard Portal
           </h1>

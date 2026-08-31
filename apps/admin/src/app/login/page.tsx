@@ -60,13 +60,13 @@ export default function AdminLoginPage() {
 
         {/* Logo & Header */}
         <div className="text-center mb-8">
-          <div className="flex justify-center mb-4">
-            <div className="h-12 w-auto flex items-center justify-center">
+          <div className="flex justify-center mb-5">
+            <div className="h-18 sm:h-20 w-auto flex items-center justify-center">
               <img
                 src="/logo.png"
                 alt="GGF Logo"
-                className="h-12 max-h-12 w-auto object-contain"
-                style={{ height: "48px", maxHeight: "48px", width: "auto" }}
+                className="h-18 sm:h-20 max-h-20 w-auto object-contain"
+                style={{ height: "72px", maxHeight: "80px", width: "auto" }}
               />
             </div>
           </div>

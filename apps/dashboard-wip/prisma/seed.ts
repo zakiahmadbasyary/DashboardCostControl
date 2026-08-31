@@ -47,6 +47,13 @@ async function main() {
   });
   console.log(`✅ Seeded ${uniqueMasterSheetMap.size} unique MasterSheet records.`);
 
+function getVal(row: ExcelRow, keys: string[]): unknown {
+  for (const k of keys) {
+    if (row[k] !== undefined && row[k] !== null && row[k] !== "") return row[k];
+  }
+  return undefined;
+}
+
   // 2. Seed Data SBT
   console.log("📄 Reading DataSBT.xlsx...");
   const sbtFile = path.join(dataDir, "DataSBT.xlsx");
@@ -55,14 +62,14 @@ async function main() {
 
   console.log(`Inserting ${sbtRows.length} records into sbt...`);
   const sbtData = sbtRows.map((row) => ({
-    kodeSbt: String(row["Code"] || "").trim(),
-    nilaiSbt: Number(row["SBT"]) || 0,
-    status: String(row["Status"] || "").trim(),
-    pupuk: String(row["Pupuk"] || "").trim(),
-    jenis: String(row["Jenis"] || "").trim(),
-    kelas: String(row["Kelas"] || "").trim(),
-    groupCost: String(row["Group Cost"] || "").trim(),
-    umur: row["Umur"] !== undefined ? Number(row["Umur"]) : null,
+    kodeSbt: String(getVal(row, ["kode_sbt", "kode sbt", "Kode SBT", "Kode", "code_sbt", "Code SBT", "Code"]) || "").trim(),
+    nilaiSbt: Number(getVal(row, ["nilai_sbt", "nilai sbt", "Nilai SBT", "SBT"])) || 0,
+    status: String(getVal(row, ["status", "Status"]) || "").trim(),
+    pupuk: String(getVal(row, ["pupuk", "Pupuk"]) || "").trim(),
+    jenis: String(getVal(row, ["jenis", "Jenis"]) || "").trim(),
+    kelas: String(getVal(row, ["kelas", "Kelas"]) || "").trim(),
+    groupCost: String(getVal(row, ["group_cost", "Group Cost", "GroupCost"]) || "").trim(),
+    umur: getVal(row, ["umur", "Umur"]) !== undefined ? Number(getVal(row, ["umur", "Umur"])) : null,
   }));
 
   const uniqueSbtMap = new Map<string, typeof sbtData[0]>();
@@ -133,21 +140,12 @@ async function main() {
         specificCode = status + pupuk + jenisCode + kelasCode + gc + umur;
       }
 
-      // 2. Try 'Semua' group cost code as fallback
-      let semuaCode = "";
-      if (status === "NSSC") {
-        semuaCode = "NSSCSemua" + umur;
-      } else {
-        semuaCode = status + pupuk + jenisCode + kelasCode + "Semua" + umur;
-      }
-
       let finalKodeSbt = defaultSbtCode;
       if (uniqueSbtMap.has(specificCode)) {
         finalKodeSbt = specificCode;
-      } else if (uniqueSbtMap.has(semuaCode)) {
-        finalKodeSbt = semuaCode;
       } else {
-        missingSbtCodes.add(specificCode);
+        finalKodeSbt = specificCode || defaultSbtCode;
+        missingSbtCodes.add(finalKodeSbt);
       }
 
       return {

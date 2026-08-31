@@ -244,20 +244,11 @@ export async function POST(request: NextRequest) {
             specificCode = status + pupuk + jenisCode + kelasCode + gc + umur;
           }
 
-          let semuaCode = "";
-          if (status === "NSSC") {
-            semuaCode = "NSSCSemua" + umur;
-          } else {
-            semuaCode = status + pupuk + jenisCode + kelasCode + "Semua" + umur;
-          }
-
           let finalKodeSbt = defaultSbtCode;
           if (rowKodeSbt && (uniqueSbtSet.has(rowKodeSbt) || missingSbtCodes.has(rowKodeSbt))) {
             finalKodeSbt = rowKodeSbt;
           } else if (uniqueSbtSet.has(specificCode) || missingSbtCodes.has(specificCode)) {
             finalKodeSbt = specificCode;
-          } else if (uniqueSbtSet.has(semuaCode) || missingSbtCodes.has(semuaCode)) {
-            finalKodeSbt = semuaCode;
           } else if (specificCode) {
             finalKodeSbt = specificCode;
             missingSbtCodes.add(specificCode);

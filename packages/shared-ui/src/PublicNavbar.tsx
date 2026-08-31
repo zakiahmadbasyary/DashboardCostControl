@@ -36,12 +36,12 @@ export const PublicNavbar: React.FC<PublicNavbarProps> = ({
   const logoSrc = typeof logoImg === "string" ? logoImg : (logoImg as unknown as { src: string })?.src;
 
   const defaultLogo = (
-    <div className={`h-9 max-h-9 w-auto flex items-center shrink-0 overflow-hidden ${logoClassName}`} style={{ height: "36px", maxHeight: "36px" }}>
+    <div className={`h-13 sm:h-14 max-h-14 w-auto flex items-center shrink-0 overflow-hidden ${logoClassName}`} style={{ height: "52px", maxHeight: "56px" }}>
       <img
         src={logoSrc}
         alt="GGF Logo"
-        className="h-9 max-h-9 w-auto object-contain"
-        style={{ height: "36px", maxHeight: "36px", width: "auto" }}
+        className="h-13 sm:h-14 max-h-14 w-auto object-contain"
+        style={{ height: "52px", maxHeight: "56px", width: "auto" }}
       />
     </div>
   );
@@ -57,7 +57,7 @@ export const PublicNavbar: React.FC<PublicNavbarProps> = ({
             className="flex items-center gap-3 shrink-0 bg-white py-1 group focus:outline-none"
             title="Ke Beranda Portal"
           >
-            <div className="h-9 max-h-9 w-auto flex items-center shrink-0 overflow-hidden" style={{ height: "36px", maxHeight: "36px" }}>
+            <div className="h-13 sm:h-14 max-h-14 w-auto flex items-center shrink-0 overflow-hidden" style={{ height: "52px", maxHeight: "56px" }}>
               {logoElement || defaultLogo}
             </div>
             <div className="flex flex-col justify-center">
