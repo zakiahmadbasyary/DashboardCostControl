@@ -21,6 +21,49 @@ export const ZN_NAME_MAP: Record<string, number> = {
   "deepenning lagoon allocation": 18,
 };
 
+export const ZN_CODE_TO_NAME: Record<string, string> = {
+  ZN01: "Land Preparation",
+  ZN02: "Seedling Allocation",
+  ZN03: "Planting",
+  ZN04: "Road and Drainage",
+  ZN05: "Fertilization",
+  ZN06: "Weed Control",
+  ZN07: "Plant Pest Control",
+  ZN08: "Forcing",
+  ZN09: "Pre Harvesting",
+  ZN10: "Harvesting",
+  ZN11: "Observation",
+  ZN12: "Plant Selection",
+  ZN13: "Sprinkle/Irrigation",
+  ZN14: "Guard/Pull/Labour Transportation",
+  ZN15: "Others",
+  ZN16: "Land Rehabilitation",
+  ZN17: "Road and Drainage Allocation",
+  ZN18: "Deepening Lagoon Allocation",
+};
+
+export function getZnDetail(gcName: string | null | undefined): { znCode: string; description: string } | null {
+  if (!gcName) return null;
+  const raw = gcName.trim();
+  const lower = raw.toLowerCase();
+
+  const znMatch = raw.match(/^zn[\s-_]*(\d+)/i);
+  if (znMatch) {
+    const num = parseInt(znMatch[1], 10);
+    const codeKey = `ZN${num < 10 ? '0' + num : num}`;
+    const desc = ZN_CODE_TO_NAME[codeKey] || raw;
+    return { znCode: codeKey, description: desc };
+  }
+
+  for (const [codeKey, desc] of Object.entries(ZN_CODE_TO_NAME)) {
+    if (lower === desc.toLowerCase() || lower.includes(desc.toLowerCase())) {
+      return { znCode: codeKey, description: desc };
+    }
+  }
+
+  return null;
+}
+
 export function normalizeGroupCostName(rawName: string | null | undefined): string {
   if (!rawName) return "";
   const trimmed = rawName.trim();

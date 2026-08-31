@@ -28,6 +28,8 @@ export default function GroupCostTable({
     return a.groupCost.localeCompare(b.groupCost);
   });
 
+  const totalCostHa = sortedGroupCosts.reduce((acc, curr) => acc + curr.costHa, 0);
+
   if (!selectedLocation) {
     return (
       <div className="bg-white border border-[#DDE5DF] rounded-2xl p-6 shadow-xs h-full flex flex-col items-center justify-center text-center">
@@ -83,17 +85,19 @@ export default function GroupCostTable({
                 {sortedGroupCosts.map((item) => {
                   const isSelected = selectedGroupCost?.groupCost === item.groupCost;
                   const isOverSbt = item.costHa > item.sbt;
+
                   return (
                     <tr
                       key={item.groupCost}
                       onClick={() => onSelectGroupCost(item)}
-                      className={`cursor-pointer transition-all ${isSelected
+                      className={`cursor-pointer transition-all ${
+                        isSelected
                           ? "bg-[#A8D437]/20 border-l-4 border-l-[#16823B] font-semibold text-[#0B6B32]"
                           : "hover:bg-[#F7F9F7] text-[#17231B]"
-                        }`}
+                      }`}
                     >
                       <td className="py-2.5 px-3 font-bold">{item.groupCost}</td>
-                      <td className="py-2.5 px-3 text-right font-mono">
+                      <td className="py-2.5 px-3 text-right font-mono font-bold text-[#16823B]">
                         {item.costHa.toLocaleString("id-ID")}
                       </td>
                       <td className="py-2.5 px-3 text-right font-mono text-[#5F6B63]">
@@ -124,8 +128,10 @@ export default function GroupCostTable({
       </div>
 
       <div className="mt-4 pt-3 border-t border-[#DDE5DF] text-[11px] text-[#5F6B63] flex justify-between items-center">
-        <span>* Nilai disajikan dalam Rupiah (Rp) | SBT = Standar Biaya Tanaman</span>
-        {selectedGroupCost && <span className="font-semibold text-[#16823B]">Klik Group Cost lain untuk mengubah aktivitas</span>}
+        <span className="font-semibold text-[#17231B]">
+          Total Cost / Ha: <span className="font-extrabold text-[#16823B]">Rp {totalCostHa.toLocaleString("id-ID")}</span>
+        </span>
+        {selectedGroupCost && <span className="font-semibold text-[#16823B]">Terpilih: {selectedGroupCost.groupCost}</span>}
       </div>
     </div>
   );
