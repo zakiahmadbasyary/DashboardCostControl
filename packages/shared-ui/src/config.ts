@@ -1,5 +1,5 @@
 export interface DashboardNavItem {
-  key: "portal" | "wip" | "dashboard_a" | "dashboard_b" | "dashboard_c";
+  key: string;
   label: string;
   url: string;
   description: string;
@@ -10,6 +10,14 @@ export interface DashboardNavConfig {
   portalUrl: string;
   adminUrl: string;
   wipAccUrl: string;
+  hppUrl: string;
+  capexUrl: string;
+  opexUrl: string;
+  irigasiUrl: string;
+  sulamUrl: string;
+  selesaiBongkarUrl: string;
+  hargaMaterialUrl: string;
+  pollPg1Url: string;
   wipPg1Url: string;
   hppPg1Url: string;
   hppM3Url: string;
@@ -39,6 +47,15 @@ export const getDashboardNavConfig = (): DashboardNavConfig => {
     "http://localhost:3004";
   const adminUrl = process.env.NEXT_PUBLIC_ADMIN_URL || "http://localhost:3005";
 
+  const hppUrl = process.env.NEXT_PUBLIC_HPP_URL || hppPg1Url;
+  const capexUrl = process.env.NEXT_PUBLIC_CAPEX_URL || "#";
+  const opexUrl = process.env.NEXT_PUBLIC_OPEX_URL || "#";
+  const irigasiUrl = process.env.NEXT_PUBLIC_IRIGASI_URL || "#";
+  const sulamUrl = process.env.NEXT_PUBLIC_SULAM_URL || "#";
+  const selesaiBongkarUrl = process.env.NEXT_PUBLIC_SELESAI_BONGKAR_URL || "#";
+  const hargaMaterialUrl = process.env.NEXT_PUBLIC_HARGA_MATERIAL_URL || "#";
+  const pollPg1Url = process.env.NEXT_PUBLIC_POLL_PG1_URL || wipPg1Url;
+
   const wipAccAdminUrl =
     process.env.NEXT_PUBLIC_WIP_ACC_ADMIN_URL || `${wipAccUrl}/admin`;
   const wipPg1AdminUrl =
@@ -52,32 +69,70 @@ export const getDashboardNavConfig = (): DashboardNavConfig => {
     navItems: [
       {
         key: "wip",
-        label: "WIP ACC",
+        label: "WIP",
         url: wipAccUrl,
         description: "Monitoring Cost Control WIP ACC",
       },
       {
-        key: "dashboard_a",
-        label: "WIP PG1",
-        url: wipPg1Url,
-        description: "Operasional & Performa Produksi PG1",
+        key: "hpp",
+        label: "HPP",
+        url: hppUrl,
+        description: "Harga Pokok Produksi (HPP)",
       },
       {
-        key: "dashboard_b",
-        label: "HPP PG1",
-        url: hppPg1Url,
-        description: "Harga Pokok Produksi & Inventaris PG1",
+        key: "capex",
+        label: "Capex",
+        url: capexUrl,
+        description: "Capital Expenditure (Belanja Modal)",
       },
       {
-        key: "dashboard_c",
-        label: "HPP M3",
-        url: hppM3Url,
-        description: "Audit Finansial & Laporan Eksekutif M3",
+        key: "opex",
+        label: "Opex",
+        url: opexUrl,
+        description: "Operational Expenditure (Biaya Operasional)",
+      },
+      {
+        key: "irigasi",
+        label: "Irigasi",
+        url: irigasiUrl,
+        description: "Pengawasan Biaya & Operasional Irigasi",
+      },
+      {
+        key: "sulam",
+        label: "Sulam",
+        url: sulamUrl,
+        description: "Monitoring Biaya Pemeliharaan & Penyulaman",
+      },
+      {
+        key: "selesai_bongkar",
+        label: "Selesai Bongkar",
+        url: selesaiBongkarUrl,
+        description: "Evaluasi Pasca Selesai Bongkar",
+      },
+      {
+        key: "harga_material",
+        label: "Harga Material",
+        url: hargaMaterialUrl,
+        description: "Master Data & Fluktuasi Harga Material",
+      },
+      {
+        key: "poll_pg1",
+        label: "Poll PG 1",
+        url: pollPg1Url,
+        description: "Pengendalian Biaya Armada & Transportasi PG1",
       },
     ],
     portalUrl,
     adminUrl,
     wipAccUrl,
+    hppUrl,
+    capexUrl,
+    opexUrl,
+    irigasiUrl,
+    sulamUrl,
+    selesaiBongkarUrl,
+    hargaMaterialUrl,
+    pollPg1Url,
     wipPg1Url,
     hppPg1Url,
     hppM3Url,
