@@ -2,15 +2,15 @@
 
 import React, { useState } from "react";
 import { getDashboardNavConfig } from "@dashboard/shared-ui";
-import { Banknote, LayoutGrid, ShieldCheck, Menu, X } from "lucide-react";
+import { Droplets, LayoutGrid, ShieldCheck, Menu, X } from "lucide-react";
 
-export default function DashboardHPPPage() {
+export default function DashboardIrigasiPage() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { portalUrl, adminUrl, navItems } = getDashboardNavConfig();
 
   return (
     <div className="min-h-screen bg-[#F7F9F7] text-[#17231B] flex flex-col justify-between font-sans selection:bg-[#16823B] selection:text-white">
-      {/* Dedicated Header for Dashboard HPP */}
+      {/* Dedicated Header for Dashboard Irigasi */}
       <header className="sticky top-0 z-50 bg-white border-b border-[#DDE5DF] shadow-2xs w-full">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="h-16 sm:h-18 flex items-center justify-between gap-4">
@@ -26,10 +26,10 @@ export default function DashboardHPPPage() {
               </div>
               <div className="flex flex-col justify-center">
                 <span className="font-extrabold text-sm sm:text-base text-[#17231B] group-hover:text-[#16823B] tracking-tight leading-snug transition-colors block">
-                  Dashboard HPP
+                  Dashboard Irigasi
                 </span>
                 <span className="text-[10px] sm:text-xs text-[#5F6B63] hidden sm:block font-medium leading-tight mt-0.5">
-                  Harga Pokok Produksi
+                  Pengairan & Pump
                 </span>
               </div>
             </a>
@@ -37,7 +37,7 @@ export default function DashboardHPPPage() {
             {/* Navigation Links */}
             <nav className="hidden lg:flex items-center gap-1 xl:gap-1.5 shrink-0 whitespace-nowrap overflow-x-auto py-1 max-w-2xl no-scrollbar">
               {navItems.map((item) => {
-                const isActive = item.key === "hpp";
+                const isActive = item.key === "irigasi";
                 return (
                   <a
                     key={item.key}
@@ -97,7 +97,7 @@ export default function DashboardHPPPage() {
             </div>
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-1.5">
               {navItems.map((item) => {
-                const isActive = item.key === "hpp";
+                const isActive = item.key === "irigasi";
                 return (
                   <a
                     key={item.key}
@@ -141,19 +141,19 @@ export default function DashboardHPPPage() {
       {/* Main Content Area */}
       <main className="max-w-4xl mx-auto my-12 text-center space-y-6 px-4 flex-1">
         <span className="inline-flex items-center gap-1.5 px-3 py-1 text-xs font-bold rounded-full bg-[#FCE27A] text-[#17231B] border border-[#E5C959] shadow-2xs">
-          HPP Production Module
+          Irigasi & Infrastructure Module
         </span>
         <div className="w-16 h-16 rounded-2xl bg-[#EAF3EC] border border-[#CBE0D1] text-[#16823B] flex items-center justify-center mx-auto shadow-2xs">
-          <Banknote className="w-8 h-8" />
+          <Droplets className="w-8 h-8" />
         </div>
-        <h2 className="text-3xl font-extrabold text-[#17231B]">Dashboard HPP (Harga Pokok Produksi)</h2>
+        <h2 className="text-3xl font-extrabold text-[#17231B]">Dashboard Irigasi (Pengairan & Pump)</h2>
         <p className="text-[#5F6B63] text-sm leading-relaxed max-w-xl mx-auto">
-          Modul pelacakan dan analisis Harga Pokok Produksi (HPP) akhir serta evaluasi efisiensi biaya produksi perkebunan.
+          Modul pengawasan biaya operasional pengairan, konsumsi air, dan infrastruktur sistem irigasi perkebunan.
         </p>
       </main>
 
       <footer className="text-center text-xs text-[#5F6B63] border-t border-[#DDE5DF] bg-white py-6">
-        © 2026 GGF AgroMetric Platform — Dashboard HPP Workspace
+        © 2026 GGF AgroMetric Platform — Dashboard Irigasi Workspace
       </footer>
     </div>
   );

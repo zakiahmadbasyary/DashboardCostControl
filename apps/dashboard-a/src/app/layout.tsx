@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Dashboard A | Operasional & Performa Produksi",
-  description: "Modul Analisis Operasional & Performa Produksi Wilayah A",
+  title: "Dashboard HPP | Harga Pokok Produksi",
+  description: "Modul Analisis & Pelacakan Harga Pokok Produksi (HPP)",
   icons: {
     icon: "/logo.png",
     shortcut: "/logo.png",

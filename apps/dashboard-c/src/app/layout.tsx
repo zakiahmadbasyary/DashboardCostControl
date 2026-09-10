@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Dashboard C | Audit Finansial & Laporan Eksekutif",
-  description: "Modul Audit Finansial & Laporan Eksekutif",
+  title: "Dashboard Opex | Operational Expenditure",
+  description: "Modul Monitoring & Pengendalian Biaya Operasional (Operational Expenditure)",
   icons: {
     icon: "/logo.png",
     shortcut: "/logo.png",

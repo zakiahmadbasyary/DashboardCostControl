@@ -33,37 +33,41 @@ export const getDashboardNavConfig = (): DashboardNavConfig => {
     process.env.NEXT_PUBLIC_WIP_ACC_URL ||
     process.env.NEXT_PUBLIC_WIP_URL ||
     "http://localhost:3001";
-  const wipPg1Url =
-    process.env.NEXT_PUBLIC_WIP_PG1_URL ||
+  const hppUrl =
+    process.env.NEXT_PUBLIC_HPP_URL ||
+    process.env.NEXT_PUBLIC_HPP_PG1_URL ||
     process.env.NEXT_PUBLIC_DASHBOARD_A_URL ||
     "http://localhost:3002";
-  const hppPg1Url =
-    process.env.NEXT_PUBLIC_HPP_PG1_URL ||
+  const capexUrl =
+    process.env.NEXT_PUBLIC_CAPEX_URL ||
     process.env.NEXT_PUBLIC_DASHBOARD_B_URL ||
     "http://localhost:3003";
-  const hppM3Url =
-    process.env.NEXT_PUBLIC_HPP_M3_URL ||
+  const opexUrl =
+    process.env.NEXT_PUBLIC_OPEX_URL ||
     process.env.NEXT_PUBLIC_DASHBOARD_C_URL ||
     "http://localhost:3004";
   const adminUrl = process.env.NEXT_PUBLIC_ADMIN_URL || "http://localhost:3005";
+  const irigasiUrl = process.env.NEXT_PUBLIC_IRIGASI_URL || "http://localhost:3006";
+  const sulamUrl = process.env.NEXT_PUBLIC_SULAM_URL || "http://localhost:3007";
+  const selesaiBongkarUrl = process.env.NEXT_PUBLIC_SELESAI_BONGKAR_URL || "http://localhost:3008";
+  const hargaMaterialUrl = process.env.NEXT_PUBLIC_HARGA_MATERIAL_URL || "http://localhost:3009";
+  const pollPg1Url = process.env.NEXT_PUBLIC_POLL_PG1_URL || "http://localhost:3010";
 
-  const hppUrl = process.env.NEXT_PUBLIC_HPP_URL || hppPg1Url;
-  const capexUrl = process.env.NEXT_PUBLIC_CAPEX_URL || "#";
-  const opexUrl = process.env.NEXT_PUBLIC_OPEX_URL || "#";
-  const irigasiUrl = process.env.NEXT_PUBLIC_IRIGASI_URL || "#";
-  const sulamUrl = process.env.NEXT_PUBLIC_SULAM_URL || "#";
-  const selesaiBongkarUrl = process.env.NEXT_PUBLIC_SELESAI_BONGKAR_URL || "#";
-  const hargaMaterialUrl = process.env.NEXT_PUBLIC_HARGA_MATERIAL_URL || "#";
-  const pollPg1Url = process.env.NEXT_PUBLIC_POLL_PG1_URL || wipPg1Url;
+  const wipPg1Url =
+    process.env.NEXT_PUBLIC_WIP_PG1_URL || hppUrl;
+  const hppPg1Url =
+    process.env.NEXT_PUBLIC_HPP_PG1_URL || hppUrl;
+  const hppM3Url =
+    process.env.NEXT_PUBLIC_HPP_M3_URL || opexUrl;
 
   const wipAccAdminUrl =
     process.env.NEXT_PUBLIC_WIP_ACC_ADMIN_URL || `${wipAccUrl}/admin`;
   const wipPg1AdminUrl =
-    process.env.NEXT_PUBLIC_WIP_PG1_ADMIN_URL || `${wipPg1Url}/admin`;
+    process.env.NEXT_PUBLIC_WIP_PG1_ADMIN_URL || `${hppUrl}/admin`;
   const hppPg1AdminUrl =
-    process.env.NEXT_PUBLIC_HPP_PG1_ADMIN_URL || `${hppPg1Url}/admin`;
+    process.env.NEXT_PUBLIC_HPP_PG1_ADMIN_URL || `${hppUrl}/admin`;
   const hppM3AdminUrl =
-    process.env.NEXT_PUBLIC_HPP_M3_ADMIN_URL || `${hppM3Url}/admin`;
+    process.env.NEXT_PUBLIC_HPP_M3_ADMIN_URL || `${opexUrl}/admin`;
 
   return {
     navItems: [

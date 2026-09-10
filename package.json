@@ -8,10 +8,18 @@
     "packages/*"
   ],
   "scripts": {
-    "dev": "turbo dev",
+    "dev": "turbo dev --concurrency 20",
     "build": "turbo build",
     "lint": "turbo lint",
     "dev:wip": "npm run dev --workspace=apps/dashboard-wip",
+    "dev:hpp": "npm run dev --workspace=apps/dashboard-a",
+    "dev:capex": "npm run dev --workspace=apps/dashboard-b",
+    "dev:opex": "npm run dev --workspace=apps/dashboard-c",
+    "dev:irigasi": "npm run dev --workspace=apps/dashboard-irigasi",
+    "dev:sulam": "npm run dev --workspace=apps/dashboard-sulam",
+    "dev:selesai-bongkar": "npm run dev --workspace=apps/dashboard-selesai-bongkar",
+    "dev:harga-material": "npm run dev --workspace=apps/dashboard-harga-material",
+    "dev:poll-pg1": "npm run dev --workspace=apps/dashboard-poll-pg1",
     "dev:admin": "npm run dev --workspace=apps/admin",
     "dev:portal": "npm run dev --workspace=apps/portal"
   },

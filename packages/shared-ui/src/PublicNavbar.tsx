@@ -72,15 +72,15 @@ export const PublicNavbar: React.FC<PublicNavbarProps> = ({
             </div>
           </a>
 
-          {/* Center Main Navigation Items (Horizontal Row on Tablet & Desktop >= md) */}
-          <nav className={`hidden md:flex items-center gap-1 sm:gap-1.5 shrink-0 whitespace-nowrap ${navClassName}`}>
+          {/* Center Main Navigation Items (Horizontal Row with Overflow handling on Desktop) */}
+          <nav className={`hidden lg:flex items-center gap-1 xl:gap-1.5 shrink-0 whitespace-nowrap overflow-x-auto py-1 max-w-2xl no-scrollbar ${navClassName}`}>
             {navItems.map((item) => {
               const isActive = currentDashboard === item.key;
               return (
                 <a
                   key={item.key}
                   href={item.url}
-                  className={`px-3 py-1.5 rounded-lg text-xs sm:text-sm font-semibold transition-all flex items-center gap-1.5 whitespace-nowrap ${
+                  className={`px-2.5 py-1.5 rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5 whitespace-nowrap ${
                     isActive
                       ? "bg-[#EAF3EC] text-[#16823B] font-bold border border-[#CBE0D1]"
                       : "text-[#5F6B63] hover:text-[#17231B] hover:bg-[#F8FAF9]"
@@ -96,8 +96,8 @@ export const PublicNavbar: React.FC<PublicNavbarProps> = ({
             })}
           </nav>
 
-          {/* Right Action: Portal Link & Admin Pusat Link (Horizontal on Tablet & Desktop >= md) */}
-          <div className="hidden md:flex items-center gap-2 shrink-0">
+          {/* Right Action: Portal Link & Admin Pusat Link (Horizontal on Desktop >= lg) */}
+          <div className="hidden lg:flex items-center gap-2 shrink-0">
             {showPortalLink && currentDashboard !== "portal" && (
               <a
                 href={portalUrl}
@@ -121,8 +121,8 @@ export const PublicNavbar: React.FC<PublicNavbarProps> = ({
             )}
           </div>
 
-          {/* Mobile Hamburger Button (Garis Tiga: ONLY on small screens < md) */}
-          <div className="flex md:hidden items-center gap-2">
+          {/* Mobile Hamburger Button (< lg) */}
+          <div className="flex lg:hidden items-center gap-2">
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               className="p-1.5 rounded-lg text-[#2C3830] hover:bg-[#F4F7F5] transition-colors border border-[#DDE5DF]"
@@ -134,13 +134,13 @@ export const PublicNavbar: React.FC<PublicNavbarProps> = ({
         </div>
       </div>
 
-      {/* Mobile Drawer (< md) */}
+      {/* Mobile Drawer (< lg) */}
       {mobileMenuOpen && (
-        <div className="md:hidden border-t border-[#DDE5DF] bg-white px-4 py-3 space-y-2 shadow-lg relative z-[101]">
+        <div className="lg:hidden border-t border-[#DDE5DF] bg-white px-4 py-3 space-y-2 shadow-lg relative z-[101] max-h-[80vh] overflow-y-auto">
           <div className="text-[11px] font-bold text-[#5F6B63] uppercase tracking-wider mb-1 px-1">
-            Navigasi Dashboard
+            Navigasi Dashboard (9 Menu)
           </div>
-          <div className="grid grid-cols-1 gap-1">
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-1.5">
             {navItems.map((item) => {
               const isActive = currentDashboard === item.key;
               return (
@@ -148,15 +148,15 @@ export const PublicNavbar: React.FC<PublicNavbarProps> = ({
                   key={item.key}
                   href={item.url}
                   onClick={() => setMobileMenuOpen(false)}
-                  className={`px-3.5 py-2 rounded-lg text-xs font-semibold flex items-center justify-between transition-all ${
+                  className={`px-3 py-2 rounded-lg text-xs font-semibold flex items-center justify-between transition-all border ${
                     isActive
-                      ? "bg-[#EAF3EC] text-[#16823B] font-bold border border-[#CBE0D1]"
-                      : "text-[#2C3830] hover:bg-[#F8FAF9]"
+                      ? "bg-[#EAF3EC] text-[#16823B] font-bold border-[#CBE0D1]"
+                      : "text-[#2C3830] hover:bg-[#F8FAF9] border-[#EAEFEB]"
                   }`}
                 >
                   <span>{item.label}</span>
                   {isActive && (
-                    <span className="text-[10px] bg-[#16823B] text-white px-2 py-0.5 rounded-full font-bold">
+                    <span className="text-[9px] bg-[#16823B] text-white px-1.5 py-0.5 rounded-full font-bold">
                       Aktif
                     </span>
                   )}

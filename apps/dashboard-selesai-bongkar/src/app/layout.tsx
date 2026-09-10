@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Dashboard Capex | Capital Expenditure",
-  description: "Modul Manajemen & Pengawasan Belanja Modal (Capital Expenditure)",
+  title: "Dashboard Selesai Bongkar | Land Prep & Ratoon",
+  description: "Modul Evaluasi Biaya, Progres & Area Pasca Selesai Bongkar",
   icons: {
     icon: "/logo.png",
     shortcut: "/logo.png",
