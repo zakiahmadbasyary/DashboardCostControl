@@ -59,7 +59,7 @@ export default function PortalHomePage() {
       url: hppUrl,
       icon: Banknote,
       badge: "Produksi",
-      isHosted: true,
+      isHosted: false,
     },
     {
       id: "capex",
@@ -70,7 +70,7 @@ export default function PortalHomePage() {
       url: capexUrl,
       icon: Building2,
       badge: "Belanja Modal",
-      isHosted: true,
+      isHosted: false,
     },
     {
       id: "opex",
@@ -81,7 +81,7 @@ export default function PortalHomePage() {
       url: opexUrl,
       icon: Receipt,
       badge: "Biaya Operasional",
-      isHosted: true,
+      isHosted: false,
     },
     {
       id: "irigasi",
