@@ -12,6 +12,7 @@ export interface PublicNavbarProps {
   logoElement?: React.ReactNode;
   showPortalLink?: boolean;
   showAdminLink?: boolean;
+  showDashboardNav?: boolean;
   className?: string;
   containerClassName?: string;
   logoClassName?: string;
@@ -25,6 +26,7 @@ export const PublicNavbar: React.FC<PublicNavbarProps> = ({
   logoElement,
   showPortalLink = true,
   showAdminLink = true,
+  showDashboardNav,
   className = "",
   containerClassName = "",
   logoClassName = "",
@@ -33,6 +35,7 @@ export const PublicNavbar: React.FC<PublicNavbarProps> = ({
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { navItems, portalUrl, adminUrl } = getDashboardNavConfig();
 
+  const shouldShowNav = showDashboardNav ?? (currentDashboard !== "portal");
   const logoSrc = typeof logoImg === "string" ? logoImg : (logoImg as unknown as { src: string })?.src;
 
   const defaultLogo = (
@@ -72,46 +75,48 @@ export const PublicNavbar: React.FC<PublicNavbarProps> = ({
             </div>
           </a>
 
-          {/* Center Main Navigation Items (Horizontal Row fitting all items without scroll) */}
-          <nav className={`hidden lg:flex items-center gap-0.5 xl:gap-1.5 shrink-0 whitespace-nowrap overflow-hidden py-1 ${navClassName}`}>
-            {navItems.map((item) => {
-              const isActive = currentDashboard === item.key;
-              const isHosted = item.isHosted !== false;
+          {/* Center Main Navigation Items */}
+          {shouldShowNav && (
+            <nav className={`hidden lg:flex items-center gap-0.5 xl:gap-1.5 shrink-0 whitespace-nowrap overflow-hidden py-1 ${navClassName}`}>
+              {navItems.map((item) => {
+                const isActive = currentDashboard === item.key;
+                const isHosted = item.isHosted !== false;
 
-              if (!isHosted) {
+                if (!isHosted) {
+                  return (
+                    <span
+                      key={item.key}
+                      className="px-1.5 xl:px-2.5 py-1.5 rounded-lg text-[11px] xl:text-xs font-semibold text-gray-400 bg-gray-50/70 border border-gray-200/60 select-none cursor-not-allowed flex items-center gap-1 xl:gap-1.5 whitespace-nowrap shrink-0"
+                    >
+                      <span>{item.label}</span>
+                      <Wrench className="w-2.5 h-2.5 xl:w-3 xl:h-3 text-amber-500 shrink-0" />
+                    </span>
+                  );
+                }
+
                 return (
-                  <span
+                  <a
                     key={item.key}
-                    className="px-1.5 xl:px-2.5 py-1.5 rounded-lg text-[11px] xl:text-xs font-semibold text-gray-400 bg-gray-50/70 border border-gray-200/60 select-none cursor-not-allowed flex items-center gap-1 xl:gap-1.5 whitespace-nowrap shrink-0"
+                    href={item.url}
+                    className={`px-1.5 xl:px-2.5 py-1.5 rounded-lg text-[11px] xl:text-xs font-semibold transition-all flex items-center gap-1 xl:gap-1.5 whitespace-nowrap shrink-0 ${
+                      isActive
+                        ? "bg-[#EAF3EC] text-[#16823B] font-bold border border-[#CBE0D1]"
+                        : "text-[#5F6B63] hover:text-[#17231B] hover:bg-[#F8FAF9]"
+                    }`}
+                    title={item.description}
                   >
                     <span>{item.label}</span>
-                    <Wrench className="w-2.5 h-2.5 xl:w-3 xl:h-3 text-amber-500 shrink-0" />
-                  </span>
+                    {isActive && (
+                      <span className="w-1.5 h-1.5 rounded-full bg-[#16823B]" />
+                    )}
+                  </a>
                 );
-              }
+              })}
+            </nav>
+          )}
 
-              return (
-                <a
-                  key={item.key}
-                  href={item.url}
-                  className={`px-1.5 xl:px-2.5 py-1.5 rounded-lg text-[11px] xl:text-xs font-semibold transition-all flex items-center gap-1 xl:gap-1.5 whitespace-nowrap shrink-0 ${
-                    isActive
-                      ? "bg-[#EAF3EC] text-[#16823B] font-bold border border-[#CBE0D1]"
-                      : "text-[#5F6B63] hover:text-[#17231B] hover:bg-[#F8FAF9]"
-                  }`}
-                  title={item.description}
-                >
-                  <span>{item.label}</span>
-                  {isActive && (
-                    <span className="w-1.5 h-1.5 rounded-full bg-[#16823B]" />
-                  )}
-                </a>
-              );
-            })}
-          </nav>
-
-          {/* Right Action: Portal Link & Admin Pusat Link (Horizontal on Desktop >= lg) */}
-          <div className="hidden lg:flex items-center gap-2 shrink-0">
+          {/* Right Action: Portal Link & Admin Pusat Link */}
+          <div className={`${shouldShowNav ? "hidden lg:flex" : "flex"} items-center gap-2 shrink-0`}>
             {showPortalLink && currentDashboard !== "portal" && (
               <a
                 href={portalUrl}
@@ -135,16 +140,18 @@ export const PublicNavbar: React.FC<PublicNavbarProps> = ({
             )}
           </div>
 
-          {/* Mobile Hamburger Button (< lg) */}
-          <div className="flex lg:hidden items-center gap-2">
-            <button
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="p-1.5 rounded-lg text-[#2C3830] hover:bg-[#F4F7F5] transition-colors border border-[#DDE5DF]"
-              aria-label="Toggle Navigation Menu"
-            >
-              {mobileMenuOpen ? <X className="w-5 h-5 text-[#16823B]" /> : <Menu className="w-5 h-5 text-[#5F6B63]" />}
-            </button>
-          </div>
+          {/* Mobile Hamburger Button (Only shown if navigation items exist) */}
+          {shouldShowNav && (
+            <div className="flex lg:hidden items-center gap-2">
+              <button
+                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                className="p-1.5 rounded-lg text-[#2C3830] hover:bg-[#F4F7F5] transition-colors border border-[#DDE5DF]"
+                aria-label="Toggle Navigation Menu"
+              >
+                {mobileMenuOpen ? <X className="w-5 h-5 text-[#16823B]" /> : <Menu className="w-5 h-5 text-[#5F6B63]" />}
+              </button>
+            </div>
+          )}
         </div>
       </div>
 

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React from "react";
 import { getDashboardNavConfig } from "@dashboard/shared-ui";
 import {
   LineChart,
@@ -15,15 +15,10 @@ import {
   ShieldCheck,
   ArrowRight,
   Settings,
-  Menu,
-  X,
   Clock,
-  Lock,
-  Wrench,
 } from "lucide-react";
 
 export default function PortalHomePage() {
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const {
     portalUrl,
     wipAccUrl,
@@ -140,12 +135,6 @@ export default function PortalHomePage() {
     },
   ];
 
-  const navItems = publicDashboards.map((dash) => ({
-    label: dash.name,
-    url: dash.url,
-    isHosted: dash.isHosted,
-  }));
-
   return (
     <div className="min-h-screen bg-[#F7F9F7] text-[#17231B] flex flex-col justify-between font-sans selection:bg-[#16823B] selection:text-white">
       {/* Dedicated Portal Header */}
@@ -172,109 +161,19 @@ export default function PortalHomePage() {
               </div>
             </a>
 
-            {/* Center Navigation Links (Horizontal Row fitting all items without scroll) */}
-            <nav className="hidden lg:flex items-center gap-0.5 xl:gap-1.5 shrink-0 whitespace-nowrap overflow-hidden py-1">
-              {navItems.map((item) => {
-                const isHosted = item.isHosted !== false;
-
-                if (!isHosted) {
-                  return (
-                    <span
-                      key={item.label}
-                      className="px-1.5 xl:px-2.5 py-1.5 rounded-lg text-[11px] xl:text-xs font-semibold text-gray-400 bg-gray-50/70 border border-gray-200/60 select-none cursor-not-allowed flex items-center gap-1 xl:gap-1.5 whitespace-nowrap shrink-0"
-                    >
-                      <span>{item.label}</span>
-                      <Wrench className="w-2.5 h-2.5 xl:w-3 xl:h-3 text-amber-500 shrink-0" />
-                    </span>
-                  );
-                }
-
-                return (
-                  <a
-                    key={item.label}
-                    href={item.url}
-                    className="px-1.5 xl:px-2.5 py-1.5 rounded-lg text-[11px] xl:text-xs font-semibold transition-all flex items-center gap-1 xl:gap-1.5 whitespace-nowrap shrink-0 text-[#5F6B63] hover:text-[#17231B] hover:bg-[#F8FAF9]"
-                  >
-                    <span>{item.label}</span>
-                  </a>
-                );
-              })}
-            </nav>
-
             {/* Right Action: Admin Pusat Link */}
-            <div className="hidden lg:flex items-center gap-2 shrink-0">
+            <div className="flex items-center gap-2 shrink-0">
               <a
                 href={adminUrl}
                 className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-[#16823B] hover:bg-[#126B30] text-white font-semibold text-xs transition-all shadow-xs"
+                title="Buka Admin Pusat"
               >
                 <ShieldCheck className="w-3.5 h-3.5 text-emerald-200" />
                 <span>Admin Pusat</span>
               </a>
             </div>
-
-            {/* Mobile / Tablet Hamburger Toggle (< lg) */}
-            <div className="flex lg:hidden items-center gap-2">
-              <button
-                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                className="p-1.5 rounded-lg text-[#2C3830] hover:bg-[#F4F7F5] transition-colors border border-[#DDE5DF]"
-                aria-label="Toggle Menu"
-              >
-                {mobileMenuOpen ? <X className="w-5 h-5 text-[#16823B]" /> : <Menu className="w-5 h-5 text-[#5F6B63]" />}
-              </button>
-            </div>
           </div>
         </div>
-
-        {/* Mobile Navigation Drawer */}
-        {mobileMenuOpen && (
-          <div className="lg:hidden border-t border-[#DDE5DF] bg-white px-4 py-3 space-y-2 shadow-lg max-h-[80vh] overflow-y-auto">
-            <div className="text-[11px] font-bold text-[#5F6B63] uppercase tracking-wider mb-1 px-1">
-              Navigasi Dashboard (9 Menu)
-            </div>
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-1.5">
-              {navItems.map((item) => {
-                const isHosted = item.isHosted !== false;
-
-                if (!isHosted) {
-                  return (
-                    <span
-                      key={item.label}
-                      className="px-3 py-2 rounded-lg text-xs font-semibold text-gray-400 bg-gray-50/70 border border-gray-200/60 select-none cursor-not-allowed flex items-center justify-between"
-                    >
-                      <div className="flex items-center gap-1.5">
-                        <span>{item.label}</span>
-                        <Wrench className="w-3 h-3 text-amber-500 shrink-0" />
-                      </div>
-                      <span className="text-[9px] bg-amber-50 text-amber-700 border border-amber-200/60 px-1 py-0.5 rounded font-medium">
-                        Perbaikan
-                      </span>
-                    </span>
-                  );
-                }
-
-                return (
-                  <a
-                    key={item.label}
-                    href={item.url}
-                    onClick={() => setMobileMenuOpen(false)}
-                    className="px-3 py-2 rounded-lg text-xs font-semibold flex items-center justify-between transition-all border text-[#2C3830] hover:bg-[#F8FAF9] border-[#EAEFEB]"
-                  >
-                    <span>{item.label}</span>
-                  </a>
-                );
-              })}
-            </div>
-            <div className="pt-2 border-t border-[#E3EBE5]">
-              <a
-                href={adminUrl}
-                className="w-full text-center py-2 rounded-lg bg-[#16823B] hover:bg-[#126B30] text-white font-semibold text-xs flex items-center justify-center gap-2 shadow-xs"
-              >
-                <ShieldCheck className="w-4 h-4 text-emerald-200" />
-                <span>Admin Pusat</span>
-              </a>
-            </div>
-          </div>
-        )}
       </header>
 
       {/* Main Content Area */}
