@@ -355,7 +355,7 @@ export default function AdminDashboardPage() {
       url: hppUrl,
       adminUrl: hppPg1AdminUrl,
       icon: Banknote,
-      isHosted: true,
+      isHosted: false,
     },
     {
       code: "capex",
@@ -364,7 +364,7 @@ export default function AdminDashboardPage() {
       url: capexUrl,
       adminUrl: hppM3AdminUrl,
       icon: Building2,
-      isHosted: true,
+      isHosted: false,
     },
     {
       code: "opex",
@@ -373,7 +373,7 @@ export default function AdminDashboardPage() {
       url: opexUrl,
       adminUrl: `${opexUrl}/admin`,
       icon: Receipt,
-      isHosted: true,
+      isHosted: false,
     },
     {
       code: "irigasi",
@@ -737,14 +737,19 @@ export default function AdminDashboardPage() {
                                   {u.allowedDashboards.length === 0 ? (
                                     <span className="text-[#89938D] italic">Tidak ada akses</span>
                                   ) : (
-                                    u.allowedDashboards.map((code) => (
-                                      <span
-                                        key={code}
-                                        className="text-[10px] bg-[#F8FAF9] text-[#2C3830] px-2 py-0.5 rounded border border-[#DDE5DF] font-mono uppercase"
-                                      >
-                                        {code}
-                                      </span>
-                                    ))
+                                    u.allowedDashboards.map((code) => {
+                                      const dashItem = allDashboardsConfig.find((d) => d.code === code);
+                                      const label = dashItem ? dashItem.code.toUpperCase() : code.toUpperCase();
+                                      return (
+                                        <span
+                                          key={code}
+                                          className="text-[10px] bg-[#EAF3EC] text-[#16823B] px-2 py-0.5 rounded border border-[#CBE0D1] font-bold"
+                                          title={dashItem?.name || code}
+                                        >
+                                          {label}
+                                        </span>
+                                      );
+                                    })
                                   )}
                                 </div>
                               )}
@@ -952,37 +957,47 @@ export default function AdminDashboardPage() {
                 </div>
               </div>
 
-              {/* Dashboard Access Checkboxes */}
+              {/* Dashboard Access Checkboxes based on real platform dashboards */}
               {formData.role !== "SUPER_ADMIN" && (
                 <div className="space-y-2 pt-2 border-t border-[#DDE5DF]">
-                  <label className="block text-[#2C3830] font-semibold">
-                    Alokasi Akses Dashboard (Role Admin)
-                  </label>
+                  <div className="flex items-center justify-between">
+                    <label className="block text-[#2C3830] font-semibold">
+                      Alokasi Akses Dashboard (Role Admin)
+                    </label>
+                    <span className="text-[10px] text-[#5F6B63]">Hanya dashboard aktif yang dapat dipilih</span>
+                  </div>
 
-                  <div className="grid grid-cols-2 gap-2">
-                    {[
-                      { code: "wip", label: "Dashboard WIP" },
-                      { code: "dashboard_a", label: "Dashboard A" },
-                      { code: "dashboard_b", label: "Dashboard B" },
-                      { code: "dashboard_c", label: "Dashboard C" },
-                    ].map((dash) => {
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-48 overflow-y-auto p-1 border border-[#DDE5DF] rounded-xl bg-[#F8FAF9]">
+                    {allDashboardsConfig.map((dash) => {
+                      const isDisabled = !dash.isHosted;
                       const isChecked = formData.dashboardCodes.includes(dash.code);
                       return (
                         <label
                           key={dash.code}
-                          className={`flex items-center gap-2 p-2.5 rounded-xl border cursor-pointer transition-all ${
-                            isChecked
-                              ? "bg-[#EAF3EC] border-[#CBE0D1] text-[#16823B]"
-                              : "bg-[#F8FAF9] border-[#DDE5DF] text-[#5F6B63] hover:text-[#17231B]"
+                          className={`flex items-center justify-between gap-2 p-2 rounded-lg border transition-all ${
+                            isDisabled
+                              ? "bg-gray-50/80 border-gray-200 text-gray-400 cursor-not-allowed select-none opacity-70"
+                              : isChecked
+                              ? "bg-white border-[#CBE0D1] text-[#16823B] shadow-2xs cursor-pointer"
+                              : "bg-white/60 border-[#EAEFEB] text-[#5F6B63] hover:text-[#17231B] cursor-pointer"
                           }`}
+                          title={isDisabled ? "Dashboard masih dalam tahap pembuatan" : ""}
                         >
-                          <input
-                            type="checkbox"
-                            checked={isChecked}
-                            onChange={() => toggleDashboardCode(dash.code)}
-                            className="rounded border-[#DDE5DF] text-[#16823B] focus:ring-0"
-                          />
-                          <span className="font-semibold">{dash.label}</span>
+                          <div className="flex items-center gap-2 overflow-hidden">
+                            <input
+                              type="checkbox"
+                              disabled={isDisabled}
+                              checked={isChecked}
+                              onChange={() => !isDisabled && toggleDashboardCode(dash.code)}
+                              className="rounded border-[#DDE5DF] text-[#16823B] focus:ring-0 shrink-0 disabled:cursor-not-allowed"
+                            />
+                            <span className="font-semibold truncate text-[11px]">{dash.name}</span>
+                          </div>
+                          {isDisabled && (
+                            <span className="text-[8px] bg-amber-50 text-amber-700 border border-amber-200/80 px-1 py-0.5 rounded font-medium shrink-0">
+                              Tahap Pembuatan
+                            </span>
+                          )}
                         </label>
                       );
                     })}

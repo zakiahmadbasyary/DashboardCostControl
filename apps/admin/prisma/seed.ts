@@ -11,7 +11,7 @@ async function main() {
   const hppPg1Url = process.env.NEXT_PUBLIC_HPP_PG1_URL || process.env.NEXT_PUBLIC_DASHBOARD_B_URL || "http://localhost:3003";
   const hppM3Url = process.env.NEXT_PUBLIC_HPP_M3_URL || process.env.NEXT_PUBLIC_DASHBOARD_C_URL || "http://localhost:3004";
 
-  // 1. Seed Master Dashboards
+  // 1. Seed Master Dashboards (9 Modul Dashboard GGF AgroMetric)
   const dashboards = [
     {
       code: "wip",
@@ -21,24 +21,59 @@ async function main() {
       status: "ACTIVE",
     },
     {
-      code: "dashboard_a",
-      name: "Dashboard A (Operasional)",
+      code: "hpp",
+      name: "Dashboard HPP (Harga Pokok Produksi)",
       adminUrl: `${wipPg1Url}/admin`,
       publicUrl: wipPg1Url,
       status: "DEVELOPMENT",
     },
     {
-      code: "dashboard_b",
-      name: "Dashboard B (Inventaris)",
+      code: "capex",
+      name: "Dashboard Capex (Capital Expenditure)",
       adminUrl: `${hppPg1Url}/admin`,
       publicUrl: hppPg1Url,
       status: "DEVELOPMENT",
     },
     {
-      code: "dashboard_c",
-      name: "Dashboard C (Finansial)",
+      code: "opex",
+      name: "Dashboard Opex (Operational Expenditure)",
       adminUrl: `${hppM3Url}/admin`,
       publicUrl: hppM3Url,
+      status: "DEVELOPMENT",
+    },
+    {
+      code: "irigasi",
+      name: "Dashboard Irigasi (Pengairan & Pump)",
+      adminUrl: "http://localhost:3006/admin",
+      publicUrl: "http://localhost:3006",
+      status: "DEVELOPMENT",
+    },
+    {
+      code: "sulam",
+      name: "Dashboard Sulam (Pemeliharaan Tanaman)",
+      adminUrl: "http://localhost:3007/admin",
+      publicUrl: "http://localhost:3007",
+      status: "DEVELOPMENT",
+    },
+    {
+      code: "selesai_bongkar",
+      name: "Dashboard Selesai Bongkar (Land Prep)",
+      adminUrl: "http://localhost:3008/admin",
+      publicUrl: "http://localhost:3008",
+      status: "DEVELOPMENT",
+    },
+    {
+      code: "harga_material",
+      name: "Dashboard Harga Material (Master Logistik)",
+      adminUrl: "http://localhost:3009/admin",
+      publicUrl: "http://localhost:3009",
+      status: "DEVELOPMENT",
+    },
+    {
+      code: "poll_pg1",
+      name: "Dashboard Poll PG 1 (Armada & Transportasi)",
+      adminUrl: "http://localhost:3010/admin",
+      publicUrl: "http://localhost:3010",
       status: "DEVELOPMENT",
     },
   ];
@@ -119,7 +154,7 @@ async function main() {
     },
   });
 
-  for (const code of ["dashboard_a", "dashboard_b"]) {
+  for (const code of ["hpp", "capex"]) {
     await prisma.userDashboardAccess.upsert({
       where: {
         userId_dashboardId: {

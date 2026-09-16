@@ -99,11 +99,20 @@ export async function POST(request: Request) {
 
     // Assign dashboard access if ADMIN role
     if (role !== "SUPER_ADMIN" && Array.isArray(dashboardCodes) && dashboardCodes.length > 0) {
-      const dbRecords = await prismaAdmin.dashboard.findMany({
-        where: { code: { in: dashboardCodes } },
-      });
+      for (const code of dashboardCodes) {
+        let dash = await prismaAdmin.dashboard.findUnique({ where: { code } });
+        if (!dash) {
+          dash = await prismaAdmin.dashboard.create({
+            data: {
+              code,
+              name: `Dashboard ${code.toUpperCase()}`,
+              adminUrl: `/${code}/admin`,
+              publicUrl: `/${code}`,
+              status: code === "wip" ? "ACTIVE" : "DEVELOPMENT",
+            },
+          });
+        }
 
-      for (const dash of dbRecords) {
         await prismaAdmin.userDashboardAccess.create({
           data: {
             userId: newUser.id,
@@ -168,11 +177,20 @@ export async function PUT(request: Request) {
       await prismaAdmin.userDashboardAccess.deleteMany({ where: { userId: id } });
 
       if (updatedUser.role !== "SUPER_ADMIN" && dashboardCodes.length > 0) {
-        const dbRecords = await prismaAdmin.dashboard.findMany({
-          where: { code: { in: dashboardCodes } },
-        });
+        for (const code of dashboardCodes) {
+          let dash = await prismaAdmin.dashboard.findUnique({ where: { code } });
+          if (!dash) {
+            dash = await prismaAdmin.dashboard.create({
+              data: {
+                code,
+                name: `Dashboard ${code.toUpperCase()}`,
+                adminUrl: `/${code}/admin`,
+                publicUrl: `/${code}`,
+                status: code === "wip" ? "ACTIVE" : "DEVELOPMENT",
+              },
+            });
+          }
 
-        for (const dash of dbRecords) {
           await prismaAdmin.userDashboardAccess.create({
             data: {
               userId: id,
