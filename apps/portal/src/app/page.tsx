@@ -17,6 +17,9 @@ import {
   Settings,
   Menu,
   X,
+  Clock,
+  Lock,
+  Wrench,
 } from "lucide-react";
 
 export default function PortalHomePage() {
@@ -45,6 +48,7 @@ export default function PortalHomePage() {
       url: wipAccUrl,
       icon: LineChart,
       badge: "Cost Control",
+      isHosted: true,
     },
     {
       id: "hpp",
@@ -55,6 +59,7 @@ export default function PortalHomePage() {
       url: hppUrl,
       icon: Banknote,
       badge: "Produksi",
+      isHosted: true,
     },
     {
       id: "capex",
@@ -65,6 +70,7 @@ export default function PortalHomePage() {
       url: capexUrl,
       icon: Building2,
       badge: "Belanja Modal",
+      isHosted: true,
     },
     {
       id: "opex",
@@ -75,6 +81,7 @@ export default function PortalHomePage() {
       url: opexUrl,
       icon: Receipt,
       badge: "Biaya Operasional",
+      isHosted: true,
     },
     {
       id: "irigasi",
@@ -85,6 +92,7 @@ export default function PortalHomePage() {
       url: irigasiUrl,
       icon: Droplets,
       badge: "Fasilitas",
+      isHosted: false,
     },
     {
       id: "sulam",
@@ -95,6 +103,7 @@ export default function PortalHomePage() {
       url: sulamUrl,
       icon: Sprout,
       badge: "Pemeliharaan",
+      isHosted: false,
     },
     {
       id: "selesai-bongkar",
@@ -105,6 +114,7 @@ export default function PortalHomePage() {
       url: selesaiBongkarUrl,
       icon: Tractor,
       badge: "Land Prep",
+      isHosted: false,
     },
     {
       id: "harga-material",
@@ -115,6 +125,7 @@ export default function PortalHomePage() {
       url: hargaMaterialUrl,
       icon: Boxes,
       badge: "Master Logistik",
+      isHosted: false,
     },
     {
       id: "poll-pg1",
@@ -125,12 +136,14 @@ export default function PortalHomePage() {
       url: pollPg1Url,
       icon: Truck,
       badge: "Armada PG1",
+      isHosted: false,
     },
   ];
 
   const navItems = publicDashboards.map((dash) => ({
     label: dash.name,
     url: dash.url,
+    isHosted: dash.isHosted,
   }));
 
   return (
@@ -159,17 +172,33 @@ export default function PortalHomePage() {
               </div>
             </a>
 
-            {/* Center Navigation Links (Horizontal Row with Overflow handling) */}
-            <nav className="hidden lg:flex items-center gap-1 xl:gap-1.5 shrink-0 whitespace-nowrap overflow-x-auto py-1 max-w-2xl no-scrollbar">
-              {navItems.map((item) => (
-                <a
-                  key={item.label}
-                  href={item.url}
-                  className="px-2.5 py-1.5 rounded-lg text-xs font-semibold text-[#5F6B63] hover:text-[#17231B] hover:bg-[#F8FAF9] transition-all whitespace-nowrap"
-                >
-                  {item.label}
-                </a>
-              ))}
+            {/* Center Navigation Links (Horizontal Row fitting all items without scroll) */}
+            <nav className="hidden lg:flex items-center gap-0.5 xl:gap-1.5 shrink-0 whitespace-nowrap overflow-hidden py-1">
+              {navItems.map((item) => {
+                const isHosted = item.isHosted !== false;
+
+                if (!isHosted) {
+                  return (
+                    <span
+                      key={item.label}
+                      className="px-1.5 xl:px-2.5 py-1.5 rounded-lg text-[11px] xl:text-xs font-semibold text-gray-400 bg-gray-50/70 border border-gray-200/60 select-none cursor-not-allowed flex items-center gap-1 xl:gap-1.5 whitespace-nowrap shrink-0"
+                    >
+                      <span>{item.label}</span>
+                      <Wrench className="w-2.5 h-2.5 xl:w-3 xl:h-3 text-amber-500 shrink-0" />
+                    </span>
+                  );
+                }
+
+                return (
+                  <a
+                    key={item.label}
+                    href={item.url}
+                    className="px-1.5 xl:px-2.5 py-1.5 rounded-lg text-[11px] xl:text-xs font-semibold transition-all flex items-center gap-1 xl:gap-1.5 whitespace-nowrap shrink-0 text-[#5F6B63] hover:text-[#17231B] hover:bg-[#F8FAF9]"
+                  >
+                    <span>{item.label}</span>
+                  </a>
+                );
+              })}
             </nav>
 
             {/* Right Action: Admin Pusat Link */}
@@ -203,15 +232,37 @@ export default function PortalHomePage() {
               Navigasi Dashboard (9 Menu)
             </div>
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-1.5">
-              {navItems.map((item) => (
-                <a
-                  key={item.label}
-                  href={item.url}
-                  className="px-3 py-2 rounded-lg text-xs font-semibold text-[#2C3830] hover:bg-[#F8FAF9] border border-[#EAEFEB] flex items-center justify-between"
-                >
-                  <span>{item.label}</span>
-                </a>
-              ))}
+              {navItems.map((item) => {
+                const isHosted = item.isHosted !== false;
+
+                if (!isHosted) {
+                  return (
+                    <span
+                      key={item.label}
+                      className="px-3 py-2 rounded-lg text-xs font-semibold text-gray-400 bg-gray-50/70 border border-gray-200/60 select-none cursor-not-allowed flex items-center justify-between"
+                    >
+                      <div className="flex items-center gap-1.5">
+                        <span>{item.label}</span>
+                        <Wrench className="w-3 h-3 text-amber-500 shrink-0" />
+                      </div>
+                      <span className="text-[9px] bg-amber-50 text-amber-700 border border-amber-200/60 px-1 py-0.5 rounded font-medium">
+                        Perbaikan
+                      </span>
+                    </span>
+                  );
+                }
+
+                return (
+                  <a
+                    key={item.label}
+                    href={item.url}
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="px-3 py-2 rounded-lg text-xs font-semibold flex items-center justify-between transition-all border text-[#2C3830] hover:bg-[#F8FAF9] border-[#EAEFEB]"
+                  >
+                    <span>{item.label}</span>
+                  </a>
+                );
+              })}
             </div>
             <div className="pt-2 border-t border-[#E3EBE5]">
               <a
@@ -253,15 +304,25 @@ export default function PortalHomePage() {
             return (
               <div
                 key={dash.id}
-                className="bg-white border border-[#DDE5DF] rounded-2xl p-6 flex flex-col justify-between shadow-2xs hover:shadow-md hover:border-[#CBE0D1] transition-all group"
+                className={`bg-white border border-[#DDE5DF] rounded-2xl p-6 flex flex-col justify-between shadow-2xs transition-all ${
+                  !dash.isHosted ? "bg-slate-50/50" : "hover:shadow-md hover:border-[#CBE0D1] group"
+                }`}
               >
                 <div>
                   <div className="flex items-center justify-between mb-4">
-                    <div className="w-11 h-11 rounded-xl bg-[#EAF3EC] border border-[#CBE0D1] text-[#16823B] flex items-center justify-center shrink-0 shadow-2xs">
+                    <div className={`w-11 h-11 rounded-xl flex items-center justify-center shrink-0 shadow-2xs ${
+                      dash.isHosted
+                        ? "bg-[#EAF3EC] border border-[#CBE0D1] text-[#16823B]"
+                        : "bg-amber-50 border border-amber-200/80 text-amber-700"
+                    }`}>
                       <IconComponent className="w-5.5 h-5.5" />
                     </div>
-                    <span className="text-[11px] font-bold text-[#17231B] bg-[#FCE27A]/90 px-2.5 py-0.5 rounded-md inline-block">
-                      {dash.badge}
+                    <span className={`text-[11px] font-bold px-2.5 py-0.5 rounded-md inline-block ${
+                      dash.isHosted
+                        ? "text-[#17231B] bg-[#FCE27A]/90"
+                        : "text-amber-800 bg-amber-100/90 border border-amber-200"
+                    }`}>
+                      {dash.isHosted ? dash.badge : "Tahap Pembuatan"}
                     </span>
                   </div>
 
@@ -279,13 +340,30 @@ export default function PortalHomePage() {
                 </div>
 
                 <div>
-                  <a
-                    href={dash.url}
-                    className="w-full py-2.5 px-4 rounded-xl bg-[#16823B] hover:bg-[#126B30] text-white font-semibold text-xs flex items-center justify-center gap-2 transition-all shadow-2xs group-hover:shadow-xs"
-                  >
-                    <span>Buka Menu {dash.name}</span>
-                    <ArrowRight className="w-4 h-4" />
-                  </a>
+                  {dash.isHosted ? (
+                    <a
+                      href={dash.url}
+                      className="w-full py-2.5 px-4 rounded-xl bg-[#16823B] hover:bg-[#126B30] text-white font-semibold text-xs flex items-center justify-center gap-2 transition-all shadow-2xs group-hover:shadow-xs"
+                    >
+                      <span>Buka Menu {dash.name}</span>
+                      <ArrowRight className="w-4 h-4" />
+                    </a>
+                  ) : (
+                    <div className="relative group/btn">
+                      <button
+                        disabled
+                        onClick={(e) => e.preventDefault()}
+                        className="w-full py-2.5 px-4 rounded-xl bg-[#F0F4F1] border border-[#D0DDD4] text-[#7A8A7F] font-semibold text-xs flex items-center justify-center gap-2 cursor-not-allowed select-none"
+                      >
+                        <Clock className="w-4 h-4 text-amber-600" />
+                        <span>Tahap Pembuatan</span>
+                      </button>
+                      <div className="absolute hidden group-hover/btn:block bg-gray-900 text-white text-[11px] font-medium px-2.5 py-1 rounded shadow-md whitespace-nowrap -top-9 left-1/2 -translate-x-1/2 z-50 pointer-events-none">
+                        Masih Pembuatan
+                        <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 border-x-4 border-x-transparent border-t-4 border-t-gray-900" />
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
             );
@@ -324,9 +402,15 @@ export default function PortalHomePage() {
           <p>© 2026 GGF AgroMetric Platform. Enterprise Cost Control Portal.</p>
           <div className="flex flex-wrap justify-center gap-4 sm:gap-6 font-medium text-[#17231B]">
             {publicDashboards.map((dash) => (
-              <a key={dash.id} href={dash.url} className="hover:text-[#16823B]">
-                {dash.name}
-              </a>
+              dash.isHosted ? (
+                <a key={dash.id} href={dash.url} className="hover:text-[#16823B]">
+                  {dash.name}
+                </a>
+              ) : (
+                <span key={dash.id} className="text-gray-400 cursor-not-allowed" title="Tahap Pembuatan">
+                  {dash.name}
+                </span>
+              )
             ))}
             <a href={adminUrl} className="hover:text-[#16823B]">Admin Pusat</a>
           </div>

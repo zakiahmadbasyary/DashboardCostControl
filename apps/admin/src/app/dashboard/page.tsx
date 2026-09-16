@@ -344,6 +344,7 @@ export default function AdminDashboardPage() {
       url: wipAccUrl,
       adminUrl: wipAccAdminUrl,
       icon: Activity,
+      isHosted: true,
     },
     {
       code: "hpp",
@@ -352,6 +353,7 @@ export default function AdminDashboardPage() {
       url: hppUrl,
       adminUrl: hppPg1AdminUrl,
       icon: Banknote,
+      isHosted: true,
     },
     {
       code: "capex",
@@ -360,6 +362,7 @@ export default function AdminDashboardPage() {
       url: capexUrl,
       adminUrl: hppM3AdminUrl,
       icon: Building2,
+      isHosted: true,
     },
     {
       code: "opex",
@@ -368,6 +371,7 @@ export default function AdminDashboardPage() {
       url: opexUrl,
       adminUrl: `${opexUrl}/admin`,
       icon: Receipt,
+      isHosted: true,
     },
     {
       code: "irigasi",
@@ -376,6 +380,7 @@ export default function AdminDashboardPage() {
       url: irigasiUrl,
       adminUrl: `${irigasiUrl}/admin`,
       icon: Droplets,
+      isHosted: false,
     },
     {
       code: "sulam",
@@ -384,6 +389,7 @@ export default function AdminDashboardPage() {
       url: sulamUrl,
       adminUrl: `${sulamUrl}/admin`,
       icon: Sprout,
+      isHosted: false,
     },
     {
       code: "selesai_bongkar",
@@ -392,6 +398,7 @@ export default function AdminDashboardPage() {
       url: selesaiBongkarUrl,
       adminUrl: `${selesaiBongkarUrl}/admin`,
       icon: Tractor,
+      isHosted: false,
     },
     {
       code: "harga_material",
@@ -400,6 +407,7 @@ export default function AdminDashboardPage() {
       url: hargaMaterialUrl,
       adminUrl: `${hargaMaterialUrl}/admin`,
       icon: Boxes,
+      isHosted: false,
     },
     {
       code: "poll_pg1",
@@ -408,6 +416,7 @@ export default function AdminDashboardPage() {
       url: pollPg1Url,
       adminUrl: `${pollPg1Url}/admin`,
       icon: Truck,
+      isHosted: false,
     },
   ];
 
@@ -499,7 +508,7 @@ export default function AdminDashboardPage() {
         <div className="flex flex-wrap items-center gap-2 border-b border-[#DDE5DF] pb-4">
           <button
             onClick={() => setActiveTab("dashboards")}
-            className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all ${
+            className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 ${
               activeTab === "dashboards"
                 ? "bg-[#16823B] text-white shadow-2xs"
                 : "bg-white hover:bg-[#F8FAF9] text-[#5F6B63] hover:text-[#17231B] border border-[#DDE5DF]"
@@ -512,20 +521,20 @@ export default function AdminDashboardPage() {
           {isSuperAdmin && (
             <button
               onClick={() => setActiveTab("users")}
-              className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all ${
+              className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 ${
                 activeTab === "users"
                   ? "bg-[#16823B] text-white shadow-2xs"
                   : "bg-white hover:bg-[#F8FAF9] text-[#5F6B63] hover:text-[#17231B] border border-[#DDE5DF]"
               }`}
             >
               <Users className="w-4 h-4" />
-              <span>Manajemen User & Hak Akses</span>
+              <span>Manajemen User</span>
             </button>
           )}
 
           <button
             onClick={() => setActiveTab("logs")}
-            className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all ${
+            className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 ${
               activeTab === "logs"
                 ? "bg-[#16823B] text-white shadow-2xs"
                 : "bg-white hover:bg-[#F8FAF9] text-[#5F6B63] hover:text-[#17231B] border border-[#DDE5DF]"
@@ -551,27 +560,38 @@ export default function AdminDashboardPage() {
                 const IconComponent = dash.icon;
                 const hasAccess =
                   isSuperAdmin || currentUser?.allowedDashboards.includes(dash.code);
+                const isHosted = dash.isHosted !== false;
 
                 return (
                   <div
                     key={dash.code}
                     className={`bg-white border border-[#DDE5DF] rounded-2xl p-6 flex flex-col justify-between shadow-2xs transition-all ${
-                      !hasAccess ? "opacity-60 bg-gray-50" : "hover:shadow-md hover:border-[#CBE0D1]"
+                      !isHosted
+                        ? "bg-slate-50/50 border-slate-200 opacity-80"
+                        : !hasAccess
+                        ? "opacity-60 bg-gray-50"
+                        : "hover:shadow-md hover:border-[#CBE0D1]"
                     }`}
                   >
                     <div>
                       <div className="flex items-center justify-between mb-4">
-                        <div className="w-10 h-10 rounded-xl bg-[#EAF3EC] border border-[#CBE0D1] flex items-center justify-center text-[#16823B]">
+                        <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${
+                          isHosted
+                            ? "bg-[#EAF3EC] border border-[#CBE0D1] text-[#16823B]"
+                            : "bg-amber-50 border border-amber-200 text-amber-700"
+                        }`}>
                           <IconComponent className="w-5 h-5" />
                         </div>
                         <span
                           className={`text-[11px] font-bold px-3 py-1 rounded-full border ${
-                            hasAccess
+                            !isHosted
+                              ? "bg-amber-100 text-amber-800 border-amber-200"
+                              : hasAccess
                               ? "bg-[#EAF3EC] text-[#16823B] border-[#CBE0D1]"
                               : "bg-red-50 text-red-700 border-red-200"
                           }`}
                         >
-                          {hasAccess ? "Akses Diizinkan" : "Akses Dibatasi (403)"}
+                          {!isHosted ? "Tahap Pembuatan" : hasAccess ? "Akses Diizinkan" : "Akses Dibatasi (403)"}
                         </span>
                       </div>
 
@@ -582,8 +602,23 @@ export default function AdminDashboardPage() {
                     </div>
 
                     <div className="pt-4 border-t border-[#EAEFEB] flex items-center justify-between">
-                      <span className="text-[11px] text-[#89938D]">Database: Terpisah</span>
-                      {hasAccess ? (
+                      <span className="text-[11px] text-[#89938D]">
+                        {!isHosted ? "Status: Belum Hosted" : "Database: Terpisah"}
+                      </span>
+                      {!isHosted ? (
+                        <div className="relative group/admin-btn">
+                          <button
+                            disabled
+                            className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-[#F0F4F1] border border-[#D0DDD4] text-[#7A8A7F] font-bold text-xs cursor-not-allowed select-none"
+                          >
+                            <Clock className="w-3.5 h-3.5 text-amber-600" />
+                            <span>Tahap Pembuatan</span>
+                          </button>
+                          <div className="absolute hidden group-hover/admin-btn:block bg-gray-900 text-white text-[10px] font-medium px-2.5 py-1 rounded shadow-md whitespace-nowrap -top-8 right-0 z-50 pointer-events-none">
+                            Masih Pembuatan
+                          </div>
+                        </div>
+                      ) : hasAccess ? (
                         <button
                           onClick={() => handleManageDashboard(dash)}
                           disabled={Boolean(ssoLoadingCode)}

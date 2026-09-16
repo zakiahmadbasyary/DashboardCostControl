@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import { getDashboardNavConfig } from "@dashboard/shared-ui";
-import { Tractor, LayoutGrid, ShieldCheck, Menu, X } from "lucide-react";
+import { Tractor, LayoutGrid, ShieldCheck, Menu, X, Wrench } from "lucide-react";
 
 export default function DashboardSelesaiBongkarPage() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -29,24 +29,39 @@ export default function DashboardSelesaiBongkarPage() {
                   Dashboard Selesai Bongkar
                 </span>
                 <span className="text-[10px] sm:text-xs text-[#5F6B63] hidden sm:block font-medium leading-tight mt-0.5">
-                  Land Prep & Ratoon
+                  Evaluasi Pasca Bongkar
                 </span>
               </div>
             </a>
 
             {/* Navigation Links */}
-            <nav className="hidden lg:flex items-center gap-1 xl:gap-1.5 shrink-0 whitespace-nowrap overflow-x-auto py-1 max-w-2xl no-scrollbar">
+            <nav className="hidden lg:flex items-center gap-0.5 xl:gap-1.5 shrink-0 whitespace-nowrap overflow-hidden py-1">
               {navItems.map((item) => {
                 const isActive = item.key === "selesai_bongkar";
+                const isHosted = item.isHosted !== false;
+
+                if (!isHosted) {
+                  return (
+                    <span
+                      key={item.key}
+                      className="px-1.5 xl:px-2.5 py-1.5 rounded-lg text-[11px] xl:text-xs font-semibold text-gray-400 bg-gray-50/70 border border-gray-200/60 select-none cursor-not-allowed flex items-center gap-1 xl:gap-1.5 whitespace-nowrap shrink-0"
+                    >
+                      <span>{item.label}</span>
+                      <Wrench className="w-2.5 h-2.5 xl:w-3 xl:h-3 text-amber-500 shrink-0" />
+                    </span>
+                  );
+                }
+
                 return (
                   <a
                     key={item.key}
                     href={item.url}
-                    className={`px-2.5 py-1.5 rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5 whitespace-nowrap ${
+                    className={`px-1.5 xl:px-2.5 py-1.5 rounded-lg text-[11px] xl:text-xs font-semibold transition-all flex items-center gap-1 xl:gap-1.5 whitespace-nowrap shrink-0 ${
                       isActive
                         ? "bg-[#EAF3EC] text-[#16823B] font-bold border border-[#CBE0D1]"
                         : "text-[#5F6B63] hover:text-[#17231B] hover:bg-[#F8FAF9]"
                     }`}
+                    title={item.description}
                   >
                     <span>{item.label}</span>
                     {isActive && <span className="w-1.5 h-1.5 rounded-full bg-[#16823B]" />}
@@ -98,15 +113,36 @@ export default function DashboardSelesaiBongkarPage() {
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-1.5">
               {navItems.map((item) => {
                 const isActive = item.key === "selesai_bongkar";
+                const isHosted = item.isHosted !== false;
+
+                if (!isHosted) {
+                  return (
+                    <span
+                      key={item.key}
+                      className="px-3 py-2 rounded-lg text-xs font-semibold text-gray-400 bg-gray-50/70 border border-gray-200/60 select-none cursor-not-allowed flex items-center justify-between"
+                    >
+                      <div className="flex items-center gap-1.5">
+                        <span>{item.label}</span>
+                        <Wrench className="w-3 h-3 text-amber-500 shrink-0" />
+                      </div>
+                      <span className="text-[9px] bg-amber-50 text-amber-700 border border-amber-200/60 px-1 py-0.5 rounded font-medium">
+                        Perbaikan
+                      </span>
+                    </span>
+                  );
+                }
+
                 return (
                   <a
                     key={item.key}
                     href={item.url}
+                    onClick={() => setMobileMenuOpen(false)}
                     className={`px-3 py-2 rounded-lg text-xs font-semibold flex items-center justify-between transition-all border ${
                       isActive
                         ? "bg-[#EAF3EC] text-[#16823B] font-bold border-[#CBE0D1]"
                         : "text-[#2C3830] hover:bg-[#F8FAF9] border-[#EAEFEB]"
                     }`}
+                    title={item.description}
                   >
                     <span>{item.label}</span>
                     {isActive && (

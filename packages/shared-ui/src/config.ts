@@ -3,6 +3,7 @@ export interface DashboardNavItem {
   label: string;
   url: string;
   description: string;
+  isHosted?: boolean;
 }
 
 export interface DashboardNavConfig {
@@ -76,54 +77,63 @@ export const getDashboardNavConfig = (): DashboardNavConfig => {
         label: "WIP",
         url: wipAccUrl,
         description: "Monitoring Cost Control WIP ACC",
+        isHosted: true,
       },
       {
         key: "hpp",
         label: "HPP",
         url: hppUrl,
         description: "Harga Pokok Produksi (HPP)",
+        isHosted: true,
       },
       {
         key: "capex",
         label: "Capex",
         url: capexUrl,
         description: "Capital Expenditure (Belanja Modal)",
+        isHosted: true,
       },
       {
         key: "opex",
         label: "Opex",
         url: opexUrl,
         description: "Operational Expenditure (Biaya Operasional)",
+        isHosted: true,
       },
       {
         key: "irigasi",
         label: "Irigasi",
         url: irigasiUrl,
-        description: "Pengawasan Biaya & Operasional Irigasi",
+        description: "Pengawasan Biaya & Operasional Irigasi (Tahap Pembuatan)",
+        isHosted: false,
       },
       {
         key: "sulam",
         label: "Sulam",
         url: sulamUrl,
-        description: "Monitoring Biaya Pemeliharaan & Penyulaman",
+        description: "Monitoring Biaya Pemeliharaan & Penyulaman (Tahap Pembuatan)",
+        isHosted: false,
       },
       {
         key: "selesai_bongkar",
         label: "Selesai Bongkar",
         url: selesaiBongkarUrl,
-        description: "Evaluasi Pasca Selesai Bongkar",
+        description: "Evaluasi Pasca Selesai Bongkar (Tahap Pembuatan)",
+        isHosted: false,
       },
       {
         key: "harga_material",
         label: "Harga Material",
         url: hargaMaterialUrl,
-        description: "Master Data & Fluktuasi Harga Material",
+        description: "Master Data & Fluktuasi Harga Material (Tahap Pembuatan)",
+        isHosted: false,
       },
       {
         key: "poll_pg1",
         label: "Poll PG 1",
         url: pollPg1Url,
-        description: "Pengendalian Biaya Armada & Transportasi PG1",
+        description: "Pengendalian Biaya Armada & Transportasi PG1 (Tahap Pembuatan)",
+        isHosted: false,
       },
     ],
     portalUrl,
