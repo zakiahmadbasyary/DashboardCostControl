@@ -50,31 +50,35 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(new URL(`${adminBaseUrl}/login?error=sso_failed`));
   }
 
-  // 2. Standard Session Check (Local admin_session cookie or Central Session fallback)
+  // 2. Central Session Check (Requires active Central Admin Session)
+  const centralCookie = request.cookies.get("admin_central_session")?.value;
+  const authHeader = request.headers.get("authorization");
+  const fallbackToken = centralCookie || (authHeader?.startsWith("Bearer ") ? authHeader.substring(7).trim() : null);
+
+  // If central session cookie/token does not exist (user logged out from Admin Pusat or session ended)
+  if (!fallbackToken) {
+    if (pathname.startsWith("/api/admin")) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: "Unauthorized: Token sesi Admin Utama telah berakhir atau logout.",
+        },
+        { status: 401 }
+      );
+    }
+
+    const redirectRes = NextResponse.redirect(new URL(`${adminBaseUrl}/login`));
+    redirectRes.cookies.delete("admin_session");
+    return redirectRes;
+  }
+
+  // 3. Optional Local Session Token Validation
   const localCookie = request.cookies.get("admin_session")?.value;
   if (localCookie) {
     const payload = verifySessionToken(localCookie);
     if (payload) {
       return NextResponse.next();
     }
-  }
-
-  const centralCookie = request.cookies.get("admin_central_session")?.value;
-  const authHeader = request.headers.get("authorization");
-  const fallbackToken = centralCookie || (authHeader?.startsWith("Bearer ") ? authHeader.substring(7).trim() : null);
-
-  if (!fallbackToken) {
-    if (pathname.startsWith("/api/admin")) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: "Unauthorized: Token sesi Admin tidak ditemukan.",
-        },
-        { status: 401 }
-      );
-    }
-
-    return NextResponse.redirect(new URL(`${adminBaseUrl}/login`));
   }
 
   try {

@@ -1,9 +1,10 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
+import { ADMIN_AUTH_COOKIE } from "@/lib/auth";
 
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
-  const token = request.cookies.get("admin_session_token")?.value;
+  const token = request.cookies.get(ADMIN_AUTH_COOKIE)?.value;
 
   // Protect /dashboard path server-side
   if (pathname.startsWith("/dashboard")) {

@@ -2,6 +2,14 @@ import { cookies } from "next/headers";
 
 export const ADMIN_AUTH_COOKIE = "admin_central_session";
 
+export function getCookieDomain(): string | undefined {
+  const domain = process.env.COOKIE_DOMAIN || process.env.NEXT_PUBLIC_COOKIE_DOMAIN;
+  if (!domain || domain.trim() === "" || domain.includes("localhost")) {
+    return undefined;
+  }
+  return domain.trim().startsWith(".") ? domain.trim() : `.${domain.trim()}`;
+}
+
 export interface AdminPayload {
   userId: string;
   username: string;

@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { prismaAdmin } from "@/lib/db";
 import bcrypt from "bcryptjs";
-import { ADMIN_AUTH_COOKIE } from "@/lib/auth";
+import { ADMIN_AUTH_COOKIE, getCookieDomain } from "@/lib/auth";
 
 export async function POST(request: Request) {
   try {
@@ -97,12 +97,14 @@ export async function POST(request: Request) {
       token,
     });
 
+    const domain = getCookieDomain();
     response.cookies.set(ADMIN_AUTH_COOKIE, token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: "lax",
       expires: expiresAt,
       path: "/",
+      ...(domain ? { domain } : {}),
     });
 
     return response;
