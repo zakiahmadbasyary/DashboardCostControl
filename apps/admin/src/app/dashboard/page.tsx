@@ -428,7 +428,7 @@ export default function AdminDashboardPage() {
     <div className="min-h-screen bg-[#F7F9F7] text-[#17231B] flex flex-col font-sans selection:bg-[#16823B] selection:text-white">
       {/* Header Bar with Logo */}
       <header className="border-b border-[#DDE5DF] bg-white sticky top-0 z-50 shadow-2xs">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3.5 flex items-center justify-between gap-4">
+        <div className="w-full max-w-[95%] mx-auto px-4 sm:px-6 lg:px-8 py-3.5 flex items-center justify-between gap-4">
           {/* Logo & Title */}
           <a href="/dashboard" className="flex items-center gap-3 shrink-0 py-1 group">
             <div className="h-13 sm:h-14 w-auto flex items-center shrink-0">
@@ -480,7 +480,7 @@ export default function AdminDashboardPage() {
       </header>
 
       {/* Main Content Area */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-1 w-full space-y-6">
+      <main className="w-full max-w-[95%] mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-1 space-y-6">
         {/* Banner Section */}
         <div className="bg-white border border-[#DDE5DF] border-l-4 border-l-[#16823B] rounded-2xl p-6 sm:p-8 shadow-2xs flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
           <div className="space-y-2">

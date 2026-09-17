@@ -10,7 +10,7 @@ export default function DashboardHeader() {
 
   return (
     <header className="sticky top-0 z-50 bg-white border-b border-[#DDE5DF] shadow-2xs w-full">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="w-full max-w-[95%] mx-auto px-4 sm:px-6 lg:px-8">
         <div className="h-16 sm:h-18 flex items-center justify-between gap-4">
           {/* Brand Logo & Title */}
           <a href={portalUrl} className="flex items-center gap-3 shrink-0 py-1 group focus:outline-none">
@@ -67,7 +67,7 @@ export default function DashboardHeader() {
       {/* Collapsible Navigation Drawer */}
       {mobileMenuOpen && (
         <div className="border-t border-[#DDE5DF] bg-white px-4 py-3 space-y-2 shadow-lg max-h-[80vh] overflow-y-auto">
-          <div className="max-w-7xl mx-auto space-y-3">
+          <div className="w-full max-w-[95%] mx-auto space-y-3">
             <div className="text-[11px] font-bold text-[#5F6B63] uppercase tracking-wider px-1">
               Navigasi Dashboard Cost Control (9 Menu)
             </div>

@@ -145,7 +145,7 @@ export default function PortalHomePage() {
     <div className="min-h-screen bg-[#F7F9F7] text-[#17231B] flex flex-col justify-between font-sans selection:bg-[#16823B] selection:text-white">
       {/* Dedicated Portal Header */}
       <header className="sticky top-0 z-50 bg-white border-b border-[#DDE5DF] shadow-2xs w-full">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="w-full max-w-[95%] mx-auto px-4 sm:px-6 lg:px-8">
           <div className="h-16 sm:h-18 flex items-center justify-between gap-4">
             {/* Left Brand Logo & Title */}
             <a href={portalUrl} className="flex items-center gap-3 shrink-0 py-1 group focus:outline-none">
@@ -216,7 +216,7 @@ export default function PortalHomePage() {
         {/* Navigation Dropdown Drawer */}
         {menuOpen && (
           <div className="border-t border-[#DDE5DF] bg-white px-4 py-4 shadow-lg animate-in fade-in duration-150">
-            <div className="max-w-7xl mx-auto space-y-3">
+            <div className="w-full max-w-[95%] mx-auto space-y-3">
               {/* Mobile Quick Links Section at Top of Drawer */}
               <div className="flex sm:hidden flex-col gap-2 pb-3 border-b border-[#EAEFEB]">
                 <span className="text-[11px] font-extrabold text-[#17231B] uppercase tracking-wider">
@@ -300,7 +300,7 @@ export default function PortalHomePage() {
       </header>
 
       {/* Main Content Area */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 flex-1 w-full">
+      <main className="w-full max-w-[95%] mx-auto px-4 sm:px-6 lg:px-8 py-10 flex-1">
         {/* Title & Subtitle Section */}
         <div className="mb-10 text-center max-w-3xl mx-auto space-y-4">
           <div className="flex justify-center mb-2">
@@ -420,7 +420,7 @@ export default function PortalHomePage() {
 
       {/* Footer */}
       <footer className="border-t border-[#DDE5DF] bg-white py-6 text-center text-xs text-[#5F6B63]">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row items-center justify-between gap-4">
+        <div className="w-full max-w-[95%] mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row items-center justify-between gap-4">
           <p>© 2026 GGF AgroMetric Platform. Enterprise Cost Control Portal.</p>
           <div className="flex flex-wrap justify-center gap-4 sm:gap-6 font-medium text-[#17231B]">
             {publicDashboards.map((dash) => (
