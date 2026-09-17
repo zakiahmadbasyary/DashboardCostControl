@@ -139,7 +139,6 @@ export default function LocationAnalysis({
       "Umur Tanaman (Bulan)": loc.umur,
       "Cost / Ha (Rp)": loc.costHa,
       "Luas Area (Ha)": loc.luas,
-      "Total Biaya Cost (Rp)": loc.cost,
       "Jenis Bibit": loc.jenisBibit,
       "Kelas Bibit": loc.kelas,
       "Status Block": loc.status,
@@ -156,7 +155,6 @@ export default function LocationAnalysis({
       { wch: 22 },
       { wch: 18 },
       { wch: 15 },
-      { wch: 22 },
       { wch: 15 },
       { wch: 15 },
       { wch: 15 },
@@ -354,7 +352,6 @@ export default function LocationAnalysis({
                   <th className="py-3 px-4">Umur</th>
                   <th className="py-3 px-4 text-right">Cost / Ha (Rp)</th>
                   <th className="py-3 px-4 text-right">Luas (Ha)</th>
-                  <th className="py-3 px-4 text-right">Total Cost (Rp)</th>
                   <th className="py-3 px-4">Jenis Bibit</th>
                   <th className="py-3 px-4">Kelas</th>
                   <th className="py-3 px-4 text-center">Status Select</th>
@@ -383,9 +380,6 @@ export default function LocationAnalysis({
                         {item.costHa.toLocaleString("id-ID")}
                       </td>
                       <td className="py-3 px-4 text-right font-mono">{item.luas}</td>
-                      <td className="py-3 px-4 text-right font-mono text-[#16823B] font-bold">
-                        {item.cost.toLocaleString("id-ID")}
-                      </td>
                       <td className="py-3 px-4">{item.jenisBibit}</td>
                       <td className="py-3 px-4">{item.kelas}</td>
                       <td className="py-3 px-4 text-center">
