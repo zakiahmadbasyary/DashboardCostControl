@@ -6,7 +6,7 @@ export async function middleware(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
   const adminPublicBaseUrl = process.env.NEXT_PUBLIC_ADMIN_URL || "http://localhost:3005";
   const adminInternalBaseUrl =
-    process.env.INTERNAL_ADMIN_URL || process.env.NEXT_PUBLIC_ADMIN_URL || "http://127.0.0.1:3005";
+    process.env.SSO_INTERNAL_URL || process.env.INTERNAL_ADMIN_URL || "http://127.0.0.1:3005";
 
   // 1. SSO One-Time Token Exchange Handoff
   const ssoToken = request.nextUrl.searchParams.get("sso");
