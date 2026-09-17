@@ -52,12 +52,37 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(new URL(`${adminPublicBaseUrl}/login?error=sso_failed`));
   }
 
-  // 2. Validate Local Session Token First (if admin_session cookie is present)
+  // 2. Validate Local Session Token & Central Session Revocation Status
   const localCookie = request.cookies.get("admin_session")?.value;
   if (localCookie) {
     const payload = verifySessionToken(localCookie);
-    if (payload) {
-      return NextResponse.next();
+    if (payload && payload.id) {
+      try {
+        const verifyRes = await fetch(`${adminInternalBaseUrl}/api/auth/verify?userId=${payload.id}`, {
+          headers: { "Cache-Control": "no-cache" },
+        });
+
+        if (verifyRes.ok) {
+          const verifyData = await verifyRes.json();
+          if (verifyData.authenticated && verifyData.user) {
+            const isSuperAdmin = verifyData.user.role === "SUPER_ADMIN";
+            const hasWipAccess =
+              Array.isArray(verifyData.user.allowedDashboards) &&
+              verifyData.user.allowedDashboards.includes("wip");
+
+            if (isSuperAdmin || hasWipAccess) {
+              return NextResponse.next();
+            }
+          }
+        }
+      } catch (e) {
+        console.warn("Central session verification check failed, falling back:", e);
+      }
+
+      // If central session was revoked, logged out, or access removed, clear local session and redirect
+      const redirectRes = NextResponse.redirect(new URL(`${adminPublicBaseUrl}/login?error=session_expired`));
+      redirectRes.cookies.delete("admin_session");
+      return redirectRes;
     }
   }
 

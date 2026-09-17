@@ -13,7 +13,13 @@ export default function AdminSidebar() {
   const adminBaseUrl = process.env.NEXT_PUBLIC_ADMIN_URL || "http://localhost:3005";
 
   const handleLogout = async () => {
-    window.location.href = `${adminBaseUrl}/login`;
+    try {
+      await fetch("/api/auth/logout", { method: "POST" });
+    } catch (e) {
+      console.error(e);
+    } finally {
+      window.location.href = `${adminBaseUrl}/dashboard`;
+    }
   };
 
   const navItems = [
