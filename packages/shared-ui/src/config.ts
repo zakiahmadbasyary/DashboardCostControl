@@ -29,37 +29,47 @@ export interface DashboardNavConfig {
 }
 
 export const getDashboardNavConfig = (): DashboardNavConfig => {
-  const portalUrl = process.env.NEXT_PUBLIC_PORTAL_URL || "http://localhost:3000";
-  const wipAccUrl =
-    process.env.NEXT_PUBLIC_WIP_ACC_URL ||
-    process.env.NEXT_PUBLIC_WIP_URL ||
-    "http://localhost:3001";
-  const hppUrl =
-    process.env.NEXT_PUBLIC_HPP_URL ||
-    process.env.NEXT_PUBLIC_HPP_PG1_URL ||
-    process.env.NEXT_PUBLIC_DASHBOARD_A_URL ||
-    "http://localhost:3002";
-  const capexUrl =
-    process.env.NEXT_PUBLIC_CAPEX_URL ||
-    process.env.NEXT_PUBLIC_DASHBOARD_B_URL ||
-    "http://localhost:3003";
-  const opexUrl =
-    process.env.NEXT_PUBLIC_OPEX_URL ||
-    process.env.NEXT_PUBLIC_DASHBOARD_C_URL ||
-    "http://localhost:3004";
-  const adminUrl = process.env.NEXT_PUBLIC_ADMIN_URL || "http://localhost:3005";
-  const irigasiUrl = process.env.NEXT_PUBLIC_IRIGASI_URL || "http://localhost:3006";
-  const sulamUrl = process.env.NEXT_PUBLIC_SULAM_URL || "http://localhost:3007";
-  const selesaiBongkarUrl = process.env.NEXT_PUBLIC_SELESAI_BONGKAR_URL || "http://localhost:3008";
-  const hargaMaterialUrl = process.env.NEXT_PUBLIC_HARGA_MATERIAL_URL || "http://localhost:3009";
-  const pollPg1Url = process.env.NEXT_PUBLIC_POLL_PG1_URL || "http://localhost:3010";
+  const isBrowser = typeof window !== "undefined";
+  const currentHost = isBrowser ? window.location.hostname : "localhost";
+  const currentProtocol = isBrowser ? window.location.protocol : "http:";
 
-  const wipPg1Url =
-    process.env.NEXT_PUBLIC_WIP_PG1_URL || hppUrl;
-  const hppPg1Url =
-    process.env.NEXT_PUBLIC_HPP_PG1_URL || hppUrl;
-  const hppM3Url =
-    process.env.NEXT_PUBLIC_HPP_M3_URL || opexUrl;
+  const resolveUrl = (envVar: string | undefined, defaultPort: number) => {
+    if (envVar) return envVar;
+    if (isBrowser && currentHost !== "localhost" && currentHost !== "127.0.0.1") {
+      return `${currentProtocol}//${currentHost}:${defaultPort}`;
+    }
+    return `http://localhost:${defaultPort}`;
+  };
+
+  const portalUrl = resolveUrl(process.env.NEXT_PUBLIC_PORTAL_URL, 3000);
+  const wipAccUrl = resolveUrl(
+    process.env.NEXT_PUBLIC_WIP_ACC_URL || process.env.NEXT_PUBLIC_WIP_URL,
+    3001
+  );
+  const hppUrl = resolveUrl(
+    process.env.NEXT_PUBLIC_HPP_URL ||
+      process.env.NEXT_PUBLIC_HPP_PG1_URL ||
+      process.env.NEXT_PUBLIC_DASHBOARD_A_URL,
+    3002
+  );
+  const capexUrl = resolveUrl(
+    process.env.NEXT_PUBLIC_CAPEX_URL || process.env.NEXT_PUBLIC_DASHBOARD_B_URL,
+    3003
+  );
+  const opexUrl = resolveUrl(
+    process.env.NEXT_PUBLIC_OPEX_URL || process.env.NEXT_PUBLIC_DASHBOARD_C_URL,
+    3004
+  );
+  const adminUrl = resolveUrl(process.env.NEXT_PUBLIC_ADMIN_URL, 3005);
+  const irigasiUrl = resolveUrl(process.env.NEXT_PUBLIC_IRIGASI_URL, 3006);
+  const sulamUrl = resolveUrl(process.env.NEXT_PUBLIC_SULAM_URL, 3007);
+  const selesaiBongkarUrl = resolveUrl(process.env.NEXT_PUBLIC_SELESAI_BONGKAR_URL, 3008);
+  const hargaMaterialUrl = resolveUrl(process.env.NEXT_PUBLIC_HARGA_MATERIAL_URL, 3009);
+  const pollPg1Url = resolveUrl(process.env.NEXT_PUBLIC_POLL_PG1_URL, 3010);
+
+  const wipPg1Url = process.env.NEXT_PUBLIC_WIP_PG1_URL || hppUrl;
+  const hppPg1Url = process.env.NEXT_PUBLIC_HPP_PG1_URL || hppUrl;
+  const hppM3Url = process.env.NEXT_PUBLIC_HPP_M3_URL || opexUrl;
 
   const wipAccAdminUrl =
     process.env.NEXT_PUBLIC_WIP_ACC_ADMIN_URL || `${wipAccUrl}/admin`;

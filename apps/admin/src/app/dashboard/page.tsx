@@ -119,7 +119,21 @@ export default function AdminDashboardPage() {
         throw new Error(data.error || `HTTP ${res.status}: Gagal membuat sesi SSO ke dashboard.`);
       }
 
-      const targetUrl = new URL(dash.adminUrl);
+      // Dynamic URL resolution for VPS deployment
+      let targetAdminUrl = dash.adminUrl;
+      if (typeof window !== "undefined" && window.location.hostname !== "localhost" && window.location.hostname !== "127.0.0.1") {
+        try {
+          const parsed = new URL(targetAdminUrl);
+          if (parsed.hostname === "localhost" || parsed.hostname === "127.0.0.1") {
+            parsed.hostname = window.location.hostname;
+            targetAdminUrl = parsed.toString();
+          }
+        } catch (e) {
+          // If dash.adminUrl is relative path like "/admin"
+        }
+      }
+
+      const targetUrl = new URL(targetAdminUrl, window.location.origin);
       targetUrl.searchParams.set("sso", data.token);
       window.location.href = targetUrl.toString();
     } catch (err: any) {

@@ -4,7 +4,9 @@ import { createSessionToken, attachSessionCookie, verifySessionToken } from "@/l
 
 export async function middleware(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
-  const adminBaseUrl = process.env.NEXT_PUBLIC_ADMIN_URL || "http://localhost:3005";
+  const adminPublicBaseUrl = process.env.NEXT_PUBLIC_ADMIN_URL || "http://localhost:3005";
+  const adminInternalBaseUrl =
+    process.env.INTERNAL_ADMIN_URL || process.env.NEXT_PUBLIC_ADMIN_URL || "http://127.0.0.1:3005";
 
   // 1. SSO One-Time Token Exchange Handoff
   const ssoToken = request.nextUrl.searchParams.get("sso");
@@ -12,7 +14,7 @@ export async function middleware(request: NextRequest) {
   if (ssoToken) {
     try {
       // Exchange one-time SSO token with Admin Pusat
-      const exchangeRes = await fetch(`${adminBaseUrl}/api/auth/sso/exchange`, {
+      const exchangeRes = await fetch(`${adminInternalBaseUrl}/api/auth/sso/exchange`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ token: ssoToken, dashboardCode: "wip" }),
@@ -47,10 +49,19 @@ export async function middleware(request: NextRequest) {
     }
 
     // If exchange fails, redirect to Central Admin login page
-    return NextResponse.redirect(new URL(`${adminBaseUrl}/login?error=sso_failed`));
+    return NextResponse.redirect(new URL(`${adminPublicBaseUrl}/login?error=sso_failed`));
   }
 
-  // 2. Central Session Check (Requires active Central Admin Session)
+  // 2. Validate Local Session Token First (if admin_session cookie is present)
+  const localCookie = request.cookies.get("admin_session")?.value;
+  if (localCookie) {
+    const payload = verifySessionToken(localCookie);
+    if (payload) {
+      return NextResponse.next();
+    }
+  }
+
+  // 3. Fallback: Central Session Check (If request carries central admin session cookie / authorization header)
   const centralCookie = request.cookies.get("admin_central_session")?.value;
   const authHeader = request.headers.get("authorization");
   const fallbackToken = centralCookie || (authHeader?.startsWith("Bearer ") ? authHeader.substring(7).trim() : null);
@@ -67,23 +78,14 @@ export async function middleware(request: NextRequest) {
       );
     }
 
-    const redirectRes = NextResponse.redirect(new URL(`${adminBaseUrl}/login`));
+    const redirectRes = NextResponse.redirect(new URL(`${adminPublicBaseUrl}/login`));
     redirectRes.cookies.delete("admin_session");
     return redirectRes;
   }
 
-  // 3. Optional Local Session Token Validation
-  const localCookie = request.cookies.get("admin_session")?.value;
-  if (localCookie) {
-    const payload = verifySessionToken(localCookie);
-    if (payload) {
-      return NextResponse.next();
-    }
-  }
-
   try {
     // Verify fallback central token with Admin Pusat Central Auth API
-    const verifyRes = await fetch(`${adminBaseUrl}/api/auth/verify?token=${fallbackToken}`, {
+    const verifyRes = await fetch(`${adminInternalBaseUrl}/api/auth/verify?token=${fallbackToken}`, {
       headers: { "Cache-Control": "no-cache" },
     });
 
@@ -91,7 +93,7 @@ export async function middleware(request: NextRequest) {
       if (pathname.startsWith("/api/admin")) {
         return NextResponse.json({ success: false, error: "Session tidak valid" }, { status: 401 });
       }
-      return NextResponse.redirect(new URL(`${adminBaseUrl}/login`));
+      return NextResponse.redirect(new URL(`${adminPublicBaseUrl}/login`));
     }
 
     const data = await verifyRes.json();
@@ -99,7 +101,7 @@ export async function middleware(request: NextRequest) {
       if (pathname.startsWith("/api/admin")) {
         return NextResponse.json({ success: false, error: "Sesi telah berakhir" }, { status: 401 });
       }
-      return NextResponse.redirect(new URL(`${adminBaseUrl}/login`));
+      return NextResponse.redirect(new URL(`${adminPublicBaseUrl}/login`));
     }
 
     const user = data.user;
