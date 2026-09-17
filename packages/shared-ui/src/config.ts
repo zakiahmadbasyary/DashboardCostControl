@@ -9,6 +9,7 @@ export interface DashboardNavItem {
 export interface DashboardNavConfig {
   navItems: DashboardNavItem[];
   portalUrl: string;
+  mainEstatePortalUrl: string;
   adminUrl: string;
   wipAccUrl: string;
   hppUrl: string;
@@ -30,6 +31,10 @@ export interface DashboardNavConfig {
 
 export const getDashboardNavConfig = (): DashboardNavConfig => {
   const portalUrl = process.env.NEXT_PUBLIC_PORTAL_URL || "http://localhost:3000";
+  const mainEstatePortalUrl =
+    process.env.NEXT_PUBLIC_MAIN_ESTATE_PORTAL_URL ||
+    process.env.NEXT_PUBLIC_MAIN_PORTAL_URL ||
+    "https://estatepg1.online/";
   const wipAccUrl =
     process.env.NEXT_PUBLIC_WIP_ACC_URL ||
     process.env.NEXT_PUBLIC_WIP_URL ||
@@ -134,6 +139,7 @@ export const getDashboardNavConfig = (): DashboardNavConfig => {
       },
     ],
     portalUrl,
+    mainEstatePortalUrl,
     adminUrl,
     wipAccUrl,
     hppUrl,
