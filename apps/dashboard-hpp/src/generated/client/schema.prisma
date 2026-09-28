@@ -1,0 +1,88 @@
+// Skema Database Prisma untuk Dashboard HPP (Harga Pokok Produksi)
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/client"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// 1. Tabel MasterSheet: menyimpan data master lokasi dan karakteristik bibit
+model MasterSheet {
+  lokasi     String   @id @map("lokasi") @db.VarChar(10)
+  wilayah    String   @map("wilayah") @db.VarChar(10)
+  kodeBibit  String   @map("kode_bibit") @db.VarChar(20)
+  jenisBibit String   @map("jenis_bibit") @db.VarChar(20)
+  kelasBibit String   @map("kelas_bibit") @db.VarChar(20)
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @updatedAt @map("updated_at")
+
+  lokasiHppList    LokasiHPP[]
+  aktivitasHppList AktivitasHPP[]
+
+  @@map("mastersheet")
+}
+
+// 2. Tabel Budget: menyimpan data anggaran berdasarkan group, status, dan periode
+model Budget {
+  idBudget  String   @id @map("id_budget") @db.VarChar(20)
+  group     String   @map("group") @db.VarChar(10)
+  status    String   @map("status") @db.VarChar(10)
+  periode   Int      @map("periode")
+  budget    Decimal  @map("budget") @db.Decimal(18, 2)
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  lokasiHppList LokasiHPP[]
+
+  @@map("budget")
+}
+
+// 3. Tabel LokasiHPP: menyimpan data HPP berdasarkan lokasi dan periode
+model LokasiHPP {
+  idLokasiHpp String   @id @map("id_lokasi_hpp") @db.VarChar(20)
+  lokasi      String   @map("lokasi") @db.VarChar(10)
+  idBudget    String   @map("id_budget") @db.VarChar(20)
+  periode     Int      @map("periode")
+  status      String   @map("status") @db.VarChar(10)
+  qtyPanen    Decimal  @map("qty_panen") @db.Decimal(18, 2)
+  luasPanen   Decimal  @map("luas_panen") @db.Decimal(18, 2)
+  luasAktif   Decimal  @map("luas_aktif") @db.Decimal(18, 2)
+  group       String   @map("group") @db.VarChar(10)
+  descGroup   String   @map("desc_group") @db.VarChar(255)
+  jenisBiaya  String   @map("jenis_biaya") @db.VarChar(50)
+  biaya       Decimal  @map("biaya") @db.Decimal(18, 2)
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  masterSheet MasterSheet @relation(fields: [lokasi], references: [lokasi], onDelete: Cascade)
+  budgetItem  Budget      @relation(fields: [idBudget], references: [idBudget], onDelete: Cascade)
+
+  @@map("lokasiHPP")
+}
+
+// 4. Tabel AktivitasHPP: menyimpan aktivitas produksi/perawatan yang berkaitan dengan lokasi
+model AktivitasHPP {
+  idAktivitas            String    @id @map("id_aktivitas") @db.VarChar(20)
+  lokasi                 String    @map("lokasi") @db.VarChar(10)
+  tanggalMulaiRawat      DateTime? @map("tanggal_mulai_rawat") @db.Date
+  tanggalMulaiTanam      DateTime? @map("tanggal_mulai_tanam") @db.Date
+  tanggalForcingStandard DateTime? @map("tanggal_forcing_standard") @db.Date
+  rencanaForcing         DateTime? @map("rencana_forcing") @db.Date
+  realForcing            DateTime? @map("real_forcing") @db.Date
+  rencanaPanen           DateTime? @map("rencana_panen") @db.Date
+  aktivitas              String    @map("aktivitas") @db.VarChar(100)
+  biaya                  Decimal   @map("biaya") @db.Decimal(18, 2)
+  hasil                  Decimal   @map("hasil") @db.Decimal(18, 2)
+  uom                    String    @map("UoM") @db.VarChar(20)
+  group                  String    @map("group") @db.VarChar(10)
+  createdAt              DateTime  @default(now()) @map("created_at")
+  updatedAt              DateTime  @updatedAt @map("updated_at")
+
+  masterSheet MasterSheet @relation(fields: [lokasi], references: [lokasi], onDelete: Cascade)
+
+  @@map("aktivitasHPP")
+}
