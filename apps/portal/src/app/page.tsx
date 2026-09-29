@@ -146,55 +146,55 @@ export default function PortalHomePage() {
       {/* Dedicated Portal Header */}
       <header className="sticky top-0 z-50 bg-white border-b border-[#DDE5DF] shadow-2xs w-full">
         <div className="w-full max-w-[95%] mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="h-16 sm:h-18 flex items-center justify-between gap-4">
+          <div className="h-20 flex items-center justify-between gap-4">
             {/* Left Brand Logo & Title */}
-            <a href={portalUrl} className="flex items-center gap-3 shrink-0 py-1 group focus:outline-none">
-              <div className="h-13 sm:h-14 w-auto flex items-center shrink-0">
+            <a href={portalUrl} className="flex items-center gap-3.5 shrink-0 py-1 group focus:outline-none">
+              <div className="h-14 sm:h-15 w-auto flex items-center shrink-0">
                 <img
                   src="/logo.png"
                   alt="GGF Logo"
-                  className="h-13 sm:h-14 max-h-14 w-auto object-contain"
-                  style={{ height: "52px", maxHeight: "56px", width: "auto" }}
+                  className="h-14 sm:h-15 max-h-15 w-auto object-contain"
+                  style={{ height: "56px", maxHeight: "60px", width: "auto" }}
                 />
               </div>
               <div className="flex flex-col justify-center">
-                <span className="font-extrabold text-sm sm:text-base text-[#17231B] group-hover:text-[#16823B] tracking-tight leading-snug transition-colors block">
+                <span className="font-extrabold text-base sm:text-lg text-[#17231B] group-hover:text-[#16823B] tracking-tight leading-snug transition-colors block">
                   Cost Control Dashboard Portal
                 </span>
-                <span className="text-[10px] sm:text-xs text-[#5F6B63] hidden sm:block font-medium leading-tight mt-0.5">
+                <span className="text-xs sm:text-sm text-[#5F6B63] hidden sm:block font-medium leading-tight mt-0.5">
                   Sistem Informasi Manajemen Estate PG 1
                 </span>
               </div>
             </a>
 
             {/* Desktop Action Buttons (Visible on sm and larger) */}
-            <div className="hidden sm:flex items-center gap-2 shrink-0">
+            <div className="hidden sm:flex items-center gap-2.5 shrink-0">
               {/* Main Estate Portal Link */}
               <a
                 href={mainEstatePortalUrl}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-[#DDE5DF] bg-[#F8FAF9] hover:bg-[#EEF4F0] text-[#2C3830] font-semibold text-xs transition-all shadow-xs"
+                className="inline-flex items-center gap-2 px-4 py-2 rounded-xl border border-[#DDE5DF] bg-[#F8FAF9] hover:bg-[#EEF4F0] text-[#2C3830] font-semibold text-xs sm:text-sm transition-all shadow-xs"
                 title="Kembali ke Portal Utama Estate PG 1 (Seluruh Sistem)"
               >
-                <Globe className="w-3.5 h-3.5 text-[#16823B]" />
+                <Globe className="w-4 h-4 text-[#16823B]" />
                 <span>Portal Utama Estate</span>
               </a>
 
               {/* Toggle Dashboard Drawer */}
               <button
                 onClick={() => setMenuOpen(!menuOpen)}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-[#DDE5DF] bg-[#F8FAF9] hover:bg-[#EEF4F0] text-[#2C3830] font-semibold text-xs transition-all shadow-xs cursor-pointer"
+                className="inline-flex items-center gap-2 px-4 py-2 rounded-xl border border-[#DDE5DF] bg-[#F8FAF9] hover:bg-[#EEF4F0] text-[#2C3830] font-semibold text-xs sm:text-sm transition-all shadow-xs cursor-pointer"
                 aria-label="Toggle Navigation Menu"
               >
-                {menuOpen ? <X className="w-4 h-4 text-[#16823B]" /> : <Menu className="w-4 h-4 text-[#16823B]" />}
+                {menuOpen ? <X className="w-4.5 h-4.5 text-[#16823B]" /> : <Menu className="w-4.5 h-4.5 text-[#16823B]" />}
                 <span>Daftar Dashboard</span>
               </button>
 
               <a
                 href={adminUrl}
-                className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-[#16823B] hover:bg-[#126B30] text-white font-semibold text-xs transition-all shadow-xs"
+                className="inline-flex items-center gap-2 px-4.5 py-2 rounded-xl bg-[#16823B] hover:bg-[#126B30] text-white font-bold text-xs sm:text-sm transition-all shadow-xs"
                 title="Buka Admin Pusat"
               >
-                <ShieldCheck className="w-3.5 h-3.5 text-emerald-200" />
+                <ShieldCheck className="w-4 h-4 text-emerald-200" />
                 <span>Admin Pusat</span>
               </a>
             </div>
@@ -203,7 +203,7 @@ export default function PortalHomePage() {
             <div className="sm:hidden flex items-center shrink-0">
               <button
                 onClick={() => setMenuOpen(!menuOpen)}
-                className="p-2 rounded-xl border border-[#DDE5DF] bg-[#F8FAF9] hover:bg-[#EEF4F0] text-[#17231B] transition-all shadow-xs focus:outline-none cursor-pointer flex items-center gap-1.5"
+                className="p-2.5 rounded-xl border border-[#DDE5DF] bg-[#F8FAF9] hover:bg-[#EEF4F0] text-[#17231B] transition-all shadow-xs focus:outline-none cursor-pointer flex items-center gap-1.5"
                 aria-label="Menu Navigasi Mobile"
               >
                 {menuOpen ? <X className="w-5 h-5 text-[#16823B]" /> : <Menu className="w-5 h-5 text-[#16823B]" />}
