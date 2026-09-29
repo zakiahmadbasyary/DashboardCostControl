@@ -86,7 +86,7 @@ export const getDashboardNavConfig = (): DashboardNavConfig => {
         label: "HPP",
         url: hppUrl,
         description: "Harga Pokok Produksi (HPP)",
-        isHosted: false,
+        isHosted: true,
       },
       {
         key: "capex",

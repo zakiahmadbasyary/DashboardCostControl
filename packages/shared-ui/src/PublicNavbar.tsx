@@ -103,6 +103,7 @@ export const PublicNavbar: React.FC<PublicNavbarProps> = ({
             {shouldShowNav && (
               <button
                 onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                suppressHydrationWarning
                 className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg border border-[#DDE5DF] bg-[#F8FAF9] hover:bg-[#EEF4F0] text-[#2C3830] font-semibold text-xs transition-all shadow-xs"
                 aria-label="Toggle Navigation Menu"
               >
