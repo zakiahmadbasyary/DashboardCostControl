@@ -28,7 +28,7 @@ interface HppTrendAndWilayahChartsProps {
   ytdPoint: TrendPoint | null;
   wilayahData: WilayahPoint[];
   filters: HppFilterState;
-  onSelectMonth?: (month: number | "all") => void;
+  onSelectMonth?: (month: number) => void;
   onSelectWilayah?: (wilayah: string) => void;
   loading?: boolean;
 }
@@ -114,7 +114,7 @@ export default function HppTrendAndWilayahCharts({
                 return (
                   <div
                     key={item.month}
-                    onClick={() => onSelectMonth?.(isSelected ? "all" : item.month)}
+                    onClick={() => onSelectMonth?.(item.month)}
                     className="flex-1 flex flex-col items-center group cursor-pointer"
                     title={`${item.label}: ${formatCurrency(val)} (${unitLabel})`}
                   >
@@ -150,7 +150,6 @@ export default function HppTrendAndWilayahCharts({
               {/* YTD Bar Column */}
               {ytdPoint && (
                 <div
-                  onClick={() => onSelectMonth?.("all")}
                   className="flex-1 flex flex-col items-center group cursor-pointer border-l-2 border-dashed border-[#D5E1D8] pl-1.5"
                   title={`YTD Accumulation: ${formatCurrency(
                     isRpKg ? ytdPoint.valRpKg : ytdPoint.valRpHa

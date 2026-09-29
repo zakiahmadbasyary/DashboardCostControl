@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useCallback, useMemo } from "react";
 import HppDashboardHeader from "@/components/HppDashboardHeader";
-import HppMainFilters, { HppFilterState, MONTH_NAMES } from "@/components/HppMainFilters";
+import HppMainFilters, { HppFilterState, CostGroupOption, MONTH_NAMES } from "@/components/HppMainFilters";
 import HppTrendAndWilayahCharts, { TrendPoint, WilayahPoint } from "@/components/HppTrendAndWilayahCharts";
 import HppLokasiTable, { LokasiHppItem } from "@/components/HppLokasiTable";
 import HppLocationDetailDrilldown, { AktivitasHppItem, BudgetItem } from "@/components/HppLocationDetailDrilldown";
@@ -10,12 +10,12 @@ import HppLocationDetailDrilldown, { AktivitasHppItem, BudgetItem } from "@/comp
 export default function DashboardHPPPage() {
   const [mounted, setMounted] = useState(false);
 
-  // Main Filter State per PRD Section 6
+  // Main Filter State per PRD Section 6 (Default periode 1 = Januari)
   const [filters, setFilters] = useState<HppFilterState>({
     taksasiFilter: "all",
     costGroupFilter: "all",
     statusFilter: "all",
-    periodeFilter: "all",
+    periodeFilter: 1,
     reportFilter: "rp_kg",
     wilayahFilter: "all",
   });
@@ -78,17 +78,25 @@ export default function DashboardHPPPage() {
   }, [mounted, fetchData]);
 
   // Handler for updating filter state
-  const handleFilterChange = (newFilters: Partial<HppFilterState>) => {
+  const handleFilterChange = (newFilters: HppFilterState | Partial<HppFilterState>) => {
     setFilters((prev) => ({ ...prev, ...newFilters }));
   };
 
-  // Extract available Cost Groups for filter dropdown
-  const availableGroups = useMemo(() => {
-    const setGrp = new Set<string>();
+  // Extract available Cost Group options with desc_group column data from lokasiHPP
+  const availableGroupOptions = useMemo<CostGroupOption[]>(() => {
+    const groupMap: Record<string, string> = {};
     rawLokasiList.forEach((item) => {
-      if (item.group) setGrp.add(item.group);
+      if (item.group && !groupMap[item.group]) {
+        groupMap[item.group] = item.descGroup || item.group;
+      }
     });
-    return Array.from(setGrp).sort();
+
+    return Object.entries(groupMap)
+      .map(([group, descGroup]) => ({
+        group,
+        descGroup,
+      }))
+      .sort((a, b) => a.group.localeCompare(b.group));
   }, [rawLokasiList]);
 
   // Apply Main Filters to rawLokasiList (PRD Section 6 & Section 22)
@@ -114,8 +122,8 @@ export default function DashboardHPPPage() {
         }
       }
 
-      // 4. Periode (Bulan) Filter
-      if (filters.periodeFilter !== "all" && item.periode !== filters.periodeFilter) {
+      // 4. Periode (Bulan) Filter (Match specific month 1..12)
+      if (item.periode !== filters.periodeFilter) {
         return false;
       }
 
@@ -143,7 +151,23 @@ export default function DashboardHPPPage() {
     let ytdQty = 0;
     let ytdLuas = 0;
 
-    filteredLokasiList.forEach((item) => {
+    // Aggregate monthly data matching all filters EXCEPT periodeFilter so trend shows all 12 months
+    rawLokasiList.forEach((item) => {
+      if (filters.taksasiFilter === "100_only") {
+        const taksasiVal = Number(item.luasAktif) > 0 ? (Number(item.luasPanen) / Number(item.luasAktif)) * 100 : 0;
+        if (Math.round(taksasiVal) < 100) return;
+      }
+      if (filters.costGroupFilter !== "all" && item.group !== filters.costGroupFilter) return;
+      if (filters.statusFilter !== "all") {
+        if (filters.statusFilter === "NS") {
+          if (item.status !== "NSSC" && item.status !== "NSFC") return;
+        } else if (item.status !== filters.statusFilter) return;
+      }
+      if (filters.wilayahFilter !== "all") {
+        const itemWilayah = item.masterSheet?.wilayah || "";
+        if (itemWilayah.toUpperCase() !== filters.wilayahFilter.toUpperCase()) return;
+      }
+
       const p = item.periode;
       const c = Number(item.biaya || 0);
       const q = Number(item.qtyPanen || 0);
@@ -188,7 +212,7 @@ export default function DashboardHPPPage() {
     };
 
     return { trendData: trendPoints, ytdPoint: ytd };
-  }, [filteredLokasiList]);
+  }, [rawLokasiList, filters.taksasiFilter, filters.costGroupFilter, filters.statusFilter, filters.wilayahFilter]);
 
   // Calculate Wilayah Data (W01–W07) per PRD Section 9
   const wilayahData = useMemo(() => {
@@ -246,11 +270,11 @@ export default function DashboardHPPPage() {
 
   return (
     <div className="min-h-screen bg-[#F7F9F7] text-[#17231B] flex flex-col font-sans" suppressHydrationWarning>
-      {/* Shared Navbar Header Matched to WIP Header */}
+      {/* Shared Navbar Header Matched to WIP Header (Sticky top-0 z-50) */}
       <HppDashboardHeader />
 
       {/* Main Content Body Container */}
-      <main className="flex-1 max-w-[95%] w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 flex flex-col gap-8" suppressHydrationWarning>
+      <main className="flex-1 max-w-[95%] w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 flex flex-col gap-6" suppressHydrationWarning>
         
         {/* Error Alert */}
         {errorMsg && (
@@ -259,12 +283,12 @@ export default function DashboardHPPPage() {
           </div>
         )}
 
-        {/* PRD Section 6: Filter Utama Toolbar */}
-        <section suppressHydrationWarning>
+        {/* PRD Section 6: Sticky Freeze Filter Utama Toolbar */}
+        <section className="sticky top-20 z-30" suppressHydrationWarning>
           <HppMainFilters
             filters={filters}
             onChangeFilter={handleFilterChange}
-            availableGroups={availableGroups}
+            availableGroupOptions={availableGroupOptions}
           />
         </section>
 

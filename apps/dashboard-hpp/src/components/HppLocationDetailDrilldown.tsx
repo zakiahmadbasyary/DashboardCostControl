@@ -406,7 +406,6 @@ export default function HppLocationDetailDrilldown({
         {/* Footer info */}
         <div className="p-3 bg-[#F8FAF9] border-t border-[#EAEFEB] text-xs text-[#5F6B63] flex justify-between items-center">
           <span>Menampilkan {filteredAktivitas.length} aktivitas pekerjaan</span>
-          <span className="font-semibold text-[#16823B]">GGF AgroMetric Cost Control</span>
         </div>
       </div>
 
