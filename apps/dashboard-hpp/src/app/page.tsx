@@ -3,15 +3,11 @@
 import React, { useState, useEffect, useCallback, useMemo } from "react";
 import HppDashboardHeader from "@/components/HppDashboardHeader";
 import HppMainFilters, { HppFilterState, MONTH_NAMES } from "@/components/HppMainFilters";
-import HppMetricsOverview, { HppSummaryMetrics } from "@/components/HppMetricsOverview";
 import HppTrendAndWilayahCharts, { TrendPoint, WilayahPoint } from "@/components/HppTrendAndWilayahCharts";
 import HppLokasiTable, { LokasiHppItem } from "@/components/HppLokasiTable";
 import HppLocationDetailDrilldown, { AktivitasHppItem, BudgetItem } from "@/components/HppLocationDetailDrilldown";
-import DatabaseTesterView from "@/components/DatabaseTesterView";
-import { BarChart3, Database } from "lucide-react";
 
 export default function DashboardHPPPage() {
-  const [activeTab, setActiveTab] = useState<"overview" | "database">("overview");
   const [mounted, setMounted] = useState(false);
 
   // Main Filter State per PRD Section 6
@@ -231,51 +227,6 @@ export default function DashboardHPPPage() {
     return list;
   }, [filteredLokasiList]);
 
-  // Aggregate Summary Metrics for Top Cards
-  const summaryMetrics = useMemo<HppSummaryMetrics>(() => {
-    let totalBiayaLokasi = 0;
-    let totalQtyPanen = 0;
-    let totalLuasPanen = 0;
-    let totalLuasAktif = 0;
-
-    filteredLokasiList.forEach((item) => {
-      totalBiayaLokasi += Number(item.biaya || 0);
-      totalQtyPanen += Number(item.qtyPanen || 0);
-      totalLuasPanen += Number(item.luasPanen || 0);
-      totalLuasAktif += Number(item.luasAktif || 0);
-    });
-
-    let totalBiayaAktivitas = 0;
-    rawAktivitasList.forEach((act) => {
-      totalBiayaAktivitas += Number(act.biaya || 0);
-    });
-
-    const totalBiayaHpp = totalBiayaLokasi + totalBiayaAktivitas;
-    const totalBudget = rawBudgetList.reduce((acc, b) => acc + Number(b.budget || 0), 0) || 500000000;
-    const costVariance = totalBudget - totalBiayaHpp;
-    const realizationPercent = totalBudget > 0 ? (totalBiayaHpp / totalBudget) * 100 : 0;
-    const avgHppPerKg = totalQtyPanen > 0 ? totalBiayaHpp / totalQtyPanen : 0;
-    const avgYieldPerHa = totalLuasPanen > 0 ? totalQtyPanen / totalLuasPanen : 0;
-
-    const uniqueLokasiCount = new Set(filteredLokasiList.map((l) => l.lokasi)).size;
-
-    return {
-      totalBudget,
-      totalBiayaHpp,
-      totalBiayaLokasi,
-      totalBiayaAktivitas,
-      costVariance,
-      realizationPercent,
-      totalQtyPanen,
-      totalLuasPanen,
-      totalLuasAktif,
-      avgHppPerKg,
-      avgYieldPerHa,
-      totalLokasi: uniqueLokasiCount,
-      totalAktivitas: rawAktivitasList.length,
-    };
-  }, [filteredLokasiList, rawAktivitasList, rawBudgetList]);
-
   // Items for selected location drill-down
   const selectedLokasiItems = useMemo(() => {
     if (!selectedLokasiCode) return [];
@@ -301,121 +252,58 @@ export default function DashboardHPPPage() {
       {/* Main Content Body Container */}
       <main className="flex-1 max-w-[95%] w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 flex flex-col gap-8" suppressHydrationWarning>
         
-        {/* Header Title Bar & View Toggle */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[#DDE5DF] pb-4">
-          <div>
-            <h1 className="text-xl sm:text-2xl font-black text-[#17231B] tracking-tight">
-              Dashboard HPP (Harga Pokok Produksi) PG1
-            </h1>
-            <p className="text-xs sm:text-sm text-[#5F6B63] font-medium mt-0.5">
-              Monitoring Realisasi HPP Perkebunan, Alokasi Cost Group, dan Aktivitas Panen
-            </p>
-          </div>
-
-          <div className="inline-flex p-1 bg-[#E8EFEA] rounded-xl border border-[#D5E1D8] shrink-0">
-            <button
-              onClick={() => setActiveTab("overview")}
-              suppressHydrationWarning
-              className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all ${
-                activeTab === "overview"
-                  ? "bg-[#16823B] text-white shadow-2xs"
-                  : "text-[#455248] hover:text-[#17231B] hover:bg-[#DCE7DF]"
-              }`}
-            >
-              <BarChart3 className="w-3.5 h-3.5" />
-              <span>Overview Dashboard</span>
-            </button>
-            <button
-              onClick={() => setActiveTab("database")}
-              suppressHydrationWarning
-              className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all ${
-                activeTab === "database"
-                  ? "bg-[#16823B] text-white shadow-2xs"
-                  : "text-[#455248] hover:text-[#17231B] hover:bg-[#DCE7DF]"
-              }`}
-            >
-              <Database className="w-3.5 h-3.5" />
-              <span>Tester Database</span>
-            </button>
-          </div>
-        </div>
-
         {/* Error Alert */}
         {errorMsg && (
           <div className="p-4 rounded-2xl bg-red-50 border border-red-200 text-red-800 text-xs font-semibold flex items-center justify-between" suppressHydrationWarning>
             <span>⚠️ {errorMsg}</span>
-            <button
-              onClick={() => setActiveTab("database")}
-              className="px-3 py-1 bg-red-600 hover:bg-red-700 text-white rounded-lg text-xs font-bold transition-all shadow-xs"
-              suppressHydrationWarning
-            >
-              Buka Database Tester
-            </button>
           </div>
         )}
 
-        {/* Overview Dashboard View */}
-        {activeTab === "overview" && (
-          <>
-            {/* PRD Section 6: Filter Utama Toolbar */}
-            <section suppressHydrationWarning>
-              <HppMainFilters
-                filters={filters}
-                onChangeFilter={handleFilterChange}
-                availableGroups={availableGroups}
-              />
-            </section>
+        {/* PRD Section 6: Filter Utama Toolbar */}
+        <section suppressHydrationWarning>
+          <HppMainFilters
+            filters={filters}
+            onChangeFilter={handleFilterChange}
+            availableGroups={availableGroups}
+          />
+        </section>
 
-            {/* KPI Summary Cards */}
-            <section suppressHydrationWarning>
-              <HppMetricsOverview metrics={summaryMetrics} loading={loading} />
-            </section>
+        {/* PRD Section 8 & 9: Trend HPP Pine PG1 & HPP Per Wilayah Charts */}
+        <section suppressHydrationWarning>
+          <HppTrendAndWilayahCharts
+            trendData={trendData}
+            ytdPoint={ytdPoint}
+            wilayahData={wilayahData}
+            filters={filters}
+            onSelectMonth={(m) => handleFilterChange({ periodeFilter: m })}
+            onSelectWilayah={(w) => handleFilterChange({ wilayahFilter: w })}
+            loading={loading}
+          />
+        </section>
 
-            {/* PRD Section 8 & 9: Trend HPP Pine PG1 & HPP Per Wilayah Charts */}
-            <section suppressHydrationWarning>
-              <HppTrendAndWilayahCharts
-                trendData={trendData}
-                ytdPoint={ytdPoint}
-                wilayahData={wilayahData}
-                filters={filters}
-                onSelectMonth={(m) => handleFilterChange({ periodeFilter: m })}
-                onSelectWilayah={(w) => handleFilterChange({ wilayahFilter: w })}
-                loading={loading}
-              />
-            </section>
+        {/* PRD Section 10: Daftar Lokasi Table */}
+        <section suppressHydrationWarning>
+          <HppLokasiTable
+            data={filteredLokasiList}
+            loading={loading}
+            selectedWilayahFilter={filters.wilayahFilter}
+            onWilayahFilterChange={(w) => handleFilterChange({ wilayahFilter: w })}
+            reportFilter={filters.reportFilter}
+            selectedLokasiCode={selectedLokasiCode}
+            onSelectLokasi={(code) => setSelectedLokasiCode((prev) => (prev === code ? null : code))}
+          />
+        </section>
 
-            {/* PRD Section 10: Daftar Lokasi Table */}
-            <section suppressHydrationWarning>
-              <HppLokasiTable
-                data={filteredLokasiList}
-                loading={loading}
-                selectedWilayahFilter={filters.wilayahFilter}
-                onWilayahFilterChange={(w) => handleFilterChange({ wilayahFilter: w })}
-                reportFilter={filters.reportFilter}
-                selectedLokasiCode={selectedLokasiCode}
-                onSelectLokasi={(code) => setSelectedLokasiCode((prev) => (prev === code ? null : code))}
-              />
-            </section>
-
-            {/* PRD Section 11, 12, 13: Detail Lokasi, Group Cost Table & Aktivitas Table */}
-            {selectedLokasiCode && (
-              <section className="pt-2 animate-in fade-in duration-300" suppressHydrationWarning>
-                <HppLocationDetailDrilldown
-                  lokasiCode={selectedLokasiCode}
-                  lokasiItems={selectedLokasiItems}
-                  aktivitasItems={rawAktivitasList}
-                  budgetItems={rawBudgetList}
-                  reportFilter={filters.reportFilter}
-                />
-              </section>
-            )}
-          </>
-        )}
-
-        {/* Database Diagnostic & Seed View */}
-        {activeTab === "database" && (
-          <section suppressHydrationWarning>
-            <DatabaseTesterView />
+        {/* PRD Section 11, 12, 13: Detail Lokasi, Group Cost Table & Aktivitas Table */}
+        {selectedLokasiCode && (
+          <section className="pt-2 animate-in fade-in duration-300" suppressHydrationWarning>
+            <HppLocationDetailDrilldown
+              lokasiCode={selectedLokasiCode}
+              lokasiItems={selectedLokasiItems}
+              aktivitasItems={rawAktivitasList}
+              budgetItems={rawBudgetList}
+              reportFilter={filters.reportFilter}
+            />
           </section>
         )}
 
