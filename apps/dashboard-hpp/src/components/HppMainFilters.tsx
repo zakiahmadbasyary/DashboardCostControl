@@ -38,35 +38,44 @@ export const MONTH_NAMES = [
   "Desember",
 ];
 
+// Helper to get current month index (1-12)
+export const getCurrentMonthIndex = (): number => {
+  const m = new Date().getMonth() + 1;
+  return m >= 1 && m <= 12 ? m : 9;
+};
+
 export default function HppMainFilters({
   filters,
   onChangeFilter,
   availableGroupOptions,
 }: HppMainFiltersProps) {
-  // Local state for filter selections until "Terapkan" is clicked
+  // Local state for filter selections — ONLY applied when "Terapkan" or "Reset" is clicked
   const [localFilters, setLocalFilters] = useState<HppFilterState>(filters);
   const [isOpen, setIsOpen] = useState<boolean>(false);
 
-  // Sync localState when parent filters change
+  // Sync localState when parent filters change (e.g. from Reset or chart click)
   useEffect(() => {
     setLocalFilters(filters);
   }, [filters]);
 
   const handleChange = (key: keyof HppFilterState, value: any) => {
+    // Only update local state internally, do NOT call onChangeFilter until "Terapkan"
     setLocalFilters((prev) => ({ ...prev, [key]: value }));
   };
 
   const handleApply = () => {
+    // Apply local filters to parent dashboard on Terapkan click
     onChangeFilter(localFilters);
     setIsOpen(false);
   };
 
   const handleReset = () => {
+    const currentMonth = getCurrentMonthIndex();
     const defaultFilters: HppFilterState = {
       taksasiFilter: "all",
       costGroupFilter: "all",
       statusFilter: "all",
-      periodeFilter: 1, // Default bulan 1 (Januari)
+      periodeFilter: currentMonth, // Default bulan sekarang saat ini
       reportFilter: "rp_kg",
       wilayahFilter: "all",
     };
@@ -76,10 +85,12 @@ export default function HppMainFilters({
   };
 
   // Count active non-default filters for mobile badge
+  const currentMonth = getCurrentMonthIndex();
   const activeCount = [
     localFilters.taksasiFilter !== "all",
     localFilters.costGroupFilter !== "all",
     localFilters.statusFilter !== "all",
+    localFilters.periodeFilter !== currentMonth,
     localFilters.wilayahFilter !== "all",
   ].filter(Boolean).length;
 
@@ -105,20 +116,20 @@ export default function HppMainFilters({
             <select
               value={localFilters.taksasiFilter}
               onChange={(e) => handleChange("taksasiFilter", e.target.value)}
-              className="w-full bg-[#F7F9F7] border border-[#DDE5DF] rounded-lg px-2.5 py-1.5 text-xs text-[#17231B] focus:outline-none focus:border-[#16823B] transition-colors cursor-pointer"
+              className="w-full bg-[#F7F9F7] border border-[#DDE5DF] rounded-lg px-2.5 py-1.5 text-xs text-[#17231B] focus:outline-none focus:border-[#16823B] transition-colors cursor-pointer font-medium"
             >
               <option value="all">All Taksasi</option>
               <option value="100_only">100% Only</option>
             </select>
           </div>
 
-          {/* Cost Group */}
+          {/* Cost Group (Deskripsi kolom desc_group dari tabel lokasiHPP) */}
           <div className="flex flex-col gap-0.5">
             <label className="text-[10px] font-semibold text-[#5F6B63] uppercase tracking-wide">Cost Group</label>
             <select
               value={localFilters.costGroupFilter}
               onChange={(e) => handleChange("costGroupFilter", e.target.value)}
-              className="w-full bg-[#F7F9F7] border border-[#DDE5DF] rounded-lg px-2.5 py-1.5 text-xs text-[#17231B] focus:outline-none focus:border-[#16823B] transition-colors cursor-pointer truncate"
+              className="w-full bg-[#F7F9F7] border border-[#DDE5DF] rounded-lg px-2.5 py-1.5 text-xs text-[#17231B] focus:outline-none focus:border-[#16823B] transition-colors cursor-pointer truncate font-medium"
             >
               <option value="all">Semua Group Cost</option>
               {availableGroupOptions.map((opt) => (
@@ -135,7 +146,7 @@ export default function HppMainFilters({
             <select
               value={localFilters.statusFilter}
               onChange={(e) => handleChange("statusFilter", e.target.value)}
-              className="w-full bg-[#F7F9F7] border border-[#DDE5DF] rounded-lg px-2.5 py-1.5 text-xs text-[#17231B] focus:outline-none focus:border-[#16823B] transition-colors cursor-pointer"
+              className="w-full bg-[#F7F9F7] border border-[#DDE5DF] rounded-lg px-2.5 py-1.5 text-xs text-[#17231B] focus:outline-none focus:border-[#16823B] transition-colors cursor-pointer font-medium"
             >
               <option value="all">Semua Status</option>
               <option value="NSSC">NSSC</option>
@@ -144,7 +155,7 @@ export default function HppMainFilters({
             </select>
           </div>
 
-          {/* Bulan (Periode) — HANYA Bulan 1 s/d 12 */}
+          {/* Bulan (Periode) — HANYA Bulan 1 s/d 12 (Tanpa "Semua Bulan") */}
           <div className="flex flex-col gap-0.5">
             <label className="text-[10px] font-semibold text-[#5F6B63] uppercase tracking-wide">Bulan (Periode)</label>
             <select
@@ -310,7 +321,7 @@ export default function HppMainFilters({
                 </select>
               </div>
 
-              {/* Bulan (Periode) */}
+              {/* Bulan (Periode) — HANYA Bulan 1 s/d 12 */}
               <div>
                 <label className="block text-xs font-bold text-[#17231B] mb-1.5 uppercase tracking-wide">Bulan (Periode)</label>
                 <select

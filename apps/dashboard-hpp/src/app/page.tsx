@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useCallback, useMemo } from "react";
 import HppDashboardHeader from "@/components/HppDashboardHeader";
-import HppMainFilters, { HppFilterState, CostGroupOption, MONTH_NAMES } from "@/components/HppMainFilters";
+import HppMainFilters, { HppFilterState, CostGroupOption, MONTH_NAMES, getCurrentMonthIndex } from "@/components/HppMainFilters";
 import HppTrendAndWilayahCharts, { TrendPoint, WilayahPoint } from "@/components/HppTrendAndWilayahCharts";
 import HppLokasiTable, { LokasiHppItem } from "@/components/HppLokasiTable";
 import HppLocationDetailDrilldown, { AktivitasHppItem, BudgetItem } from "@/components/HppLocationDetailDrilldown";
@@ -10,12 +10,12 @@ import HppLocationDetailDrilldown, { AktivitasHppItem, BudgetItem } from "@/comp
 export default function DashboardHPPPage() {
   const [mounted, setMounted] = useState(false);
 
-  // Main Filter State per PRD Section 6 (Default periode 1 = Januari)
+  // Main Filter State per PRD Section 6 (Default periodeFilter = Bulan sekarang saat ini)
   const [filters, setFilters] = useState<HppFilterState>({
     taksasiFilter: "all",
     costGroupFilter: "all",
     statusFilter: "all",
-    periodeFilter: 1,
+    periodeFilter: getCurrentMonthIndex(),
     reportFilter: "rp_kg",
     wilayahFilter: "all",
   });
@@ -77,7 +77,7 @@ export default function DashboardHPPPage() {
     }
   }, [mounted, fetchData]);
 
-  // Handler for updating filter state
+  // Handler for updating filter state (Called ONLY upon Terapkan, Reset, or Chart Bar click)
   const handleFilterChange = (newFilters: HppFilterState | Partial<HppFilterState>) => {
     setFilters((prev) => ({ ...prev, ...newFilters }));
   };
@@ -122,7 +122,7 @@ export default function DashboardHPPPage() {
         }
       }
 
-      // 4. Periode (Bulan) Filter (Match specific month 1..12)
+      // 4. Periode (Bulan) Filter (Match specific month number 1..12)
       if (item.periode !== filters.periodeFilter) {
         return false;
       }
@@ -151,7 +151,7 @@ export default function DashboardHPPPage() {
     let ytdQty = 0;
     let ytdLuas = 0;
 
-    // Aggregate monthly data matching all filters EXCEPT periodeFilter so trend shows all 12 months
+    // Aggregate monthly data matching all filters EXCEPT periodeFilter so trend always shows all 12 months
     rawLokasiList.forEach((item) => {
       if (filters.taksasiFilter === "100_only") {
         const taksasiVal = Number(item.luasAktif) > 0 ? (Number(item.luasPanen) / Number(item.luasAktif)) * 100 : 0;
@@ -212,7 +212,14 @@ export default function DashboardHPPPage() {
     };
 
     return { trendData: trendPoints, ytdPoint: ytd };
-  }, [rawLokasiList, filters.taksasiFilter, filters.costGroupFilter, filters.statusFilter, filters.wilayahFilter]);
+  }, [
+    rawLokasiList,
+    filters.taksasiFilter,
+    filters.costGroupFilter,
+    filters.statusFilter,
+    filters.wilayahFilter,
+    filters.reportFilter,
+  ]);
 
   // Calculate Wilayah Data (W01–W07) per PRD Section 9
   const wilayahData = useMemo(() => {
@@ -249,7 +256,7 @@ export default function DashboardHPPPage() {
     });
 
     return list;
-  }, [filteredLokasiList]);
+  }, [filteredLokasiList, filters.reportFilter]);
 
   // Items for selected location drill-down
   const selectedLokasiItems = useMemo(() => {
@@ -284,7 +291,7 @@ export default function DashboardHPPPage() {
         )}
 
         {/* PRD Section 6: Sticky Freeze Filter Utama Toolbar */}
-        <section className="sticky top-20 z-30" suppressHydrationWarning>
+        <section className="sticky top-20 z-30 font-sans" suppressHydrationWarning>
           <HppMainFilters
             filters={filters}
             onChangeFilter={handleFilterChange}
