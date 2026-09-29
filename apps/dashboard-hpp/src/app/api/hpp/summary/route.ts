@@ -69,6 +69,7 @@ export async function GET() {
         totalAktivitas: aktivitasHpps.length,
       },
       groupBreakdown,
+      budgets,
     });
   } catch (error: any) {
     console.error("Error fetching HPP summary:", error);
