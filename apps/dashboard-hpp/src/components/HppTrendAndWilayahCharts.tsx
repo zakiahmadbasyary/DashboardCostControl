@@ -92,7 +92,7 @@ export default function HppTrendAndWilayahCharts({
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-      
+
       {/* ----------------------------------------------------------------- */}
       {/* CHART 1 (LEFT): Trend HPP Pine PG1 (Vertical Bar Chart)           */}
       {/* ----------------------------------------------------------------- */}
@@ -121,7 +121,7 @@ export default function HppTrendAndWilayahCharts({
           {/* Vertical Bar Chart Container */}
           <div className="pt-2 overflow-x-auto">
             <div className="min-w-[440px]">
-              
+
               {/* Bars Area */}
               <div className="flex items-end justify-between gap-1.5 h-48 pb-1">
                 {trendData.map((item) => {
@@ -138,9 +138,8 @@ export default function HppTrendAndWilayahCharts({
                     >
                       {/* Number value label on top of bar */}
                       <span
-                        className={`text-[10px] sm:text-[11px] font-bold mb-1 transition-all truncate ${
-                          isSelected ? "text-[#29A9D6] scale-110" : "text-[#17231B] opacity-90 group-hover:opacity-100"
-                        }`}
+                        className={`text-[10px] sm:text-[11px] font-bold mb-1 transition-all truncate ${isSelected ? "text-[#B45309] scale-110 font-black" : "text-[#17231B] opacity-90 group-hover:opacity-100"
+                          }`}
                       >
                         {formatValNumber(val)}
                       </span>
@@ -148,11 +147,10 @@ export default function HppTrendAndWilayahCharts({
                       {/* Bar Track Container */}
                       <div className="w-full bg-[#F2F6F3] rounded-t-md h-36 flex items-end overflow-hidden p-0.5">
                         <div
-                          className={`w-full rounded-t transition-all duration-300 ${
-                            isSelected
-                              ? "bg-[#29A9D6] ring-2 ring-[#208bb2] shadow-md"
+                          className={`w-full rounded-t transition-all duration-300 ${isSelected
+                              ? "bg-[#FCE27A] ring-2 ring-[#E5C959] shadow-md"
                               : "bg-[#8CC63F] group-hover:bg-[#16823B]"
-                          }`}
+                            }`}
                           style={{ height: `${Math.max(heightPercent, val > 0 ? 5 : 0)}%` }}
                         ></div>
                       </div>
@@ -200,9 +198,8 @@ export default function HppTrendAndWilayahCharts({
                     <span
                       key={item.month}
                       onClick={() => onSelectMonth?.(item.month)}
-                      className={`flex-1 text-center text-xs font-bold cursor-pointer transition-colors ${
-                        isSelected ? "text-[#16823B] underline font-extrabold" : "text-[#17231B]"
-                      }`}
+                      className={`flex-1 text-center text-xs font-bold cursor-pointer transition-colors ${isSelected ? "text-[#B45309] underline font-extrabold" : "text-[#17231B]"
+                        }`}
                     >
                       {item.label}
                     </span>
@@ -254,7 +251,7 @@ export default function HppTrendAndWilayahCharts({
           {/* Vertical Bar Chart Container */}
           <div className="pt-2 overflow-x-auto">
             <div className="min-w-[360px]">
-              
+
               {/* Bars Area */}
               <div className="flex items-end justify-between gap-2.5 h-48 pb-1">
                 {wilayahData.map((item) => {
@@ -272,9 +269,8 @@ export default function HppTrendAndWilayahCharts({
                     >
                       {/* Number value label on top of bar */}
                       <span
-                        className={`text-[10px] sm:text-[11px] font-bold mb-1 transition-all truncate ${
-                          isSelected ? "text-[#17231B] scale-110 underline font-black" : "text-[#17231B] opacity-90 group-hover:opacity-100"
-                        }`}
+                        className={`text-[10px] sm:text-[11px] font-bold mb-1 transition-all truncate ${isSelected ? "text-[#17231B] scale-110 underline font-black" : "text-[#17231B] opacity-90 group-hover:opacity-100"
+                          }`}
                       >
                         {formatValNumber(val)}
                       </span>
@@ -282,9 +278,8 @@ export default function HppTrendAndWilayahCharts({
                       {/* Bar Track Container */}
                       <div className="w-full bg-[#F2F6F3] rounded-t-md h-36 flex items-end overflow-hidden p-0.5">
                         <div
-                          className={`w-full rounded-t transition-all duration-300 ${palette.bg} ${palette.hover} ${
-                            isSelected ? "ring-2 ring-[#17231B] shadow-md scale-[1.02]" : ""
-                          }`}
+                          className={`w-full rounded-t transition-all duration-300 ${palette.bg} ${palette.hover} ${isSelected ? "ring-2 ring-[#17231B] shadow-md scale-[1.02]" : ""
+                            }`}
                           style={{ height: `${Math.max(heightPercent, val > 0 ? 5 : 0)}%` }}
                         ></div>
                       </div>
@@ -304,9 +299,8 @@ export default function HppTrendAndWilayahCharts({
                     <span
                       key={item.wilayah}
                       onClick={() => onSelectWilayah?.(isSelected ? "all" : item.wilayah)}
-                      className={`flex-1 text-center text-xs font-extrabold cursor-pointer transition-colors ${
-                        isSelected ? "text-[#16823B] underline" : "text-[#17231B]"
-                      }`}
+                      className={`flex-1 text-center text-xs font-extrabold cursor-pointer transition-colors ${isSelected ? "text-[#16823B] underline" : "text-[#17231B]"
+                        }`}
                     >
                       {item.wilayah}
                     </span>
