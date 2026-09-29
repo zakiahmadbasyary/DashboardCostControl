@@ -135,9 +135,21 @@ export default function DashboardHPPPage() {
         }
       }
 
-      return true;
-    });
-  }, [rawLokasiList, filters]);
+        return true;
+      });
+    }, [rawLokasiList, filters]);
+
+  // Auto-select first location from filteredLokasiList by default
+  useEffect(() => {
+    if (filteredLokasiList.length > 0) {
+      const exists = filteredLokasiList.some((item) => item.lokasi === selectedLokasiCode);
+      if (!selectedLokasiCode || !exists) {
+        setSelectedLokasiCode(filteredLokasiList[0].lokasi);
+      }
+    } else {
+      setSelectedLokasiCode(null);
+    }
+  }, [filteredLokasiList, selectedLokasiCode]);
 
   // Calculate Trend Data (Jan–Dec + YTD weighted sum) per PRD Section 8
   const { trendData, ytdPoint } = useMemo(() => {
@@ -321,7 +333,7 @@ export default function DashboardHPPPage() {
             onWilayahFilterChange={(w) => handleFilterChange({ wilayahFilter: w })}
             reportFilter={filters.reportFilter}
             selectedLokasiCode={selectedLokasiCode}
-            onSelectLokasi={(code) => setSelectedLokasiCode((prev) => (prev === code ? null : code))}
+            onSelectLokasi={(code) => setSelectedLokasiCode(code)}
           />
         </section>
 

@@ -33,15 +33,22 @@ interface HppTrendAndWilayahChartsProps {
   loading?: boolean;
 }
 
-// Curated GGF AgroMetric palette for Wilayah Bars
-const WILAYAH_COLORS: Record<string, { bg: string; hover: string }> = {
-  W01: { bg: "bg-[#00A896]", hover: "hover:bg-[#008f80]" }, // Teal Cyan
-  W02: { bg: "bg-[#F9A91B]", hover: "hover:bg-[#e09412]" }, // GGF Orange
-  W03: { bg: "bg-[#29A9D6]", hover: "hover:bg-[#208bb2]" }, // GGF Cyan Blue
-  W04: { bg: "bg-[#A8D437]", hover: "hover:bg-[#92ba2b]" }, // GGF Light Green
-  W05: { bg: "bg-[#0B6B32]", hover: "hover:bg-[#074f24]" }, // GGF Dark Green
-  W06: { bg: "bg-[#FCE27A]", hover: "hover:bg-[#e5ca59]" }, // GGF Yellow
-  W07: { bg: "bg-[#16823B]", hover: "hover:bg-[#11682f]" }, // GGF Primary Green
+// Curated GGF AgroMetric & Logo palette for Wilayah Bars (Biru -> Kuning -> Hijau)
+const WILAYAH_COLORS: Record<string, string> = {
+  W01: "#29A9D6",  // Biru Cyan
+  AW01: "#29A9D6",
+  W02: "#00A896",  // Biru Teal
+  AW02: "#00A896",
+  W03: "#FCE27A",  // Kuning Cerah
+  AW03: "#FCE27A",
+  W04: "#F9A91B",  // Kuning Emas
+  AW04: "#F9A91B",
+  W05: "#A8D437",  // Hijau Muda (Lime)
+  AW05: "#A8D437",
+  W06: "#16823B",  // Hijau Utama
+  AW06: "#16823B",
+  W07: "#0B6B32",  // Hijau Tua (Dark Green)
+  AW07: "#0B6B32",
 };
 
 export default function HppTrendAndWilayahCharts({
@@ -258,7 +265,7 @@ export default function HppTrendAndWilayahCharts({
                   const val = isRpKg ? item.valRpKg : item.valRpHa;
                   const heightPercent = maxWilayahVal > 0 ? (val / maxWilayahVal) * 100 : 0;
                   const isSelected = filters.wilayahFilter === item.wilayah;
-                  const palette = WILAYAH_COLORS[item.wilayah] || { bg: "bg-[#16823B]", hover: "hover:bg-[#0B6B32]" };
+                  const barColor = WILAYAH_COLORS[item.wilayah] || WILAYAH_COLORS[`A${item.wilayah}`] || "#16823B";
 
                   return (
                     <div
@@ -278,9 +285,12 @@ export default function HppTrendAndWilayahCharts({
                       {/* Bar Track Container */}
                       <div className="w-full bg-[#F2F6F3] rounded-t-md h-36 flex items-end overflow-hidden p-0.5">
                         <div
-                          className={`w-full rounded-t transition-all duration-300 ${palette.bg} ${palette.hover} ${isSelected ? "ring-2 ring-[#17231B] shadow-md scale-[1.02]" : ""
+                          className={`w-full rounded-t transition-all duration-300 hover:brightness-90 ${isSelected ? "ring-2 ring-[#17231B] shadow-md scale-[1.02]" : ""
                             }`}
-                          style={{ height: `${Math.max(heightPercent, val > 0 ? 5 : 0)}%` }}
+                          style={{
+                            height: `${Math.max(heightPercent, val > 0 ? 5 : 0)}%`,
+                            backgroundColor: barColor,
+                          }}
                         ></div>
                       </div>
                     </div>

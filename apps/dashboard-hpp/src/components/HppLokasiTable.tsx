@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { Search, MapPin, Filter, ArrowUpRight, CheckCircle2, ChevronRight } from "lucide-react";
+import { Search, MapPin, Filter, ArrowUpRight, CheckCircle2, ChevronRight, ChevronLeft } from "lucide-react";
 
 export interface LokasiHppItem {
   idLokasiHpp: string;
@@ -53,6 +53,8 @@ interface HppLokasiTableProps {
   onSelectLokasi: (lokasiCode: string) => void;
 }
 
+const ITEMS_PER_PAGE = 15;
+
 export default function HppLokasiTable({
   data,
   loading,
@@ -63,6 +65,7 @@ export default function HppLokasiTable({
   onSelectLokasi,
 }: HppLokasiTableProps) {
   const [searchQuery, setSearchQuery] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
 
   const formatCurrency = (val: number) => {
     return new Intl.NumberFormat("id-ID", {
@@ -134,6 +137,29 @@ export default function HppLokasiTable({
 
   const isRpKg = reportFilter === "rp_kg";
 
+  // Sort locations descending by HPP (rp_kg or rp_ha): Largest to Smallest
+  const sortedFilteredList = [...filteredList].sort((a, b) => {
+    const valA = isRpKg ? a.rpKg : a.rpHa;
+    const valB = isRpKg ? b.rpKg : b.rpHa;
+    return valB - valA;
+  });
+
+  // Pagination calculation
+  const totalPages = Math.ceil(sortedFilteredList.length / ITEMS_PER_PAGE) || 1;
+  const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+  const endIndex = Math.min(startIndex + ITEMS_PER_PAGE, sortedFilteredList.length);
+  const paginatedList = sortedFilteredList.slice(startIndex, endIndex);
+
+  const handleSearchChange = (query: string) => {
+    setSearchQuery(query);
+    setCurrentPage(1);
+  };
+
+  const handleWilayahChange = (wilayah: string) => {
+    onWilayahFilterChange(wilayah);
+    setCurrentPage(1);
+  };
+
   return (
     <div className="bg-white rounded-2xl border border-[#DDE5DF] shadow-2xs overflow-hidden flex flex-col" suppressHydrationWarning>
       {/* Table Header Controls per PRD Section 10 */}
@@ -157,7 +183,7 @@ export default function HppLokasiTable({
             <span className="text-xs font-bold text-[#5F6B63]">Wilayah:</span>
             <select
               value={selectedWilayahFilter}
-              onChange={(e) => onWilayahFilterChange(e.target.value)}
+              onChange={(e) => handleWilayahChange(e.target.value)}
               suppressHydrationWarning
               className="bg-transparent text-xs font-extrabold text-[#17231B] focus:outline-none cursor-pointer"
             >
@@ -177,7 +203,7 @@ export default function HppLokasiTable({
               type="text"
               placeholder="Cari lokasi, bibit..."
               value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
+              onChange={(e) => handleSearchChange(e.target.value)}
               suppressHydrationWarning
               className="w-full pl-8 pr-3 py-1.5 bg-white border border-[#DDE5DF] rounded-xl text-xs font-medium text-[#17231B] focus:outline-none focus:border-[#16823B] transition-all"
             />
@@ -192,29 +218,28 @@ export default function HppLokasiTable({
             <tr className="bg-[#F0F4F1] text-[#455248] uppercase tracking-wider font-extrabold border-b border-[#E0E8E2]">
               <th className="py-3 px-4">Lokasi</th>
               <th className="py-3 px-4 text-center">% Taksasi</th>
-              <th className="py-3 px-4 text-right">Yield (Kg/Ha)</th>
+              <th className="py-3 px-4 text-right">Yield</th>
               <th className="py-3 px-4 text-right">{isRpKg ? "HPP (Rp/Kg)" : "HPP (Rp/Ha)"}</th>
-              <th className="py-3 px-4 text-right">Total Cost (Rp)</th>
-              <th className="py-3 px-4 text-center">Aksi / Drill-down</th>
+              <th className="py-3 px-4 text-center">STATUS SELECT</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-[#EAEFEB]">
             {loading ? (
               [1, 2, 3].map((i) => (
                 <tr key={i} className="animate-pulse">
-                  <td colSpan={6} className="py-4 px-4 bg-gray-50/50">
+                  <td colSpan={5} className="py-4 px-4 bg-gray-50/50">
                     <div className="h-4 bg-gray-200 rounded w-full"></div>
                   </td>
                 </tr>
               ))
-            ) : filteredList.length === 0 ? (
+            ) : sortedFilteredList.length === 0 ? (
               <tr>
-                <td colSpan={6} className="py-8 text-center text-[#8C9890] font-medium">
+                <td colSpan={5} className="py-8 text-center text-[#8C9890] font-medium">
                   Tidak ada data Lokasi yang sesuai dengan filter.
                 </td>
               </tr>
             ) : (
-              filteredList.map((loc) => {
+              paginatedList.map((loc) => {
                 const isSelected = selectedLokasiCode === loc.lokasi;
                 const hppVal = isRpKg ? loc.rpKg : loc.rpHa;
 
@@ -224,8 +249,8 @@ export default function HppLokasiTable({
                     onClick={() => onSelectLokasi(loc.lokasi)}
                     className={`cursor-pointer transition-all ${
                       isSelected
-                        ? "bg-[#EAF3EC] border-l-4 border-l-[#16823B] font-semibold"
-                        : "hover:bg-[#F4F8F5]"
+                        ? "bg-[#EFF7DB] font-semibold"
+                        : "hover:bg-[#F8FAF9]"
                     }`}
                   >
                     {/* 1. Lokasi */}
@@ -255,38 +280,38 @@ export default function HppLokasiTable({
 
                     {/* 3. Yield */}
                     <td className="py-3.5 px-4 text-right font-bold text-[#17231B]">
-                      {formatNumber(loc.yieldVal, 1)} Kg/Ha
+                      {formatNumber(loc.yieldVal, 1)}
                     </td>
 
-                    {/* 4. Rp/Kg or Rp/Ha */}
+                    {/* 4. HPP (No Rp prefix) */}
                     <td className="py-3.5 px-4 text-right font-black text-[#16823B]">
-                      {formatCurrency(hppVal)}
-                      <span className="text-[10px] text-[#5F6B63] font-normal ml-0.5">
-                        /{isRpKg ? "Kg" : "Ha"}
-                      </span>
+                      {formatNumber(hppVal, 0)}
                     </td>
 
-                    {/* 5. Total Cost */}
-                    <td className="py-3.5 px-4 text-right font-bold text-[#2C3830]">
-                      {formatCurrency(loc.totalBiaya)}
-                    </td>
-
-                    {/* 6. Action Button */}
+                    {/* 5. Status Select Column */}
                     <td className="py-3.5 px-4 text-center">
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          onSelectLokasi(loc.lokasi);
-                        }}
-                        className={`px-3 py-1.5 rounded-xl text-xs font-extrabold inline-flex items-center gap-1 transition-all ${
-                          isSelected
-                            ? "bg-[#16823B] text-white shadow-2xs"
-                            : "bg-[#EAF3EC] text-[#16823B] hover:bg-[#16823B] hover:text-white"
-                        }`}
-                      >
-                        <span>{isSelected ? "Terpilih" : "Detail Lokasi"}</span>
-                        {isSelected ? <ArrowUpRight className="w-3.5 h-3.5" /> : <ChevronRight className="w-3.5 h-3.5" />}
-                      </button>
+                      {isSelected ? (
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            onSelectLokasi(loc.lokasi);
+                          }}
+                          className="px-3.5 py-1 rounded-full bg-[#0B6B32] text-white text-xs font-bold shadow-xs inline-flex items-center gap-1.5 hover:bg-[#074f24] transition-all"
+                        >
+                          <CheckCircle2 className="w-3.5 h-3.5 text-white" />
+                          <span>Selected</span>
+                        </button>
+                      ) : (
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            onSelectLokasi(loc.lokasi);
+                          }}
+                          className="text-xs text-[#89958C] hover:text-[#16823B] font-medium transition-colors cursor-pointer"
+                        >
+                          Klik pilih
+                        </button>
+                      )}
                     </td>
                   </tr>
                 );
@@ -296,10 +321,55 @@ export default function HppLokasiTable({
         </table>
       </div>
 
-      {/* Footer Info */}
-      <div className="p-3 bg-[#F8FAF9] border-t border-[#EAEFEB] text-xs text-[#5F6B63] flex justify-between items-center">
-        <span>Menampilkan {filteredList.length} lokasi perkebunan</span>
+      {/* Footer Info & Pagination Controls */}
+      <div className="p-3.5 bg-[#F8FAF9] border-t border-[#EAEFEB] text-xs text-[#5F6B63] flex flex-col sm:flex-row items-center justify-between gap-3">
+        <div>
+          {filteredList.length > 0 ? (
+            <span>
+              Menampilkan <strong className="text-[#17231B]">{startIndex + 1}</strong> - <strong className="text-[#17231B]">{endIndex}</strong> dari <strong className="text-[#17231B]">{filteredList.length}</strong> lokasi perkebunan
+            </span>
+          ) : (
+            <span>Tidak ada data lokasi</span>
+          )}
+        </div>
+
+        {totalPages > 1 && (
+          <div className="flex items-center gap-1.5">
+            <button
+              onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
+              disabled={currentPage === 1}
+              className="px-2.5 py-1.5 rounded-lg border border-[#DDE5DF] bg-white text-xs font-bold text-[#17231B] hover:bg-[#EAF3EC] disabled:opacity-40 disabled:cursor-not-allowed transition-all inline-flex items-center gap-1"
+            >
+              <ChevronLeft className="w-3.5 h-3.5" />
+              <span>Sebelumnya</span>
+            </button>
+
+            {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+              <button
+                key={page}
+                onClick={() => setCurrentPage(page)}
+                className={`px-3 py-1.5 rounded-lg text-xs font-black transition-all ${
+                  currentPage === page
+                    ? "bg-[#16823B] text-white shadow-2xs"
+                    : "bg-white border border-[#DDE5DF] text-[#17231B] hover:bg-[#EAF3EC]"
+                }`}
+              >
+                {page}
+              </button>
+            ))}
+
+            <button
+              onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))}
+              disabled={currentPage === totalPages}
+              className="px-2.5 py-1.5 rounded-lg border border-[#DDE5DF] bg-white text-xs font-bold text-[#17231B] hover:bg-[#EAF3EC] disabled:opacity-40 disabled:cursor-not-allowed transition-all inline-flex items-center gap-1"
+            >
+              <span>Selanjutnya</span>
+              <ChevronRight className="w-3.5 h-3.5" />
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );
 }
+
