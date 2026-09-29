@@ -134,8 +134,14 @@ export default function HppLocationDetailDrilldown({
   // Automatically select first group if none selected
   const activeGroup = selectedGroup || (groupCostList.length > 0 ? groupCostList[0].group : null);
 
-  // 3. Filtered Aktivitas for active group per PRD Section 13
-  const filteredAktivitas = locAktivitas.filter((a) => a.group === activeGroup);
+  // 3. Filtered & Sorted Aktivitas for active group descending by Cost/Ha (Largest to Smallest)
+  const filteredAktivitas = locAktivitas
+    .filter((a) => a.group === activeGroup)
+    .sort((a, b) => {
+      const costPerHaA = luasPanen > 0 ? Number(a.biaya || 0) / luasPanen : 0;
+      const costPerHaB = luasPanen > 0 ? Number(b.biaya || 0) / luasPanen : 0;
+      return costPerHaB - costPerHaA;
+    });
 
   return (
     <div className="space-y-6" suppressHydrationWarning>
