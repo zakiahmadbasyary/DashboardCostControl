@@ -10,7 +10,7 @@ Repository ini menyimpan seluruh aplikasi platform **Cost Control Portal** (Port
 |----|-----------------|--------------------------|------------------------|----------|-------------------|
 | 1 | **Portal Utama** | `apps/portal` | Landing page terpusat 9 menu cost control | `3000` | `npm run dev:portal` |
 | 2 | **WIP** | `apps/dashboard-wip` | Monitoring Work In Process ACC | `3001` | `npm run dev:wip` |
-| 3 | **HPP** | `apps/dashboard-hpp` | Analisis Harga Pokok Produksi | `3002` | `` |
+| 3 | **HPP** | `apps/dashboard-hpp` | Analisis Harga Pokok Produksi | `3002` | `npm run dev:hpp` |
 | 4 | **Capex** | `apps/dashboard-capex` | Pengawasan Capital Expenditure (Belanja Modal) | `3003` | `npm run dev:capex` |
 | 5 | **Opex** | `apps/dashboard-opex` | Monitoring Operational Expenditure (Biaya Operasional) | `3004` | `npm run dev:opex` |
 | 6 | **Admin Pusat** | `apps/admin` | Pusat Administrasi, Single Sign-On (SSO) & Akses User | `3005` | `npm run dev:admin` |

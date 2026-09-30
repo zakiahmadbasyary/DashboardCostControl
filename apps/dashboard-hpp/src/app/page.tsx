@@ -139,17 +139,45 @@ export default function DashboardHPPPage() {
       });
     }, [rawLokasiList, filters]);
 
-  // Auto-select first location from filteredLokasiList by default
-  useEffect(() => {
-    if (filteredLokasiList.length > 0) {
-      const exists = filteredLokasiList.some((item) => item.lokasi === selectedLokasiCode);
-      if (!selectedLokasiCode || !exists) {
-        setSelectedLokasiCode(filteredLokasiList[0].lokasi);
+  // Aggregate and sort location codes descending by HPP (rp_kg / rp_ha) or total cost: Largest to Smallest
+  const sortedLokasiCodes = useMemo(() => {
+    const lokasiMap: Record<string, { totalBiaya: number; qtyPanen: number; luasPanen: number }> = {};
+
+    filteredLokasiList.forEach((item) => {
+      const code = item.lokasi;
+      if (!lokasiMap[code]) {
+        lokasiMap[code] = {
+          totalBiaya: 0,
+          qtyPanen: Number(item.qtyPanen || 0),
+          luasPanen: Number(item.luasPanen || 0),
+        };
       }
+      lokasiMap[code].totalBiaya += Number(item.biaya || 0);
+    });
+
+    const isRpKg = filters.reportFilter === "rp_kg";
+
+    const aggregated = Object.entries(lokasiMap).map(([code, data]) => {
+      const rpKg = data.qtyPanen > 0 ? data.totalBiaya / data.qtyPanen : 0;
+      const rpHa = data.luasPanen > 0 ? data.totalBiaya / data.luasPanen : 0;
+      const val = isRpKg ? rpKg : rpHa;
+      return { code, val, totalBiaya: data.totalBiaya };
+    });
+
+    // Sort descending by HPP value (val), fallback to totalBiaya descending
+    aggregated.sort((a, b) => (b.val !== a.val ? b.val - a.val : b.totalBiaya - a.totalBiaya));
+
+    return aggregated.map((item) => item.code);
+  }, [filteredLokasiList, filters.reportFilter]);
+
+  // Auto-select location with largest HPP (Rp/Kg or Rp/Ha) by default (first item in sorted list)
+  useEffect(() => {
+    if (sortedLokasiCodes.length > 0) {
+      setSelectedLokasiCode(sortedLokasiCodes[0]);
     } else {
       setSelectedLokasiCode(null);
     }
-  }, [filteredLokasiList, selectedLokasiCode]);
+  }, [sortedLokasiCodes]);
 
   // Calculate Trend Data (Jan–Dec + YTD weighted sum) per PRD Section 8
   const { trendData, ytdPoint } = useMemo(() => {
