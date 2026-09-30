@@ -355,7 +355,7 @@ export default function AdminDashboardPage() {
       url: hppUrl,
       adminUrl: hppPg1AdminUrl,
       icon: Banknote,
-      isHosted: false,
+      isHosted: true,
     },
     {
       code: "capex",

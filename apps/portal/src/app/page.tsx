@@ -60,7 +60,7 @@ export default function PortalHomePage() {
       url: hppUrl,
       icon: Banknote,
       badge: "Produksi",
-      isHosted: false,
+      isHosted: true,
     },
     {
       id: "capex",
@@ -145,20 +145,19 @@ export default function PortalHomePage() {
     <div className="min-h-screen bg-[#F7F9F7] text-[#17231B] flex flex-col justify-between font-sans selection:bg-[#16823B] selection:text-white">
       {/* Dedicated Portal Header */}
       <header className="sticky top-0 z-50 bg-white border-b border-[#DDE5DF] shadow-2xs w-full">
-        <div className="w-full max-w-[95%] mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="h-20 flex items-center justify-between gap-4">
+        <div className="w-full max-w-[95%] mx-auto px-3.5 sm:px-6 lg:px-8">
+          <div className="h-20 flex items-center justify-between gap-2.5 sm:gap-4">
             {/* Left Brand Logo & Title */}
-            <a href={portalUrl} className="flex items-center gap-3.5 shrink-0 py-1 group focus:outline-none">
-              <div className="h-14 sm:h-15 w-auto flex items-center shrink-0">
+            <a href={portalUrl} className="flex items-center gap-2 sm:gap-3.5 min-w-0 py-1 group focus:outline-none">
+              <div className="h-10 sm:h-14 w-auto flex items-center shrink-0">
                 <img
                   src="/logo.png"
                   alt="GGF Logo"
-                  className="h-14 sm:h-15 max-h-15 w-auto object-contain"
-                  style={{ height: "56px", maxHeight: "60px", width: "auto" }}
+                  className="h-10 sm:h-14 max-h-14 w-auto object-contain"
                 />
               </div>
-              <div className="flex flex-col justify-center">
-                <span className="font-extrabold text-base sm:text-lg text-[#17231B] group-hover:text-[#16823B] tracking-tight leading-snug transition-colors block">
+              <div className="flex flex-col justify-center min-w-0">
+                <span className="font-extrabold text-xs sm:text-base lg:text-lg text-[#17231B] group-hover:text-[#16823B] tracking-tight leading-snug transition-colors truncate">
                   Cost Control Dashboard Portal
                 </span>
                 <span className="text-xs sm:text-sm text-[#5F6B63] hidden sm:block font-medium leading-tight mt-0.5">
@@ -203,10 +202,10 @@ export default function PortalHomePage() {
             <div className="sm:hidden flex items-center shrink-0">
               <button
                 onClick={() => setMenuOpen(!menuOpen)}
-                className="p-2.5 rounded-xl border border-[#DDE5DF] bg-[#F8FAF9] hover:bg-[#EEF4F0] text-[#17231B] transition-all shadow-xs focus:outline-none cursor-pointer flex items-center gap-1.5"
+                className="px-2.5 py-1.5 sm:p-2.5 rounded-xl border border-[#DDE5DF] bg-[#F8FAF9] hover:bg-[#EEF4F0] text-[#17231B] transition-all shadow-xs focus:outline-none cursor-pointer flex items-center gap-1.5"
                 aria-label="Menu Navigasi Mobile"
               >
-                {menuOpen ? <X className="w-5 h-5 text-[#16823B]" /> : <Menu className="w-5 h-5 text-[#16823B]" />}
+                {menuOpen ? <X className="w-4.5 h-4.5 text-[#16823B]" /> : <Menu className="w-4.5 h-4.5 text-[#16823B]" />}
                 <span className="text-xs font-bold text-[#17231B]">Menu</span>
               </button>
             </div>
@@ -215,7 +214,7 @@ export default function PortalHomePage() {
 
         {/* Navigation Dropdown Drawer */}
         {menuOpen && (
-          <div className="border-t border-[#DDE5DF] bg-white px-4 py-4 shadow-lg animate-in fade-in duration-150">
+          <div className="border-t border-[#DDE5DF] bg-white px-3.5 sm:px-6 py-4 shadow-lg animate-in fade-in duration-150">
             <div className="w-full max-w-[95%] mx-auto space-y-3">
               {/* Mobile Quick Links Section at Top of Drawer */}
               <div className="flex sm:hidden flex-col gap-2 pb-3 border-b border-[#EAEFEB]">
