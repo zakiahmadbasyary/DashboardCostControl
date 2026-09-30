@@ -54,9 +54,9 @@ export default function AdminPreviewPage() {
   const endRecord = Math.min(page * limit, totalRecords);
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6" suppressHydrationWarning>
       {/* Page Header */}
-      <div>
+      <div suppressHydrationWarning>
         <h1 className="text-xl font-extrabold text-[#17231B]">Preview Data Database HPP</h1>
         <p className="text-xs text-[#5F6B63] mt-1">
           Inspeksi data mentah dari 4 tabel database HPP (MasterSheet, Data Budget, Data Lokasi HPP, dan Data Aktivitas HPP) dengan paginasi 50 data per halaman.
@@ -64,12 +64,13 @@ export default function AdminPreviewPage() {
       </div>
 
       {/* Tabs & Search Bar */}
-      <div className="bg-white border border-[#DDE5DF] rounded-2xl p-5 shadow-xs space-y-4">
-        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 border-b border-[#DDE5DF] pb-4">
+      <div className="bg-white border border-[#DDE5DF] rounded-2xl p-5 shadow-xs space-y-4" suppressHydrationWarning>
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 border-b border-[#DDE5DF] pb-4" suppressHydrationWarning>
           {/* 4 Tabs */}
-          <div className="flex items-center gap-2 overflow-x-auto pb-1 sm:pb-0 max-w-full shrink-0 scrollbar-none">
+          <div className="flex items-center gap-2 overflow-x-auto pb-1 sm:pb-0 max-w-full shrink-0 scrollbar-none" suppressHydrationWarning>
             <button
               onClick={() => handleTabChange("mastersheet")}
+              suppressHydrationWarning
               className={`inline-flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
                 activeTab === "mastersheet"
                   ? "bg-[#16823B] text-white shadow-xs"
@@ -82,6 +83,7 @@ export default function AdminPreviewPage() {
 
             <button
               onClick={() => handleTabChange("budget")}
+              suppressHydrationWarning
               className={`inline-flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
                 activeTab === "budget"
                   ? "bg-[#16823B] text-white shadow-xs"
@@ -94,6 +96,7 @@ export default function AdminPreviewPage() {
 
             <button
               onClick={() => handleTabChange("lokasi")}
+              suppressHydrationWarning
               className={`inline-flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
                 activeTab === "lokasi"
                   ? "bg-[#16823B] text-white shadow-xs"
@@ -106,6 +109,7 @@ export default function AdminPreviewPage() {
 
             <button
               onClick={() => handleTabChange("aktivitas")}
+              suppressHydrationWarning
               className={`inline-flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
                 activeTab === "aktivitas"
                   ? "bg-[#16823B] text-white shadow-xs"
@@ -118,13 +122,14 @@ export default function AdminPreviewPage() {
           </div>
 
           {/* Search Box */}
-          <div className="relative min-w-[240px]">
+          <div className="relative min-w-[240px]" suppressHydrationWarning>
             <Search className="w-4 h-4 text-[#89938D] absolute left-3 top-2.5" />
             <input
               type="text"
               value={searchQuery}
               onChange={(e) => handleSearchChange(e.target.value)}
               placeholder="Cari kata kunci..."
+              suppressHydrationWarning
               className="w-full bg-[#F7F9F7] border border-[#DDE5DF] rounded-xl pl-9 pr-3 py-1.5 text-xs text-[#17231B] focus:outline-none focus:border-[#16823B]"
             />
           </div>
