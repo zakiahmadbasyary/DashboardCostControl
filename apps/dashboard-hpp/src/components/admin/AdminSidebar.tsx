@@ -31,7 +31,7 @@ export default function AdminSidebar() {
   const sidebarContent = (
     <div className="flex flex-col justify-between h-full" suppressHydrationWarning>
       <div suppressHydrationWarning>
-        {/* Brand */}
+        {/* Brand Header */}
         <div className="p-6 border-b border-[#DDE5DF] flex items-center justify-between" suppressHydrationWarning>
           <div className="flex items-center gap-3">
             <div className="h-11 w-auto flex items-center shrink-0">
@@ -43,8 +43,8 @@ export default function AdminSidebar() {
               />
             </div>
             <div>
-              <h2 className="font-extrabold text-sm text-[#17231B]">GGF Admin</h2>
-              <p className="text-[11px] text-[#5F6B63]">HPP Panel</p>
+              <h2 className="font-extrabold text-base text-[#17231B]">GGF Admin</h2>
+              <p className="text-xs font-medium text-[#5F6B63]">HPP Panel</p>
             </div>
           </div>
           {/* Close button for mobile drawer */}
@@ -53,13 +53,13 @@ export default function AdminSidebar() {
             suppressHydrationWarning
             className="lg:hidden p-1.5 text-[#5F6B63] hover:text-[#17231B] rounded-lg hover:bg-[#F7F9F7]"
           >
-            <X className="w-5 h-5" />
+            <X className="w-5.5 h-5.5" />
           </button>
         </div>
 
         {/* Navigation */}
-        <nav className="p-4 space-y-1.5" suppressHydrationWarning>
-          <p className="px-3 text-[10px] font-bold text-[#89938D] uppercase tracking-wider mb-2">Data Management</p>
+        <nav className="p-4 space-y-2" suppressHydrationWarning>
+          <p className="px-3 text-xs font-extrabold text-[#89938D] uppercase tracking-wider mb-2.5">Data Management</p>
           {navItems.map((item) => {
             const Icon = item.icon;
             const isActive = pathname === item.href || (item.href !== "/admin" && pathname.startsWith(`${item.href}`));
@@ -69,13 +69,13 @@ export default function AdminSidebar() {
                 href={item.href}
                 onClick={() => setMobileOpen(false)}
                 suppressHydrationWarning
-                className={`flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-semibold transition-all ${
+                className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold transition-all ${
                   isActive
                     ? "bg-[#16823B] text-white shadow-xs"
                     : "text-[#5F6B63] hover:bg-[#F7F9F7] hover:text-[#17231B]"
                 }`}
               >
-                <Icon className="w-4 h-4" />
+                <Icon className="w-4.5 h-4.5 shrink-0" />
                 <span>{item.label}</span>
               </Link>
             );
@@ -84,30 +84,30 @@ export default function AdminSidebar() {
       </div>
 
       {/* Footer / Actions */}
-      <div className="p-4 border-t border-[#DDE5DF] space-y-2" suppressHydrationWarning>
+      <div className="p-4 border-t border-[#DDE5DF] space-y-2.5" suppressHydrationWarning>
         <a
           href={`${adminUrl}/dashboard`}
           suppressHydrationWarning
-          className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-semibold text-[#16823B] bg-[#EAF3EC] hover:bg-[#D5E7DA] transition-colors"
+          className="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs sm:text-sm font-bold text-[#16823B] bg-[#EAF3EC] hover:bg-[#D5E7DA] transition-colors shadow-2xs"
         >
-          <Shield className="w-4 h-4 text-[#16823B]" />
+          <Shield className="w-4.5 h-4.5 text-[#16823B] shrink-0" />
           <span>Ke Admin Pusat</span>
         </a>
         <Link
           href="/"
           onClick={() => setMobileOpen(false)}
           suppressHydrationWarning
-          className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium text-[#5F6B63] hover:bg-[#F7F9F7] transition-colors"
+          className="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs sm:text-sm font-semibold text-[#5F6B63] hover:bg-[#F7F9F7] hover:text-[#17231B] transition-colors"
         >
-          <LayoutDashboard className="w-4 h-4 text-[#16823B]" />
+          <LayoutDashboard className="w-4.5 h-4.5 text-[#16823B] shrink-0" />
           <span>Lihat Dashboard Publik</span>
         </Link>
         <button
           onClick={handleLogout}
           suppressHydrationWarning
-          className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium text-rose-600 hover:bg-rose-50 transition-colors cursor-pointer"
+          className="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs sm:text-sm font-bold text-rose-600 hover:bg-rose-50 transition-colors cursor-pointer"
         >
-          <LogOut className="w-4 h-4" />
+          <LogOut className="w-4.5 h-4.5 shrink-0" />
           <span>Keluar (Logout)</span>
         </button>
       </div>
@@ -118,7 +118,7 @@ export default function AdminSidebar() {
     <div suppressHydrationWarning>
       {/* Mobile Header Bar */}
       <header className="lg:hidden bg-white border-b border-[#DDE5DF] px-4 py-3 sticky top-0 z-30 flex items-center justify-between shadow-xs w-full" suppressHydrationWarning>
-        <div className="flex items-center gap-2.5" suppressHydrationWarning>
+        <div className="flex items-center gap-3" suppressHydrationWarning>
           <div className="h-11 w-auto flex items-center shrink-0">
             <img
               src="/logo.png"
@@ -127,12 +127,12 @@ export default function AdminSidebar() {
               style={{ height: "44px", maxHeight: "44px", width: "auto" }}
             />
           </div>
-          <span className="font-extrabold text-sm text-[#17231B]">GGF Admin</span>
+          <span className="font-extrabold text-base text-[#17231B]">GGF Admin</span>
         </div>
         <button
           onClick={() => setMobileOpen(!mobileOpen)}
           suppressHydrationWarning
-          className="p-2 text-[#17231B] bg-[#F7F9F7] border border-[#DDE5DF] rounded-xl focus:outline-none"
+          className="p-2 text-[#17231B] bg-[#F7F9F7] border border-[#DDE5DF] rounded-xl focus:outline-none cursor-pointer"
         >
           <Menu className="w-5 h-5" />
         </button>
@@ -154,7 +154,7 @@ export default function AdminSidebar() {
       )}
 
       {/* Desktop Fixed Sidebar */}
-      <aside className="hidden lg:flex w-64 bg-white border-r border-[#DDE5DF] flex-col justify-between h-screen sticky top-0 shrink-0" suppressHydrationWarning>
+      <aside className="hidden lg:flex w-72 bg-white border-r border-[#DDE5DF] flex-col justify-between h-screen sticky top-0 shrink-0" suppressHydrationWarning>
         {sidebarContent}
       </aside>
     </div>
