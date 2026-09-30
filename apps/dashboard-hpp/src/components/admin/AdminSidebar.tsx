@@ -5,9 +5,12 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { UploadCloud, Eye, LayoutDashboard, Menu, X, Shield, ArrowLeft } from "lucide-react";
 
+import { getDashboardNavConfig } from "@dashboard/shared-ui";
+
 export default function AdminSidebar() {
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const { adminUrl } = getDashboardNavConfig();
 
   const navItems = [
     { label: "Upload Data Excel", href: "/admin/upload", icon: UploadCloud },
@@ -64,10 +67,18 @@ export default function AdminSidebar() {
 
       {/* Footer / Actions */}
       <div className="p-4 border-t border-[#DDE5DF] space-y-2">
+        <a
+          href={adminUrl}
+          onClick={() => setMobileOpen(false)}
+          className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold text-[#5F6B63] hover:bg-[#F7F9F7] hover:text-[#17231B] transition-all border border-[#DDE5DF]"
+        >
+          <Shield className="w-4 h-4 text-[#16823B]" />
+          <span>Admin Pusat (SSO)</span>
+        </a>
         <Link
           href="/"
           onClick={() => setMobileOpen(false)}
-          className="flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-xs font-extrabold text-[#16823B] bg-[#EAF3EC] hover:bg-[#16823B] hover:text-white transition-all shadow-2xs"
+          className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-extrabold text-[#16823B] bg-[#EAF3EC] hover:bg-[#16823B] hover:text-white transition-all shadow-2xs"
         >
           <ArrowLeft className="w-4 h-4" />
           <span>Kembali ke Dashboard HPP</span>

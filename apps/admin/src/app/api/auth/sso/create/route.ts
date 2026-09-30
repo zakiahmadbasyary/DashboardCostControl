@@ -4,7 +4,23 @@ import { ADMIN_AUTH_COOKIE } from "@/lib/auth";
 import { cookies } from "next/headers";
 import crypto from "crypto";
 
-const ALLOWED_DASHBOARD_CODES = ["wip", "dashboard_a", "dashboard_b", "dashboard_c"];
+const ALLOWED_DASHBOARD_CODES = [
+  "wip",
+  "hpp",
+  "capex",
+  "opex",
+  "irigasi",
+  "sulam",
+  "selesai_bongkar",
+  "harga_material",
+  "poll_pg1",
+  "dashboard_a",
+  "dashboard_b",
+  "dashboard_c",
+  "wip_pg1",
+  "hpp_pg1",
+  "hpp_m3",
+];
 
 export async function POST(request: Request) {
   try {
