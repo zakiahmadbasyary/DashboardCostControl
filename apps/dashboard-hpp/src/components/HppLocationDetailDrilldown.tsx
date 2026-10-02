@@ -98,21 +98,29 @@ export default function HppLocationDetailDrilldown({
   const rencanaForcing = formatDate(sampleAktivitas?.rencanaForcing);
   const rencanaPanen = formatDate(sampleAktivitas?.rencanaPanen);
 
-  // 2. Group cost aggregation per PRD Section 12
+  // Helper to extract numeric value from ZN code (e.g. "ZN01" -> 1)
+  const getZnNumber = (groupStr: string): number => {
+    const match = groupStr.match(/\d+/);
+    return match ? parseInt(match[0], 10) : 999;
+  };
+
+  // 2. Group cost aggregation per PRD Section 12 (Hanya berkode ZN, urut dari ZN 1)
   const groupCostMap: Record<string, { group: string; descGroup: string; totalBiaya: number; status: string; periode: number }> = {};
 
   lokasiItems.forEach((item) => {
     const grp = item.group;
-    if (!groupCostMap[grp]) {
-      groupCostMap[grp] = {
-        group: grp,
-        descGroup: item.descGroup || `Group ${grp}`,
-        totalBiaya: 0,
-        status: item.status,
-        periode: item.periode,
-      };
+    if (grp && grp.trim().toUpperCase().startsWith("ZN")) {
+      if (!groupCostMap[grp]) {
+        groupCostMap[grp] = {
+          group: grp,
+          descGroup: item.descGroup || `Group ${grp}`,
+          totalBiaya: 0,
+          status: item.status,
+          periode: item.periode,
+        };
+      }
+      groupCostMap[grp].totalBiaya += Number(item.biaya || 0);
     }
-    groupCostMap[grp].totalBiaya += Number(item.biaya || 0);
   });
 
   const groupCostList = Object.values(groupCostMap).map((gc) => {
@@ -130,6 +138,9 @@ export default function HppLocationDetailDrilldown({
       budgetVal,
     };
   });
+
+  // Sort group cost list ascending starting from ZN 1 (ZN01 -> ZN02 -> ZN03 ...)
+  groupCostList.sort((a, b) => getZnNumber(a.group) - getZnNumber(b.group));
 
   // Automatically select first group if none selected
   const activeGroup = selectedGroup || (groupCostList.length > 0 ? groupCostList[0].group : null);

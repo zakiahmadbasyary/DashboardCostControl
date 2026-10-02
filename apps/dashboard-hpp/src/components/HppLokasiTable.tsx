@@ -53,7 +53,7 @@ interface HppLokasiTableProps {
   onSelectLokasi: (lokasiCode: string) => void;
 }
 
-const ITEMS_PER_PAGE = 15;
+const ITEMS_PER_PAGE = 5;
 
 export default function HppLokasiTable({
   data,

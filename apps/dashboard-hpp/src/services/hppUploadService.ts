@@ -57,7 +57,17 @@ export const hppUploadService = {
         }),
       });
 
-      const result = await res.json();
+      const responseText = await res.text();
+      let result: any = {};
+
+      try {
+        result = JSON.parse(responseText);
+      } catch (e) {
+        result = {
+          status: "error",
+          message: `Gagal memproses respon server (${res.status} ${res.statusText}).`,
+        };
+      }
 
       if (res.ok && result.status === "success") {
         onProgress({
@@ -75,7 +85,7 @@ export const hppUploadService = {
           fileSize: file.size,
           status: "error",
           progressPercentage: 100,
-          message: result.message || "Gagal mengunggah data.",
+          message: result.message || `Gagal mengunggah data (${res.status}).`,
         });
         return { success: false, message: result.message || "Gagal mengunggah data." };
       }

@@ -33,22 +33,22 @@ interface HppTrendAndWilayahChartsProps {
   loading?: boolean;
 }
 
-// Curated GGF AgroMetric & Logo palette for Wilayah Bars (Biru -> Kuning -> Hijau)
+// Curated Green Gradient Palette for Wilayah Bars (Hijau Muda -> Hijau Tua)
 const WILAYAH_COLORS: Record<string, string> = {
-  W01: "#29A9D6",  // Biru Cyan
-  AW01: "#29A9D6",
-  W02: "#00A896",  // Biru Teal
-  AW02: "#00A896",
-  W03: "#FCE27A",  // Kuning Cerah
-  AW03: "#FCE27A",
-  W04: "#F9A91B",  // Kuning Emas
-  AW04: "#F9A91B",
-  W05: "#A8D437",  // Hijau Muda (Lime)
-  AW05: "#A8D437",
-  W06: "#16823B",  // Hijau Utama
-  AW06: "#16823B",
-  W07: "#0B6B32",  // Hijau Tua (Dark Green)
-  AW07: "#0B6B32",
+  W01: "#B5E397",  // Hijau Muda (Light Green)
+  AW01: "#B5E397",
+  W02: "#8CD16B",  // Hijau Cerah
+  AW02: "#8CD16B",
+  W03: "#60B647",  // Hijau Sedang-Muda
+  AW03: "#60B647",
+  W04: "#3B9C3D",  // Hijau Sedang
+  AW04: "#3B9C3D",
+  W05: "#16823B",  // Hijau Utama
+  AW05: "#16823B",
+  W06: "#0E632A",  // Hijau Tua
+  AW06: "#0E632A",
+  W07: "#06451B",  // Hijau Sangat Tua (Dark Green)
+  AW07: "#06451B",
 };
 
 export default function HppTrendAndWilayahCharts({
@@ -265,7 +265,8 @@ export default function HppTrendAndWilayahCharts({
                   const val = isRpKg ? item.valRpKg : item.valRpHa;
                   const heightPercent = maxWilayahVal > 0 ? (val / maxWilayahVal) * 100 : 0;
                   const isSelected = filters.wilayahFilter === item.wilayah;
-                  const barColor = WILAYAH_COLORS[item.wilayah] || WILAYAH_COLORS[`A${item.wilayah}`] || "#16823B";
+                  const defaultColor = WILAYAH_COLORS[item.wilayah] || WILAYAH_COLORS[`A${item.wilayah}`] || "#16823B";
+                  const barColor = isSelected ? "#FCE27A" : defaultColor;
 
                   return (
                     <div
@@ -276,7 +277,7 @@ export default function HppTrendAndWilayahCharts({
                     >
                       {/* Number value label on top of bar */}
                       <span
-                        className={`text-[10px] sm:text-[11px] font-bold mb-1 transition-all truncate ${isSelected ? "text-[#17231B] scale-110 underline font-black" : "text-[#17231B] opacity-90 group-hover:opacity-100"
+                        className={`text-[10px] sm:text-[11px] font-bold mb-1 transition-all truncate ${isSelected ? "text-[#B45309] scale-110 font-black" : "text-[#17231B] opacity-90 group-hover:opacity-100"
                           }`}
                       >
                         {formatValNumber(val)}
@@ -285,7 +286,7 @@ export default function HppTrendAndWilayahCharts({
                       {/* Bar Track Container */}
                       <div className="w-full bg-[#F2F6F3] rounded-t-md h-36 flex items-end overflow-hidden p-0.5">
                         <div
-                          className={`w-full rounded-t transition-all duration-300 hover:brightness-90 ${isSelected ? "ring-2 ring-[#17231B] shadow-md scale-[1.02]" : ""
+                          className={`w-full rounded-t transition-all duration-300 hover:brightness-95 ${isSelected ? "ring-2 ring-[#E5C959] shadow-md scale-[1.02]" : ""
                             }`}
                           style={{
                             height: `${Math.max(heightPercent, val > 0 ? 5 : 0)}%`,
@@ -309,7 +310,7 @@ export default function HppTrendAndWilayahCharts({
                     <span
                       key={item.wilayah}
                       onClick={() => onSelectWilayah?.(isSelected ? "all" : item.wilayah)}
-                      className={`flex-1 text-center text-xs font-extrabold cursor-pointer transition-colors ${isSelected ? "text-[#16823B] underline" : "text-[#17231B]"
+                      className={`flex-1 text-center text-xs font-extrabold cursor-pointer transition-colors ${isSelected ? "text-[#B45309] underline font-black" : "text-[#17231B]"
                         }`}
                     >
                       {item.wilayah}

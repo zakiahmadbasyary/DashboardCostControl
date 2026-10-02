@@ -82,11 +82,11 @@ export default function DashboardHPPPage() {
     setFilters((prev) => ({ ...prev, ...newFilters }));
   };
 
-  // Extract available Cost Group options with desc_group column data from lokasiHPP
+  // Extract available Cost Group options with desc_group column data from lokasiHPP (Hanya kode ZN, tanpa ZW)
   const availableGroupOptions = useMemo<CostGroupOption[]>(() => {
     const groupMap: Record<string, string> = {};
     rawLokasiList.forEach((item) => {
-      if (item.group && !groupMap[item.group]) {
+      if (item.group && item.group.trim().toUpperCase().startsWith("ZN") && !groupMap[item.group]) {
         groupMap[item.group] = item.descGroup || item.group;
       }
     });
@@ -261,7 +261,7 @@ export default function DashboardHPPPage() {
     filters.reportFilter,
   ]);
 
-  // Calculate Wilayah Data (W01–W07) per PRD Section 9
+  // Calculate Wilayah Data (W01–W07) per PRD Section 9 (Matches all filters EXCEPT wilayahFilter)
   const wilayahData = useMemo(() => {
     const regions = ["W01", "W02", "W03", "W04", "W05", "W06", "W07"];
     const regionStats: Record<string, { cost: number; qty: number; luas: number }> = {};
@@ -270,7 +270,20 @@ export default function DashboardHPPPage() {
       regionStats[r] = { cost: 0, qty: 0, luas: 0 };
     });
 
-    filteredLokasiList.forEach((item) => {
+    // Aggregate data matching all filters EXCEPT wilayahFilter so Wilayah chart always shows all regions
+    rawLokasiList.forEach((item) => {
+      if (filters.taksasiFilter === "100_only") {
+        const taksasiVal = Number(item.luasAktif) > 0 ? (Number(item.luasPanen) / Number(item.luasAktif)) * 100 : 0;
+        if (Math.round(taksasiVal) < 100) return;
+      }
+      if (filters.costGroupFilter !== "all" && item.group !== filters.costGroupFilter) return;
+      if (filters.statusFilter !== "all") {
+        if (filters.statusFilter === "NS") {
+          if (item.status !== "NSSC" && item.status !== "NSFC") return;
+        } else if (item.status !== filters.statusFilter) return;
+      }
+      if (item.periode !== filters.periodeFilter) return;
+
       const reg = (item.masterSheet?.wilayah || "W01").toUpperCase();
       const c = Number(item.biaya || 0);
       const q = Number(item.qtyPanen || 0);
@@ -296,7 +309,14 @@ export default function DashboardHPPPage() {
     });
 
     return list;
-  }, [filteredLokasiList, filters.reportFilter]);
+  }, [
+    rawLokasiList,
+    filters.taksasiFilter,
+    filters.costGroupFilter,
+    filters.statusFilter,
+    filters.periodeFilter,
+    filters.reportFilter,
+  ]);
 
   // Items for selected location drill-down
   const selectedLokasiItems = useMemo(() => {

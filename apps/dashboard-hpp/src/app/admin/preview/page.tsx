@@ -273,6 +273,9 @@ export default function AdminPreviewPage() {
                       <th className="py-2.5 px-3">Mulai Rawat</th>
                       <th className="py-2.5 px-3">Mulai Tanam</th>
                       <th className="py-2.5 px-3">Forcing Std</th>
+                      <th className="py-2.5 px-3">Rencana Forcing</th>
+                      <th className="py-2.5 px-3">Real Forcing</th>
+                      <th className="py-2.5 px-3">Rencana Panen</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-[#DDE5DF]/60 text-[#17231B]">
@@ -291,6 +294,9 @@ export default function AdminPreviewPage() {
                         <td className="py-2.5 px-3 font-mono text-[11px] text-[#5F6B63]">{item.tanggalMulaiRawat ? String(item.tanggalMulaiRawat) : "-"}</td>
                         <td className="py-2.5 px-3 font-mono text-[11px] text-[#5F6B63]">{item.tanggalMulaiTanam ? String(item.tanggalMulaiTanam) : "-"}</td>
                         <td className="py-2.5 px-3 font-mono text-[11px] text-[#5F6B63]">{item.tanggalForcingStandard ? String(item.tanggalForcingStandard) : "-"}</td>
+                        <td className="py-2.5 px-3 font-mono text-[11px] text-[#5F6B63]">{item.rencanaForcing ? String(item.rencanaForcing) : "-"}</td>
+                        <td className="py-2.5 px-3 font-mono text-[11px] text-[#5F6B63]">{item.realForcing ? String(item.realForcing) : "-"}</td>
+                        <td className="py-2.5 px-3 font-mono text-[11px] text-[#5F6B63]">{item.rencanaPanen ? String(item.rencanaPanen) : "-"}</td>
                       </tr>
                     ))}
                   </tbody>
