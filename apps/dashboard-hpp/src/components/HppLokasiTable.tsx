@@ -78,7 +78,7 @@ export default function HppLokasiTable({
   const formatNumber = (val: number, decimals = 2) => {
     return new Intl.NumberFormat("id-ID", {
       maximumFractionDigits: decimals,
-      minimumFractionDigits: decimals > 0 ? 1 : 0,
+      minimumFractionDigits: decimals,
     }).format(val || 0);
   };
 
@@ -121,7 +121,7 @@ export default function HppLokasiTable({
   // Calculate aggregated HPP Rp/Kg and Rp/Ha for each location
   const aggregatedList = Object.values(lokasiMap).map((loc) => {
     const taksasi = loc.luasAktif > 0 ? (loc.luasPanen / loc.luasAktif) * 100 : 0;
-    const yieldVal = loc.luasPanen > 0 ? loc.qtyPanen / loc.luasPanen : 0;
+    const yieldVal = loc.luasPanen > 0 ? (loc.qtyPanen / loc.luasPanen) / 1000 : 0;
     const rpKg = loc.qtyPanen > 0 ? loc.totalBiaya / loc.qtyPanen : 0;
     const rpHa = loc.luasPanen > 0 ? loc.totalBiaya / loc.luasPanen : 0;
     return {
@@ -232,7 +232,7 @@ export default function HppLokasiTable({
             <tr className="bg-[#F0F4F1] text-[#455248] uppercase tracking-wider font-extrabold border-b border-[#E0E8E2]">
               <th className="py-3 px-4">Lokasi</th>
               <th className="py-3 px-4 text-center">% Taksasi</th>
-              <th className="py-3 px-4 text-right">Yield</th>
+              <th className="py-3 px-4 text-right">Yield (Ton/Ha)</th>
               <th className="py-3 px-4 text-right">{isRpKg ? "HPP (Rp/Kg)" : "HPP (Rp/Ha)"}</th>
               <th className="py-3 px-4 text-center">STATUS SELECT</th>
             </tr>
@@ -294,7 +294,7 @@ export default function HppLokasiTable({
 
                     {/* 3. Yield */}
                     <td className="py-3.5 px-4 text-right font-bold text-[#17231B]">
-                      {formatNumber(loc.yieldVal, 1)}
+                      {formatNumber(loc.yieldVal, 2)}
                     </td>
 
                     {/* 4. HPP (No Rp prefix) */}
