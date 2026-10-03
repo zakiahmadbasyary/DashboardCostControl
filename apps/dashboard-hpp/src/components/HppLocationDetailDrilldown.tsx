@@ -104,12 +104,22 @@ export default function HppLocationDetailDrilldown({
     return match ? parseInt(match[0], 10) : 999;
   };
 
-  // 2. Group cost aggregation per PRD Section 12 (Hanya berkode ZN, urut dari ZN 1 s/d akhir)
+  const status = validItem?.status || "NSFC";
+  const periode = validItem?.periode || 1;
+
+  // 2. Direct Cost (ZN) & Indirect Cost (ZW) totals and budget lookups
+  let totalBiayaDirect = 0;
+  let totalBiayaIndirect = 0;
+
   const groupCostMap: Record<string, { group: string; descGroup: string; totalBiaya: number; status: string; periode: number }> = {};
 
   lokasiItems.forEach((item) => {
     const grp = item.group;
+    const b = Number(item.biaya || 0);
+
     if (grp && grp.trim().toUpperCase().startsWith("ZN")) {
+      totalBiayaDirect += b;
+
       if (!groupCostMap[grp]) {
         groupCostMap[grp] = {
           group: grp,
@@ -119,9 +129,28 @@ export default function HppLocationDetailDrilldown({
           periode: item.periode,
         };
       }
-      groupCostMap[grp].totalBiaya += Number(item.biaya || 0);
+      groupCostMap[grp].totalBiaya += b;
+    } else if (grp && grp.trim().toUpperCase().startsWith("ZW")) {
+      totalBiayaIndirect += b;
     }
   });
+
+  const costPerHaDirect = luasPanen > 0 ? totalBiayaDirect / luasPanen : 0;
+  const costPerHaIndirect = luasPanen > 0 ? totalBiayaIndirect / luasPanen : 0;
+
+  // Budget Lookups for Direct Cost (ZN{status}{periode}) & Indirect Cost (ZW{status}{periode})
+  const directBudgetId = `ZN${status}${periode}`;
+  const indirectBudgetId = `ZW${status}${periode}`;
+
+  const matchedDirectBudget = budgetItems.find(
+    (b) => b.idBudget === directBudgetId || (b.group === "ZN" && b.status === status && b.periode === periode)
+  );
+  const budgetValDirect = matchedDirectBudget ? Number(matchedDirectBudget.budget) : null;
+
+  const matchedIndirectBudget = budgetItems.find(
+    (b) => b.idBudget === indirectBudgetId || (b.group === "ZW" && b.status === status && b.periode === periode)
+  );
+  const budgetValIndirect = matchedIndirectBudget ? Number(matchedIndirectBudget.budget) : null;
 
   const groupCostList = Object.values(groupCostMap).map((gc) => {
     const costPerHa = luasPanen > 0 ? gc.totalBiaya / luasPanen : 0;
@@ -142,12 +171,21 @@ export default function HppLocationDetailDrilldown({
   // Sort group cost list ascending starting from ZN 1 (ZN01 -> ZN02 -> ZN03 ... dst)
   groupCostList.sort((a, b) => getZnNumber(a.group) - getZnNumber(b.group));
 
-  // Automatically select first group if none selected
-  const activeGroup = selectedGroup || (groupCostList.length > 0 ? groupCostList[0].group : null);
+  // Automatically select first group if none selected (default to "direct_cost" or first ZN group)
+  const activeGroup = selectedGroup || "direct_cost";
 
   // 3. Filtered & Sorted Aktivitas for active group descending by Cost/Ha (Largest to Smallest)
   const filteredAktivitas = locAktivitas
-    .filter((a) => a.group === activeGroup)
+    .filter((a) => {
+      if (!activeGroup || activeGroup === "all") return true;
+      if (activeGroup === "direct_cost" || activeGroup === "ZN") {
+        return a.group && a.group.trim().toUpperCase().startsWith("ZN");
+      }
+      if (activeGroup === "indirect_cost" || activeGroup === "ZW") {
+        return a.group && a.group.trim().toUpperCase().startsWith("ZW");
+      }
+      return a.group === activeGroup;
+    })
     .sort((a, b) => {
       const costPerHaA = luasPanen > 0 ? Number(a.biaya || 0) / luasPanen : 0;
       const costPerHaB = luasPanen > 0 ? Number(b.biaya || 0) / luasPanen : 0;
@@ -268,10 +306,50 @@ export default function HppLocationDetailDrilldown({
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-[#EAEFEB]">
+                  {/* 1. Direct Cost Summary Row */}
+                  <tr
+                    onClick={() => setSelectedGroup("direct_cost")}
+                    className={`cursor-pointer transition-all border-b-2 border-b-[#CBE0D1] ${
+                      activeGroup === "direct_cost" || activeGroup === "ZN"
+                        ? "bg-[#EAF3EC] font-black border-l-4 border-l-[#16823B]"
+                        : "bg-[#F4F9F5] hover:bg-[#EAF3EC]/60 font-bold"
+                    }`}
+                  >
+                    <td className="py-3 px-3">
+                      <div className="flex items-center gap-1.5">
+                        <span className="px-2 py-0.5 rounded bg-[#16823B] text-white font-black text-[10px] shadow-2xs shrink-0">
+                          ZN (Direct)
+                        </span>
+                        <span className="font-extrabold text-[#16823B] uppercase tracking-wide">
+                          Direct Cost
+                        </span>
+                      </div>
+                    </td>
+                    <td className="py-3 px-3 text-right font-black text-[#16823B]">
+                      {formatNumber(costPerHaDirect, 0)}
+                    </td>
+                    <td className="py-3 px-3 text-right font-black text-[#17231B]">
+                      {budgetValDirect !== null ? formatNumber(budgetValDirect, 0) : "-"}
+                    </td>
+                    <td className="py-3 px-3 text-center">
+                      {activeGroup === "direct_cost" || activeGroup === "ZN" ? (
+                        <button className="px-3 py-0.5 rounded-full bg-[#0B6B32] text-white text-xs font-bold shadow-xs inline-flex items-center gap-1">
+                          <CheckCircle2 className="w-3.5 h-3.5 text-white" />
+                          <span>Selected</span>
+                        </button>
+                      ) : (
+                        <button className="text-xs text-[#16823B] hover:underline font-bold transition-colors cursor-pointer">
+                          Klik pilih
+                        </button>
+                      )}
+                    </td>
+                  </tr>
+
+                  {/* 2. Individual ZN Group Rows */}
                   {groupCostList.length === 0 ? (
                     <tr>
-                      <td colSpan={4} className="py-8 text-center text-[#8C9890] font-medium">
-                        Belum ada Group Cost untuk lokasi ini.
+                      <td colSpan={4} className="py-4 text-center text-[#8C9890] font-medium italic">
+                        Belum ada Group Cost ZN spesifik untuk lokasi ini.
                       </td>
                     </tr>
                   ) : (
@@ -290,9 +368,9 @@ export default function HppLocationDetailDrilldown({
                           }`}
                         >
                           {/* Group Cost */}
-                          <td className="py-3 px-3">
+                          <td className="py-2.5 px-3">
                             <div className="flex items-center gap-1.5">
-                              <span className="px-1.5 py-0.5 rounded bg-amber-100 text-amber-900 font-black text-[10px] border border-amber-200 shrink-0">
+                              <span className="px-1.5 py-0.5 rounded bg-[#EAF3EC] text-[#0B6B32] font-black text-[10px] border border-[#CBE0D1] shrink-0">
                                 {gc.group}
                               </span>
                               <span className="font-extrabold text-[#17231B] truncate max-w-[140px]" title={gc.descGroup}>
@@ -302,12 +380,12 @@ export default function HppLocationDetailDrilldown({
                           </td>
 
                           {/* Cost / Ha (No Rp prefix) */}
-                          <td className="py-3 px-3 text-right font-extrabold text-[#16823B]">
+                          <td className="py-2.5 px-3 text-right font-extrabold text-[#16823B]">
                             {formatNumber(gc.costPerHa, 0)}
                           </td>
 
                           {/* Budget (No Rp prefix) */}
-                          <td className="py-3 px-3 text-right font-bold">
+                          <td className="py-2.5 px-3 text-right font-bold">
                             {hasBudget ? (
                               <span className="text-[#17231B]">{formatNumber(gc.budgetVal, 0)}</span>
                             ) : (
@@ -316,14 +394,14 @@ export default function HppLocationDetailDrilldown({
                           </td>
 
                           {/* Status Select Column */}
-                          <td className="py-3 px-3 text-center">
+                          <td className="py-2.5 px-3 text-center">
                             {isGroupSelected ? (
                               <button
                                 onClick={(e) => {
                                   e.stopPropagation();
                                   setSelectedGroup(gc.group);
                                 }}
-                                className="px-3.5 py-1 rounded-full bg-[#0B6B32] text-white text-xs font-bold shadow-xs inline-flex items-center gap-1.5 hover:bg-[#074f24] transition-all"
+                                className="px-3 py-0.5 rounded-full bg-[#0B6B32] text-white text-xs font-bold shadow-xs inline-flex items-center gap-1 hover:bg-[#074f24] transition-all"
                               >
                                 <CheckCircle2 className="w-3.5 h-3.5 text-white" />
                                 <span>Selected</span>
@@ -344,6 +422,45 @@ export default function HppLocationDetailDrilldown({
                       );
                     })
                   )}
+
+                  {/* 3. Indirect Cost Summary Row */}
+                  <tr
+                    onClick={() => setSelectedGroup("indirect_cost")}
+                    className={`cursor-pointer transition-all border-t-2 border-t-[#FDE68A] ${
+                      activeGroup === "indirect_cost" || activeGroup === "ZW"
+                        ? "bg-[#FEF3C7] font-black border-l-4 border-l-amber-600"
+                        : "bg-[#FFFBEB] hover:bg-[#FEF3C7]/60 font-bold"
+                    }`}
+                  >
+                    <td className="py-3 px-3">
+                      <div className="flex items-center gap-1.5">
+                        <span className="px-2 py-0.5 rounded bg-amber-600 text-white font-black text-[10px] shadow-2xs shrink-0">
+                          ZW (Indirect)
+                        </span>
+                        <span className="font-extrabold text-amber-900 uppercase tracking-wide">
+                          Indirect Cost
+                        </span>
+                      </div>
+                    </td>
+                    <td className="py-3 px-3 text-right font-black text-amber-900">
+                      {formatNumber(costPerHaIndirect, 0)}
+                    </td>
+                    <td className="py-3 px-3 text-right font-black text-[#17231B]">
+                      {budgetValIndirect !== null ? formatNumber(budgetValIndirect, 0) : "-"}
+                    </td>
+                    <td className="py-3 px-3 text-center">
+                      {activeGroup === "indirect_cost" || activeGroup === "ZW" ? (
+                        <button className="px-3 py-0.5 rounded-full bg-amber-600 text-white text-xs font-bold shadow-xs inline-flex items-center gap-1">
+                          <CheckCircle2 className="w-3.5 h-3.5 text-white" />
+                          <span>Selected</span>
+                        </button>
+                      ) : (
+                        <button className="text-xs text-amber-800 hover:underline font-bold transition-colors cursor-pointer">
+                          Klik pilih
+                        </button>
+                      )}
+                    </td>
+                  </tr>
                 </tbody>
               </table>
             </div>
