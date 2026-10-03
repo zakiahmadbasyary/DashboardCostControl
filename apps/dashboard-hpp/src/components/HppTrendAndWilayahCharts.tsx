@@ -79,10 +79,10 @@ export default function HppTrendAndWilayahCharts({
       }).format(Math.round(val));
     } else {
       const valJuta = val / 1_000_000;
-      return `${new Intl.NumberFormat("id-ID", {
+      return new Intl.NumberFormat("id-ID", {
         maximumFractionDigits: 1,
         minimumFractionDigits: 0,
-      }).format(valJuta)}M`;
+      }).format(valJuta);
     }
   };
 
