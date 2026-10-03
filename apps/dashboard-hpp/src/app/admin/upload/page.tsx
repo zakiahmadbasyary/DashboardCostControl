@@ -96,25 +96,25 @@ export default function HppAdminUploadPage() {
       title: "MasterSheet",
       step: 1,
       desc: "Upload data master lokasi, wilayah, luas, kode bibit, jenis, dan kelas bibit.",
-      sampleFile: "mastersheet_hpp.xlsx",
+      sampleFile: "mastersheet_template.xlsx",
     },
     {
       title: "Data Budget",
       step: 2,
       desc: "Upload acuan budget per periode, group cost, dan status lokasi HPP.",
-      sampleFile: "databudget_hpp.xlsx",
+      sampleFile: "data_budget_template.xlsx",
     },
     {
       title: "Data Lokasi HPP",
       step: 3,
       desc: "Upload detail lokasi HPP, qty panen, luas panen, luas aktif, dan total biaya.",
-      sampleFile: "datalokasi_hpp.xlsx",
+      sampleFile: "data_lokasi_template.xlsx",
     },
     {
       title: "Data Aktivitas HPP",
       step: 4,
       desc: "Upload rincian pekerjaan aktivitas lapangan, tanggal, biaya, dan hasil HPP.",
-      sampleFile: "dataaktivitas_hpp.xlsx",
+      sampleFile: "data_aktivitas_template.xlsx",
     },
   ];
 
