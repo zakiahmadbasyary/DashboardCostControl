@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   FileText,
   Layers,
@@ -8,6 +8,7 @@ import {
   Calendar,
   Sprout,
   ChevronRight,
+  ChevronLeft,
   CheckCircle2,
 } from "lucide-react";
 import { LokasiHppItem } from "@/components/HppLokasiTable";
@@ -52,6 +53,12 @@ export default function HppLocationDetailDrilldown({
   reportFilter,
 }: HppLocationDetailDrilldownProps) {
   const [selectedGroup, setSelectedGroup] = useState<string | null>(null);
+  const [aktCurrentPage, setAktCurrentPage] = useState<number>(1);
+  const AKT_ITEMS_PER_PAGE = 25;
+
+  useEffect(() => {
+    setAktCurrentPage(1);
+  }, [selectedGroup, lokasiCode]);
 
   const formatCurrency = (val: number | null | undefined) => {
     if (val === null || val === undefined) return "-";
@@ -191,6 +198,10 @@ export default function HppLocationDetailDrilldown({
       const costPerHaB = luasPanen > 0 ? Number(b.biaya || 0) / luasPanen : 0;
       return costPerHaB - costPerHaA;
     });
+
+  const totalAktPages = Math.ceil(filteredAktivitas.length / AKT_ITEMS_PER_PAGE) || 1;
+  const startAktIndex = (aktCurrentPage - 1) * AKT_ITEMS_PER_PAGE;
+  const paginatedAktivitas = filteredAktivitas.slice(startAktIndex, startAktIndex + AKT_ITEMS_PER_PAGE);
 
   return (
     <div className="space-y-6" suppressHydrationWarning>
@@ -514,7 +525,7 @@ export default function HppLocationDetailDrilldown({
                       </td>
                     </tr>
                   ) : (
-                    filteredAktivitas.map((act) => {
+                    paginatedAktivitas.map((act) => {
                       const costPerHa = luasPanen > 0 ? Number(act.biaya || 0) / luasPanen : 0;
 
                       return (
@@ -537,9 +548,39 @@ export default function HppLocationDetailDrilldown({
             </div>
           </div>
 
-          {/* Footer info */}
-          <div className="p-3 bg-[#F8FAF9] border-t border-[#EAEFEB] text-xs text-[#5F6B63] flex justify-between items-center">
-            <span>Menampilkan {filteredAktivitas.length} aktivitas pekerjaan</span>
+          {/* Footer info & Pagination */}
+          <div className="p-3 bg-[#F8FAF9] border-t border-[#EAEFEB] text-xs text-[#5F6B63] flex flex-col sm:flex-row justify-between items-center gap-2">
+            <span>
+              Menampilkan {filteredAktivitas.length === 0 ? 0 : startAktIndex + 1} - {Math.min(startAktIndex + AKT_ITEMS_PER_PAGE, filteredAktivitas.length)} dari {filteredAktivitas.length} aktivitas
+            </span>
+
+            {totalAktPages > 1 && (
+              <div className="flex items-center gap-1.5">
+                <button
+                  onClick={() => setAktCurrentPage((prev) => Math.max(prev - 1, 1))}
+                  disabled={aktCurrentPage === 1}
+                  className="px-2.5 py-1 rounded-lg border border-[#DDE5DF] bg-white text-[#455248] hover:bg-[#EAF3EC] hover:text-[#0B6B32] disabled:opacity-40 disabled:hover:bg-white disabled:hover:text-[#455248] cursor-pointer disabled:cursor-not-allowed transition-all font-semibold flex items-center gap-1"
+                  title="Halaman Sebelumnya"
+                >
+                  <ChevronLeft className="w-3.5 h-3.5" />
+                  <span>Prev</span>
+                </button>
+
+                <span className="px-2.5 py-1 text-xs font-bold text-[#17231B] bg-white rounded-lg border border-[#E0E8E2]">
+                  {aktCurrentPage} / {totalAktPages}
+                </span>
+
+                <button
+                  onClick={() => setAktCurrentPage((prev) => Math.min(prev + 1, totalAktPages))}
+                  disabled={aktCurrentPage === totalAktPages}
+                  className="px-2.5 py-1 rounded-lg border border-[#DDE5DF] bg-white text-[#455248] hover:bg-[#EAF3EC] hover:text-[#0B6B32] disabled:opacity-40 disabled:hover:bg-white disabled:hover:text-[#455248] cursor-pointer disabled:cursor-not-allowed transition-all font-semibold flex items-center gap-1"
+                  title="Halaman Selanjutnya"
+                >
+                  <span>Next</span>
+                  <ChevronRight className="w-3.5 h-3.5" />
+                </button>
+              </div>
+            )}
           </div>
         </div>
 
