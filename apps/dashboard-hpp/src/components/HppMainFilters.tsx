@@ -132,6 +132,8 @@ export default function HppMainFilters({
               className="w-full bg-[#F7F9F7] border border-[#DDE5DF] rounded-lg px-2.5 py-1.5 text-xs text-[#17231B] focus:outline-none focus:border-[#16823B] transition-colors cursor-pointer truncate font-medium"
             >
               <option value="all">Semua Group Cost</option>
+              <option value="direct_cost">Direct Cost (Kode ZN)</option>
+              <option value="indirect_cost">Indirect Cost (Kode ZW)</option>
               {availableGroupOptions.map((opt) => (
                 <option key={opt.group} value={opt.group}>
                   {opt.group} - {opt.descGroup}
@@ -297,12 +299,14 @@ export default function HppMainFilters({
                   onChange={(e) => handleChange("costGroupFilter", e.target.value)}
                   className="w-full bg-[#F7F9F7] border border-[#DDE5DF] rounded-xl px-3 py-2.5 text-xs text-[#17231B] focus:outline-none focus:border-[#16823B] transition-colors cursor-pointer"
                 >
-                  <option value="all">Semua Group Cost</option>
-                  {availableGroupOptions.map((opt) => (
-                    <option key={opt.group} value={opt.group}>
-                      {opt.group} - {opt.descGroup}
-                    </option>
-                  ))}
+              <option value="all">Semua Group Cost</option>
+              <option value="direct_cost">Direct Cost (Kode ZN)</option>
+              <option value="indirect_cost">Indirect Cost (Kode ZW)</option>
+              {availableGroupOptions.map((opt) => (
+                <option key={opt.group} value={opt.group}>
+                  {opt.group} - {opt.descGroup}
+                </option>
+              ))}
                 </select>
               </div>
 

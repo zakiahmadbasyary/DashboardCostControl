@@ -82,15 +82,15 @@ export default function HppLocationDetailDrilldown({
   };
 
   // 1. Compute Master Location Metrics from lokasiItems
-  const firstItem = lokasiItems[0];
-  const masterSheet = firstItem?.masterSheet;
+  const validItem = lokasiItems.find((i) => Number(i.luasPanen || 0) > 0 || Number(i.luasAktif || 0) > 0) || lokasiItems[0];
+  const masterSheet = validItem?.masterSheet;
   const wilayah = masterSheet?.wilayah || "W01";
   const jenisBibit = masterSheet?.jenisBibit || "-";
   const kelasBibit = masterSheet?.kelasBibit || "-";
 
-  // Use max or first values for active and harvested area
-  const luasAktif = Number(firstItem?.luasAktif || 0);
-  const luasPanen = Number(firstItem?.luasPanen || 0);
+  // Use active and harvested area for the selected period
+  const luasAktif = Number(validItem?.luasAktif || 0);
+  const luasPanen = Number(validItem?.luasPanen || 0);
 
   // Find forcing & panen dates from location's activities if available
   const locAktivitas = aktivitasItems.filter((a) => a.lokasi === lokasiCode);
@@ -98,13 +98,13 @@ export default function HppLocationDetailDrilldown({
   const rencanaForcing = formatDate(sampleAktivitas?.rencanaForcing);
   const rencanaPanen = formatDate(sampleAktivitas?.rencanaPanen);
 
-  // Helper to extract numeric value from ZN code (e.g. "ZN01" -> 1)
+  // Helper to extract numeric value from ZN code (e.g. "ZN01" -> 1, "ZN10" -> 10)
   const getZnNumber = (groupStr: string): number => {
     const match = groupStr.match(/\d+/);
     return match ? parseInt(match[0], 10) : 999;
   };
 
-  // 2. Group cost aggregation per PRD Section 12 (Hanya berkode ZN, urut dari ZN 1)
+  // 2. Group cost aggregation per PRD Section 12 (Hanya berkode ZN, urut dari ZN 1 s/d akhir)
   const groupCostMap: Record<string, { group: string; descGroup: string; totalBiaya: number; status: string; periode: number }> = {};
 
   lokasiItems.forEach((item) => {
@@ -139,7 +139,7 @@ export default function HppLocationDetailDrilldown({
     };
   });
 
-  // Sort group cost list ascending starting from ZN 1 (ZN01 -> ZN02 -> ZN03 ...)
+  // Sort group cost list ascending starting from ZN 1 (ZN01 -> ZN02 -> ZN03 ... dst)
   groupCostList.sort((a, b) => getZnNumber(a.group) - getZnNumber(b.group));
 
   // Automatically select first group if none selected

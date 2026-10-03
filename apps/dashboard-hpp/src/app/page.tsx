@@ -82,11 +82,11 @@ export default function DashboardHPPPage() {
     setFilters((prev) => ({ ...prev, ...newFilters }));
   };
 
-  // Extract available Cost Group options with desc_group column data from lokasiHPP (Hanya kode ZN, tanpa ZW)
+  // Extract available Cost Group options with desc_group column data from lokasiHPP
   const availableGroupOptions = useMemo<CostGroupOption[]>(() => {
     const groupMap: Record<string, string> = {};
     rawLokasiList.forEach((item) => {
-      if (item.group && item.group.trim().toUpperCase().startsWith("ZN") && !groupMap[item.group]) {
+      if (item.group && !groupMap[item.group]) {
         groupMap[item.group] = item.descGroup || item.group;
       }
     });
@@ -96,7 +96,12 @@ export default function DashboardHPPPage() {
         group,
         descGroup,
       }))
-      .sort((a, b) => a.group.localeCompare(b.group));
+      .sort((a, b) => {
+        const aIsZw = a.group.toUpperCase().startsWith("ZW");
+        const bIsZw = b.group.toUpperCase().startsWith("ZW");
+        if (aIsZw !== bIsZw) return aIsZw ? 1 : -1;
+        return a.group.localeCompare(b.group);
+      });
   }, [rawLokasiList]);
 
   // Apply Main Filters to rawLokasiList (PRD Section 6 & Section 22)
@@ -108,9 +113,15 @@ export default function DashboardHPPPage() {
         if (Math.round(taksasiVal) < 100) return false;
       }
 
-      // 2. Cost Group Filter
-      if (filters.costGroupFilter !== "all" && item.group !== filters.costGroupFilter) {
-        return false;
+      // 2. Cost Group Filter (Support direct_cost for ZN and indirect_cost for ZW)
+      if (filters.costGroupFilter !== "all") {
+        if (filters.costGroupFilter === "direct_cost") {
+          if (!item.group || !item.group.toUpperCase().startsWith("ZN")) return false;
+        } else if (filters.costGroupFilter === "indirect_cost") {
+          if (!item.group || !item.group.toUpperCase().startsWith("ZW")) return false;
+        } else if (item.group !== filters.costGroupFilter) {
+          return false;
+        }
       }
 
       // 3. Status Filter (NSSC, NSFC, NS = NSSC || NSFC)
@@ -135,9 +146,9 @@ export default function DashboardHPPPage() {
         }
       }
 
-        return true;
-      });
-    }, [rawLokasiList, filters]);
+      return true;
+    });
+  }, [rawLokasiList, filters]);
 
   // Aggregate and sort location codes descending by HPP (rp_kg / rp_ha) or total cost: Largest to Smallest
   const sortedLokasiCodes = useMemo(() => {
@@ -191,13 +202,21 @@ export default function DashboardHPPPage() {
     let ytdQty = 0;
     let ytdLuas = 0;
 
-    // Aggregate monthly data matching all filters EXCEPT periodeFilter so trend always shows all 12 months
+    // Group rawLokasiList by unique (lokasi, periode) to avoid duplicating qty & area per ZN group row
+    const locMap: Record<string, { cost: number; qty: number; luas: number; periode: number }> = {};
+
     rawLokasiList.forEach((item) => {
       if (filters.taksasiFilter === "100_only") {
         const taksasiVal = Number(item.luasAktif) > 0 ? (Number(item.luasPanen) / Number(item.luasAktif)) * 100 : 0;
         if (Math.round(taksasiVal) < 100) return;
       }
-      if (filters.costGroupFilter !== "all" && item.group !== filters.costGroupFilter) return;
+      if (filters.costGroupFilter !== "all") {
+        if (filters.costGroupFilter === "direct_cost") {
+          if (!item.group || !item.group.toUpperCase().startsWith("ZN")) return;
+        } else if (filters.costGroupFilter === "indirect_cost") {
+          if (!item.group || !item.group.toUpperCase().startsWith("ZW")) return;
+        } else if (item.group !== filters.costGroupFilter) return;
+      }
       if (filters.statusFilter !== "all") {
         if (filters.statusFilter === "NS") {
           if (item.status !== "NSSC" && item.status !== "NSFC") return;
@@ -208,20 +227,28 @@ export default function DashboardHPPPage() {
         if (itemWilayah.toUpperCase() !== filters.wilayahFilter.toUpperCase()) return;
       }
 
-      const p = item.periode;
-      const c = Number(item.biaya || 0);
-      const q = Number(item.qtyPanen || 0);
-      const l = Number(item.luasPanen || 0);
-
-      if (monthStats[p]) {
-        monthStats[p].cost += c;
-        monthStats[p].qty += q;
-        monthStats[p].luas += l;
+      const key = `${item.lokasi}_P${item.periode}`;
+      if (!locMap[key]) {
+        locMap[key] = {
+          cost: 0,
+          qty: Number(item.qtyPanen || 0),
+          luas: Number(item.luasPanen || 0),
+          periode: item.periode,
+        };
       }
+      locMap[key].cost += Number(item.biaya || 0);
+    });
 
-      ytdCost += c;
-      ytdQty += q;
-      ytdLuas += l;
+    Object.values(locMap).forEach((loc) => {
+      const p = loc.periode;
+      if (monthStats[p]) {
+        monthStats[p].cost += loc.cost;
+        monthStats[p].qty += loc.qty;
+        monthStats[p].luas += loc.luas;
+      }
+      ytdCost += loc.cost;
+      ytdQty += loc.qty;
+      ytdLuas += loc.luas;
     });
 
     const trendPoints: TrendPoint[] = Object.keys(monthStats).map((monthStr) => {
@@ -270,29 +297,46 @@ export default function DashboardHPPPage() {
       regionStats[r] = { cost: 0, qty: 0, luas: 0 };
     });
 
-    // Aggregate data matching all filters EXCEPT wilayahFilter so Wilayah chart always shows all regions
+    const locMap: Record<string, { cost: number; qty: number; luas: number; wilayah: string }> = {};
+
+    // Aggregate data matching all filters EXCEPT wilayahFilter for selected month
     rawLokasiList.forEach((item) => {
+      if (item.periode !== filters.periodeFilter) return;
       if (filters.taksasiFilter === "100_only") {
         const taksasiVal = Number(item.luasAktif) > 0 ? (Number(item.luasPanen) / Number(item.luasAktif)) * 100 : 0;
         if (Math.round(taksasiVal) < 100) return;
       }
-      if (filters.costGroupFilter !== "all" && item.group !== filters.costGroupFilter) return;
+      if (filters.costGroupFilter !== "all") {
+        if (filters.costGroupFilter === "direct_cost") {
+          if (!item.group || !item.group.toUpperCase().startsWith("ZN")) return;
+        } else if (filters.costGroupFilter === "indirect_cost") {
+          if (!item.group || !item.group.toUpperCase().startsWith("ZW")) return;
+        } else if (item.group !== filters.costGroupFilter) return;
+      }
       if (filters.statusFilter !== "all") {
         if (filters.statusFilter === "NS") {
           if (item.status !== "NSSC" && item.status !== "NSFC") return;
         } else if (item.status !== filters.statusFilter) return;
       }
-      if (item.periode !== filters.periodeFilter) return;
 
-      const reg = (item.masterSheet?.wilayah || "W01").toUpperCase();
-      const c = Number(item.biaya || 0);
-      const q = Number(item.qtyPanen || 0);
-      const l = Number(item.luasPanen || 0);
+      const key = `${item.lokasi}_P${item.periode}`;
+      if (!locMap[key]) {
+        locMap[key] = {
+          cost: 0,
+          qty: Number(item.qtyPanen || 0),
+          luas: Number(item.luasPanen || 0),
+          wilayah: (item.masterSheet?.wilayah || "W01").toUpperCase(),
+        };
+      }
+      locMap[key].cost += Number(item.biaya || 0);
+    });
 
+    Object.values(locMap).forEach((loc) => {
+      const reg = loc.wilayah;
       if (regionStats[reg]) {
-        regionStats[reg].cost += c;
-        regionStats[reg].qty += q;
-        regionStats[reg].luas += l;
+        regionStats[reg].cost += loc.cost;
+        regionStats[reg].qty += loc.qty;
+        regionStats[reg].luas += loc.luas;
       }
     });
 
@@ -318,11 +362,34 @@ export default function DashboardHPPPage() {
     filters.reportFilter,
   ]);
 
-  // Items for selected location drill-down
+  // Items for selected location drill-down (filtered by selected location and active period/filters)
   const selectedLokasiItems = useMemo(() => {
     if (!selectedLokasiCode) return [];
-    return rawLokasiList.filter((item) => item.lokasi === selectedLokasiCode);
-  }, [rawLokasiList, selectedLokasiCode]);
+    return rawLokasiList.filter((item) => {
+      if (item.lokasi !== selectedLokasiCode) return false;
+      if (item.periode !== filters.periodeFilter) return false;
+      if (filters.statusFilter !== "all") {
+        if (filters.statusFilter === "NS") {
+          if (item.status !== "NSSC" && item.status !== "NSFC") return false;
+        } else if (item.status !== filters.statusFilter) {
+          return false;
+        }
+      }
+      if (filters.wilayahFilter !== "all") {
+        const itemWilayah = item.masterSheet?.wilayah || "";
+        if (itemWilayah.toUpperCase() !== filters.wilayahFilter.toUpperCase()) {
+          return false;
+        }
+      }
+      return true;
+    });
+  }, [
+    rawLokasiList,
+    selectedLokasiCode,
+    filters.periodeFilter,
+    filters.statusFilter,
+    filters.wilayahFilter,
+  ]);
 
   if (!mounted) {
     return (

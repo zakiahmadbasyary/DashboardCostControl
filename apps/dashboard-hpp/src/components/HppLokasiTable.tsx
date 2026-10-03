@@ -97,12 +97,22 @@ export default function HppLokasiTable({
         luasAktif: Number(item.luasAktif || 0),
         qtyPanen: Number(item.qtyPanen || 0),
         totalBiaya: 0,
-        taksasi: Number(item.luasAktif) > 0 ? (Number(item.luasPanen) / Number(item.luasAktif)) * 100 : 0,
-        yieldVal: Number(item.luasPanen) > 0 ? Number(item.qtyPanen) / Number(item.luasPanen) : 0,
+        taksasi: 0,
+        yieldVal: 0,
         rpKg: 0,
         rpHa: 0,
         rawItems: [],
       };
+    } else {
+      if (lokasiMap[code].luasPanen === 0 && Number(item.luasPanen || 0) > 0) {
+        lokasiMap[code].luasPanen = Number(item.luasPanen);
+      }
+      if (lokasiMap[code].luasAktif === 0 && Number(item.luasAktif || 0) > 0) {
+        lokasiMap[code].luasAktif = Number(item.luasAktif);
+      }
+      if (lokasiMap[code].qtyPanen === 0 && Number(item.qtyPanen || 0) > 0) {
+        lokasiMap[code].qtyPanen = Number(item.qtyPanen);
+      }
     }
     lokasiMap[code].totalBiaya += Number(item.biaya || 0);
     lokasiMap[code].rawItems.push(item);
@@ -110,10 +120,14 @@ export default function HppLokasiTable({
 
   // Calculate aggregated HPP Rp/Kg and Rp/Ha for each location
   const aggregatedList = Object.values(lokasiMap).map((loc) => {
+    const taksasi = loc.luasAktif > 0 ? (loc.luasPanen / loc.luasAktif) * 100 : 0;
+    const yieldVal = loc.luasPanen > 0 ? loc.qtyPanen / loc.luasPanen : 0;
     const rpKg = loc.qtyPanen > 0 ? loc.totalBiaya / loc.qtyPanen : 0;
     const rpHa = loc.luasPanen > 0 ? loc.totalBiaya / loc.luasPanen : 0;
     return {
       ...loc,
+      taksasi,
+      yieldVal,
       rpKg,
       rpHa,
     };

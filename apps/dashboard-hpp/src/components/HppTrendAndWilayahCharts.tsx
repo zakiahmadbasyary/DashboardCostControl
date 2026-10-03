@@ -73,9 +73,17 @@ export default function HppTrendAndWilayahCharts({
 
   const formatValNumber = (val: number) => {
     if (!val || val <= 0) return "-";
-    return new Intl.NumberFormat("id-ID", {
-      maximumFractionDigits: 0,
-    }).format(Math.round(val));
+    if (isRpKg) {
+      return new Intl.NumberFormat("id-ID", {
+        maximumFractionDigits: 0,
+      }).format(Math.round(val));
+    } else {
+      const valJuta = val / 1_000_000;
+      return `${new Intl.NumberFormat("id-ID", {
+        maximumFractionDigits: 1,
+        minimumFractionDigits: 0,
+      }).format(valJuta)}M`;
+    }
   };
 
   // Calculate scaling max values for both bar charts
