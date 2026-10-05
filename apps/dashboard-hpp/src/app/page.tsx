@@ -42,21 +42,16 @@ export default function DashboardHPPPage() {
     setErrorMsg(null);
 
     try {
-      const [lokasiRes, aktivitasRes, summaryRes] = await Promise.all([
+      const [lokasiRes, summaryRes] = await Promise.all([
         fetch("/api/hpp/lokasi"),
-        fetch("/api/hpp/aktivitas"),
         fetch("/api/hpp/summary"),
       ]);
 
       const lokasiData = await lokasiRes.json();
-      const aktivitasData = await aktivitasRes.json();
       const summaryData = await summaryRes.json();
 
       if (lokasiData.status === "success") {
         setRawLokasiList(lokasiData.data || []);
-      }
-      if (aktivitasData.status === "success") {
-        setRawAktivitasList(aktivitasData.data || []);
       }
 
       // If summary API returns budgets, store them for Section 12 budget lookup
@@ -203,6 +198,28 @@ export default function DashboardHPPPage() {
       setSelectedLokasiCode(null);
     }
   }, [sortedLokasiCodes]);
+
+  // Lazy-load activity data on demand when selectedLokasiCode changes
+  useEffect(() => {
+    if (!selectedLokasiCode) {
+      setRawAktivitasList([]);
+      return;
+    }
+
+    let isMounted = true;
+    fetch(`/api/hpp/aktivitas?lokasi=${encodeURIComponent(selectedLokasiCode)}`)
+      .then((res) => res.json())
+      .then((data) => {
+        if (isMounted && data.status === "success") {
+          setRawAktivitasList(data.data || []);
+        }
+      })
+      .catch((err) => console.error("Error loading location activities:", err));
+
+    return () => {
+      isMounted = false;
+    };
+  }, [selectedLokasiCode]);
 
   // Calculate Trend Data (Jan–Dec + YTD weighted sum) per PRD Section 8
   const { trendData, ytdPoint } = useMemo(() => {
