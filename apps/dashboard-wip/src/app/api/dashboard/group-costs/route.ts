@@ -6,13 +6,13 @@ import { normalizeGroupCostName, getZnSortOrder } from "@/lib/filterUtils";
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
-    const lokasi = searchParams.get("lokasi");
+    const rawLokasi = searchParams.get("lokasi")?.trim();
 
-    if (!lokasi) {
+    if (!rawLokasi) {
       return NextResponse.json([]);
     }
 
-    const cleanLokasi = lokasi.replace("LOC-", "");
+    const cleanLokasi = rawLokasi.replace("LOC-", "").slice(0, 50);
     const locMatches = await prisma.lokasi.findMany({
       where: {
         lokasi: cleanLokasi,

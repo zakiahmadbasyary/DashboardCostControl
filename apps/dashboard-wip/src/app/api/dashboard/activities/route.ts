@@ -6,14 +6,15 @@ import { getGroupCostVariants, normalizeGroupCostName } from "@/lib/filterUtils"
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
-    const groupCost = searchParams.get("groupCost");
-    const lokasi = searchParams.get("lokasi");
+    const rawGroupCost = searchParams.get("groupCost")?.trim();
+    const rawLokasi = searchParams.get("lokasi")?.trim();
 
-    if (!groupCost && !lokasi) {
+    if (!rawGroupCost && !rawLokasi) {
       return NextResponse.json([]);
     }
 
-    const cleanLokasi = lokasi ? lokasi.replace("LOC-", "") : undefined;
+    const groupCost = rawGroupCost ? rawGroupCost.slice(0, 50) : undefined;
+    const cleanLokasi = rawLokasi ? rawLokasi.replace("LOC-", "").slice(0, 50) : undefined;
     const gcVariants = groupCost && groupCost !== "all" ? getGroupCostVariants(groupCost) : [];
 
     const actMatches = await prisma.aktivitas.findMany({
@@ -33,7 +34,12 @@ export async function GET(request: NextRequest) {
       include: {
         masterSheet: true,
       },
+      take: (!cleanLokasi || cleanLokasi === "all") ? 300 : undefined,
     });
+
+    if (actMatches.length === 0) {
+      return NextResponse.json([]);
+    }
 
     const lokasiCodes = Array.from(new Set(actMatches.map((a) => a.lokasi)));
     const lokasiList = await prisma.lokasi.findMany({
@@ -69,3 +75,4 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: message }, { status: 500 });
   }
 }
+

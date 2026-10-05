@@ -1,15 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { LocationData } from "@/types/dashboard";
-import { matchesStatus, matchesGroupCost } from "@/lib/filterUtils";
+import { matchesGroupCost } from "@/lib/filterUtils";
 
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
-    const status = searchParams.get("status");
-    const jenisBibit = searchParams.get("jenisBibit");
-    const kelasBibit = searchParams.get("kelasBibit");
-    const groupCost = searchParams.get("groupCost");
+    const status = searchParams.get("status")?.trim();
+    const jenisBibit = searchParams.get("jenisBibit")?.trim();
+    const kelasBibit = searchParams.get("kelasBibit")?.trim();
+    const groupCost = searchParams.get("groupCost")?.trim();
     const umurStr = searchParams.get("umur");
     const umurArr =
       umurStr !== null && umurStr !== "all" && umurStr !== ""
@@ -19,7 +19,37 @@ export async function GET(request: NextRequest) {
     const wilayahStr = searchParams.get("wilayah");
     const wilayahArr = wilayahStr ? wilayahStr.split(",").map((w) => w.trim()).filter(Boolean) : [];
 
+    const where: any = {};
+
+    if (status && status !== "all") {
+      if (status === "NS") {
+        where.status = { in: ["NSSC", "NSFC"] };
+      } else {
+        where.status = status;
+      }
+    }
+
+    if (umurArr.length > 0 && !umurStr?.includes("all")) {
+      where.umur = { in: umurArr };
+    }
+
+    const masterSheetWhere: any = {};
+    if (jenisBibit && jenisBibit !== "all") {
+      masterSheetWhere.jenisBibit = jenisBibit;
+    }
+    if (kelasBibit && kelasBibit !== "all") {
+      masterSheetWhere.kelasBibit = kelasBibit;
+    }
+    if (wilayahArr.length > 0 && !wilayahArr.includes("all")) {
+      masterSheetWhere.wilayah = { in: wilayahArr };
+    }
+
+    if (Object.keys(masterSheetWhere).length > 0) {
+      where.masterSheet = masterSheetWhere;
+    }
+
     const dbLokasi = await prisma.lokasi.findMany({
+      where,
       include: {
         masterSheet: true,
         sbt: true,
@@ -45,17 +75,7 @@ export async function GET(request: NextRequest) {
       const ms = item.masterSheet;
       if (!ms) return;
 
-      if (!matchesStatus(item.status, status)) return;
-      if (jenisBibit && jenisBibit !== "all" && ms.jenisBibit !== jenisBibit) return;
-      if (kelasBibit && kelasBibit !== "all" && ms.kelasBibit !== kelasBibit) return;
       if (!matchesGroupCost(item, groupCost)) return;
-
-      if (umurArr.length > 0 && !umurStr?.includes("all")) {
-        if (!umurArr.includes(item.umur)) return;
-      }
-      if (wilayahArr.length > 0 && !wilayahArr.includes("all")) {
-        if (!wilayahArr.includes(ms.wilayah)) return;
-      }
 
       const key = `${item.lokasi}`;
       if (!locGroupMap.has(key)) {
@@ -91,3 +111,4 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: message }, { status: 500 });
   }
 }
+
