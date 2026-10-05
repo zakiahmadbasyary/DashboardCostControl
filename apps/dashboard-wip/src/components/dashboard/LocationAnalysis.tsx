@@ -11,6 +11,7 @@ import {
   ChevronLeft,
   ChevronRight,
   FileSpreadsheet,
+  Calendar,
 } from "lucide-react";
 import * as XLSX from "xlsx";
 
@@ -37,6 +38,24 @@ const parseSelectedWilayah = (val: string | string[]): string[] => {
   if (Array.isArray(val)) return val;
   if (!val || val === "all") return ALL_WILAYAH;
   return val.split(",").map((s) => s.trim()).filter(Boolean);
+};
+
+const formatRencanaForcingPanen = (umur?: number) => {
+  if (umur === undefined || umur === null || isNaN(umur)) return "-";
+
+  const now = new Date(2026, 0, 15);
+  const forcingDate = new Date(now.getFullYear(), now.getMonth() + (12 - umur), 28);
+  const panenDate = new Date(now.getFullYear(), now.getMonth() + (17 - umur), 22);
+
+  const monthsIndo = [
+    "Jan", "Feb", "Mar", "Apr", "Mei", "Jun",
+    "Jul", "Agu", "Sep", "Okt", "Nov", "Des"
+  ];
+
+  const formatD = (d: Date) =>
+    `${d.getDate()} ${monthsIndo[d.getMonth()]} ${d.getFullYear()}`;
+
+  return `${formatD(forcingDate)} / ${formatD(panenDate)}`;
 };
 
 export default function LocationAnalysis({
@@ -437,3 +456,4 @@ export default function LocationAnalysis({
     </div>
   );
 }
+

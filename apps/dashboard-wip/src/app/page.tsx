@@ -5,6 +5,7 @@ import DashboardHeader from "@/components/dashboard/DashboardHeader";
 import GlobalFilters from "@/components/dashboard/GlobalFilters";
 import TrendCard from "@/components/dashboard/TrendCard";
 import LocationAnalysis from "@/components/dashboard/LocationAnalysis";
+import LocationDetailCard from "@/components/dashboard/LocationDetailCard";
 import GroupCostTable from "@/components/dashboard/GroupCostTable";
 import ActivityTable from "@/components/dashboard/ActivityTable";
 
@@ -49,6 +50,23 @@ export default function PublicDashboardPage() {
   const [loadingGroupCosts, setLoadingGroupCosts] = useState<boolean>(false);
   const [loadingActivities, setLoadingActivities] = useState<boolean>(false);
 
+  // Handle Location selection -> Fetch Group Costs
+  const handleSelectLocation = useCallback(async (loc: LocationData) => {
+    setSelectedLocation(loc);
+    setSelectedGroupCost(null);
+    setActivities([]);
+    setLoadingGroupCosts(true);
+
+    try {
+      const gcRes = await dashboardService.getGroupCosts(loc.lokasi);
+      setGroupCosts(gcRes);
+    } catch (err) {
+      console.error("Error fetching group costs:", err);
+    } finally {
+      setLoadingGroupCosts(false);
+    }
+  }, []);
+
   const fetchDashboardData = useCallback(async () => {
     try {
       const [trendRes, locRes] = await Promise.all([
@@ -65,6 +83,8 @@ export default function PublicDashboardPage() {
         setGroupCosts([]);
         setSelectedGroupCost(null);
         setActivities([]);
+      } else if (!selectedLocation && locRes.length > 0) {
+        handleSelectLocation(locRes[0]);
       }
     } catch (err) {
       console.error("Error fetching dashboard data:", err);
@@ -72,7 +92,7 @@ export default function PublicDashboardPage() {
       setLoadingTrend(false);
       setLoadingLocations(false);
     }
-  }, [globalFilters, locationFilters, selectedLocation]);
+  }, [globalFilters, locationFilters, selectedLocation, handleSelectLocation]);
 
   useEffect(() => {
     let isMounted = true;
@@ -87,23 +107,6 @@ export default function PublicDashboardPage() {
       isMounted = false;
     };
   }, [fetchDashboardData]);
-
-  // Handle Location selection -> Fetch Group Costs
-  const handleSelectLocation = async (loc: LocationData) => {
-    setSelectedLocation(loc);
-    setSelectedGroupCost(null);
-    setActivities([]);
-    setLoadingGroupCosts(true);
-
-    try {
-      const gcRes = await dashboardService.getGroupCosts(loc.lokasi);
-      setGroupCosts(gcRes);
-    } catch (err) {
-      console.error("Error fetching group costs:", err);
-    } finally {
-      setLoadingGroupCosts(false);
-    }
-  };
 
   // Handle Group Cost selection -> Fetch Activities
   const handleSelectGroupCost = async (gc: GroupCostData) => {
@@ -174,6 +177,11 @@ export default function PublicDashboardPage() {
             onSelectLocation={handleSelectLocation}
             loading={loadingLocations}
           />
+        </section>
+
+        {/* Location Detail Card Section (WIP Data) */}
+        <section>
+          <LocationDetailCard selectedLocation={selectedLocation} />
         </section>
 
         {/* Downstream Cascading Section: Group Cost -> Activity */}
