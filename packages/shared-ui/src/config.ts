@@ -127,8 +127,8 @@ export const getDashboardNavConfig = (): DashboardNavConfig => {
         key: "harga_material",
         label: "Harga Material",
         url: hargaMaterialUrl,
-        description: "Master Data & Fluktuasi Harga Material (Tahap Pembuatan)",
-        isHosted: false,
+        description: "Master Data & Fluktuasi Harga Material Logistik PG 1",
+        isHosted: true,
       },
       {
         key: "poll_pg1",
