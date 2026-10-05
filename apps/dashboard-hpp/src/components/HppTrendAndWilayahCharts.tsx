@@ -134,11 +134,11 @@ export default function HppTrendAndWilayahCharts({
           </div>
 
           {/* Vertical Bar Chart Container */}
-          <div className="pt-2 overflow-x-auto">
-            <div className="min-w-[440px]">
+          <div className="pt-2 w-full">
+            <div className="w-full">
 
               {/* Bars Area */}
-              <div className="flex items-end justify-between gap-1.5 h-48 pb-1">
+              <div className="flex items-end justify-between gap-0.5 sm:gap-1.5 h-48 pb-1 w-full">
                 {trendData.map((item) => {
                   const val = isRpKg ? item.valRpKg : item.valRpHa;
                   const heightPercent = maxTrendVal > 0 ? (val / maxTrendVal) * 100 : 0;
@@ -148,13 +148,14 @@ export default function HppTrendAndWilayahCharts({
                     <div
                       key={item.month}
                       onClick={() => onSelectMonth?.(item.month)}
-                      className="flex-1 flex flex-col items-center group cursor-pointer"
+                      className="flex-1 flex flex-col items-center group cursor-pointer min-w-0"
                       title={`${item.label}: ${formatCurrency(val)} (${unitLabel})`}
                     >
                       {/* Number value label on top of bar */}
                       <span
-                        className={`text-[10px] sm:text-[11px] font-bold mb-1 transition-all truncate ${isSelected ? "text-[#B45309] scale-110 font-black" : "text-[#17231B] opacity-90 group-hover:opacity-100"
-                          }`}
+                        className={`text-[8px] min-[380px]:text-[9px] sm:text-[11px] font-bold mb-1 transition-all truncate tracking-tighter w-full text-center ${
+                          isSelected ? "text-[#B45309] scale-105 font-black" : "text-[#17231B] opacity-90 group-hover:opacity-100"
+                        }`}
                       >
                         {formatValNumber(val)}
                       </span>
@@ -162,10 +163,11 @@ export default function HppTrendAndWilayahCharts({
                       {/* Bar Track Container */}
                       <div className="w-full bg-[#F2F6F3] rounded-t-md h-36 flex items-end overflow-hidden p-0.5">
                         <div
-                          className={`w-full rounded-t transition-all duration-300 ${isSelected
+                          className={`w-full rounded-t transition-all duration-300 ${
+                            isSelected
                               ? "bg-[#FCE27A] ring-2 ring-[#E5C959] shadow-md"
                               : "bg-[#8CC63F] group-hover:bg-[#16823B]"
-                            }`}
+                          }`}
                           style={{ height: `${Math.max(heightPercent, val > 0 ? 5 : 0)}%` }}
                         ></div>
                       </div>
@@ -176,12 +178,12 @@ export default function HppTrendAndWilayahCharts({
                 {/* YTD Bar Column */}
                 {ytdPoint && (
                   <div
-                    className="flex-1 flex flex-col items-center group cursor-pointer border-l border-dashed border-[#D5E1D8] pl-1.5"
+                    className="flex-1 flex flex-col items-center group cursor-pointer border-l border-dashed border-[#D5E1D8] pl-0.5 sm:pl-1.5 min-w-0"
                     title={`YTD Accumulation: ${formatCurrency(
                       isRpKg ? ytdPoint.valRpKg : ytdPoint.valRpHa
                     )} (${unitLabel})`}
                   >
-                    <span className="text-[10px] sm:text-[11px] font-black text-[#17231B] mb-1">
+                    <span className="text-[8px] min-[380px]:text-[9px] sm:text-[11px] font-black text-[#17231B] mb-1 truncate tracking-tighter w-full text-center">
                       {formatValNumber(isRpKg ? ytdPoint.valRpKg : ytdPoint.valRpHa)}
                     </span>
 
@@ -206,22 +208,23 @@ export default function HppTrendAndWilayahCharts({
               <div className="w-full h-[2px] bg-[#17231B]/20 rounded-full"></div>
 
               {/* Month Labels Axis */}
-              <div className="flex justify-between gap-1.5 mt-2">
+              <div className="flex justify-between gap-0.5 sm:gap-1.5 mt-2 w-full">
                 {trendData.map((item) => {
                   const isSelected = filters.periodeFilter === item.month;
                   return (
                     <span
                       key={item.month}
                       onClick={() => onSelectMonth?.(item.month)}
-                      className={`flex-1 text-center text-xs font-bold cursor-pointer transition-colors ${isSelected ? "text-[#B45309] underline font-extrabold" : "text-[#17231B]"
-                        }`}
+                      className={`flex-1 text-center text-[9px] sm:text-xs font-bold cursor-pointer transition-colors truncate ${
+                        isSelected ? "text-[#B45309] underline font-extrabold" : "text-[#17231B]"
+                      }`}
                     >
                       {item.label}
                     </span>
                   );
                 })}
                 {ytdPoint && (
-                  <span className="flex-1 text-center text-xs font-black text-[#17231B] uppercase pl-1.5">
+                  <span className="flex-1 text-center text-[9px] sm:text-xs font-black text-[#17231B] uppercase pl-0.5 sm:pl-1.5 truncate">
                     YTD
                   </span>
                 )}
@@ -264,11 +267,11 @@ export default function HppTrendAndWilayahCharts({
           </div>
 
           {/* Vertical Bar Chart Container */}
-          <div className="pt-2 overflow-x-auto">
-            <div className="min-w-[360px]">
+          <div className="pt-2 w-full">
+            <div className="w-full">
 
               {/* Bars Area */}
-              <div className="flex items-end justify-between gap-2.5 h-48 pb-1">
+              <div className="flex items-end justify-between gap-1.5 sm:gap-2.5 h-48 pb-1 w-full">
                 {wilayahData.map((item) => {
                   const val = isRpKg ? item.valRpKg : item.valRpHa;
                   const heightPercent = maxWilayahVal > 0 ? (val / maxWilayahVal) * 100 : 0;
@@ -280,13 +283,14 @@ export default function HppTrendAndWilayahCharts({
                     <div
                       key={item.wilayah}
                       onClick={() => onSelectWilayah?.(isSelected ? "all" : item.wilayah)}
-                      className="flex-1 flex flex-col items-center group cursor-pointer"
+                      className="flex-1 flex flex-col items-center group cursor-pointer min-w-0"
                       title={`Wilayah ${item.wilayah}: ${formatCurrency(val)} (${unitLabel})`}
                     >
                       {/* Number value label on top of bar */}
                       <span
-                        className={`text-[10px] sm:text-[11px] font-bold mb-1 transition-all truncate ${isSelected ? "text-[#B45309] scale-110 font-black" : "text-[#17231B] opacity-90 group-hover:opacity-100"
-                          }`}
+                        className={`text-[9px] sm:text-[11px] font-bold mb-1 transition-all truncate tracking-tighter w-full text-center ${
+                          isSelected ? "text-[#B45309] scale-105 font-black" : "text-[#17231B] opacity-90 group-hover:opacity-100"
+                        }`}
                       >
                         {formatValNumber(val)}
                       </span>
@@ -294,8 +298,9 @@ export default function HppTrendAndWilayahCharts({
                       {/* Bar Track Container */}
                       <div className="w-full bg-[#F2F6F3] rounded-t-md h-36 flex items-end overflow-hidden p-0.5">
                         <div
-                          className={`w-full rounded-t transition-all duration-300 hover:brightness-95 ${isSelected ? "ring-2 ring-[#E5C959] shadow-md scale-[1.02]" : ""
-                            }`}
+                          className={`w-full rounded-t transition-all duration-300 hover:brightness-95 ${
+                            isSelected ? "ring-2 ring-[#E5C959] shadow-md scale-[1.02]" : ""
+                          }`}
                           style={{
                             height: `${Math.max(heightPercent, val > 0 ? 5 : 0)}%`,
                             backgroundColor: barColor,
@@ -311,15 +316,16 @@ export default function HppTrendAndWilayahCharts({
               <div className="w-full h-[2px] bg-[#17231B]/20 rounded-full"></div>
 
               {/* Wilayah Labels Axis */}
-              <div className="flex justify-between gap-2.5 mt-2">
+              <div className="flex justify-between gap-1.5 sm:gap-2.5 mt-2 w-full">
                 {wilayahData.map((item) => {
                   const isSelected = filters.wilayahFilter === item.wilayah;
                   return (
                     <span
                       key={item.wilayah}
                       onClick={() => onSelectWilayah?.(isSelected ? "all" : item.wilayah)}
-                      className={`flex-1 text-center text-xs font-extrabold cursor-pointer transition-colors ${isSelected ? "text-[#B45309] underline font-black" : "text-[#17231B]"
-                        }`}
+                      className={`flex-1 text-center text-[10px] sm:text-xs font-extrabold cursor-pointer transition-colors truncate ${
+                        isSelected ? "text-[#B45309] underline font-black" : "text-[#17231B]"
+                      }`}
                     >
                       {item.wilayah}
                     </span>

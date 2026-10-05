@@ -136,8 +136,11 @@ export default function HppLokasiTable({
   // Unique Wilayah list for filter dropdown
   const wilayahOptions = ["W01", "W02", "W03", "W04", "W05", "W06", "W07"];
 
-  // Filter list by searchQuery and selectedWilayahFilter
+  // Filter list by searchQuery, selectedWilayahFilter, and exclude taksasi 0%
   const filteredList = aggregatedList.filter((loc) => {
+    // Exclude location data with 0% taksasi
+    if (loc.taksasi <= 0) return false;
+
     const matchesSearch =
       loc.lokasi.toLowerCase().includes(searchQuery.toLowerCase()) ||
       loc.wilayah.toLowerCase().includes(searchQuery.toLowerCase()) ||

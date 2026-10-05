@@ -152,7 +152,10 @@ export default function DashboardHPPPage() {
 
   // Aggregate and sort location codes descending by HPP (rp_kg / rp_ha) or total cost: Largest to Smallest
   const sortedLokasiCodes = useMemo(() => {
-    const lokasiMap: Record<string, { totalBiaya: number; qtyPanen: number; luasPanen: number }> = {};
+    const lokasiMap: Record<
+      string,
+      { totalBiaya: number; qtyPanen: number; luasPanen: number; luasAktif: number }
+    > = {};
 
     filteredLokasiList.forEach((item) => {
       const code = item.lokasi;
@@ -161,19 +164,30 @@ export default function DashboardHPPPage() {
           totalBiaya: 0,
           qtyPanen: Number(item.qtyPanen || 0),
           luasPanen: Number(item.luasPanen || 0),
+          luasAktif: Number(item.luasAktif || 0),
         };
+      } else {
+        if (lokasiMap[code].luasPanen === 0 && Number(item.luasPanen || 0) > 0) {
+          lokasiMap[code].luasPanen = Number(item.luasPanen);
+        }
+        if (lokasiMap[code].luasAktif === 0 && Number(item.luasAktif || 0) > 0) {
+          lokasiMap[code].luasAktif = Number(item.luasAktif);
+        }
       }
       lokasiMap[code].totalBiaya += Number(item.biaya || 0);
     });
 
     const isRpKg = filters.reportFilter === "rp_kg";
 
-    const aggregated = Object.entries(lokasiMap).map(([code, data]) => {
-      const rpKg = data.qtyPanen > 0 ? data.totalBiaya / data.qtyPanen : 0;
-      const rpHa = data.luasPanen > 0 ? data.totalBiaya / data.luasPanen : 0;
-      const val = isRpKg ? rpKg : rpHa;
-      return { code, val, totalBiaya: data.totalBiaya };
-    });
+    const aggregated = Object.entries(lokasiMap)
+      .map(([code, data]) => {
+        const taksasi = data.luasAktif > 0 ? (data.luasPanen / data.luasAktif) * 100 : 0;
+        const rpKg = data.qtyPanen > 0 ? data.totalBiaya / data.qtyPanen : 0;
+        const rpHa = data.luasPanen > 0 ? data.totalBiaya / data.luasPanen : 0;
+        const val = isRpKg ? rpKg : rpHa;
+        return { code, val, totalBiaya: data.totalBiaya, taksasi };
+      })
+      .filter((item) => item.taksasi > 0);
 
     // Sort descending by HPP value (val), fallback to totalBiaya descending
     aggregated.sort((a, b) => (b.val !== a.val ? b.val - a.val : b.totalBiaya - a.totalBiaya));
