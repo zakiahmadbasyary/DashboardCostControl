@@ -54,7 +54,7 @@ export default function HppLocationDetailDrilldown({
 }: HppLocationDetailDrilldownProps) {
   const [selectedGroup, setSelectedGroup] = useState<string | null>(null);
   const [aktCurrentPage, setAktCurrentPage] = useState<number>(1);
-  const AKT_ITEMS_PER_PAGE = 25;
+  const AKT_ITEMS_PER_PAGE = 20;
 
   useEffect(() => {
     setAktCurrentPage(1);
@@ -285,73 +285,70 @@ export default function HppLocationDetailDrilldown({
         {/* ----------------------------------------------------------- */}
         {/* LEFT COLUMN: TABEL GROUP COST LOKASI                        */}
         {/* ----------------------------------------------------------- */}
-        <div className="bg-white rounded-2xl border border-[#DDE5DF] shadow-2xs overflow-hidden flex flex-col justify-between">
+        <div className="bg-white border border-[#DDE5DF] rounded-2xl p-5 shadow-xs flex flex-col justify-between">
           <div>
-            <div className="p-4 border-b border-[#EAEFEB] bg-[#F8FAF9] flex items-center justify-between gap-2">
+            <div className="flex items-center justify-between mb-4 pb-3 border-b border-[#DDE5DF]">
               <div className="flex items-center gap-2">
-                <div className="p-2 bg-amber-500 text-white rounded-xl shadow-2xs shrink-0">
+                <div className="p-2 rounded-lg bg-[#16823B]/10 text-[#16823B] shrink-0">
                   <Layers className="w-4 h-4" />
                 </div>
                 <div>
-                  <h3 className="font-extrabold text-[#17231B] text-sm sm:text-base">
+                  <h3 className="font-bold text-base text-[#17231B]">
                     Group Cost ({lokasiCode})
                   </h3>
-                  <p className="text-[11px] text-[#5F6B63]">
-                    Kelompok biaya & anggaran budget
+                  <p className="text-xs text-[#5F6B63]">
+                    Kelompok biaya &amp; anggaran budget
                   </p>
                 </div>
               </div>
-              <span className="text-[10px] sm:text-xs font-bold text-[#16823B] bg-[#EAF3EC] px-2.5 py-1 rounded-lg border border-[#CBE0D1] shrink-0">
+              <span className="text-xs font-bold text-[#16823B] bg-[#16823B]/10 px-2.5 py-1 rounded-lg border border-[#16823B]/20 shrink-0">
                 Klik Group untuk Filter Aktivitas
               </span>
             </div>
 
-            <div className="overflow-x-auto">
-              <table className="w-full text-left text-xs border-collapse">
-                <thead>
-                  <tr className="bg-[#F0F4F1] text-[#455248] uppercase tracking-wider font-extrabold border-b border-[#E0E8E2]">
+            <div className="overflow-x-auto rounded-xl border border-[#DDE5DF]">
+              <table className="w-full text-xs text-left">
+                <thead className="bg-[#F7F9F7] text-[#17231B] uppercase font-bold border-b border-[#DDE5DF]">
+                  <tr>
                     <th className="py-2.5 px-3">Group Cost</th>
-                    <th className="py-2.5 px-3 text-right">Cost / Ha</th>
-                    <th className="py-2.5 px-3 text-right">Budget</th>
-                    <th className="py-2.5 px-3 text-center">STATUS SELECT</th>
+                    <th className="py-2.5 px-3 text-right">Cost / Ha (Rp)</th>
+                    <th className="py-2.5 px-3 text-right">Budget (Rp)</th>
+                    <th className="py-2.5 px-3 text-center">Status Select</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-[#EAEFEB]">
+                <tbody className="divide-y divide-[#DDE5DF]/60">
                   {/* 1. Direct Cost Summary Row */}
                   <tr
                     onClick={() => setSelectedGroup("direct_cost")}
-                    className={`cursor-pointer transition-all border-b-2 border-b-[#CBE0D1] ${
+                    className={`cursor-pointer transition-all border-b-2 border-b-[#16823B]/30 ${
                       activeGroup === "direct_cost" || activeGroup === "ZN"
-                        ? "bg-[#EAF3EC] font-black border-l-4 border-l-[#16823B]"
-                        : "bg-[#F4F9F5] hover:bg-[#EAF3EC]/60 font-bold"
+                        ? "bg-[#A8D437]/20 border-l-4 border-l-[#16823B] font-bold text-[#0B6B32]"
+                        : "hover:bg-[#F7F9F7] text-[#17231B] font-bold"
                     }`}
                   >
-                    <td className="py-3 px-3">
+                    <td className="py-2.5 px-3">
                       <div className="flex items-center gap-1.5">
-                        <span className="px-2 py-0.5 rounded bg-[#16823B] text-white font-black text-[10px] shadow-2xs shrink-0">
+                        <span className="px-2 py-0.5 rounded bg-[#16823B] text-white font-bold text-[10px] shrink-0">
                           ZN (Direct)
                         </span>
-                        <span className="font-extrabold text-[#16823B] uppercase tracking-wide">
+                        <span className="font-bold text-[#16823B] uppercase tracking-wide">
                           Direct Cost
                         </span>
                       </div>
                     </td>
-                    <td className="py-3 px-3 text-right font-black text-[#16823B]">
+                    <td className="py-2.5 px-3 text-right font-mono font-bold text-[#16823B]">
                       {formatNumber(costPerHaDirect, 0)}
                     </td>
-                    <td className="py-3 px-3 text-right font-black text-[#17231B]">
+                    <td className="py-2.5 px-3 text-right font-mono font-semibold text-[#5F6B63]">
                       {budgetValDirect !== null ? formatNumber(budgetValDirect, 0) : "-"}
                     </td>
-                    <td className="py-3 px-3 text-center">
+                    <td className="py-2.5 px-3 text-center">
                       {activeGroup === "direct_cost" || activeGroup === "ZN" ? (
-                        <button className="px-3 py-0.5 rounded-full bg-[#0B6B32] text-white text-xs font-bold shadow-xs inline-flex items-center gap-1">
-                          <CheckCircle2 className="w-3.5 h-3.5 text-white" />
-                          <span>Selected</span>
-                        </button>
+                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-[#16823B] text-white text-[10px] font-bold">
+                          <CheckCircle2 className="w-3 h-3" /> Selected
+                        </span>
                       ) : (
-                        <button className="text-xs text-[#16823B] hover:underline font-bold transition-colors cursor-pointer">
-                          Klik pilih
-                        </button>
+                        <span className="text-[10px] text-[#89938D]">Klik pilih</span>
                       )}
                     </td>
                   </tr>
@@ -359,7 +356,7 @@ export default function HppLocationDetailDrilldown({
                   {/* 2. Individual ZN Group Rows */}
                   {groupCostList.length === 0 ? (
                     <tr>
-                      <td colSpan={4} className="py-4 text-center text-[#8C9890] font-medium italic">
+                      <td colSpan={4} className="py-4 text-center text-[#89938D] text-xs font-medium italic">
                         Belum ada Group Cost ZN spesifik untuk lokasi ini.
                       </td>
                     </tr>
@@ -374,59 +371,40 @@ export default function HppLocationDetailDrilldown({
                           onClick={() => setSelectedGroup(gc.group)}
                           className={`cursor-pointer transition-all ${
                             isGroupSelected
-                              ? "bg-[#EFF7DB] font-semibold"
-                              : "hover:bg-[#F8FAF9]"
+                              ? "bg-[#A8D437]/20 border-l-4 border-l-[#16823B] font-semibold text-[#0B6B32]"
+                              : "hover:bg-[#F7F9F7] text-[#17231B]"
                           }`}
                         >
                           {/* Group Cost */}
                           <td className="py-2.5 px-3">
                             <div className="flex items-center gap-1.5">
-                              <span className="px-1.5 py-0.5 rounded bg-[#EAF3EC] text-[#0B6B32] font-black text-[10px] border border-[#CBE0D1] shrink-0">
+                              <span className="px-1.5 py-0.5 rounded bg-[#16823B]/10 text-[#16823B] font-bold text-[10px] border border-[#16823B]/20 shrink-0">
                                 {gc.group}
                               </span>
-                              <span className="font-extrabold text-[#17231B] truncate max-w-[140px]" title={gc.descGroup}>
+                              <span className="font-bold text-[#17231B] truncate max-w-[140px]" title={gc.descGroup}>
                                 {gc.descGroup}
                               </span>
                             </div>
                           </td>
 
-                          {/* Cost / Ha (No Rp prefix) */}
-                          <td className="py-2.5 px-3 text-right font-extrabold text-[#16823B]">
+                          {/* Cost / Ha */}
+                          <td className="py-2.5 px-3 text-right font-mono font-bold text-[#16823B]">
                             {formatNumber(gc.costPerHa, 0)}
                           </td>
 
-                          {/* Budget (No Rp prefix) */}
-                          <td className="py-2.5 px-3 text-right font-bold">
-                            {hasBudget ? (
-                              <span className="text-[#17231B]">{formatNumber(gc.budgetVal, 0)}</span>
-                            ) : (
-                              <span className="text-gray-400 italic">-</span>
-                            )}
+                          {/* Budget */}
+                          <td className="py-2.5 px-3 text-right font-mono text-[#5F6B63]">
+                            {hasBudget ? formatNumber(gc.budgetVal, 0) : "-"}
                           </td>
 
                           {/* Status Select Column */}
                           <td className="py-2.5 px-3 text-center">
                             {isGroupSelected ? (
-                              <button
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  setSelectedGroup(gc.group);
-                                }}
-                                className="px-3 py-0.5 rounded-full bg-[#0B6B32] text-white text-xs font-bold shadow-xs inline-flex items-center gap-1 hover:bg-[#074f24] transition-all"
-                              >
-                                <CheckCircle2 className="w-3.5 h-3.5 text-white" />
-                                <span>Selected</span>
-                              </button>
+                              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-[#16823B] text-white text-[10px] font-bold">
+                                <CheckCircle2 className="w-3 h-3" /> Selected
+                              </span>
                             ) : (
-                              <button
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  setSelectedGroup(gc.group);
-                                }}
-                                className="text-xs text-[#89958C] hover:text-[#16823B] font-medium transition-colors cursor-pointer"
-                              >
-                                Klik pilih
-                              </button>
+                              <span className="text-[10px] text-[#89938D]">Klik pilih</span>
                             )}
                           </td>
                         </tr>
@@ -437,38 +415,35 @@ export default function HppLocationDetailDrilldown({
                   {/* 3. Indirect Cost Summary Row */}
                   <tr
                     onClick={() => setSelectedGroup("indirect_cost")}
-                    className={`cursor-pointer transition-all border-t-2 border-t-[#FDE68A] ${
+                    className={`cursor-pointer transition-all border-t-2 border-t-amber-300 ${
                       activeGroup === "indirect_cost" || activeGroup === "ZW"
-                        ? "bg-[#FEF3C7] font-black border-l-4 border-l-amber-600"
-                        : "bg-[#FFFBEB] hover:bg-[#FEF3C7]/60 font-bold"
+                        ? "bg-amber-100/60 border-l-4 border-l-amber-600 font-bold text-amber-900"
+                        : "hover:bg-amber-50/50 text-[#17231B] font-bold"
                     }`}
                   >
-                    <td className="py-3 px-3">
+                    <td className="py-2.5 px-3">
                       <div className="flex items-center gap-1.5">
-                        <span className="px-2 py-0.5 rounded bg-amber-600 text-white font-black text-[10px] shadow-2xs shrink-0">
+                        <span className="px-2 py-0.5 rounded bg-amber-600 text-white font-bold text-[10px] shrink-0">
                           ZW (Indirect)
                         </span>
-                        <span className="font-extrabold text-amber-900 uppercase tracking-wide">
+                        <span className="font-bold text-amber-900 uppercase tracking-wide">
                           Indirect Cost
                         </span>
                       </div>
                     </td>
-                    <td className="py-3 px-3 text-right font-black text-amber-900">
+                    <td className="py-2.5 px-3 text-right font-mono font-bold text-amber-800">
                       {formatNumber(costPerHaIndirect, 0)}
                     </td>
-                    <td className="py-3 px-3 text-right font-black text-[#17231B]">
+                    <td className="py-2.5 px-3 text-right font-mono text-[#5F6B63]">
                       {budgetValIndirect !== null ? formatNumber(budgetValIndirect, 0) : "-"}
                     </td>
-                    <td className="py-3 px-3 text-center">
+                    <td className="py-2.5 px-3 text-center">
                       {activeGroup === "indirect_cost" || activeGroup === "ZW" ? (
-                        <button className="px-3 py-0.5 rounded-full bg-amber-600 text-white text-xs font-bold shadow-xs inline-flex items-center gap-1">
-                          <CheckCircle2 className="w-3.5 h-3.5 text-white" />
-                          <span>Selected</span>
-                        </button>
+                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-700 text-white text-[10px] font-bold">
+                          <CheckCircle2 className="w-3 h-3" /> Selected
+                        </span>
                       ) : (
-                        <button className="text-xs text-amber-800 hover:underline font-bold transition-colors cursor-pointer">
-                          Klik pilih
-                        </button>
+                        <span className="text-[10px] text-[#89938D]">Klik pilih</span>
                       )}
                     </td>
                   </tr>
@@ -477,50 +452,51 @@ export default function HppLocationDetailDrilldown({
             </div>
           </div>
 
-          <div className="p-3 bg-[#F8FAF9] border-t border-[#EAEFEB] text-xs text-[#5F6B63] flex justify-between items-center">
+          <div className="mt-4 pt-3 border-t border-[#DDE5DF] text-xs text-[#5F6B63] flex justify-between items-center">
             <span>Menampilkan {groupCostList.length} kelompok biaya</span>
+            {selectedGroup && <span className="font-semibold text-[#16823B]">Terpilih: {selectedGroup}</span>}
           </div>
         </div>
 
         {/* ----------------------------------------------------------- */}
         {/* RIGHT COLUMN: TABEL AKTIVITAS                               */}
         {/* ----------------------------------------------------------- */}
-        <div className="bg-white rounded-2xl border border-[#DDE5DF] shadow-2xs overflow-hidden flex flex-col justify-between">
+        <div className="bg-white border border-[#DDE5DF] rounded-2xl p-5 shadow-xs flex flex-col justify-between">
           <div>
-            <div className="p-4 border-b border-[#EAEFEB] bg-[#F8FAF9] flex items-center justify-between gap-2">
+            <div className="flex items-center justify-between mb-4 pb-3 border-b border-[#DDE5DF]">
               <div className="flex items-center gap-2">
-                <div className="p-2 bg-emerald-600 text-white rounded-xl shadow-2xs shrink-0">
+                <div className="p-2 rounded-lg bg-[#16823B]/10 text-[#16823B] shrink-0">
                   <Activity className="w-4 h-4" />
                 </div>
                 <div>
-                  <h3 className="font-extrabold text-[#17231B] text-sm sm:text-base">
-                    Rincian Aktivitas Lapangan
+                  <h3 className="font-bold text-base text-[#17231B]">
+                    Aktivitas Lapangan
                   </h3>
-                  <p className="text-[11px] text-[#5F6B63]">
+                  <p className="text-xs text-[#5F6B63]">
                     {activeGroup ? `Filter Aktivitas: Group ${activeGroup}` : "Semua Aktivitas Pekerjaan"}
                   </p>
                 </div>
               </div>
 
               {activeGroup && (
-                <span className="text-[10px] sm:text-xs font-bold text-emerald-800 bg-emerald-50 px-2.5 py-1 rounded-lg border border-emerald-200 shrink-0">
+                <span className="text-xs font-bold text-[#16823B] bg-[#16823B]/10 px-2.5 py-1 rounded-lg border border-[#16823B]/20 shrink-0">
                   Group {activeGroup}
                 </span>
               )}
             </div>
 
-            <div className="overflow-x-auto">
-              <table className="w-full text-left text-xs border-collapse">
-                <thead>
-                  <tr className="bg-[#F0F4F1] text-[#455248] uppercase tracking-wider font-extrabold border-b border-[#E0E8E2]">
-                    <th className="py-2.5 px-4">Nama Aktivitas</th>
-                    <th className="py-2.5 px-4 text-right">Cost / Ha</th>
+            <div className="overflow-x-auto rounded-xl border border-[#DDE5DF]">
+              <table className="w-full text-xs text-left">
+                <thead className="bg-[#F7F9F7] text-[#17231B] uppercase font-bold border-b border-[#DDE5DF]">
+                  <tr>
+                    <th className="py-2.5 px-3">Nama Aktivitas</th>
+                    <th className="py-2.5 px-3 text-right">Cost / Ha (Rp)</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-[#EAEFEB]">
+                <tbody className="divide-y divide-[#DDE5DF]/60 text-[#17231B]">
                   {filteredAktivitas.length === 0 ? (
                     <tr>
-                      <td colSpan={2} className="py-8 text-center text-[#8C9890] font-medium">
+                      <td colSpan={2} className="py-8 text-center text-[#89938D] font-medium">
                         Belum ada aktivitas untuk lokasi dan group cost yang dipilih.
                       </td>
                     </tr>
@@ -529,14 +505,14 @@ export default function HppLocationDetailDrilldown({
                       const costPerHa = luasPanen > 0 ? Number(act.biaya || 0) / luasPanen : 0;
 
                       return (
-                        <tr key={act.idAktivitas} className="hover:bg-[#F4F8F5] transition-colors">
+                        <tr key={act.idAktivitas} className="hover:bg-[#F7F9F7] transition-colors">
                           {/* Nama Aktivitas */}
-                          <td className="py-3 px-4 font-bold text-[#17231B]">
+                          <td className="py-2.5 px-3 font-medium text-[#17231B]">
                             {act.aktivitas}
                           </td>
 
-                          {/* Cost / Ha (No Rp prefix) */}
-                          <td className="py-3 px-4 text-right font-extrabold text-[#16823B]">
+                          {/* Cost / Ha */}
+                          <td className="py-2.5 px-3 text-right font-mono font-bold text-[#16823B]">
                             {formatNumber(costPerHa, 0)}
                           </td>
                         </tr>
@@ -549,7 +525,7 @@ export default function HppLocationDetailDrilldown({
           </div>
 
           {/* Footer info & Pagination */}
-          <div className="p-3 bg-[#F8FAF9] border-t border-[#EAEFEB] text-xs text-[#5F6B63] flex flex-col sm:flex-row justify-between items-center gap-2">
+          <div className="mt-4 pt-3 border-t border-[#DDE5DF] text-xs text-[#5F6B63] flex flex-col sm:flex-row justify-between items-center gap-2">
             <span>
               Menampilkan {filteredAktivitas.length === 0 ? 0 : startAktIndex + 1} - {Math.min(startAktIndex + AKT_ITEMS_PER_PAGE, filteredAktivitas.length)} dari {filteredAktivitas.length} aktivitas
             </span>
@@ -559,21 +535,21 @@ export default function HppLocationDetailDrilldown({
                 <button
                   onClick={() => setAktCurrentPage((prev) => Math.max(prev - 1, 1))}
                   disabled={aktCurrentPage === 1}
-                  className="px-2.5 py-1 rounded-lg border border-[#DDE5DF] bg-white text-[#455248] hover:bg-[#EAF3EC] hover:text-[#0B6B32] disabled:opacity-40 disabled:hover:bg-white disabled:hover:text-[#455248] cursor-pointer disabled:cursor-not-allowed transition-all font-semibold flex items-center gap-1"
+                  className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg border border-[#DDE5DF] bg-white text-[#17231B] hover:bg-[#F7F9F7] disabled:opacity-40 disabled:cursor-not-allowed text-xs font-semibold transition-colors cursor-pointer"
                   title="Halaman Sebelumnya"
                 >
                   <ChevronLeft className="w-3.5 h-3.5" />
                   <span>Prev</span>
                 </button>
 
-                <span className="px-2.5 py-1 text-xs font-bold text-[#17231B] bg-white rounded-lg border border-[#E0E8E2]">
+                <span className="px-2.5 py-1 text-xs font-bold text-[#16823B] bg-[#16823B]/10 rounded-lg border border-[#16823B]/20">
                   {aktCurrentPage} / {totalAktPages}
                 </span>
 
                 <button
                   onClick={() => setAktCurrentPage((prev) => Math.min(prev + 1, totalAktPages))}
                   disabled={aktCurrentPage === totalAktPages}
-                  className="px-2.5 py-1 rounded-lg border border-[#DDE5DF] bg-white text-[#455248] hover:bg-[#EAF3EC] hover:text-[#0B6B32] disabled:opacity-40 disabled:hover:bg-white disabled:hover:text-[#455248] cursor-pointer disabled:cursor-not-allowed transition-all font-semibold flex items-center gap-1"
+                  className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg border border-[#DDE5DF] bg-white text-[#17231B] hover:bg-[#F7F9F7] disabled:opacity-40 disabled:cursor-not-allowed text-xs font-semibold transition-colors cursor-pointer"
                   title="Halaman Selanjutnya"
                 >
                   <span>Next</span>

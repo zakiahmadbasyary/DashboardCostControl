@@ -111,24 +111,24 @@ export default function HppTrendAndWilayahCharts({
       {/* ----------------------------------------------------------------- */}
       {/* CHART 1 (LEFT): Trend HPP Pine PG1 (Vertical Bar Chart)           */}
       {/* ----------------------------------------------------------------- */}
-      <div className="bg-white p-5 rounded-2xl border border-[#DDE5DF] shadow-2xs flex flex-col justify-between">
+      <div className="bg-white p-5 rounded-2xl border border-[#DDE5DF] shadow-sm shadow-[#16823B]/5 flex flex-col justify-between">
         <div>
           {/* Card Header Title */}
-          <div className="flex items-center justify-between mb-4 border-b border-[#EAEFEB] pb-3">
-            <div className="flex items-center gap-2">
-              <div className="p-2 rounded-xl bg-[#EAF3EC] text-[#16823B] border border-[#CBE0D1]">
-                <TrendingUp className="w-4 h-4" />
+          <div className="flex items-center justify-between mb-4 border-b border-[#DDE5DF] pb-3">
+            <div className="flex items-center gap-3">
+              <div className="p-2.5 rounded-xl bg-[#16823B]/10 text-[#16823B] shrink-0">
+                <TrendingUp className="w-5 h-5" />
               </div>
               <div>
-                <h2 className="text-lg font-black text-[#17231B] tracking-tight">
+                <h3 className="font-bold text-base text-[#17231B]">
                   Trend HPP Pine PG1
-                </h2>
-                <p className="text-xs text-[#5F6B63] font-medium">
-                  Rincian per bulan (Jan - Des) & Akumulasi YTD ({unitLabel})
+                </h3>
+                <p className="text-xs text-[#5F6B63]">
+                  Rincian per bulan (Jan - Des) &amp; Akumulasi YTD ({unitLabel})
                 </p>
               </div>
             </div>
-            <span className="text-xs font-bold text-[#16823B] bg-emerald-50 px-2.5 py-1 rounded-lg border border-emerald-200">
+            <span className="text-xs font-bold text-[#16823B] bg-[#16823B]/10 px-2.5 py-1 rounded-lg border border-[#16823B]/20">
               {unitLabel}
             </span>
           </div>
@@ -153,8 +153,8 @@ export default function HppTrendAndWilayahCharts({
                     >
                       {/* Number value label on top of bar */}
                       <span
-                        className={`text-[8px] min-[380px]:text-[9px] sm:text-[11px] font-bold mb-1 transition-all truncate tracking-tighter w-full text-center ${
-                          isSelected ? "text-[#B45309] scale-105 font-black" : "text-[#17231B] opacity-90 group-hover:opacity-100"
+                        className={`text-[8px] min-[380px]:text-[9px] sm:text-[11px] font-mono mb-1 transition-all truncate tracking-tighter w-full text-center ${
+                          isSelected ? "text-[#16823B] font-bold scale-105" : "text-[#17231B] font-semibold opacity-90 group-hover:opacity-100"
                         }`}
                       >
                         {formatValNumber(val)}
@@ -183,7 +183,7 @@ export default function HppTrendAndWilayahCharts({
                       isRpKg ? ytdPoint.valRpKg : ytdPoint.valRpHa
                     )} (${unitLabel})`}
                   >
-                    <span className="text-[8px] min-[380px]:text-[9px] sm:text-[11px] font-black text-[#17231B] mb-1 truncate tracking-tighter w-full text-center">
+                    <span className="text-[8px] min-[380px]:text-[9px] sm:text-[11px] font-mono font-bold text-[#16823B] mb-1 truncate tracking-tighter w-full text-center">
                       {formatValNumber(isRpKg ? ytdPoint.valRpKg : ytdPoint.valRpHa)}
                     </span>
 
@@ -215,8 +215,8 @@ export default function HppTrendAndWilayahCharts({
                     <span
                       key={item.month}
                       onClick={() => onSelectMonth?.(item.month)}
-                      className={`flex-1 text-center text-[9px] sm:text-xs font-bold cursor-pointer transition-colors truncate ${
-                        isSelected ? "text-[#B45309] underline font-extrabold" : "text-[#17231B]"
+                      className={`flex-1 text-center text-[9px] sm:text-xs transition-colors truncate ${
+                        isSelected ? "text-[#16823B] underline font-bold" : "text-[#5F6B63] font-semibold hover:text-[#17231B]"
                       }`}
                     >
                       {item.label}
@@ -224,7 +224,7 @@ export default function HppTrendAndWilayahCharts({
                   );
                 })}
                 {ytdPoint && (
-                  <span className="flex-1 text-center text-[9px] sm:text-xs font-black text-[#17231B] uppercase pl-0.5 sm:pl-1.5 truncate">
+                  <span className="flex-1 text-center text-[9px] sm:text-xs font-bold text-[#16823B] uppercase pl-0.5 sm:pl-1.5 truncate">
                     YTD
                   </span>
                 )}
@@ -235,33 +235,33 @@ export default function HppTrendAndWilayahCharts({
         </div>
 
         {/* Footer Info */}
-        <div className="mt-4 pt-2 border-t border-[#EAEFEB] text-[11px] text-[#5F6B63] flex justify-between items-center">
-          <span>Klik batang bulan untuk memilih periode</span>
-          <span className="font-bold text-[#16823B]">PG1 Pine Trend</span>
+        <div className="mt-4 pt-3 border-t border-[#DDE5DF]/60 text-xs text-[#5F6B63] flex justify-between items-center">
+          <span>Klik batang bulan untuk menyaring periode</span>
+          <span className="font-semibold text-[#16823B]">PG1 Pine Trend</span>
         </div>
       </div>
 
       {/* ----------------------------------------------------------------- */}
       {/* CHART 2 (RIGHT): HPP Per Wilayah (Vertical Bar Chart)            */}
       {/* ----------------------------------------------------------------- */}
-      <div className="bg-white p-5 rounded-2xl border border-[#DDE5DF] shadow-2xs flex flex-col justify-between">
+      <div className="bg-white p-5 rounded-2xl border border-[#DDE5DF] shadow-sm shadow-[#16823B]/5 flex flex-col justify-between">
         <div>
           {/* Card Header Title */}
-          <div className="flex items-center justify-between mb-4 border-b border-[#EAEFEB] pb-3">
-            <div className="flex items-center gap-2">
-              <div className="p-2 rounded-xl bg-[#EAF3EC] text-[#16823B] border border-[#CBE0D1]">
-                <MapPin className="w-4 h-4" />
+          <div className="flex items-center justify-between mb-4 border-b border-[#DDE5DF] pb-3">
+            <div className="flex items-center gap-3">
+              <div className="p-2.5 rounded-xl bg-[#16823B]/10 text-[#16823B] shrink-0">
+                <MapPin className="w-5 h-5" />
               </div>
               <div>
-                <h2 className="text-lg font-black text-[#17231B] tracking-tight">
+                <h3 className="font-bold text-base text-[#17231B]">
                   HPP Per Wilayah
-                </h2>
-                <p className="text-xs text-[#5F6B63] font-medium">
+                </h3>
+                <p className="text-xs text-[#5F6B63]">
                   Perbandingan HPP Wilayah W01 s/d W07 ({unitLabel})
                 </p>
               </div>
             </div>
-            <span className="text-xs font-bold text-amber-800 bg-amber-50 px-2.5 py-1 rounded-lg border border-amber-200">
+            <span className="text-xs font-bold text-[#16823B] bg-[#16823B]/10 px-2.5 py-1 rounded-lg border border-[#16823B]/20">
               W01 - W07
             </span>
           </div>
@@ -288,8 +288,8 @@ export default function HppTrendAndWilayahCharts({
                     >
                       {/* Number value label on top of bar */}
                       <span
-                        className={`text-[9px] sm:text-[11px] font-bold mb-1 transition-all truncate tracking-tighter w-full text-center ${
-                          isSelected ? "text-[#B45309] scale-105 font-black" : "text-[#17231B] opacity-90 group-hover:opacity-100"
+                        className={`text-[9px] sm:text-[11px] font-mono mb-1 transition-all truncate tracking-tighter w-full text-center ${
+                          isSelected ? "text-[#16823B] font-bold scale-105" : "text-[#17231B] font-semibold opacity-90 group-hover:opacity-100"
                         }`}
                       >
                         {formatValNumber(val)}
@@ -323,8 +323,8 @@ export default function HppTrendAndWilayahCharts({
                     <span
                       key={item.wilayah}
                       onClick={() => onSelectWilayah?.(isSelected ? "all" : item.wilayah)}
-                      className={`flex-1 text-center text-[10px] sm:text-xs font-extrabold cursor-pointer transition-colors truncate ${
-                        isSelected ? "text-[#B45309] underline font-black" : "text-[#17231B]"
+                      className={`flex-1 text-center text-[10px] sm:text-xs transition-colors truncate ${
+                        isSelected ? "text-[#16823B] underline font-bold" : "text-[#5F6B63] font-semibold hover:text-[#17231B]"
                       }`}
                     >
                       {item.wilayah}
@@ -338,9 +338,9 @@ export default function HppTrendAndWilayahCharts({
         </div>
 
         {/* Footer Info */}
-        <div className="mt-4 pt-2 border-t border-[#EAEFEB] text-[11px] text-[#5F6B63] flex justify-between items-center">
+        <div className="mt-4 pt-3 border-t border-[#DDE5DF]/60 text-xs text-[#5F6B63] flex justify-between items-center">
           <span>Klik batang wilayah untuk menyaring daftar lokasi</span>
-          <span className="font-bold text-[#16823B]">GGF Region Summary</span>
+          <span className="font-semibold text-[#16823B]">GGF Region Summary</span>
         </div>
       </div>
 

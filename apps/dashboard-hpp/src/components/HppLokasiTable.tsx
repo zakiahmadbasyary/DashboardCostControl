@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { Search, MapPin, Filter, ArrowUpRight, CheckCircle2, ChevronRight, ChevronLeft } from "lucide-react";
+import { Search, MapPin, Filter, CheckCircle2, ChevronRight, ChevronLeft } from "lucide-react";
 
 export interface LokasiHppItem {
   idLokasiHpp: string;
@@ -53,7 +53,7 @@ interface HppLokasiTableProps {
   onSelectLokasi: (lokasiCode: string) => void;
 }
 
-const ITEMS_PER_PAGE = 5;
+const ITEMS_PER_PAGE = 10;
 
 export default function HppLokasiTable({
   data,
@@ -66,14 +66,6 @@ export default function HppLokasiTable({
 }: HppLokasiTableProps) {
   const [searchQuery, setSearchQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
-
-  const formatCurrency = (val: number) => {
-    return new Intl.NumberFormat("id-ID", {
-      style: "currency",
-      currency: "IDR",
-      maximumFractionDigits: 0,
-    }).format(val || 0);
-  };
 
   const formatNumber = (val: number, decimals = 2) => {
     return new Intl.NumberFormat("id-ID", {
@@ -162,7 +154,7 @@ export default function HppLokasiTable({
   });
 
   // Pagination calculation
-  const totalPages = Math.ceil(sortedFilteredList.length / ITEMS_PER_PAGE) || 1;
+  const totalPages = Math.max(1, Math.ceil(sortedFilteredList.length / ITEMS_PER_PAGE));
   const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
   const endIndex = Math.min(startIndex + ITEMS_PER_PAGE, sortedFilteredList.length);
   const paginatedList = sortedFilteredList.slice(startIndex, endIndex);
@@ -178,215 +170,182 @@ export default function HppLokasiTable({
   };
 
   return (
-    <div className="bg-white rounded-2xl border border-[#DDE5DF] shadow-2xs overflow-hidden flex flex-col" suppressHydrationWarning>
-      {/* Table Header Controls per PRD Section 10 */}
-      <div className="p-4 sm:p-5 border-b border-[#EAEFEB] bg-[#F8FAF9] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3" suppressHydrationWarning>
-        <div className="flex items-center gap-2.5">
-          <div className="p-2 bg-[#16823B] text-white rounded-xl shadow-2xs">
+    <div className="bg-white border border-[#DDE5DF] rounded-2xl p-5 shadow-xs" suppressHydrationWarning>
+      {/* Header & Sub-Filters Bar */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4" suppressHydrationWarning>
+        <div className="flex items-center gap-2">
+          <div className="p-2 rounded-lg bg-[#16823B]/10 text-[#16823B]">
             <MapPin className="w-4 h-4" />
           </div>
           <div>
-            <h3 className="font-extrabold text-[#17231B] text-sm sm:text-base">Tabel Daftar Lokasi HPP</h3>
+            <h3 className="font-bold text-base text-[#17231B]">Tabel Daftar Lokasi HPP</h3>
             <p className="text-xs text-[#5F6B63]">
-              Pilih lokasi untuk melihat rincian detail, Group Cost, dan aktivitas
+              Pilih salah satu baris lokasi untuk melihat rincian detail, Group Cost, dan aktivitas.
             </p>
           </div>
         </div>
 
         <div className="flex flex-wrap items-center gap-2.5 w-full sm:w-auto" suppressHydrationWarning>
-          {/* Sub-filter Wilayah per PRD: [Wilayah: All, W01–W07] */}
-          <div className="flex items-center gap-1.5 bg-white px-2.5 py-1.5 border border-[#DDE5DF] rounded-xl" suppressHydrationWarning>
+          {/* Sub-filter Wilayah */}
+          <div className="flex items-center gap-1.5 bg-[#F7F9F7] px-3 py-1.5 border border-[#DDE5DF] rounded-lg text-xs font-semibold text-[#17231B]" suppressHydrationWarning>
             <Filter className="w-3.5 h-3.5 text-[#16823B]" />
-            <span className="text-xs font-bold text-[#5F6B63]">Wilayah:</span>
+            <span className="text-[#5F6B63]">Wilayah:</span>
             <select
               value={selectedWilayahFilter}
               onChange={(e) => handleWilayahChange(e.target.value)}
               suppressHydrationWarning
-              className="bg-transparent text-xs font-extrabold text-[#17231B] focus:outline-none cursor-pointer"
+              className="bg-transparent font-bold text-[#17231B] focus:outline-none cursor-pointer"
             >
-              <option value="all">All Wilayah (W01-W07)</option>
+              <option value="all">Semua Wilayah (W01-W07)</option>
               {wilayahOptions.map((w) => (
                 <option key={w} value={w}>
-                  Wilayah {w}
+                  {w}
                 </option>
               ))}
             </select>
           </div>
 
           {/* Search Input */}
-          <div className="relative flex-1 sm:w-52" suppressHydrationWarning>
-            <Search className="w-3.5 h-3.5 text-[#8C9890] absolute left-3 top-1/2 -translate-y-1/2" />
+          <div className="relative flex-1 sm:w-48" suppressHydrationWarning>
+            <Search className="w-3.5 h-3.5 text-[#5F6B63] absolute left-3 top-1/2 -translate-y-1/2" />
             <input
               type="text"
               placeholder="Cari lokasi, bibit..."
               value={searchQuery}
               onChange={(e) => handleSearchChange(e.target.value)}
               suppressHydrationWarning
-              className="w-full pl-8 pr-3 py-1.5 bg-white border border-[#DDE5DF] rounded-xl text-xs font-medium text-[#17231B] focus:outline-none focus:border-[#16823B] transition-all"
+              className="w-full pl-8 pr-3 py-1.5 bg-[#F7F9F7] border border-[#DDE5DF] rounded-lg text-xs font-semibold text-[#17231B] focus:outline-none focus:border-[#16823B] transition-all"
             />
           </div>
         </div>
       </div>
 
       {/* Main Lokasi Table Container */}
-      <div className="overflow-x-auto">
-        <table className="w-full text-left text-xs border-collapse">
-          <thead>
-            <tr className="bg-[#F0F4F1] text-[#455248] uppercase tracking-wider font-extrabold border-b border-[#E0E8E2]">
-              <th className="py-3 px-4">Lokasi</th>
-              <th className="py-3 px-4 text-center">% Taksasi</th>
-              <th className="py-3 px-4 text-right">Yield (Ton/Ha)</th>
-              <th className="py-3 px-4 text-right">{isRpKg ? "HPP (Rp/Kg)" : "HPP (Rp/Ha)"}</th>
-              <th className="py-3 px-4 text-center">STATUS SELECT</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-[#EAEFEB]">
-            {loading ? (
-              [1, 2, 3].map((i) => (
-                <tr key={i} className="animate-pulse">
-                  <td colSpan={5} className="py-4 px-4 bg-gray-50/50">
-                    <div className="h-4 bg-gray-200 rounded w-full"></div>
-                  </td>
-                </tr>
-              ))
-            ) : sortedFilteredList.length === 0 ? (
-              <tr>
-                <td colSpan={5} className="py-8 text-center text-[#8C9890] font-medium">
-                  Tidak ada data Lokasi yang sesuai dengan filter.
-                </td>
-              </tr>
-            ) : (
-              paginatedList.map((loc) => {
-                const isSelected = selectedLokasiCode === loc.lokasi;
-                const hppVal = isRpKg ? loc.rpKg : loc.rpHa;
-
-                return (
-                  <tr
-                    key={loc.lokasi}
-                    onClick={() => onSelectLokasi(loc.lokasi)}
-                    className={`cursor-pointer transition-all ${
-                      isSelected
-                        ? "bg-[#EFF7DB] font-semibold"
-                        : "hover:bg-[#F8FAF9]"
-                    }`}
-                  >
-                    {/* 1. Lokasi */}
-                    <td className="py-3.5 px-4">
-                      <div className="flex items-center gap-2">
-                        <span className="font-black text-[#17231B] text-sm">{loc.lokasi}</span>
-                        <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-blue-50 text-blue-700 border border-blue-200">
-                          {loc.wilayah}
-                        </span>
-                        <span className="text-[10px] text-[#5F6B63] capitalize">({loc.jenisBibit})</span>
-                      </div>
-                    </td>
-
-                    {/* 2. % Taksasi */}
-                    <td className="py-3.5 px-4 text-center">
-                      <span
-                        className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-extrabold ${
-                          loc.taksasi >= 100
-                            ? "bg-emerald-100 text-emerald-800 border border-emerald-300"
-                            : "bg-amber-100 text-amber-800 border border-amber-300"
-                        }`}
-                      >
-                        {loc.taksasi >= 100 && <CheckCircle2 className="w-3 h-3 text-emerald-600" />}
-                        {formatNumber(loc.taksasi, 1)}%
-                      </span>
-                    </td>
-
-                    {/* 3. Yield */}
-                    <td className="py-3.5 px-4 text-right font-bold text-[#17231B]">
-                      {formatNumber(loc.yieldVal, 2)}
-                    </td>
-
-                    {/* 4. HPP (No Rp prefix) */}
-                    <td className="py-3.5 px-4 text-right font-black text-[#16823B]">
-                      {formatNumber(hppVal, 0)}
-                    </td>
-
-                    {/* 5. Status Select Column */}
-                    <td className="py-3.5 px-4 text-center">
-                      {isSelected ? (
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            onSelectLokasi(loc.lokasi);
-                          }}
-                          className="px-3.5 py-1 rounded-full bg-[#0B6B32] text-white text-xs font-bold shadow-xs inline-flex items-center gap-1.5 hover:bg-[#074f24] transition-all"
-                        >
-                          <CheckCircle2 className="w-3.5 h-3.5 text-white" />
-                          <span>Selected</span>
-                        </button>
-                      ) : (
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            onSelectLokasi(loc.lokasi);
-                          }}
-                          className="text-xs text-[#89958C] hover:text-[#16823B] font-medium transition-colors cursor-pointer"
-                        >
-                          Klik pilih
-                        </button>
-                      )}
-                    </td>
-                  </tr>
-                );
-              })
-            )}
-          </tbody>
-        </table>
-      </div>
-
-      {/* Footer Info & Pagination Controls */}
-      <div className="p-3.5 bg-[#F8FAF9] border-t border-[#EAEFEB] text-xs text-[#5F6B63] flex flex-col sm:flex-row items-center justify-between gap-3">
-        <div>
-          {filteredList.length > 0 ? (
-            <span>
-              Menampilkan <strong className="text-[#17231B]">{startIndex + 1}</strong> - <strong className="text-[#17231B]">{endIndex}</strong> dari <strong className="text-[#17231B]">{filteredList.length}</strong> lokasi perkebunan
-            </span>
-          ) : (
-            <span>Tidak ada data lokasi</span>
-          )}
+      {loading ? (
+        <div className="py-12 flex flex-col justify-center items-center">
+          <div className="w-6 h-6 border-2 border-[#16823B] border-t-transparent rounded-full animate-spin mb-2" />
+          <p className="text-xs text-[#5F6B63]">Memuat data lokasi HPP...</p>
         </div>
+      ) : sortedFilteredList.length === 0 ? (
+        <div className="p-8 text-center bg-[#F7F9F7] rounded-xl border border-dashed border-[#DDE5DF]">
+          <p className="text-sm font-semibold text-[#5F6B63]">Tidak ada data Lokasi HPP</p>
+          <p className="text-xs text-[#89938D] mt-1">Coba sesuaikan filter wilayah atau pencarian di atas.</p>
+        </div>
+      ) : (
+        <>
+          <div className="overflow-x-auto rounded-xl border border-[#DDE5DF]">
+            <table className="w-full text-xs text-left">
+              <thead className="bg-[#F7F9F7] text-[#17231B] uppercase font-bold border-b border-[#DDE5DF]">
+                <tr>
+                  <th className="py-3 px-4">Lokasi</th>
+                  <th className="py-3 px-4 text-center">% Taksasi</th>
+                  <th className="py-3 px-4 text-right">Yield (Ton/Ha)</th>
+                  <th className="py-3 px-4 text-right">{isRpKg ? "HPP (Rp/Kg)" : "HPP (Rp/Ha)"}</th>
+                  <th className="py-3 px-4 text-center">Status Select</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-[#DDE5DF]/60">
+                {paginatedList.map((loc) => {
+                  const isSelected = selectedLokasiCode === loc.lokasi;
+                  const hppVal = isRpKg ? loc.rpKg : loc.rpHa;
 
-        {totalPages > 1 && (
-          <div className="flex items-center gap-1.5">
-            <button
-              onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
-              disabled={currentPage === 1}
-              className="px-2.5 py-1.5 rounded-lg border border-[#DDE5DF] bg-white text-xs font-bold text-[#17231B] hover:bg-[#EAF3EC] disabled:opacity-40 disabled:cursor-not-allowed transition-all inline-flex items-center gap-1"
-            >
-              <ChevronLeft className="w-3.5 h-3.5" />
-              <span>Sebelumnya</span>
-            </button>
+                  return (
+                    <tr
+                      key={loc.lokasi}
+                      onClick={() => onSelectLokasi(loc.lokasi)}
+                      className={`cursor-pointer transition-all ${
+                        isSelected
+                          ? "bg-[#A8D437]/20 border-l-4 border-l-[#16823B] font-medium text-[#0B6B32]"
+                          : "hover:bg-[#F7F9F7] text-[#17231B]"
+                      }`}
+                    >
+                      {/* 1. Lokasi */}
+                      <td className="py-3 px-4 font-bold">
+                        <div className="flex items-center gap-2">
+                          <span className="w-2 h-2 rounded-full bg-[#16823B]" />
+                          <span className="font-bold text-[#17231B]">{loc.lokasi}</span>
+                          <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#16823B]/10 text-[#16823B] border border-[#16823B]/20">
+                            {loc.wilayah}
+                          </span>
+                          <span className="text-xs text-[#5F6B63] font-normal">({loc.jenisBibit})</span>
+                        </div>
+                      </td>
 
-            {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-              <button
-                key={page}
-                onClick={() => setCurrentPage(page)}
-                className={`px-3 py-1.5 rounded-lg text-xs font-black transition-all ${
-                  currentPage === page
-                    ? "bg-[#16823B] text-white shadow-2xs"
-                    : "bg-white border border-[#DDE5DF] text-[#17231B] hover:bg-[#EAF3EC]"
-                }`}
-              >
-                {page}
-              </button>
-            ))}
+                      {/* 2. % Taksasi */}
+                      <td className="py-3 px-4 text-center">
+                        <span
+                          className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold ${
+                            loc.taksasi >= 100
+                              ? "bg-[#16823B] text-white"
+                              : "bg-amber-100 text-amber-800 border border-amber-300"
+                          }`}
+                        >
+                          {loc.taksasi >= 100 && <CheckCircle2 className="w-3 h-3 text-white" />}
+                          {formatNumber(loc.taksasi, 1)}%
+                        </span>
+                      </td>
 
-            <button
-              onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))}
-              disabled={currentPage === totalPages}
-              className="px-2.5 py-1.5 rounded-lg border border-[#DDE5DF] bg-white text-xs font-bold text-[#17231B] hover:bg-[#EAF3EC] disabled:opacity-40 disabled:cursor-not-allowed transition-all inline-flex items-center gap-1"
-            >
-              <span>Selanjutnya</span>
-              <ChevronRight className="w-3.5 h-3.5" />
-            </button>
+                      {/* 3. Yield */}
+                      <td className="py-3 px-4 text-right font-mono font-semibold text-[#17231B]">
+                        {formatNumber(loc.yieldVal, 2)}
+                      </td>
+
+                      {/* 4. HPP */}
+                      <td className="py-3 px-4 text-right font-mono font-bold text-[#16823B]">
+                        {formatNumber(hppVal, 0)}
+                      </td>
+
+                      {/* 5. Status Select */}
+                      <td className="py-3 px-4 text-center">
+                        {isSelected ? (
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-[#16823B] text-white text-[10px] font-bold">
+                            <CheckCircle2 className="w-3 h-3" /> Selected
+                          </span>
+                        ) : (
+                          <span className="text-[10px] text-[#89938D]">Klik pilih</span>
+                        )}
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
           </div>
-        )}
-      </div>
+
+          {/* Pagination Controls */}
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-3 mt-4 pt-3 border-t border-[#DDE5DF]/80 text-xs text-[#5F6B63]">
+            <span>
+              Menampilkan <strong className="text-[#17231B]">{startIndex + 1}</strong> -{" "}
+              <strong className="text-[#17231B]">{endIndex}</strong> dari{" "}
+              <strong className="text-[#16823B] font-bold">{filteredList.length}</strong> lokasi perkebunan
+            </span>
+
+            <div className="flex items-center gap-1.5">
+              <button
+                disabled={currentPage === 1}
+                onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
+                className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg border border-[#DDE5DF] bg-white text-[#17231B] hover:bg-[#F7F9F7] disabled:opacity-40 disabled:cursor-not-allowed text-xs font-semibold transition-colors cursor-pointer"
+              >
+                <ChevronLeft className="w-3.5 h-3.5" />
+                <span>Sebelumnya</span>
+              </button>
+
+              <span className="px-2.5 py-1 text-xs font-bold text-[#16823B] bg-[#16823B]/10 rounded-lg border border-[#16823B]/20">
+                {currentPage} / {totalPages}
+              </span>
+
+              <button
+                disabled={currentPage === totalPages}
+                onClick={() => setCurrentPage((prev) => Math.min(totalPages, prev + 1))}
+                className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg border border-[#DDE5DF] bg-white text-[#17231B] hover:bg-[#F7F9F7] disabled:opacity-40 disabled:cursor-not-allowed text-xs font-semibold transition-colors cursor-pointer"
+              >
+                <span>Selanjutnya</span>
+                <ChevronRight className="w-3.5 h-3.5" />
+              </button>
+            </div>
+          </div>
+        </>
+      )}
     </div>
   );
 }
-
