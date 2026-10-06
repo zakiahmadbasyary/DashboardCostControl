@@ -409,7 +409,7 @@ export default function AdminDashboardPage() {
       url: hargaMaterialUrl,
       adminUrl: `${hargaMaterialUrl}/admin`,
       icon: Boxes,
-      isHosted: false,
+      isHosted: true,
     },
     {
       code: "poll_pg1",
