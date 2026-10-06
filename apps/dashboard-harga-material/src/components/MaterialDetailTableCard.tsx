@@ -55,7 +55,7 @@ export default function MaterialDetailTableCard({
           </div>
           <div>
             <h2 className="font-extrabold text-lg text-[#17231B] tracking-tight">
-              CARD 2 — DETAIL HARGA MATERIAL
+              DETAIL HARGA MATERIAL
             </h2>
             <p className="text-xs text-[#5F6B63]">
               Daftar rincian nilai harga material (<span className="font-semibold text-[#16823B]">nilai = price / price_unit</span>) untuk bulan 1 sampai 12
