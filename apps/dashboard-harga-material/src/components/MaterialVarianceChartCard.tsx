@@ -201,7 +201,19 @@ export default function MaterialVarianceChartCard({
           </div>
 
           {/* Line Chart Area */}
-          <div className="bg-white border border-[#DDE5DF] rounded-xl p-3 relative overflow-hidden flex flex-col w-full">
+          <div className="bg-white border border-[#DDE5DF] rounded-xl p-3 relative flex flex-col w-full">
+            
+            {/* Mobile Scroll Hint Banner */}
+            <div className="flex sm:hidden items-center justify-between text-[10px] text-[#5F6B63] bg-[#F7F9F7] px-2.5 py-1.5 rounded-lg border border-[#E0E8E2] font-medium mb-2.5">
+              <span className="flex items-center gap-1.5">
+                <span className="inline-block w-1.5 h-1.5 rounded-full bg-[#16823B] animate-pulse" />
+                Geser grafik garis ke kanan/kiri
+              </span>
+              <span className="font-semibold text-[#16823B]">12 Bulan</span>
+            </div>
+
+            <div className="w-full overflow-x-auto pb-1 touch-pan-x">
+              <div className="flex flex-col w-full min-w-[500px] sm:min-w-0 relative">
             
             <svg
               viewBox={`0 0 ${svgWidth} ${svgHeight}`}
@@ -371,6 +383,8 @@ export default function MaterialVarianceChartCard({
             )}
 
           </div>
+        </div>
+      </div>
 
           {/* Footer Note (Matched 1:1 to Card 1 Footer) */}
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between text-[11px] text-[#5F6B63] border-t border-[#DDE5DF] pt-3 gap-1">

@@ -174,66 +174,82 @@ export default function MaterialAnalysisCard({
               </span>
             </div>
 
-            {/* Visual Bar Chart — Matched 1:1 to HPP Bar Chart Font Styles */}
+            {/* Visual Bar Chart — Scrollable on Mobile, Auto 100% on Desktop */}
             <div className="flex flex-col w-full pt-2 pb-1">
               
-              {/* Bars Row */}
-              <div className="h-52 flex items-end justify-between gap-1 sm:gap-1.5 px-1 w-full pb-1">
-                {chartData.map((bar) => {
-                  const heightPercent = bar.nilai !== null ? Math.max(Math.round((bar.nilai / maxNilai) * 100), 8) : 0;
-                  const monthAbbr = MONTH_ABBR[bar.month - 1] || bar.label;
-
-                  return (
-                    <div
-                      key={bar.month}
-                      className="flex-1 flex flex-col items-center justify-end h-full group cursor-pointer min-w-0"
-                    >
-                      {/* Tooltip on Hover */}
-                      <div className="opacity-0 group-hover:opacity-100 pointer-events-none absolute -top-12 bg-[#17231B] text-white text-[10px] py-1 px-2 rounded-md shadow-lg transition-opacity whitespace-nowrap z-20 font-mono">
-                        <div className="font-bold">{monthAbbr} ({bar.date ? formatDate(bar.date) : "N/A"})</div>
-                        <div className="text-[#84E09B]">{bar.nilai !== null ? formatCurrency(bar.nilai) : "Tidak ada data"}</div>
-                      </div>
-
-                      {/* Value Label above Bar (HPP Font Style: font-mono text-xs font-semibold) */}
-                      {bar.nilai !== null ? (
-                        <span className="text-[8px] min-[380px]:text-[9px] sm:text-[11px] font-mono text-[#17231B] font-semibold opacity-90 group-hover:opacity-100 mb-1 transition-all truncate tracking-tighter w-full text-center">
-                          {formatBarValue(bar.nilai)}
-                        </span>
-                      ) : (
-                        <span className="text-[8px] sm:text-[10px] text-gray-400 mb-1 font-mono">-</span>
-                      )}
-
-                      {/* Bar Container Track (HPP Style: rounded-t-md p-0.5) */}
-                      <div className="w-full bg-[#F2F6F3] rounded-t-md overflow-hidden flex items-end h-full p-0.5">
-                        {bar.nilai !== null ? (
-                          <div
-                            style={{ height: `${heightPercent}%` }}
-                            className="w-full bg-[#8CC63F] hover:bg-[#16823B] transition-all duration-300 rounded-t shadow-2xs"
-                          />
-                        ) : (
-                          <div className="w-full h-1 bg-gray-300 rounded-t-sm" />
-                        )}
-                      </div>
-                    </div>
-                  );
-                })}
+              {/* Mobile Scroll Hint Banner */}
+              <div className="flex sm:hidden items-center justify-between text-[10px] text-[#5F6B63] bg-[#F7F9F7] px-2.5 py-1.5 rounded-lg border border-[#E0E8E2] font-medium mb-2.5">
+                <span className="flex items-center gap-1.5">
+                  <span className="inline-block w-1.5 h-1.5 rounded-full bg-[#16823B] animate-pulse" />
+                  Geser grafik ke kanan/kiri
+                </span>
+                <span className="font-semibold text-[#16823B]">12 Bulan (Jan–Des)</span>
               </div>
 
-              {/* Solid Base Baseline (HPP Style: 2px dark baseline) */}
-              <div className="w-full h-[2px] bg-[#17231B]/20 rounded-full my-1.5" />
+              {/* Horizontal Scroll Wrapper on Mobile (min-w-[500px] on mobile, sm:min-w-0 on desktop) */}
+              <div className="w-full overflow-x-auto pb-1 touch-pan-x">
+                <div className="flex flex-col w-full min-w-[500px] sm:min-w-0">
+                  
+                  {/* Bars Row */}
+                  <div className="h-52 flex items-end justify-between gap-1.5 px-1 w-full pb-1">
+                    {chartData.map((bar) => {
+                      const heightPercent = bar.nilai !== null ? Math.max(Math.round((bar.nilai / maxNilai) * 100), 8) : 0;
+                      const monthAbbr = MONTH_ABBR[bar.month - 1] || bar.label;
 
-              {/* Month Abbr Labels Axis (HPP Font Style: text-[9px] sm:text-xs text-[#5F6B63] font-semibold) */}
-              <div className="flex items-center justify-between gap-1 sm:gap-1.5 px-0.5 w-full mt-1">
-                {chartData.map((bar) => {
-                  const monthAbbr = MONTH_ABBR[bar.month - 1] || bar.label;
-                  return (
-                    <div key={bar.month} className="flex-1 text-center">
-                      <span className="text-[9px] sm:text-xs font-semibold text-[#5F6B63] hover:text-[#17231B] transition-colors truncate block">
-                        {monthAbbr}
-                      </span>
-                    </div>
-                  );
-                })}
+                      return (
+                        <div
+                          key={bar.month}
+                          className="flex-1 flex flex-col items-center justify-end h-full group cursor-pointer min-w-0"
+                        >
+                          {/* Tooltip on Hover */}
+                          <div className="opacity-0 group-hover:opacity-100 pointer-events-none absolute -top-12 bg-[#17231B] text-white text-[10px] py-1 px-2 rounded-md shadow-lg transition-opacity whitespace-nowrap z-20 font-mono">
+                            <div className="font-bold">{monthAbbr} ({bar.date ? formatDate(bar.date) : "N/A"})</div>
+                            <div className="text-[#84E09B]">{bar.nilai !== null ? formatCurrency(bar.nilai) : "Tidak ada data"}</div>
+                          </div>
+
+                          {/* Value Label above Bar (Legible font-mono format) */}
+                          {bar.nilai !== null ? (
+                            <span className="text-[9px] sm:text-[11px] font-mono text-[#17231B] font-semibold opacity-90 group-hover:opacity-100 mb-1 transition-all truncate tracking-tight w-full text-center">
+                              {formatBarValue(bar.nilai)}
+                            </span>
+                          ) : (
+                            <span className="text-[9px] sm:text-[10px] text-gray-400 mb-1 font-mono">-</span>
+                          )}
+
+                          {/* Bar Container Track (HPP Style: rounded-t-md p-0.5) */}
+                          <div className="w-full bg-[#F2F6F3] rounded-t-md overflow-hidden flex items-end h-full p-0.5">
+                            {bar.nilai !== null ? (
+                              <div
+                                style={{ height: `${heightPercent}%` }}
+                                className="w-full bg-[#8CC63F] hover:bg-[#16823B] transition-all duration-300 rounded-t shadow-2xs"
+                              />
+                            ) : (
+                              <div className="w-full h-1 bg-gray-300 rounded-t-sm" />
+                            )}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+
+                  {/* Solid Base Baseline (HPP Style: 2px dark baseline) */}
+                  <div className="w-full h-[2px] bg-[#17231B]/20 rounded-full my-1.5" />
+
+                  {/* Month Abbr Labels Axis */}
+                  <div className="flex items-center justify-between gap-1.5 px-0.5 w-full mt-1">
+                    {chartData.map((bar) => {
+                      const monthAbbr = MONTH_ABBR[bar.month - 1] || bar.label;
+                      return (
+                        <div key={bar.month} className="flex-1 text-center">
+                          <span className="text-[10px] sm:text-xs font-semibold text-[#5F6B63] hover:text-[#17231B] transition-colors truncate block">
+                            {monthAbbr}
+                          </span>
+                        </div>
+                      );
+                    })}
+                  </div>
+
+                </div>
               </div>
 
             </div>
