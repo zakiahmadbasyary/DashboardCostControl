@@ -245,14 +245,16 @@ export default function MaterialAnalysisCard({
 
           </div>
 
-          {/* Right 1 Col: Card Informasi Material (Desain Orange Menonjol & Lebih Berisi) */}
-          <div className="bg-white border-2 border-[#F97316] rounded-2xl flex flex-col justify-between overflow-hidden shadow-md shadow-orange-500/5 self-stretch font-sans">
+          {/* Right 1 Col: Card Informasi Material (Desain Kuning #FCE27A Menonjol & Tanpa Rata-rata) */}
+          <div className="bg-white border-2 border-[#E5C959] rounded-2xl flex flex-col justify-between overflow-hidden shadow-sm self-stretch font-sans">
             
-            {/* 1. Header Banner Orange */}
-            <div className="bg-gradient-to-r from-[#EA580C] via-[#F97316] to-[#FB923C] p-4 text-center border-b-2 border-[#C2410C] text-white shadow-xs">
+            {/* 1. Header Banner Kuning (#FCE27A) */}
+            <div className="bg-[#FCE27A] p-3.5 text-center border-b-2 border-[#E5C959] text-[#17231B] shadow-2xs">
               <div className="flex items-center justify-center gap-2">
-                <Tag className="w-4 h-4 text-amber-100" />
-                <h3 className="text-white text-xs sm:text-sm font-extrabold tracking-wider uppercase">
+                <div className="p-1 rounded-md bg-[#17231B] text-[#FCE27A]">
+                  <Tag className="w-3.5 h-3.5 text-[#FCE27A]" />
+                </div>
+                <h3 className="text-[#17231B] text-xs sm:text-sm font-extrabold tracking-wider uppercase">
                   INFORMASI HARGA TERBARU
                 </h3>
               </div>
@@ -262,18 +264,18 @@ export default function MaterialAnalysisCard({
             <div className="p-5 flex flex-col gap-4 my-auto">
               
               {/* Highlight Price Container */}
-              <div className="bg-[#FFF7ED] border border-[#FFEDD5] rounded-xl p-4 text-center flex flex-col items-center justify-center gap-1 shadow-2xs">
-                <span className="text-[10px] font-extrabold text-[#C2410C] uppercase tracking-widest">
+              <div className="bg-[#FEFCE8] border border-[#FDE047]/70 rounded-xl p-4 text-center flex flex-col items-center justify-center gap-1 shadow-2xs">
+                <span className="text-[10px] font-extrabold text-[#854D0E] uppercase tracking-widest">
                   NILAI HARGA TERAKHIR
                 </span>
-                <div className="text-4xl sm:text-5xl font-black text-[#EA580C] font-mono tracking-tight my-1">
+                <div className="text-4xl sm:text-5xl font-black text-[#17231B] font-mono tracking-tight my-1">
                   {formatNumberOnly(latestNilai)}
                 </div>
-                <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#EA580C] text-white font-extrabold text-xs tracking-wide shadow-2xs">
+                <div className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-[#FCE27A] text-[#17231B] border border-[#E5C959] font-extrabold text-xs tracking-wide shadow-2xs">
                   {uomDisplay}
                 </div>
                 {latestUpdateDate && (
-                  <span className="text-[10px] text-[#9A3412] font-semibold mt-1">
+                  <span className="text-[10px] text-[#713F12] font-semibold mt-1">
                     Update Terakhir: {formatDate(latestUpdateDate)}
                   </span>
                 )}
@@ -297,7 +299,7 @@ export default function MaterialAnalysisCard({
 
                 <div className="flex items-center justify-between border-b border-[#DDE5DF]/70 pb-2">
                   <span className="text-[11px] font-semibold text-[#5F6B63]">Group Material</span>
-                  <span className="px-2 py-0.5 rounded-md bg-[#FFEDD5] text-[#C2410C] font-bold text-[11px]">
+                  <span className="px-2 py-0.5 rounded-md bg-[#FEF08A] text-[#854D0E] border border-[#FDE047] font-bold text-[11px]">
                     {activeMaster.group || "-"}
                   </span>
                 </div>
@@ -310,11 +312,11 @@ export default function MaterialAnalysisCard({
                 </div>
               </div>
 
-              {/* Mini Fluctuation Metrics Grid */}
-              <div className="grid grid-cols-3 gap-2">
-                <div className="bg-[#FFF7ED] border border-[#FFEDD5] rounded-xl p-2.5 text-center">
-                  <span className="text-[9px] font-bold text-[#C2410C] uppercase block">TERTINGGI</span>
-                  <span className="text-xs font-black text-[#EA580C] font-mono mt-0.5 block">
+              {/* Mini Fluctuation Metrics Grid (2 Columns: Tertinggi & Terendah, Tanpa Rata-rata) */}
+              <div className="grid grid-cols-2 gap-2.5">
+                <div className="bg-[#FEFCE8] border border-[#FDE047] rounded-xl p-2.5 text-center">
+                  <span className="text-[9px] font-bold text-[#854D0E] uppercase block">TERTINGGI</span>
+                  <span className="text-xs font-black text-[#713F12] font-mono mt-0.5 block">
                     {formatBarValue(maxNilai)}
                   </span>
                 </div>
@@ -325,19 +327,12 @@ export default function MaterialAnalysisCard({
                     {formatBarValue(minNilai)}
                   </span>
                 </div>
-
-                <div className="bg-[#F0F9FF] border border-[#E0F2FE] rounded-xl p-2.5 text-center">
-                  <span className="text-[9px] font-bold text-[#0369A1] uppercase block">RATA-RATA</span>
-                  <span className="text-xs font-black text-[#0284C7] font-mono mt-0.5 block">
-                    {formatBarValue(avgNilai)}
-                  </span>
-                </div>
               </div>
 
             </div>
 
             {/* Footer */}
-            <div className="bg-[#FFF7ED] border-t border-[#FFEDD5] py-2 px-4 text-center text-[10px] text-[#C2410C] font-bold">
+            <div className="bg-[#FEFCE8] border-t border-[#FDE047]/60 py-2 px-4 text-center text-[10px] text-[#854D0E] font-bold">
               Master Data Logistik PG 1
             </div>
 
