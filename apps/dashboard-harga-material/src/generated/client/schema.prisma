@@ -1,0 +1,48 @@
+// Skema Database Prisma untuk Dashboard Harga Material
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/client"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// 1. Tabel MasterSheet: menyimpan data master/identitas material
+model MasterSheet {
+  material            String   @id @map("material") @db.VarChar(100)
+  abcIndicator        String?  @map("abc_indicator") @db.VarChar(20)
+  materialDescription String?  @map("material_description") @db.Text
+  baseUnitOfMeasure   String?  @map("base_unit_of_measure") @db.VarChar(20)
+  group               String?  @map("group") @db.VarChar(100)
+  createdAt           DateTime @default(now()) @map("created_at")
+  updatedAt           DateTime @updatedAt @map("updated_at")
+
+  bahanMaterialList BahanMaterial[]
+
+  @@map("mastersheet")
+}
+
+// 2. Tabel BahanMaterial: menyimpan data harga dan informasi pendukung material
+model BahanMaterial {
+  id              BigInt    @id @default(autoincrement()) @map("id")
+  material        String    @map("material") @db.VarChar(100)
+  price           Decimal?  @map("price") @db.Decimal(18, 2)
+  currency        String?   @map("currency") @db.VarChar(10)
+  priceUnit       Decimal?  @map("price_unit") @db.Decimal(18, 2)
+  materialGroup   String?   @map("material_group") @db.VarChar(100)
+  plant           String?   @map("plant") @db.VarChar(100)
+  purchasingGroup String?   @map("purchasing_group") @db.VarChar(100)
+  lastChange      DateTime? @map("last_change") @db.Date
+  createdBy       String?   @map("created_by") @db.VarChar(100)
+  update          DateTime? @map("update") @db.Date
+  nilai           Decimal?  @map("nilai") @db.Decimal(18, 4)
+  createdAt       DateTime  @default(now()) @map("created_at")
+  updatedAt       DateTime  @updatedAt @map("updated_at")
+
+  masterSheet MasterSheet @relation(fields: [material], references: [material], onUpdate: Cascade, onDelete: Restrict)
+
+  @@map("bahan_material")
+}

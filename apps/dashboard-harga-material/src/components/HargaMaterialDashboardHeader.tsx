@@ -28,7 +28,7 @@ export default function HargaMaterialDashboardHeader() {
                 Dashboard Harga Material
               </span>
               <span className="text-xs sm:text-sm text-[#5F6B63] hidden sm:block font-medium leading-tight mt-0.5">
-                Master Data Logistik &amp; Harga Material
+                Dashboard Cost Control
               </span>
             </div>
           </a>
