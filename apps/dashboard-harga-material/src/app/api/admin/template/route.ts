@@ -1,8 +1,26 @@
 import { NextResponse } from "next/server";
+import fs from "fs";
+import path from "path";
 import * as XLSX from "xlsx";
 
 export async function GET() {
   try {
+    const filename = "template_harga_material.xlsx";
+    const filePath = path.join(process.cwd(), "public", "templates", filename);
+
+    // If static template file exists in public/templates/, serve it directly
+    if (fs.existsSync(filePath)) {
+      const fileBuffer = fs.readFileSync(filePath);
+      return new Response(fileBuffer, {
+        status: 200,
+        headers: {
+          "Content-Type": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+          "Content-Disposition": `attachment; filename="${filename}"`,
+        },
+      });
+    }
+
+    // Fallback: Generate template dynamically using XLSX if static file is not present yet
     const templateData = [
       {
         "Kode Material": "MAT-PUPUK-01",
@@ -64,11 +82,11 @@ export async function GET() {
       status: 200,
       headers: {
         "Content-Type": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-        "Content-Disposition": 'attachment; filename="DataHargaMaterial_Template.xlsx"',
+        "Content-Disposition": `attachment; filename="${filename}"`,
       },
     });
   } catch (error: unknown) {
-    console.error("Error generating template:", error);
-    return NextResponse.json({ success: false, message: "Gagal membuat template Excel." }, { status: 500 });
+    console.error("Error serving/generating template:", error);
+    return NextResponse.json({ success: false, message: "Gagal mengambil/membuat template Excel." }, { status: 500 });
   }
 }
