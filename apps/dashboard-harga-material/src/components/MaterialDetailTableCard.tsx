@@ -64,10 +64,10 @@ export default function MaterialDetailTableCard({
   const paginatedRows = filteredRows.slice(startIndex, startIndex + itemsPerPage);
 
   return (
-    <div className="bg-white border border-[#DDE5DF] rounded-2xl p-5 shadow-xs scroll-mt-24 font-sans" suppressHydrationWarning>
+    <div className="bg-white border border-[#DDE5DF] rounded-2xl p-4 sm:p-5 shadow-xs scroll-mt-24 font-sans" suppressHydrationWarning>
       
       {/* 1. Header & Sub-Filters Bar (Matched 1:1 to LocationAnalysis.tsx WIP) */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4 pb-3 border-b border-[#DDE5DF]">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 mb-4 pb-3 border-b border-[#DDE5DF]">
         <div className="flex items-center gap-2">
           <div className="p-2 rounded-lg bg-[#16823B]/10 text-[#16823B]">
             <FileSpreadsheet className="w-4 h-4" />

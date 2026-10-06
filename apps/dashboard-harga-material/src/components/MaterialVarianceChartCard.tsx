@@ -181,7 +181,7 @@ export default function MaterialVarianceChartCard({
         <div className="space-y-2.5">
           
           {/* Material Legend Pills Bar */}
-          <div className="flex flex-wrap items-center gap-1.5 bg-[#F8FAF9] p-2 rounded-xl border border-[#DDE5DF]">
+          <div className="flex flex-wrap items-center gap-1.5 bg-[#F8FAF9] p-2 rounded-xl border border-[#DDE5DF] max-h-24 sm:max-h-none overflow-y-auto">
             <span className="text-[10px] font-bold text-[#5F6B63] uppercase tracking-wider mr-1">Legend:</span>
             {materialsWithColor.map((mat) => (
               <div
@@ -193,7 +193,7 @@ export default function MaterialVarianceChartCard({
                   style={{ backgroundColor: mat.color }}
                 />
                 <span className="font-mono font-bold text-[#17231B]">{mat.material}</span>
-                <span className="text-[#5F6B63] text-[9.5px] truncate max-w-[120px]" title={mat.materialDescription}>
+                <span className="text-[#5F6B63] text-[9.5px] truncate max-w-[100px] sm:max-w-[120px]" title={mat.materialDescription}>
                   ({mat.materialDescription})
                 </span>
               </div>

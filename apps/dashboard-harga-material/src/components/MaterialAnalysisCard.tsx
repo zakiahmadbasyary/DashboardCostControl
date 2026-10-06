@@ -95,21 +95,21 @@ export default function MaterialAnalysisCard({
     : "RP/Unit";
 
   return (
-    <div className="bg-white border border-[#DDE5DF] rounded-2xl p-6 shadow-xs space-y-6 font-sans" suppressHydrationWarning>
+    <div className="bg-white border border-[#DDE5DF] rounded-2xl p-4 sm:p-6 shadow-xs space-y-4 sm:space-y-6 font-sans" suppressHydrationWarning>
       
       {/* 1. Header & Active Material Info */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[#DDE5DF] pb-5">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3.5 border-b border-[#DDE5DF] pb-4 sm:pb-5">
         
         {/* Title */}
-        <div className="flex items-center gap-3">
-          <div className="p-2.5 rounded-xl bg-[#16823B]/10 text-[#16823B] shrink-0">
-            <BarChart3 className="w-5 h-5" />
+        <div className="flex items-center gap-2.5 sm:gap-3">
+          <div className="p-2 sm:p-2.5 rounded-xl bg-[#16823B]/10 text-[#16823B] shrink-0">
+            <BarChart3 className="w-4 h-4 sm:w-5 sm:h-5" />
           </div>
           <div>
-            <h3 className="font-bold text-base text-[#17231B]">
+            <h3 className="font-bold text-sm sm:text-base text-[#17231B]">
               Analisis Harga Material
             </h3>
-            <p className="text-xs text-[#5F6B63]">
+            <p className="text-[11px] sm:text-xs text-[#5F6B63]">
               Perkembangan harga material bulan 1 sampai 12 berdasarkan data <code className="text-[#16823B] font-semibold">bahan_material.nilai</code>
             </p>
           </div>
@@ -117,11 +117,11 @@ export default function MaterialAnalysisCard({
 
         {/* Active Material Badge */}
         {activeMaster && (
-          <div className="flex items-center gap-2.5 bg-[#F7F9F7] border border-[#DDE5DF] px-3.5 py-2 rounded-xl shrink-0 shadow-2xs">
-            <Package className="w-4 h-4 text-[#16823B]" />
-            <div className="flex flex-col">
-              <span className="text-[10px] font-bold text-[#5F6B63] uppercase tracking-wide">Material Aktif Grafik:</span>
-              <span className="text-xs font-bold text-[#16823B] truncate max-w-[280px]">
+          <div className="flex items-center gap-2 sm:gap-2.5 bg-[#F7F9F7] border border-[#DDE5DF] px-3 py-1.5 sm:px-3.5 sm:py-2 rounded-xl shrink-0 shadow-2xs">
+            <Package className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#16823B] shrink-0" />
+            <div className="flex flex-col min-w-0">
+              <span className="text-[9px] sm:text-[10px] font-bold text-[#5F6B63] uppercase tracking-wide">Material Aktif Grafik:</span>
+              <span className="text-xs font-bold text-[#16823B] truncate max-w-[200px] sm:max-w-[280px]">
                 {activeMaster.materialDescription ? `${activeMaster.material} - ${activeMaster.materialDescription}` : activeMaster.material}
               </span>
             </div>
@@ -323,7 +323,7 @@ export default function MaterialAnalysisCard({
                 {/* Row 2: Deskripsi */}
                 <div className="flex items-center justify-between border-b border-[#EAF0EB] pb-2 gap-2">
                   <span className="text-xs font-semibold text-[#5F6B63] shrink-0">Deskripsi</span>
-                  <span className="font-semibold text-xs text-[#17231B] text-right truncate max-w-[190px]" title={activeMaster.materialDescription || ""}>
+                  <span className="font-semibold text-xs text-[#17231B] text-right truncate max-w-[140px] sm:max-w-[190px]" title={activeMaster.materialDescription || ""}>
                     {activeMaster.materialDescription || "-"}
                   </span>
                 </div>
