@@ -81,9 +81,11 @@ export default function MaterialAnalysisCard({
     }
   };
 
-  // Find max value in chart data for bar height percentage scaling
+  // Find min, max, and avg values in chart data for bar height scaling & metric summary
   const validNilaiList = chartData.map((d) => d.nilai).filter((v): v is number => v !== null);
   const maxNilai = validNilaiList.length > 0 ? Math.max(...validNilaiList) : 1;
+  const minNilai = validNilaiList.length > 0 ? Math.min(...validNilaiList) : null;
+  const avgNilai = validNilaiList.length > 0 ? validNilaiList.reduce((a, b) => a + b, 0) / validNilaiList.length : null;
 
   // Determine UoM display (e.g. RP/KG or RP/Fertilization)
   const uomDisplay = activeMaster?.baseUnitOfMeasure
@@ -243,39 +245,100 @@ export default function MaterialAnalysisCard({
 
           </div>
 
-          {/* Right 1 Col: Card Informasi Material (Exact Design per User Uploaded Image) */}
-          <div className="bg-white border-2 border-[#005B9E] rounded-xl flex flex-col justify-between overflow-hidden shadow-sm self-stretch">
+          {/* Right 1 Col: Card Informasi Material (Desain Orange Menonjol & Lebih Berisi) */}
+          <div className="bg-white border-2 border-[#F97316] rounded-2xl flex flex-col justify-between overflow-hidden shadow-md shadow-orange-500/5 self-stretch font-sans">
             
-            {/* 1. Solid Blue Header Bar */}
-            <div className="bg-[#0073C6] py-3.5 px-4 text-center border-b-2 border-[#005B9E]">
-              <h3 className="text-white text-sm sm:text-base font-extrabold tracking-wider uppercase font-sans">
-                HARGA TERBARU
-              </h3>
+            {/* 1. Header Banner Orange */}
+            <div className="bg-gradient-to-r from-[#EA580C] via-[#F97316] to-[#FB923C] p-4 text-center border-b-2 border-[#C2410C] text-white shadow-xs">
+              <div className="flex items-center justify-center gap-2">
+                <Tag className="w-4 h-4 text-amber-100" />
+                <h3 className="text-white text-xs sm:text-sm font-extrabold tracking-wider uppercase">
+                  INFORMASI HARGA TERBARU
+                </h3>
+              </div>
             </div>
 
             {/* 2. Body Info Content */}
-            <div className="p-6 flex flex-col items-center justify-center text-center space-y-4 my-auto">
+            <div className="p-5 flex flex-col gap-4 my-auto">
               
-              {/* Large Value Display */}
-              <div className="text-4xl sm:text-5xl font-black text-[#0073C6] font-sans tracking-tight leading-none">
-                {formatNumberOnly(latestNilai)}
+              {/* Highlight Price Container */}
+              <div className="bg-[#FFF7ED] border border-[#FFEDD5] rounded-xl p-4 text-center flex flex-col items-center justify-center gap-1 shadow-2xs">
+                <span className="text-[10px] font-extrabold text-[#C2410C] uppercase tracking-widest">
+                  NILAI HARGA TERAKHIR
+                </span>
+                <div className="text-4xl sm:text-5xl font-black text-[#EA580C] font-mono tracking-tight my-1">
+                  {formatNumberOnly(latestNilai)}
+                </div>
+                <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#EA580C] text-white font-extrabold text-xs tracking-wide shadow-2xs">
+                  {uomDisplay}
+                </div>
+                {latestUpdateDate && (
+                  <span className="text-[10px] text-[#9A3412] font-semibold mt-1">
+                    Update Terakhir: {formatDate(latestUpdateDate)}
+                  </span>
+                )}
               </div>
 
-              {/* RP / Unit Line */}
-              <div className="text-sm sm:text-base font-extrabold text-[#17231B] font-sans tracking-wide">
-                {uomDisplay}
+              {/* Detail Metadata Grid */}
+              <div className="bg-[#F8FAF9] border border-[#DDE5DF] rounded-xl p-3.5 space-y-2.5 text-xs text-[#17231B]">
+                <div className="flex items-center justify-between border-b border-[#DDE5DF]/70 pb-2">
+                  <span className="text-[11px] font-semibold text-[#5F6B63]">Kode Material</span>
+                  <span className="font-mono font-bold text-[#17231B] bg-white px-2 py-0.5 rounded border border-[#DDE5DF]">
+                    {activeMaster.material}
+                  </span>
+                </div>
+
+                <div className="flex items-start justify-between border-b border-[#DDE5DF]/70 pb-2 gap-2">
+                  <span className="text-[11px] font-semibold text-[#5F6B63] shrink-0">Deskripsi</span>
+                  <span className="font-bold text-[#17231B] text-right truncate max-w-[170px]" title={activeMaster.materialDescription || ""}>
+                    {activeMaster.materialDescription || "-"}
+                  </span>
+                </div>
+
+                <div className="flex items-center justify-between border-b border-[#DDE5DF]/70 pb-2">
+                  <span className="text-[11px] font-semibold text-[#5F6B63]">Group Material</span>
+                  <span className="px-2 py-0.5 rounded-md bg-[#FFEDD5] text-[#C2410C] font-bold text-[11px]">
+                    {activeMaster.group || "-"}
+                  </span>
+                </div>
+
+                <div className="flex items-center justify-between">
+                  <span className="text-[11px] font-semibold text-[#5F6B63]">Satuan (UoM)</span>
+                  <span className="font-mono font-bold text-[#17231B]">
+                    {activeMaster.baseUnitOfMeasure || "-"}
+                  </span>
+                </div>
               </div>
 
-              {/* Material Code Footer Line */}
-              <div className="text-xs sm:text-sm font-semibold text-[#17231B] font-sans pt-1">
-                Kode Material : <span className="font-bold text-[#17231B]">{activeMaster.material}</span>
+              {/* Mini Fluctuation Metrics Grid */}
+              <div className="grid grid-cols-3 gap-2">
+                <div className="bg-[#FFF7ED] border border-[#FFEDD5] rounded-xl p-2.5 text-center">
+                  <span className="text-[9px] font-bold text-[#C2410C] uppercase block">TERTINGGI</span>
+                  <span className="text-xs font-black text-[#EA580C] font-mono mt-0.5 block">
+                    {formatBarValue(maxNilai)}
+                  </span>
+                </div>
+
+                <div className="bg-[#F0FDF4] border border-[#DCFCE7] rounded-xl p-2.5 text-center">
+                  <span className="text-[9px] font-bold text-[#166534] uppercase block">TERENDAH</span>
+                  <span className="text-xs font-black text-[#15803D] font-mono mt-0.5 block">
+                    {formatBarValue(minNilai)}
+                  </span>
+                </div>
+
+                <div className="bg-[#F0F9FF] border border-[#E0F2FE] rounded-xl p-2.5 text-center">
+                  <span className="text-[9px] font-bold text-[#0369A1] uppercase block">RATA-RATA</span>
+                  <span className="text-xs font-black text-[#0284C7] font-mono mt-0.5 block">
+                    {formatBarValue(avgNilai)}
+                  </span>
+                </div>
               </div>
 
             </div>
 
-            {/* Optional subtle bottom meta footer */}
-            <div className="bg-[#F7F9F7] border-t border-[#DDE5DF] py-2 px-4 text-center text-[10px] text-[#5F6B63] font-medium">
-              {activeMaster.materialDescription ? `${activeMaster.materialDescription}` : "Master Material Logistik"}
+            {/* Footer */}
+            <div className="bg-[#FFF7ED] border-t border-[#FFEDD5] py-2 px-4 text-center text-[10px] text-[#C2410C] font-bold">
+              Master Data Logistik PG 1
             </div>
 
           </div>
