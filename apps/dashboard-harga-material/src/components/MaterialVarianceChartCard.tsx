@@ -1,7 +1,5 @@
-"use client";
-
 import React, { useState, useMemo } from "react";
-import { LineChart, Layers, AlertCircle } from "lucide-react";
+import { LineChart, Layers, AlertCircle, X, Pin } from "lucide-react";
 import { PivotedTableRow } from "./MaterialDetailTableCard";
 
 interface MaterialVarianceChartCardProps {
@@ -34,6 +32,9 @@ export default function MaterialVarianceChartCard({
   error,
 }: MaterialVarianceChartCardProps) {
   const [hoveredMonthIdx, setHoveredMonthIdx] = useState<number | null>(null);
+  const [pinnedMonthIdx, setPinnedMonthIdx] = useState<number | null>(null);
+
+  const activeMonthIdx = pinnedMonthIdx !== null ? pinnedMonthIdx : hoveredMonthIdx;
 
   // Group materials (all materials belonging to selectedGroup)
   const groupMaterials = useMemo(() => {
@@ -180,27 +181,104 @@ export default function MaterialVarianceChartCard({
       ) : (
         <div className="space-y-2.5">
           
-          {/* Line Chart Area */}
+          {/* Line Chart Area (Full Width Responsive, No Horizontal Scroll on Chart) */}
           <div className="bg-white border border-[#DDE5DF] rounded-xl p-3 relative flex flex-col w-full">
             
-            {/* Mobile Scroll Hint Banner */}
-            <div className="flex sm:hidden items-center justify-between text-[10px] text-[#5F6B63] bg-[#F7F9F7] px-2.5 py-1.5 rounded-lg border border-[#E0E8E2] font-medium mb-2.5">
-              <span className="flex items-center gap-1.5">
-                <span className="inline-block w-1.5 h-1.5 rounded-full bg-[#16823B] animate-pulse" />
-                Geser grafik garis ke kanan/kiri
-              </span>
-              <span className="font-semibold text-[#16823B]">12 Bulan</span>
-            </div>
+            <div className="w-full relative">
+              <div className="flex flex-col w-full relative">
+                
+                {/* Dynamic Hover / Pinned Tooltip Card */}
+                {activeMonthIdx !== null && (
+                  <div
+                    className={`absolute top-1 bg-white border rounded-xl p-3 shadow-xl text-xs min-w-[220px] z-30 transition-all duration-150 ease-out ${
+                      pinnedMonthIdx !== null
+                        ? "pointer-events-auto border-[#16823B] ring-2 ring-[#16823B]/15"
+                        : "pointer-events-none border-[#DDE5DF]"
+                    }`}
+                    style={{
+                      left: `${((padding.left + (activeMonthIdx / 11) * chartWidth) / svgWidth) * 100}%`,
+                      transform: activeMonthIdx > 6 ? "translateX(calc(-100% - 12px))" : "translateX(12px)",
+                    }}
+                  >
+                    <div className="font-bold text-[#17231B] pb-2 mb-2 border-b border-[#DDE5DF] flex items-center justify-between gap-2">
+                      <div className="flex items-center gap-1.5">
+                        {pinnedMonthIdx !== null && <Pin className="w-3 h-3 text-[#16823B] shrink-0 fill-[#16823B]" />}
+                        <span>Bulan: <strong className="text-[#16823B] font-extrabold">{MONTH_ABBR[activeMonthIdx]}</strong></span>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        {pinnedMonthIdx !== null ? (
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setPinnedMonthIdx(null);
+                            }}
+                            className="p-1 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-md transition-colors pointer-events-auto cursor-pointer"
+                            title="Tutup / Lepas Pin"
+                          >
+                            <X className="w-3.5 h-3.5" />
+                          </button>
+                        ) : (
+                          <span className="text-[10px] text-[#5F6B63] bg-[#F7F9F7] px-1.5 py-0.5 rounded border border-[#DDE5DF] font-semibold">
+                            Bln {activeMonthIdx + 1}
+                          </span>
+                        )}
+                      </div>
+                    </div>
 
-            <div className="w-full overflow-x-auto pb-1 touch-pan-x">
-              <div className="flex flex-col w-full min-w-[500px] sm:min-w-0 relative">
+                    {(() => {
+                      const activeMonthPrices = materialsWithColor
+                        .map((m) => m.months[activeMonthIdx])
+                        .filter((v): v is number => v !== null && v !== undefined);
+                      const maxMonthPrice = activeMonthPrices.length > 0 ? Math.max(...activeMonthPrices) : 0;
+
+                      return (
+                        <div className="flex flex-col gap-1 max-h-48 overflow-y-auto pr-1">
+                          {materialsWithColor.map((mat) => {
+                            const priceVal = mat.months[activeMonthIdx];
+                            const isMax = priceVal !== null && priceVal !== undefined && maxMonthPrice > 0 && priceVal === maxMonthPrice;
+
+                            return (
+                              <div key={mat.material} className="flex items-center justify-between gap-3 p-1 rounded hover:bg-[#F7F9F7]">
+                                <div className="flex items-center gap-1.5 min-w-0">
+                                  <span
+                                    className="w-2.5 h-2.5 rounded-full shrink-0"
+                                    style={{ backgroundColor: mat.color }}
+                                  />
+                                  <span className="text-[#5F6B63] font-medium truncate max-w-[110px]" title={mat.materialDescription || mat.material}>
+                                    {mat.material}
+                                  </span>
+                                </div>
+                                <div className="flex items-center gap-1 shrink-0">
+                                  <span
+                                    className={`font-mono text-xs ${
+                                      isMax
+                                        ? "text-rose-600 font-extrabold bg-rose-50 px-1.5 py-0.5 rounded border border-rose-200"
+                                        : "text-[#17231B] font-semibold"
+                                    }`}
+                                  >
+                                    {priceVal !== null && priceVal !== undefined ? formatCurrency(priceVal) : "-"}
+                                  </span>
+                                  {isMax && (
+                                    <span className="text-[9px] font-black text-rose-600 bg-rose-100 px-1 rounded uppercase tracking-tighter">
+                                      MAX
+                                    </span>
+                                  )}
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      );
+                    })()}
+                  </div>
+                )}
             
             <svg
               viewBox={`0 0 ${svgWidth} ${svgHeight}`}
               className="w-full h-auto overflow-visible select-none"
               onMouseLeave={() => setHoveredMonthIdx(null)}
             >
-              {/* Y-Axis Grid Lines & Labels (Font size matched to Bar Chart y-labels) */}
+              {/* Y-Axis Grid Lines & Labels */}
               {yAxisTicks.map((tick, i) => (
                 <g key={i}>
                   <line
@@ -226,7 +304,7 @@ export default function MaterialVarianceChartCard({
                 </g>
               ))}
 
-              {/* Invisible Full-Height Hover Rectangles */}
+              {/* Invisible Full-Height Hover & Click Rectangles */}
               {MONTH_ABBR.map((_, idx) => {
                 const x = getX(idx);
                 const stepX = chartWidth / 11;
@@ -240,20 +318,21 @@ export default function MaterialVarianceChartCard({
                     fill="transparent"
                     className="cursor-pointer"
                     onMouseEnter={() => setHoveredMonthIdx(idx)}
+                    onClick={() => setPinnedMonthIdx((prev) => (prev === idx ? null : idx))}
                   />
                 );
               })}
 
-              {/* Hover Vertical Guide Line */}
-              {hoveredMonthIdx !== null && (
+              {/* Active Month Vertical Guide Line */}
+              {activeMonthIdx !== null && (
                 <line
-                  x1={getX(hoveredMonthIdx)}
+                  x1={getX(activeMonthIdx)}
                   y1={padding.top}
-                  x2={getX(hoveredMonthIdx)}
+                  x2={getX(activeMonthIdx)}
                   y2={svgHeight - padding.bottom}
                   stroke="#16823B"
-                  strokeWidth="1.2"
-                  strokeDasharray="2 2"
+                  strokeWidth={pinnedMonthIdx !== null ? "1.8" : "1.2"}
+                  strokeDasharray={pinnedMonthIdx !== null ? "none" : "2 2"}
                 />
               )}
 
@@ -298,17 +377,18 @@ export default function MaterialVarianceChartCard({
 
                     {/* Data Point Circles */}
                     {validPoints.map((pt) => {
-                      const isHovered = hoveredMonthIdx === pt.monthIdx;
+                      const isActive = activeMonthIdx === pt.monthIdx;
                       return (
                         <circle
                           key={pt.monthIdx}
                           cx={pt.x}
                           cy={pt.y}
-                          r={isHovered ? "4" : "2.5"}
+                          r={isActive ? "4" : "2.5"}
                           fill={mat.color}
                           stroke="#FFFFFF"
                           strokeWidth="1.2"
                           className="transition-all cursor-pointer shadow-2xs"
+                          onClick={() => setPinnedMonthIdx((prev) => (prev === pt.monthIdx ? null : pt.monthIdx))}
                         />
                       );
                     })}
@@ -317,16 +397,27 @@ export default function MaterialVarianceChartCard({
               })}
             </svg>
 
-            {/* Solid 2px Baseline (1:1 with Bar Chart Baseline in Card 1) */}
+            {/* Solid 2px Baseline */}
             <div className="w-full h-[2px] bg-[#17231B]/20 rounded-full my-1" />
 
-            {/* Month Abbr Labels Axis (1:1 with Bar Chart Month Axis in Card 1) */}
+            {/* Month Abbr Labels Axis */}
             <div className="flex items-center justify-between gap-1 sm:gap-1.5 px-0.5 w-full pl-[5.5%] sm:pl-[5.2%]">
               {MONTH_ABBR.map((monthName, idx) => {
-                const isHovered = hoveredMonthIdx === idx;
+                const isSelected = activeMonthIdx === idx;
                 return (
-                  <div key={idx} className="flex-1 text-center cursor-pointer" onMouseEnter={() => setHoveredMonthIdx(idx)}>
-                    <span className={`text-[9px] sm:text-xs font-semibold transition-colors truncate block ${isHovered ? "text-[#17231B] font-bold" : "text-[#5F6B63]"}`}>
+                  <div
+                    key={idx}
+                    className="flex-1 text-center cursor-pointer"
+                    onMouseEnter={() => setHoveredMonthIdx(idx)}
+                    onClick={() => setPinnedMonthIdx((prev) => (prev === idx ? null : idx))}
+                  >
+                    <span
+                      className={`text-[9px] sm:text-xs font-semibold transition-colors truncate block ${
+                        isSelected
+                          ? "text-[#16823B] font-extrabold underline underline-offset-2"
+                          : "text-[#5F6B63]"
+                      }`}
+                    >
                       {monthName}
                     </span>
                   </div>
@@ -334,47 +425,19 @@ export default function MaterialVarianceChartCard({
               })}
             </div>
 
-            {/* Interactive Tooltip Card on Hover (Font matching Card 1 bar chart tooltip) */}
-            {hoveredMonthIdx !== null && (
-              <div className="absolute top-2.5 right-2.5 bg-[#17231B] text-white p-2 rounded-md shadow-lg transition-opacity whitespace-nowrap z-20 font-mono text-[10px] min-w-[180px]">
-                <div className="font-bold border-b border-white/20 pb-1 flex items-center justify-between text-[#84E09B]">
-                  <span>Bulan {MONTH_ABBR[hoveredMonthIdx]}</span>
-                  <span className="text-[9px] text-gray-300">Bln {hoveredMonthIdx + 1}</span>
-                </div>
-                <div className="space-y-1 mt-1.5 max-h-40 overflow-y-auto pr-0.5">
-                  {materialsWithColor.map((mat) => {
-                    const priceVal = mat.months[hoveredMonthIdx];
-                    return (
-                      <div key={mat.material} className="flex items-center justify-between gap-3 text-[10px]">
-                        <div className="flex items-center gap-1.5 truncate">
-                          <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ backgroundColor: mat.color }} />
-                          <span className="font-mono font-semibold truncate" title={mat.materialDescription}>
-                            {mat.material}
-                          </span>
-                        </div>
-                        <span className="font-mono font-bold shrink-0 text-[#84E09B]">
-                          {priceVal !== null ? formatCurrency(priceVal) : "-"}
-                        </span>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-            )}
-
           </div>
         </div>
       </div>
 
-          {/* Footer Note (Matched 1:1 to Card 1 Footer) */}
-          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between text-[11px] text-[#5F6B63] border-t border-[#DDE5DF] pt-3 gap-1">
-            <span>* Apabila terdapat beberapa update di bulan yang sama, menggunakan data <code className="font-semibold text-[#16823B]">MAX(update)</code>.</span>
-            <span className="font-bold text-[#17231B] shrink-0">Jan – Des</span>
-          </div>
-
-        </div>
-      )}
+      {/* Footer Note */}
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between text-[11px] text-[#5F6B63] border-t border-[#DDE5DF] pt-3 gap-1">
+        <span>* Apabila terdapat beberapa update di bulan yang sama, menggunakan data <code className="font-semibold text-[#16823B]">MAX(update)</code>.</span>
+        <span className="font-bold text-[#17231B] shrink-0">Jan – Des</span>
+      </div>
 
     </div>
+  )}
+
+</div>
   );
 }
