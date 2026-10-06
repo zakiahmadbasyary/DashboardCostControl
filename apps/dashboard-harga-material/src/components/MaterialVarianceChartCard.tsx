@@ -110,7 +110,7 @@ export default function MaterialVarianceChartCard({
 
   const formatCurrency = (val: number | null) => {
     if (val === null || val === undefined) return "-";
-    return `Rp ${new Intl.NumberFormat("id-ID", { maximumFractionDigits: 0 }).format(val)}`;
+    return new Intl.NumberFormat("id-ID", { maximumFractionDigits: 0 }).format(val);
   };
 
   const formatYAxisLabel = (val: number) => {

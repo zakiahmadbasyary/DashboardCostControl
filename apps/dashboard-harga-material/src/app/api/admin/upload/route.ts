@@ -202,8 +202,41 @@ export async function POST(request: NextRequest) {
           });
         }
 
-        // 2. Incremental BahanMaterial update (Append / CreateMany new price history rows without deleting previous months)
+        // 2. BahanMaterial update: Overwrite/Replace existing records for the target months being uploaded to prevent duplicate rows
         if (bahanList.length > 0) {
+          // Collect all unique Year-Month combinations in the incoming upload file
+          const dateFilters: { gte: Date; lt: Date }[] = [];
+          const monthMap = new Set<string>();
+
+          for (const item of bahanList) {
+            if (item.update) {
+              const year = item.update.getUTCFullYear();
+              const month = item.update.getUTCMonth(); // 0-indexed
+              const key = `${year}-${month}`;
+              if (!monthMap.has(key)) {
+                monthMap.add(key);
+                const startOfMonth = new Date(Date.UTC(year, month, 1));
+                const endOfMonth = new Date(Date.UTC(year, month + 1, 1));
+                dateFilters.push({ gte: startOfMonth, lt: endOfMonth });
+              }
+            }
+          }
+
+          // Delete existing BahanMaterial records for the months being uploaded
+          if (dateFilters.length > 0) {
+            await tx.bahanMaterial.deleteMany({
+              where: {
+                OR: dateFilters.map((df) => ({
+                  update: {
+                    gte: df.gte,
+                    lt: df.lt,
+                  },
+                })),
+              },
+            });
+          }
+
+          // Insert the new updated records
           const chunkSize = 1000;
           for (let i = 0; i < bahanList.length; i += chunkSize) {
             const chunk = bahanList.slice(i, i + chunkSize);

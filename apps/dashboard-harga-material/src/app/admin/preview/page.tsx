@@ -41,6 +41,7 @@ export default function AdminPreviewPage() {
   const fetchData = async () => {
     setLoading(true);
     setError(null);
+    const startTime = Date.now();
     try {
       const res = await fetch(`/api/admin/preview?tab=${activeTab}`);
       const data = await res.json();
@@ -58,6 +59,11 @@ export default function AdminPreviewPage() {
       const msg = err instanceof Error ? err.message : String(err);
       setError(msg);
     } finally {
+      const elapsed = Date.now() - startTime;
+      const minLoadingMs = 1000;
+      if (elapsed < minLoadingMs) {
+        await new Promise((resolve) => setTimeout(resolve, minLoadingMs - elapsed));
+      }
       setLoading(false);
     }
   };

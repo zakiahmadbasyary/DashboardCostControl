@@ -39,6 +39,7 @@ export default function DashboardHargaMaterialPage() {
   const fetchDashboardData = async (groupParam: string, materialParam: string) => {
     setLoading(true);
     setError(null);
+    const startTime = Date.now();
     try {
       const url = `/api/material/prd-data?group=${encodeURIComponent(
         groupParam
@@ -72,6 +73,11 @@ export default function DashboardHargaMaterialPage() {
       console.error("Error fetching PRD dashboard data:", err);
       setError(err.message || "Terjadi kesalahan jaringan.");
     } finally {
+      const elapsed = Date.now() - startTime;
+      const minLoadingMs = 1000;
+      if (elapsed < minLoadingMs) {
+        await new Promise((resolve) => setTimeout(resolve, minLoadingMs - elapsed));
+      }
       setLoading(false);
     }
   };
