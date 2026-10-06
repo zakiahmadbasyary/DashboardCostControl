@@ -126,7 +126,7 @@ export default function PortalHomePage() {
       url: hargaMaterialUrl,
       icon: Boxes,
       badge: "Master Logistik",
-      isHosted: false,
+      isHosted: true,
     },
     {
       id: "poll-pg1",
