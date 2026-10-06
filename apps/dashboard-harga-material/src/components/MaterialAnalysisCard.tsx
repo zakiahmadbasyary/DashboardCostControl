@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { BarChart3, Tag, Package, RefreshCw, AlertCircle, Info } from "lucide-react";
+import { BarChart3, Tag, Package, RefreshCw, AlertCircle, Info, Clock, TrendingUp, TrendingDown } from "lucide-react";
 
 export interface MonthlyChartItem {
   month: number;
@@ -107,7 +107,7 @@ export default function MaterialAnalysisCard({
           </div>
           <div>
             <h2 className="font-extrabold text-lg text-[#17231B] tracking-tight">
-              CARD 1 — ANALISIS HARGA MATERIAL
+              ANALISIS HARGA MATERIAL
             </h2>
             <p className="text-xs text-[#5F6B63]">
               Perkembangan harga material bulan 1 sampai 12 berdasarkan data <code className="text-[#16823B] font-semibold">bahan_material.nilai</code>
@@ -245,59 +245,86 @@ export default function MaterialAnalysisCard({
 
           </div>
 
-          {/* Right 1 Col: Card Informasi Material (Desain Kuning #FCE27A Menonjol & Tanpa Rata-rata) */}
+          {/* Right 1 Col: Card Informasi Material (Layout Eksekutif & Teratur) */}
           <div className="bg-white border-2 border-[#E5C959] rounded-2xl flex flex-col justify-between overflow-hidden shadow-sm self-stretch font-sans">
             
             {/* 1. Header Banner Kuning (#FCE27A) */}
-            <div className="bg-[#FCE27A] p-3.5 text-center border-b-2 border-[#E5C959] text-[#17231B] shadow-2xs">
-              <div className="flex items-center justify-center gap-2">
+            <div className="bg-[#FCE27A] px-4 py-3 border-b-2 border-[#E5C959] text-[#17231B] flex items-center justify-between shadow-2xs">
+              <div className="flex items-center gap-2">
                 <div className="p-1 rounded-md bg-[#17231B] text-[#FCE27A]">
                   <Tag className="w-3.5 h-3.5 text-[#FCE27A]" />
                 </div>
-                <h3 className="text-[#17231B] text-xs sm:text-sm font-extrabold tracking-wider uppercase">
+                <h3 className="text-[#17231B] text-xs font-extrabold tracking-wider uppercase">
                   INFORMASI HARGA TERBARU
                 </h3>
               </div>
+              <span className="text-[10px] font-bold text-[#854D0E] bg-white/70 px-2 py-0.5 rounded border border-[#E5C959]">
+                PG 1
+              </span>
             </div>
 
-            {/* 2. Body Info Content */}
-            <div className="p-5 flex flex-col gap-4 my-auto">
+            {/* 2. Body Content */}
+            <div className="p-4.5 flex flex-col gap-3.5 my-auto">
               
-              {/* Highlight Price Container */}
-              <div className="bg-[#FEFCE8] border border-[#FDE047]/70 rounded-xl p-4 text-center flex flex-col items-center justify-center gap-1 shadow-2xs">
-                <span className="text-[10px] font-extrabold text-[#854D0E] uppercase tracking-widest">
-                  NILAI HARGA TERAKHIR
+              {/* Hero Price Container */}
+              <div className="bg-gradient-to-br from-[#FEFCE8] to-[#FFFBEB] border border-[#E5C959]/70 rounded-xl p-3.5 text-center flex flex-col items-center justify-center gap-1 shadow-2xs">
+                <span className="text-[10px] font-extrabold text-[#854D0E] uppercase tracking-widest flex items-center gap-1">
+                  <Clock className="w-3 h-3 text-[#854D0E]" />
+                  <span>HARGA TERAKHIR</span>
                 </span>
-                <div className="text-4xl sm:text-5xl font-black text-[#17231B] font-mono tracking-tight my-1">
+                <div className="text-3xl sm:text-4xl font-black text-[#17231B] font-mono tracking-tight my-0.5">
                   {formatNumberOnly(latestNilai)}
                 </div>
-                <div className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-[#FCE27A] text-[#17231B] border border-[#E5C959] font-extrabold text-xs tracking-wide shadow-2xs">
+                <div className="inline-flex items-center gap-1 px-3 py-0.5 rounded-full bg-[#17231B] text-[#FCE27A] font-extrabold text-xs font-mono shadow-2xs">
                   {uomDisplay}
                 </div>
                 {latestUpdateDate && (
-                  <span className="text-[10px] text-[#713F12] font-semibold mt-1">
+                  <span className="text-[10px] text-[#713F12] font-semibold mt-0.5">
                     Update Terakhir: {formatDate(latestUpdateDate)}
                   </span>
                 )}
               </div>
 
-              {/* Detail Metadata Grid */}
-              <div className="bg-[#F8FAF9] border border-[#DDE5DF] rounded-xl p-3.5 space-y-2.5 text-xs text-[#17231B]">
-                <div className="flex items-center justify-between border-b border-[#DDE5DF]/70 pb-2">
+              {/* 2 KPI Cards: Tertinggi & Terendah */}
+              <div className="grid grid-cols-2 gap-2.5">
+                <div className="bg-[#FFF7ED] border border-[#FFEDD5] rounded-xl p-2.5 flex flex-col justify-between">
+                  <div className="flex items-center justify-between text-[10px] font-bold text-[#C2410C]">
+                    <span className="uppercase">TERTINGGI</span>
+                    <TrendingUp className="w-3.5 h-3.5 text-[#EA580C]" />
+                  </div>
+                  <span className="text-sm font-black text-[#C2410C] font-mono mt-1">
+                    {formatBarValue(maxNilai)}
+                  </span>
+                </div>
+
+                <div className="bg-[#F0FDF4] border border-[#DCFCE7] rounded-xl p-2.5 flex flex-col justify-between">
+                  <div className="flex items-center justify-between text-[10px] font-bold text-[#166534]">
+                    <span className="uppercase">TERENDAH</span>
+                    <TrendingDown className="w-3.5 h-3.5 text-[#16A34A]" />
+                  </div>
+                  <span className="text-sm font-black text-[#15803D] font-mono mt-1">
+                    {formatBarValue(minNilai)}
+                  </span>
+                </div>
+              </div>
+
+              {/* Detail Metadata Table */}
+              <div className="bg-[#F8FAF9] border border-[#DDE5DF] rounded-xl p-3 space-y-2 text-xs text-[#17231B]">
+                <div className="flex items-center justify-between border-b border-[#DDE5DF]/70 pb-1.5">
                   <span className="text-[11px] font-semibold text-[#5F6B63]">Kode Material</span>
                   <span className="font-mono font-bold text-[#17231B] bg-white px-2 py-0.5 rounded border border-[#DDE5DF]">
                     {activeMaster.material}
                   </span>
                 </div>
 
-                <div className="flex items-start justify-between border-b border-[#DDE5DF]/70 pb-2 gap-2">
+                <div className="flex items-start justify-between border-b border-[#DDE5DF]/70 pb-1.5 gap-2">
                   <span className="text-[11px] font-semibold text-[#5F6B63] shrink-0">Deskripsi</span>
                   <span className="font-bold text-[#17231B] text-right truncate max-w-[170px]" title={activeMaster.materialDescription || ""}>
                     {activeMaster.materialDescription || "-"}
                   </span>
                 </div>
 
-                <div className="flex items-center justify-between border-b border-[#DDE5DF]/70 pb-2">
+                <div className="flex items-center justify-between border-b border-[#DDE5DF]/70 pb-1.5">
                   <span className="text-[11px] font-semibold text-[#5F6B63]">Group Material</span>
                   <span className="px-2 py-0.5 rounded-md bg-[#FEF08A] text-[#854D0E] border border-[#FDE047] font-bold text-[11px]">
                     {activeMaster.group || "-"}
@@ -308,23 +335,6 @@ export default function MaterialAnalysisCard({
                   <span className="text-[11px] font-semibold text-[#5F6B63]">Satuan (UoM)</span>
                   <span className="font-mono font-bold text-[#17231B]">
                     {activeMaster.baseUnitOfMeasure || "-"}
-                  </span>
-                </div>
-              </div>
-
-              {/* Mini Fluctuation Metrics Grid (2 Columns: Tertinggi & Terendah, Tanpa Rata-rata) */}
-              <div className="grid grid-cols-2 gap-2.5">
-                <div className="bg-[#FEFCE8] border border-[#FDE047] rounded-xl p-2.5 text-center">
-                  <span className="text-[9px] font-bold text-[#854D0E] uppercase block">TERTINGGI</span>
-                  <span className="text-xs font-black text-[#713F12] font-mono mt-0.5 block">
-                    {formatBarValue(maxNilai)}
-                  </span>
-                </div>
-
-                <div className="bg-[#F0FDF4] border border-[#DCFCE7] rounded-xl p-2.5 text-center">
-                  <span className="text-[9px] font-bold text-[#166534] uppercase block">TERENDAH</span>
-                  <span className="text-xs font-black text-[#15803D] font-mono mt-0.5 block">
-                    {formatBarValue(minNilai)}
                   </span>
                 </div>
               </div>
