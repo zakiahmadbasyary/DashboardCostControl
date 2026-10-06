@@ -1,9 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
-import { PrismaClient } from "@/generated/client";
+import { prisma } from "@/lib/prisma";
 import * as XLSX from "xlsx";
 import * as path from "path";
 
-const prisma = new PrismaClient();
 const MAX_FILE_SIZE_BYTES = 15 * 1024 * 1024; // 15MB Limit
 
 export async function POST(request: NextRequest) {
@@ -110,9 +109,10 @@ export async function POST(request: NextRequest) {
         getVal(row, ["material_description", "material description", "deskripsi", "Deskripsi", "Material Description"]) || ""
       ).trim() || null;
 
-      const group = String(
+      const rawGroup = String(
         getVal(row, ["group", "Group", "material_group", "material group", "Material Group"]) || ""
-      ).trim() || null;
+      ).trim();
+      const group = rawGroup || "-";
 
       const uom = String(
         getVal(row, ["base_unit_of_measure", "satuan", "Satuan", "UoM", "Base Unit Of Measure"]) || ""
@@ -131,10 +131,10 @@ export async function POST(request: NextRequest) {
           abcIndicator,
         });
       } else {
-        // Update master description/group if previously empty
+        // Update master description/group if previously empty or '-'
         const existing = masterMap.get(materialCode)!;
         if (!existing.materialDescription && description) existing.materialDescription = description;
-        if (!existing.group && group) existing.group = group;
+        if ((!existing.group || existing.group === "-") && group !== "-") existing.group = group;
         if (!existing.baseUnitOfMeasure && uom) existing.baseUnitOfMeasure = uom;
       }
 

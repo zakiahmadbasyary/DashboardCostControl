@@ -7,16 +7,21 @@ export async function GET(request: NextRequest) {
     const paramGroup = searchParams.get("group") || "";
     const selectedMaterial = searchParams.get("material") || "";
 
-    // 1. Fetch all distinct groups from mastersheet for the Group Filter
-    const masterGroupsRaw = await prisma.masterSheet.findMany({
+    // 1. Fetch all distinct groups strictly from MasterSheet table for the Group Filter
+    const allMastersheetsRaw = await prisma.masterSheet.findMany({
       select: { group: true },
-      distinct: ["group"],
-      orderBy: { group: "asc" },
     });
 
-    const groupsList = masterGroupsRaw
-      .map((g) => g.group)
-      .filter((g): g is string => Boolean(g));
+    const groupsList = Array.from(
+      new Set(
+        allMastersheetsRaw
+          .map((g) => (g.group || "").trim() || "-")
+      )
+    ).sort((a, b) => {
+      if (a === "-") return 1;
+      if (b === "-") return -1;
+      return a.localeCompare(b);
+    });
 
     // Determine active group: paramGroup if valid in groupsList, else default to first group
     let activeGroupCode = paramGroup;
@@ -26,7 +31,13 @@ export async function GET(request: NextRequest) {
 
     // 2. Fetch master materials dependent on activeGroupCode
     const masterWhere: any = {};
-    if (activeGroupCode) {
+    if (activeGroupCode === "-") {
+      masterWhere.OR = [
+        { group: null },
+        { group: "" },
+        { group: { equals: "-", mode: "insensitive" } },
+      ];
+    } else if (activeGroupCode) {
       masterWhere.group = { equals: activeGroupCode, mode: "insensitive" };
     }
 
@@ -38,7 +49,7 @@ export async function GET(request: NextRequest) {
     const materialsList = mastersheets.map((m) => ({
       material: m.material,
       materialDescription: m.materialDescription,
-      group: m.group,
+      group: (m.group || "").trim() || "-",
       baseUnitOfMeasure: m.baseUnitOfMeasure,
       abcIndicator: m.abcIndicator,
     }));
@@ -138,7 +149,7 @@ export async function GET(request: NextRequest) {
       return {
         material: m.material,
         materialDescription: m.materialDescription || "-",
-        group: m.group || "-",
+        group: (m.group || "").trim() || "-",
         baseUnitOfMeasure: m.baseUnitOfMeasure || "-",
         abcIndicator: m.abcIndicator || "-",
         months: monthlyValues,
