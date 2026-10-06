@@ -1,7 +1,15 @@
 "use client";
 
-import React, { useState } from "react";
-import { Table, Search, Download, FileSpreadsheet, RefreshCw, AlertCircle } from "lucide-react";
+import React, { useState, useEffect } from "react";
+import {
+  Table,
+  Search,
+  FileSpreadsheet,
+  RefreshCw,
+  AlertCircle,
+  ChevronLeft,
+  ChevronRight,
+} from "lucide-react";
 
 export interface PivotedTableRow {
   material: string;
@@ -26,6 +34,13 @@ export default function MaterialDetailTableCard({
   onRetry,
 }: MaterialDetailTableCardProps) {
   const [searchTerm, setSearchTerm] = useState<string>("");
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const itemsPerPage = 10;
+
+  // Reset pagination on search change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm]);
 
   const formatNumber = (val: number | null) => {
     if (val === null || val === undefined) return "-";
@@ -44,130 +59,181 @@ export default function MaterialDetailTableCard({
     );
   });
 
+  const totalPages = Math.max(1, Math.ceil(filteredRows.length / itemsPerPage));
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const paginatedRows = filteredRows.slice(startIndex, startIndex + itemsPerPage);
+
   return (
-    <div className="bg-white border border-[#DDE5DF] rounded-2xl p-6 shadow-xs space-y-5 font-sans" suppressHydrationWarning>
+    <div className="bg-white border border-[#DDE5DF] rounded-2xl p-5 shadow-xs scroll-mt-24 font-sans" suppressHydrationWarning>
       
-      {/* 1. Header Controls */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-[#DDE5DF] pb-4">
-        <div className="flex items-center gap-3">
-          <div className="p-3 bg-[#16823B]/10 text-[#16823B] rounded-xl shrink-0">
-            <FileSpreadsheet className="w-6 h-6" />
+      {/* 1. Header & Sub-Filters Bar (Matched 1:1 to LocationAnalysis.tsx WIP) */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4 pb-3 border-b border-[#DDE5DF]">
+        <div className="flex items-center gap-2">
+          <div className="p-2 rounded-lg bg-[#16823B]/10 text-[#16823B]">
+            <FileSpreadsheet className="w-4 h-4" />
           </div>
           <div>
-            <h2 className="font-extrabold text-lg text-[#17231B] tracking-tight">
-              DETAIL HARGA MATERIAL
-            </h2>
+            <h3 className="font-bold text-base text-[#17231B]">Detail Harga Material</h3>
             <p className="text-xs text-[#5F6B63]">
-              Daftar rincian nilai harga material (<span className="font-semibold text-[#16823B]">nilai = price / price_unit</span>) untuk bulan 1 sampai 12
+              Daftar rincian nilai harga material (nilai = price / price_unit) untuk bulan 1 sampai 12.{" "}
+              <span className="font-semibold text-[#16823B]">* Seluruh nilai biaya disajikan dalam Rupiah (Rp)</span>
             </p>
           </div>
         </div>
 
         {/* Table Search Input */}
         <div className="relative min-w-[240px] w-full sm:w-auto">
-          <Search className="w-4 h-4 text-[#89938D] absolute left-3 top-1/2 -translate-y-1/2" />
+          <Search className="w-3.5 h-3.5 text-[#89938D] absolute left-3 top-1/2 -translate-y-1/2" />
           <input
             type="text"
             placeholder="Cari material / deskripsi / group..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-9 pr-3 py-2 text-xs bg-[#F7F9F7] border border-[#DDE5DF] rounded-xl focus:outline-none focus:border-[#16823B] focus:bg-white text-[#17231B] font-medium"
+            className="w-full pl-8 pr-3 py-1.5 text-xs bg-[#F7F9F7] border border-[#DDE5DF] rounded-lg focus:outline-none focus:border-[#16823B] focus:bg-white text-[#17231B] font-medium"
           />
         </div>
       </div>
 
       {/* 2. Pivoted Data Table Container */}
       {loading ? (
-        <div className="py-16 text-center text-[#5F6B63] space-y-3 bg-[#F7F9F7] rounded-xl border border-dashed border-[#DDE5DF]">
-          <RefreshCw className="w-8 h-8 animate-spin mx-auto text-[#16823B]" />
-          <p className="text-xs font-semibold">Memuat rincian tabel detail harga material...</p>
+        <div className="py-12 flex flex-col justify-center items-center">
+          <div className="w-6 h-6 border-2 border-[#16823B] border-t-transparent rounded-full animate-spin mb-2" />
+          <p className="text-xs text-[#5F6B63]">Memuat rincian tabel detail harga material...</p>
         </div>
       ) : error ? (
-        <div className="py-12 px-6 text-center bg-red-50 border border-red-200 rounded-xl space-y-3">
-          <AlertCircle className="w-8 h-8 mx-auto text-red-600" />
+        <div className="py-10 px-6 text-center bg-red-50 border border-red-200 rounded-xl space-y-3">
+          <AlertCircle className="w-7 h-7 mx-auto text-red-600" />
           <p className="text-xs font-bold text-red-700">Gagal memuat tabel detail harga material.</p>
           <button
             onClick={onRetry}
-            className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-xl text-xs font-bold transition-colors cursor-pointer"
+            className="px-3.5 py-1.5 bg-red-600 hover:bg-red-700 text-white rounded-lg text-xs font-bold transition-colors cursor-pointer"
           >
             Silakan coba lagi
           </button>
         </div>
       ) : (
-        <div className="overflow-x-auto rounded-xl border border-[#DDE5DF]">
-          <table className="w-full text-xs text-left">
-            <thead className="bg-[#F7F9F7] text-[#17231B] uppercase font-bold border-b border-[#DDE5DF]">
-              <tr>
-                <th className="py-3 px-3.5 sticky left-0 bg-[#F7F9F7] z-10 border-r border-[#DDE5DF] min-w-[110px]">
-                  Material
-                </th>
-                <th className="py-3 px-3.5 min-w-[200px]">Deskripsi</th>
-                <th className="py-3 px-3.5 min-w-[110px]">Group</th>
-                <th className="py-3 px-3.5 text-center min-w-[70px]">UoM</th>
-                
-                {/* Columns 1 to 12 */}
-                {Array.from({ length: 12 }, (_, i) => (
-                  <th key={i + 1} className="py-3 px-3 text-right min-w-[75px] font-mono">
-                    {i + 1}
-                  </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-[#DDE5DF]/70 text-[#17231B]">
-              {filteredRows.length === 0 ? (
+        <>
+          <div className="overflow-x-auto rounded-xl border border-[#DDE5DF]">
+            <table className="w-full text-xs text-left">
+              <thead className="bg-[#F7F9F7] text-[#17231B] uppercase font-bold border-b border-[#DDE5DF]">
                 <tr>
-                  <td colSpan={16} className="py-12 text-center text-[#89938D] font-medium bg-[#F7F9F7]/50">
-                    Tidak ada data material.
-                  </td>
+                  <th className="py-3 px-4 sticky left-0 bg-[#F7F9F7] z-10 border-r border-[#DDE5DF] min-w-[120px]">
+                    Material
+                  </th>
+                  <th className="py-3 px-4 min-w-[220px]">Deskripsi</th>
+                  <th className="py-3 px-4 min-w-[120px]">Group</th>
+                  <th className="py-3 px-4 text-center min-w-[70px]">UoM</th>
+                  
+                  {/* Columns 1 to 12 */}
+                  {Array.from({ length: 12 }, (_, i) => (
+                    <th key={i + 1} className="py-3 px-3 text-right min-w-[80px] font-mono">
+                      Bln {i + 1}
+                    </th>
+                  ))}
                 </tr>
-              ) : (
-                filteredRows.map((row) => (
-                  <tr key={row.material} className="hover:bg-[#F7F9F7] transition-colors">
-                    {/* Material Code (Sticky Left Column) */}
-                    <td className="py-3 px-3.5 font-bold font-mono text-[#16823B] sticky left-0 bg-white hover:bg-[#F7F9F7] border-r border-[#DDE5DF] z-10">
-                      {row.material}
+              </thead>
+              <tbody className="divide-y divide-[#DDE5DF]/60">
+                {filteredRows.length === 0 ? (
+                  <tr>
+                    <td colSpan={16} className="py-10 text-center text-[#89938D] font-medium bg-[#F7F9F7]/50">
+                      Tidak ada data material yang sesuai filter/pencarian.
                     </td>
-
-                    {/* Description */}
-                    <td className="py-3 px-3.5 font-semibold text-[#17231B]">
-                      {row.materialDescription}
-                    </td>
-
-                    {/* Group */}
-                    <td className="py-3 px-3.5 font-medium text-[#5F6B63]">
-                      <span className="px-2 py-0.5 rounded-md bg-gray-100 text-[11px] font-semibold text-[#17231B]">
-                        {row.group}
-                      </span>
-                    </td>
-
-                    {/* UoM */}
-                    <td className="py-3 px-3.5 text-center font-mono text-[#5F6B63]">
-                      {row.baseUnitOfMeasure}
-                    </td>
-
-                    {/* Monthly Values 1..12 */}
-                    {row.months.map((val, monthIdx) => (
-                      <td
-                        key={monthIdx}
-                        className={`py-3 px-3 text-right font-mono font-medium ${
-                          val !== null ? "text-[#17231B]" : "text-gray-300 font-light"
-                        }`}
-                      >
-                        {formatNumber(val)}
-                      </td>
-                    ))}
                   </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        </div>
-      )}
+                ) : (
+                  paginatedRows.map((row) => {
+                    const validVals = row.months.filter((v): v is number => v !== null && v !== undefined);
+                    const maxVal = validVals.length > 0 ? Math.max(...validVals) : null;
 
-      <div className="flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-[#5F6B63] pt-2">
-        <span>Menampilkan {filteredRows.length} dari {rows.length} material master.</span>
-        <span>* Format nilai dalam Rupiah (Rp) per unit dasar (UoM).</span>
-      </div>
+                    return (
+                      <tr key={row.material} className="hover:bg-[#F7F9F7] text-[#17231B] transition-all">
+                        {/* Material Code (Sticky Left Column with Green Dot indicator like WIP Location) */}
+                        <td className="py-3 px-4 font-bold font-mono text-[#17231B] sticky left-0 bg-white border-r border-[#DDE5DF] z-10">
+                          <div className="flex items-center gap-2">
+                            <span className="w-2 h-2 rounded-full bg-[#16823B] shrink-0" />
+                            <span>{row.material}</span>
+                          </div>
+                        </td>
+
+                        {/* Description */}
+                        <td className="py-3 px-4 font-semibold text-[#17231B]">
+                          {row.materialDescription || "-"}
+                        </td>
+
+                        {/* Group */}
+                        <td className="py-3 px-4">
+                          <span className="px-2.5 py-0.5 rounded-full bg-[#E8F5E9] text-[#16823B] border border-[#A5D6A7] font-semibold text-[11px]">
+                            {row.group || "-"}
+                          </span>
+                        </td>
+
+                        {/* UoM */}
+                        <td className="py-3 px-4 text-center font-mono text-[#5F6B63] font-normal">
+                          {row.baseUnitOfMeasure || "-"}
+                        </td>
+
+                        {/* Monthly Values 1..12 */}
+                        {row.months.map((val, monthIdx) => {
+                          const isMax = val !== null && maxVal !== null && val === maxVal;
+                          return (
+                            <td
+                              key={monthIdx}
+                              className={`py-3 px-3 text-right font-mono ${
+                                val === null
+                                  ? "text-gray-300 font-light"
+                                  : isMax
+                                  ? "font-bold text-[#17231B] bg-[#FEFCE8]/80"
+                                  : "font-normal text-[#17231B]"
+                              }`}
+                              title={isMax ? "Nilai Tertinggi Tahun Ini" : undefined}
+                            >
+                              {formatNumber(val)}
+                            </td>
+                          );
+                        })}
+                      </tr>
+                    );
+                  })
+                )}
+              </tbody>
+            </table>
+          </div>
+
+          {/* 3. Pagination Controls (Matched 1:1 to LocationAnalysis.tsx WIP) */}
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-3 mt-4 pt-3 border-t border-[#DDE5DF]/80 text-xs text-[#5F6B63]">
+            <span>
+              Menampilkan <strong className="text-[#17231B]">{filteredRows.length > 0 ? startIndex + 1 : 0}</strong> -{" "}
+              <strong className="text-[#17231B]">
+                {Math.min(startIndex + itemsPerPage, filteredRows.length)}
+              </strong>{" "}
+              dari <strong className="text-[#16823B] font-bold">{filteredRows.length}</strong> material
+            </span>
+
+            <div className="flex items-center gap-1.5">
+              <button
+                disabled={currentPage === 1}
+                onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
+                className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg border border-[#DDE5DF] bg-white text-[#17231B] hover:bg-[#F7F9F7] disabled:opacity-40 disabled:cursor-not-allowed text-xs font-semibold transition-colors cursor-pointer"
+              >
+                <ChevronLeft className="w-3.5 h-3.5" />
+                <span>Sebelumnya</span>
+              </button>
+
+              <span className="px-2.5 py-1 text-xs font-bold text-[#16823B] bg-[#16823B]/10 rounded-lg border border-[#16823B]/20">
+                {currentPage} / {totalPages}
+              </span>
+
+              <button
+                disabled={currentPage === totalPages}
+                onClick={() => setCurrentPage((prev) => Math.min(totalPages, prev + 1))}
+                className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg border border-[#DDE5DF] bg-white text-[#17231B] hover:bg-[#F7F9F7] disabled:opacity-40 disabled:cursor-not-allowed text-xs font-semibold transition-colors cursor-pointer"
+              >
+                <span>Selanjutnya</span>
+                <ChevronRight className="w-3.5 h-3.5" />
+              </button>
+            </div>
+          </div>
+        </>
+      )}
 
     </div>
   );
