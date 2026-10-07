@@ -431,7 +431,7 @@ export default function MaterialVarianceChartCard({
 
       {/* Footer Note */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between text-[11px] text-[#5F6B63] border-t border-[#DDE5DF] pt-3 gap-1">
-        <span>* Apabila terdapat beberapa update di bulan yang sama, menggunakan data <code className="font-semibold text-[#16823B]">MAX(update)</code>.</span>
+        <span>* Penggunaan harga terupdate.</span>
         <span className="font-bold text-[#17231B] shrink-0">Jan – Des</span>
       </div>
 
