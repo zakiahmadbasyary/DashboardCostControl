@@ -19,6 +19,7 @@ import {
   Menu,
   X,
   Globe,
+  Wrench,
 } from "lucide-react";
 
 export default function PortalHomePage() {
@@ -37,6 +38,7 @@ export default function PortalHomePage() {
     hargaMaterialUrl,
     pollPg1Url,
     adminUrl,
+    navItems,
   } = getDashboardNavConfig();
 
   const publicDashboards = [
@@ -126,7 +128,7 @@ export default function PortalHomePage() {
       url: hargaMaterialUrl,
       icon: Boxes,
       badge: "Master Logistik",
-      isHosted: false,
+      isHosted: true,
     },
     {
       id: "poll-pg1",
@@ -178,14 +180,14 @@ export default function PortalHomePage() {
                 <span>Portal Utama Estate</span>
               </a>
 
-              {/* Toggle Dashboard Drawer */}
+              {/* Toggle Dashboard Drawer (Matched 1:1 to WIP Header Style) */}
               <button
                 onClick={() => setMenuOpen(!menuOpen)}
-                className="inline-flex items-center gap-2 px-4 py-2 rounded-xl border border-[#DDE5DF] bg-[#F8FAF9] hover:bg-[#EEF4F0] text-[#2C3830] font-semibold text-xs sm:text-sm transition-all shadow-xs cursor-pointer"
+                className="inline-flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 rounded-xl border border-[#DDE5DF] bg-[#F8FAF9] hover:bg-[#EEF4F0] text-[#2C3830] font-semibold text-xs sm:text-sm transition-all shadow-xs cursor-pointer"
                 aria-label="Toggle Navigation Menu"
               >
-                {menuOpen ? <X className="w-4.5 h-4.5 text-[#16823B]" /> : <Menu className="w-4.5 h-4.5 text-[#16823B]" />}
-                <span>Daftar Dashboard</span>
+                {menuOpen ? <X className="w-4 h-4 text-[#16823B]" /> : <Menu className="w-4 h-4 text-[#16823B]" />}
+                <span>Menu Dashboard</span>
               </button>
 
               <a
@@ -212,9 +214,9 @@ export default function PortalHomePage() {
           </div>
         </div>
 
-        {/* Navigation Dropdown Drawer */}
+        {/* Navigation Dropdown Drawer (Matched 1:1 to WIP Dashboard Menu Drawer Style) */}
         {menuOpen && (
-          <div className="border-t border-[#DDE5DF] bg-white px-3.5 sm:px-6 py-4 shadow-lg animate-in fade-in duration-150">
+          <div className="border-t border-[#DDE5DF] bg-white px-3 sm:px-4 py-3.5 sm:py-4 space-y-3 shadow-lg max-h-[85vh] overflow-y-auto animate-in slide-in-from-top-2 duration-200">
             <div className="w-full max-w-[95%] mx-auto space-y-3">
               {/* Mobile Quick Links Section at Top of Drawer */}
               <div className="flex sm:hidden flex-col gap-2 pb-3 border-b border-[#EAEFEB]">
@@ -239,57 +241,41 @@ export default function PortalHomePage() {
                 </div>
               </div>
 
-              <div className="flex items-center justify-between pb-1 border-b border-[#EAEFEB]">
-                <span className="text-xs font-extrabold text-[#17231B] uppercase tracking-wider">
-                  Daftar Dashboard Platform (9 Modul)
-                </span>
-                <span className="text-[11px] text-[#5F6B63] font-medium hidden sm:inline">
-                  Pilih modul untuk berpindah aplikasi
-                </span>
+              <div className="flex items-center justify-between text-xs font-bold text-[#5F6B63] uppercase tracking-wider px-1">
+                <span>Navigasi Dashboard Cost Control (9 Menu)</span>
+                <span className="text-[10px] text-[#16823B] font-semibold">GGF AgroMetric</span>
               </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2.5">
-                {publicDashboards.map((dash) => {
-                  const Icon = dash.icon;
-                  return (
-                    <div key={dash.id}>
-                      {dash.isHosted ? (
-                        <a
-                          href={dash.url}
-                          onClick={() => setMenuOpen(false)}
-                          className="p-3 rounded-xl border border-[#DDE5DF] hover:border-[#16823B] bg-white hover:bg-[#F4F9F5] transition-all flex items-center justify-between group shadow-2xs"
-                        >
-                          <div className="flex items-center gap-3">
-                            <div className="p-2 rounded-lg bg-[#EAF3EC] text-[#16823B] group-hover:bg-[#16823B] group-hover:text-white transition-colors shrink-0">
-                              <Icon className="w-4 h-4" />
-                            </div>
-                            <div>
-                              <div className="text-xs font-bold text-[#17231B] group-hover:text-[#16823B] transition-colors">
-                                {dash.name}
-                              </div>
-                              <div className="text-[10px] text-[#5F6B63] font-medium">{dash.subtitle}</div>
-                            </div>
-                          </div>
-                          <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-[#FCE27A] text-[#17231B] shrink-0">
-                            Buka
-                          </span>
-                        </a>
-                      ) : (
-                        <div className="p-3 rounded-xl border border-dashed border-gray-200 bg-gray-50/70 flex items-center justify-between select-none">
-                          <div className="flex items-center gap-3 opacity-60">
-                            <div className="p-2 rounded-lg bg-amber-50 text-amber-700 shrink-0">
-                              <Icon className="w-4 h-4" />
-                            </div>
-                            <div>
-                              <div className="text-xs font-bold text-[#17231B]">{dash.name}</div>
-                              <div className="text-[10px] text-[#5F6B63]">{dash.subtitle}</div>
-                            </div>
-                          </div>
-                          <span className="text-[9px] font-semibold px-2 py-0.5 rounded bg-amber-100 text-amber-800 shrink-0">
-                            Pembuatan
-                          </span>
+              <div className="grid grid-cols-1 min-[360px]:grid-cols-2 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-3 gap-2 sm:gap-2.5">
+                {navItems.map((item) => {
+                  const isHosted = item.isHosted !== false;
+
+                  if (!isHosted) {
+                    return (
+                      <span
+                        key={item.key}
+                        className="px-3 py-2.5 sm:px-3.5 sm:py-3 rounded-xl text-xs font-semibold text-gray-400 bg-gray-50/70 border border-gray-200/60 select-none cursor-not-allowed flex items-center justify-between"
+                      >
+                        <div className="flex items-center gap-1.5 truncate">
+                          <span className="truncate">{item.label}</span>
+                          <Wrench className="w-3 h-3 text-amber-500 shrink-0" />
                         </div>
-                      )}
-                    </div>
+                        <span className="text-[9px] sm:text-[10px] bg-amber-50 text-amber-700 border border-amber-200/60 px-1.5 py-0.5 rounded font-medium shrink-0">
+                          Pembuatan
+                        </span>
+                      </span>
+                    );
+                  }
+
+                  return (
+                    <a
+                      key={item.key}
+                      href={item.url}
+                      onClick={() => setMenuOpen(false)}
+                      className="px-3 py-2.5 sm:px-3.5 sm:py-3 rounded-xl text-xs sm:text-sm font-semibold flex items-center justify-between transition-all border text-[#2C3830] hover:bg-[#F8FAF9] border-[#EAEFEB]"
+                      title={item.description}
+                    >
+                      <span className="truncate mr-1">{item.label}</span>
+                    </a>
                   );
                 })}
               </div>
