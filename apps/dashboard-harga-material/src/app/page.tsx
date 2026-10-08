@@ -3,7 +3,6 @@
 import React, { useState, useEffect } from "react";
 import HargaMaterialDashboardHeader from "@/components/HargaMaterialDashboardHeader";
 import MaterialMainFilters from "@/components/MaterialMainFilters";
-import MaterialVarianceChartCard from "@/components/MaterialVarianceChartCard";
 import MaterialAnalysisCard, {
   MonthlyChartItem,
   MasterMaterialOption,
@@ -117,14 +116,6 @@ export default function DashboardHargaMaterialPage() {
           selectedMaterial={selectedMaterial}
           onGroupChange={handleGroupChange}
           onMaterialChange={handleMaterialChange}
-        />
-
-        {/* GRAFIK PERBANDINGAN TREND HARGA MATERIAL PER GROUP (Multi-Line Chart) */}
-        <MaterialVarianceChartCard
-          rows={tableRows}
-          selectedGroup={selectedGroup}
-          loading={loading}
-          error={error}
         />
 
         {/* CARD 1 — ANALISIS HARGA MATERIAL */}

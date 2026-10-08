@@ -15,13 +15,10 @@ export async function GET(request: NextRequest) {
     const groupsList = Array.from(
       new Set(
         allMastersheetsRaw
-          .map((g) => (g.group || "").trim() || "-")
+          .map((g) => (g.group || "").trim())
+          .filter((g) => g !== "" && g !== "-")
       )
-    ).sort((a, b) => {
-      if (a === "-") return 1;
-      if (b === "-") return -1;
-      return a.localeCompare(b);
-    });
+    ).sort((a, b) => a.localeCompare(b));
 
     // Determine active group: paramGroup if valid in groupsList, else default to first group
     let activeGroupCode = paramGroup;
