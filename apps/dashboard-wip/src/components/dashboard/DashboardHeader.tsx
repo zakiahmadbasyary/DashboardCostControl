@@ -20,7 +20,6 @@ export default function DashboardHeader() {
                 src="/logo.png"
                 alt="GGF Logo"
                 className="h-10 sm:h-14 max-h-14 w-auto object-contain"
-                style={{ height: "40px", maxHeight: "56px", width: "auto" }}
               />
             </div>
             <div className="flex flex-col justify-center min-w-0">
