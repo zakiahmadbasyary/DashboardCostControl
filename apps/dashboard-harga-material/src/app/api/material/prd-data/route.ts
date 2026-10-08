@@ -6,6 +6,7 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const paramGroup = searchParams.get("group") || "";
     const selectedMaterial = searchParams.get("material") || "";
+    const paramYear = searchParams.get("year") || "";
 
     // 1. Fetch all distinct groups strictly from MasterSheet table for the Group Filter
     const allMastersheetsRaw = await prisma.masterSheet.findMany({
@@ -64,7 +65,31 @@ export async function GET(request: NextRequest) {
       orderBy: { update: "asc" },
     });
 
-    // Process Card 1 (Selected Material Bar Chart & Summary Info)
+    // Extract available distinct years from bahanMaterial
+    const yearsList = Array.from(
+      new Set(
+        allBahanRecords
+          .map((b) => (b.update ? new Date(b.update).getFullYear().toString() : null))
+          .filter((y): y is string => Boolean(y))
+      )
+    ).sort((a, b) => b.localeCompare(a));
+
+    if (yearsList.length === 0) {
+      yearsList.push(new Date().getFullYear().toString());
+    }
+
+    let activeYear = paramYear;
+    if (!activeYear || !yearsList.includes(activeYear)) {
+      activeYear = yearsList[0];
+    }
+
+    const selectedYearNum = parseInt(activeYear, 10);
+    const bahanRecordsForYear = allBahanRecords.filter((b) => {
+      if (!b.update) return false;
+      return new Date(b.update).getFullYear() === selectedYearNum;
+    });
+
+    // Process Card 1 (Selected Material Bar Chart & Summary Info for Active Year)
     const chartMonthlyData: { month: number; label: string; nilai: number | null; date: string | null }[] = Array.from(
       { length: 12 },
       (_, i) => ({
@@ -81,8 +106,8 @@ export async function GET(request: NextRequest) {
     };
 
     if (activeMaterialCode) {
-      // Filter bahan records for active material
-      const activeBahan = allBahanRecords.filter((b) => b.material === activeMaterialCode);
+      // Filter bahan records for active material & selected year
+      const activeBahan = bahanRecordsForYear.filter((b) => b.material === activeMaterialCode);
 
       // Track MAX(update) for each month (1..12) per Section 8 & 13 of PRD
       const monthLatestMap = new Map<number, { updateTime: number; nilai: number }>();
@@ -116,10 +141,9 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    // 4. Process Card 2 (Pivoted Detail Table for All Mastersheets)
-    // For each material in mastersheets, build monthly values 1..12 using MAX(update) per month
+    // 4. Process Card 2 (Pivoted Detail Table for All Mastersheets filtered by Selected Year)
     const pivotedTableRows = mastersheets.map((m) => {
-      const matBahan = allBahanRecords.filter((b) => b.material === m.material);
+      const matBahan = bahanRecordsForYear.filter((b) => b.material === m.material);
       const monthlyValues: (number | null)[] = Array(12).fill(null);
 
       const monthMap = new Map<number, { updateTime: number; nilai: number }>();
@@ -159,6 +183,8 @@ export async function GET(request: NextRequest) {
       activeGroupCode,
       materials: materialsList,
       activeMaterialCode,
+      years: yearsList,
+      activeYear,
       card1: {
         activeMaster,
         chart: chartMonthlyData,

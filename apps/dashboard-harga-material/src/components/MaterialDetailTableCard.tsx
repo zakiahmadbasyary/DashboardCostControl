@@ -20,16 +20,22 @@ interface MaterialDetailTableCardProps {
   rows: PivotedTableRow[];
   loading: boolean;
   error: string | null;
+  selectedYear?: string;
   onRetry: () => void;
 }
+
+const MONTH_NAMES = ["Jan", "Feb", "Mar", "Apr", "Mei", "Jun", "Jul", "Agu", "Sep", "Okt", "Nov", "Des"];
 
 export default function MaterialDetailTableCard({
   rows,
   loading,
   error,
+  selectedYear,
   onRetry,
 }: MaterialDetailTableCardProps) {
   const [searchTerm, setSearchTerm] = useState<string>("");
+
+  const shortYear = (selectedYear || new Date().getFullYear().toString()).slice(-2);
 
   const formatNumber = (val: number | null) => {
     if (val === null || val === undefined) return "-";
@@ -60,7 +66,7 @@ export default function MaterialDetailTableCard({
           <div>
             <h3 className="font-bold text-base text-[#17231B]">Detail Harga Material</h3>
             <p className="text-xs text-[#5F6B63]">
-              Daftar rincian nilai harga material (nilai = price / price_unit) untuk bulan 1 sampai 12.{" "}
+              Daftar rincian nilai harga material (nilai = price / price_unit) untuk bulan 1 sampai 12 tahun {selectedYear || "2026"}.{" "}
               <span className="font-semibold text-[#16823B]">* Seluruh nilai biaya disajikan dalam Rupiah (Rp)</span>
             </p>
           </div>
@@ -119,13 +125,13 @@ export default function MaterialDetailTableCard({
                     UoM
                   </th>
                   
-                  {/* Columns 1 to 12 */}
-                  {Array.from({ length: 12 }, (_, i) => (
+                  {/* Dynamic Month Columns 1 to 12 (Jan 26, Feb 26, etc) */}
+                  {MONTH_NAMES.map((mName, i) => (
                     <th
                       key={i + 1}
-                      className="py-3 px-3 sticky top-0 bg-[#F7F9F7] z-30 border-b border-[#DDE5DF] text-right min-w-[90px] font-mono"
+                      className="py-3 px-3 sticky top-0 bg-[#F7F9F7] z-30 border-b border-[#DDE5DF] text-right min-w-[90px] font-mono whitespace-nowrap"
                     >
-                      Bln {i + 1}
+                      {mName} {shortYear}
                     </th>
                   ))}
                 </tr>
@@ -145,12 +151,12 @@ export default function MaterialDetailTableCard({
                     return (
                       <tr key={row.material} className="group hover:bg-[#F7F9F7] text-[#17231B] transition-all">
                         {/* Description (Sticky Left Column 1 - Frozen on sm+ desktop only) */}
-                        <td className="py-3 px-4 font-semibold text-[#17231B] bg-white group-hover:bg-[#F7F9F7] min-w-[200px] transition-colors sm:sticky sm:left-0 sm:z-10 sm:min-w-[240px] sm:border-r sm:border-[#DDE5DF] sm:shadow-[4px_0_8px_-2px_rgba(0,0,0,0.06)]">
+                        <td className="py-3 px-4 font-medium text-[#17231B] bg-white group-hover:bg-[#F7F9F7] min-w-[200px] transition-colors sm:sticky sm:left-0 sm:z-10 sm:min-w-[240px] sm:border-r sm:border-[#DDE5DF] sm:shadow-[4px_0_8px_-2px_rgba(0,0,0,0.06)]">
                           {row.materialDescription || "-"}
                         </td>
 
                         {/* Material Code (Column 2 - Scrollable) */}
-                        <td className="py-3 px-4 font-bold font-mono text-[#17231B] min-w-[140px]">
+                        <td className="py-3 px-4 font-medium font-mono text-[#17231B] min-w-[140px]">
                           <div className="flex items-center gap-2">
                             <span className="w-2 h-2 rounded-full bg-[#16823B] shrink-0" />
                             <span>{row.material}</span>
@@ -182,7 +188,7 @@ export default function MaterialDetailTableCard({
                                   ? "font-bold text-[#17231B] bg-[#FEFCE8]/80"
                                   : "font-normal text-[#17231B]"
                               }`}
-                              title={isMax ? "Nilai Tertinggi Tahun Ini" : undefined}
+                              title={isMax ? `Nilai Tertinggi Tahun ${selectedYear || "2026"}` : undefined}
                             >
                               {formatNumber(val)}
                             </td>

@@ -48,14 +48,14 @@ export default function MaterialAnalysisCard({
   const formatNumberOnly = (val: number | null) => {
     if (val === null || val === undefined) return "-";
     return new Intl.NumberFormat("id-ID", {
-      maximumFractionDigits: 2,
+      maximumFractionDigits: 0,
     }).format(val);
   };
 
   const formatBarValue = (val: number | null) => {
     if (val === null || val === undefined) return "";
     return new Intl.NumberFormat("id-ID", {
-      maximumFractionDigits: 1,
+      maximumFractionDigits: 0,
     }).format(val);
   };
 
@@ -110,7 +110,7 @@ export default function MaterialAnalysisCard({
               Analisis Harga Material
             </h3>
             <p className="text-[11px] sm:text-xs text-[#5F6B63]">
-              Perkembangan harga material bulan 1 sampai 12 berdasarkan data <code className="text-[#16823B] font-semibold">bahan_material.nilai</code>
+              Perkembangan harga material bulan 1 sampai 12 berdasarkan data 
             </p>
           </div>
         </div>

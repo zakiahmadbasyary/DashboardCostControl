@@ -17,10 +17,12 @@ export default function DashboardHargaMaterialPage() {
   // Filter States
   const [selectedGroup, setSelectedGroup] = useState<string>("");
   const [selectedMaterial, setSelectedMaterial] = useState<string>("");
+  const [selectedYear, setSelectedYear] = useState<string>("");
 
   // Data States
   const [groups, setGroups] = useState<string[]>([]);
   const [materials, setMaterials] = useState<MasterMaterialOption[]>([]);
+  const [years, setYears] = useState<string[]>([]);
   const [chartData, setChartData] = useState<MonthlyChartItem[]>([]);
   const [activeMaster, setActiveMaster] = useState<MasterMaterialOption | null>(null);
   const [latestNilai, setLatestNilai] = useState<number | null>(null);
@@ -35,14 +37,14 @@ export default function DashboardHargaMaterialPage() {
     setMounted(true);
   }, []);
 
-  const fetchDashboardData = async (groupParam: string, materialParam: string) => {
+  const fetchDashboardData = async (groupParam: string, materialParam: string, yearParam: string) => {
     setLoading(true);
     setError(null);
     const startTime = Date.now();
     try {
       const url = `/api/material/prd-data?group=${encodeURIComponent(
         groupParam
-      )}&material=${encodeURIComponent(materialParam)}`;
+      )}&material=${encodeURIComponent(materialParam)}&year=${encodeURIComponent(yearParam)}`;
       const res = await fetch(url);
       const json = await res.json();
 
@@ -52,6 +54,7 @@ export default function DashboardHargaMaterialPage() {
 
       setGroups(json.groups || []);
       setMaterials(json.materials || []);
+      setYears(json.years || []);
 
       // Sync activeGroupCode from server if local state is empty
       if (json.activeGroupCode && json.activeGroupCode !== selectedGroup) {
@@ -61,6 +64,11 @@ export default function DashboardHargaMaterialPage() {
       // If activeMaterialCode from server differs from local state, sync it
       if (json.activeMaterialCode && json.activeMaterialCode !== selectedMaterial) {
         setSelectedMaterial(json.activeMaterialCode);
+      }
+
+      // Sync activeYear from server if local state differs
+      if (json.activeYear && json.activeYear !== selectedYear) {
+        setSelectedYear(json.activeYear);
       }
 
       setChartData(json.card1?.chart || []);
@@ -83,9 +91,9 @@ export default function DashboardHargaMaterialPage() {
 
   useEffect(() => {
     if (mounted) {
-      fetchDashboardData(selectedGroup, selectedMaterial);
+      fetchDashboardData(selectedGroup, selectedMaterial, selectedYear);
     }
-  }, [mounted, selectedGroup, selectedMaterial]);
+  }, [mounted, selectedGroup, selectedMaterial, selectedYear]);
 
   // Handle group change: reset selected material per Section 7 of PRD
   const handleGroupChange = (newGroup: string) => {
@@ -95,6 +103,10 @@ export default function DashboardHargaMaterialPage() {
 
   const handleMaterialChange = (newMaterial: string) => {
     setSelectedMaterial(newMaterial);
+  };
+
+  const handleYearChange = (newYear: string) => {
+    setSelectedYear(newYear);
   };
 
   if (!mounted) return null;
@@ -112,10 +124,13 @@ export default function DashboardHargaMaterialPage() {
         <MaterialMainFilters
           groups={groups}
           materials={materials}
+          years={years}
           selectedGroup={selectedGroup}
           selectedMaterial={selectedMaterial}
+          selectedYear={selectedYear}
           onGroupChange={handleGroupChange}
           onMaterialChange={handleMaterialChange}
+          onYearChange={handleYearChange}
         />
 
         {/* CARD 1 — ANALISIS HARGA MATERIAL */}
@@ -126,7 +141,7 @@ export default function DashboardHargaMaterialPage() {
           latestUpdateDate={latestUpdateDate}
           loading={loading}
           error={error}
-          onRetry={() => fetchDashboardData(selectedGroup, selectedMaterial)}
+          onRetry={() => fetchDashboardData(selectedGroup, selectedMaterial, selectedYear)}
         />
 
         {/* CARD 2 — DETAIL HARGA MATERIAL */}
@@ -134,7 +149,8 @@ export default function DashboardHargaMaterialPage() {
           rows={tableRows}
           loading={loading}
           error={error}
-          onRetry={() => fetchDashboardData(selectedGroup, selectedMaterial)}
+          selectedYear={selectedYear}
+          onRetry={() => fetchDashboardData(selectedGroup, selectedMaterial, selectedYear)}
         />
 
       </main>

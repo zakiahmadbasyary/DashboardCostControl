@@ -14,10 +14,13 @@ export interface MasterMaterialOption {
 interface MaterialMainFiltersProps {
   groups: string[];
   materials: MasterMaterialOption[];
+  years: string[];
   selectedGroup: string;
   selectedMaterial: string;
+  selectedYear: string;
   onGroupChange: (group: string) => void;
   onMaterialChange: (material: string) => void;
+  onYearChange: (year: string) => void;
 }
 
 interface OptionItem {
@@ -183,10 +186,13 @@ function SearchableSelect({
 export default function MaterialMainFilters({
   groups,
   materials,
+  years,
   selectedGroup,
   selectedMaterial,
+  selectedYear,
   onGroupChange,
   onMaterialChange,
+  onYearChange,
 }: MaterialMainFiltersProps) {
   const [isOpen, setIsOpen] = useState<boolean>(false);
 
@@ -201,6 +207,11 @@ export default function MaterialMainFilters({
     value: mat.material,
     label: mat.material,
     sublabel: mat.materialDescription || mat.material,
+  }));
+
+  const yearOptions: OptionItem[] = years.map((y) => ({
+    value: y,
+    label: `Tahun ${y}`,
   }));
 
   return (
@@ -218,7 +229,7 @@ export default function MaterialMainFilters({
         </div>
 
         {/* Select Dropdowns Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 flex-1 gap-2 sm:gap-2.5">
+        <div className="grid grid-cols-1 md:grid-cols-3 flex-1 gap-2 sm:gap-2.5">
           {/* 1. Group Filter */}
           <SearchableSelect
             label="Group Material"
@@ -237,6 +248,16 @@ export default function MaterialMainFilters({
             onChange={onMaterialChange}
             placeholder="Cari Kode / Deskripsi Material..."
             emptyText="Material tidak ditemukan"
+          />
+
+          {/* 3. Year Filter */}
+          <SearchableSelect
+            label="Tahun"
+            value={selectedYear}
+            options={yearOptions}
+            onChange={onYearChange}
+            placeholder="Cari Tahun..."
+            emptyText="Tahun tidak ditemukan"
           />
         </div>
       </div>
@@ -257,7 +278,7 @@ export default function MaterialMainFilters({
                 Filter Utama Dashboard
               </span>
               <span className="text-[10px] text-[#5F6B63] font-medium truncate max-w-[200px]">
-                {selectedGroup || "Pilih Group"} • {selectedMaterial || "Pilih Material"}
+                {selectedGroup || "Group"} • {selectedMaterial || "Material"} • {selectedYear || "Tahun"}
               </span>
             </div>
           </div>
@@ -289,7 +310,7 @@ export default function MaterialMainFilters({
                     Filter Utama Dashboard
                   </h3>
                   <p className="text-[10px] text-[#5F6B63] font-medium">
-                    Pilih & cari group dan material spesifik
+                    Pilih & cari group, material, dan tahun
                   </p>
                 </div>
               </div>
@@ -322,6 +343,16 @@ export default function MaterialMainFilters({
                 onChange={onMaterialChange}
                 placeholder="Cari Kode / Deskripsi Material..."
                 emptyText="Material tidak ditemukan"
+              />
+
+              {/* Year Filter */}
+              <SearchableSelect
+                label="Tahun"
+                value={selectedYear}
+                options={yearOptions}
+                onChange={onYearChange}
+                placeholder="Cari Tahun..."
+                emptyText="Tahun tidak ditemukan"
               />
             </div>
 
