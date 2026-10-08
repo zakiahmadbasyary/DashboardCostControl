@@ -1,14 +1,10 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import {
-  Table,
-  Search,
   FileSpreadsheet,
-  RefreshCw,
+  Search,
   AlertCircle,
-  ChevronLeft,
-  ChevronRight,
 } from "lucide-react";
 
 export interface PivotedTableRow {
@@ -34,13 +30,6 @@ export default function MaterialDetailTableCard({
   onRetry,
 }: MaterialDetailTableCardProps) {
   const [searchTerm, setSearchTerm] = useState<string>("");
-  const [currentPage, setCurrentPage] = useState<number>(1);
-  const itemsPerPage = 10;
-
-  // Reset pagination on search change
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [searchTerm]);
 
   const formatNumber = (val: number | null) => {
     if (val === null || val === undefined) return "-";
@@ -59,14 +48,10 @@ export default function MaterialDetailTableCard({
     );
   });
 
-  const totalPages = Math.max(1, Math.ceil(filteredRows.length / itemsPerPage));
-  const startIndex = (currentPage - 1) * itemsPerPage;
-  const paginatedRows = filteredRows.slice(startIndex, startIndex + itemsPerPage);
-
   return (
     <div className="bg-white border border-[#DDE5DF] rounded-2xl p-4 sm:p-5 shadow-xs scroll-mt-24 font-sans" suppressHydrationWarning>
       
-      {/* 1. Header & Sub-Filters Bar (Matched 1:1 to LocationAnalysis.tsx WIP) */}
+      {/* 1. Header & Sub-Filters Bar */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 mb-4 pb-3 border-b border-[#DDE5DF]">
         <div className="flex items-center gap-2">
           <div className="p-2 rounded-lg bg-[#16823B]/10 text-[#16823B]">
@@ -113,20 +98,33 @@ export default function MaterialDetailTableCard({
         </div>
       ) : (
         <>
-          <div className="overflow-x-auto rounded-xl border border-[#DDE5DF]">
-            <table className="w-full text-xs text-left">
-              <thead className="bg-[#F7F9F7] text-[#17231B] uppercase font-bold border-b border-[#DDE5DF]">
+          {/* Scrollable Container showing max ~10 rows vertically with sticky header & frozen columns */}
+          <div className="overflow-auto max-h-[480px] rounded-xl border border-[#DDE5DF] relative">
+            <table className="w-full text-xs text-left border-collapse">
+              <thead className="bg-[#F7F9F7] text-[#17231B] uppercase font-bold">
                 <tr>
-                  <th className="py-3 px-4 sticky left-0 bg-[#F7F9F7] z-10 border-r border-[#DDE5DF] min-w-[120px]">
+                  {/* Sticky Top-Left Corner Column 1 */}
+                  <th className="py-3 px-4 sticky top-0 left-0 bg-[#F7F9F7] z-40 min-w-[140px] w-[140px] border-r border-b border-[#DDE5DF]">
                     Material
                   </th>
-                  <th className="py-3 px-4 min-w-[220px]">Deskripsi</th>
-                  <th className="py-3 px-4 min-w-[120px]">Group</th>
-                  <th className="py-3 px-4 text-center min-w-[70px]">UoM</th>
+                  {/* Sticky Top-Left Corner Column 2 */}
+                  <th className="py-3 px-4 sticky top-0 left-[140px] bg-[#F7F9F7] z-40 min-w-[240px] border-r border-b border-[#DDE5DF] shadow-[4px_0_8px_-2px_rgba(0,0,0,0.06)]">
+                    Deskripsi
+                  </th>
+                  {/* Sticky Top Headers for rest of columns */}
+                  <th className="py-3 px-4 sticky top-0 bg-[#F7F9F7] z-30 border-b border-[#DDE5DF] min-w-[120px]">
+                    Group
+                  </th>
+                  <th className="py-3 px-4 sticky top-0 bg-[#F7F9F7] z-30 border-b border-[#DDE5DF] text-center min-w-[70px]">
+                    UoM
+                  </th>
                   
                   {/* Columns 1 to 12 */}
                   {Array.from({ length: 12 }, (_, i) => (
-                    <th key={i + 1} className="py-3 px-3 text-right min-w-[80px] font-mono">
+                    <th
+                      key={i + 1}
+                      className="py-3 px-3 sticky top-0 bg-[#F7F9F7] z-30 border-b border-[#DDE5DF] text-right min-w-[90px] font-mono"
+                    >
                       Bln {i + 1}
                     </th>
                   ))}
@@ -140,22 +138,22 @@ export default function MaterialDetailTableCard({
                     </td>
                   </tr>
                 ) : (
-                  paginatedRows.map((row) => {
+                  filteredRows.map((row) => {
                     const validVals = row.months.filter((v): v is number => v !== null && v !== undefined);
                     const maxVal = validVals.length > 0 ? Math.max(...validVals) : null;
 
                     return (
-                      <tr key={row.material} className="hover:bg-[#F7F9F7] text-[#17231B] transition-all">
-                        {/* Material Code (Sticky Left Column with Green Dot indicator like WIP Location) */}
-                        <td className="py-3 px-4 font-bold font-mono text-[#17231B] sticky left-0 bg-white border-r border-[#DDE5DF] z-10">
+                      <tr key={row.material} className="group hover:bg-[#F7F9F7] text-[#17231B] transition-all">
+                        {/* Material Code (Sticky Left Column 1) */}
+                        <td className="py-3 px-4 font-bold font-mono text-[#17231B] sticky left-0 bg-white group-hover:bg-[#F7F9F7] border-r border-[#DDE5DF]/50 z-10 min-w-[140px] w-[140px] transition-colors">
                           <div className="flex items-center gap-2">
                             <span className="w-2 h-2 rounded-full bg-[#16823B] shrink-0" />
                             <span>{row.material}</span>
                           </div>
                         </td>
 
-                        {/* Description */}
-                        <td className="py-3 px-4 font-semibold text-[#17231B]">
+                        {/* Description (Sticky Left Column 2) */}
+                        <td className="py-3 px-4 font-semibold text-[#17231B] sticky left-[140px] bg-white group-hover:bg-[#F7F9F7] border-r border-[#DDE5DF] shadow-[4px_0_8px_-2px_rgba(0,0,0,0.06)] z-10 min-w-[240px] transition-colors">
                           {row.materialDescription || "-"}
                         </td>
 
@@ -198,39 +196,14 @@ export default function MaterialDetailTableCard({
             </table>
           </div>
 
-          {/* 3. Pagination Controls (Matched 1:1 to LocationAnalysis.tsx WIP) */}
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-3 mt-4 pt-3 border-t border-[#DDE5DF]/80 text-xs text-[#5F6B63]">
+          {/* 3. Footer Summary */}
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-2 mt-3 pt-3 border-t border-[#DDE5DF]/80 text-xs text-[#5F6B63]">
             <span>
-              Menampilkan <strong className="text-[#17231B]">{filteredRows.length > 0 ? startIndex + 1 : 0}</strong> -{" "}
-              <strong className="text-[#17231B]">
-                {Math.min(startIndex + itemsPerPage, filteredRows.length)}
-              </strong>{" "}
-              dari <strong className="text-[#16823B] font-bold">{filteredRows.length}</strong> material
+              Menampilkan <strong className="text-[#16823B] font-bold">{filteredRows.length}</strong> material
             </span>
-
-            <div className="flex items-center gap-1.5">
-              <button
-                disabled={currentPage === 1}
-                onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
-                className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg border border-[#DDE5DF] bg-white text-[#17231B] hover:bg-[#F7F9F7] disabled:opacity-40 disabled:cursor-not-allowed text-xs font-semibold transition-colors cursor-pointer"
-              >
-                <ChevronLeft className="w-3.5 h-3.5" />
-                <span>Sebelumnya</span>
-              </button>
-
-              <span className="px-2.5 py-1 text-xs font-bold text-[#16823B] bg-[#16823B]/10 rounded-lg border border-[#16823B]/20">
-                {currentPage} / {totalPages}
-              </span>
-
-              <button
-                disabled={currentPage === totalPages}
-                onClick={() => setCurrentPage((prev) => Math.min(totalPages, prev + 1))}
-                className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg border border-[#DDE5DF] bg-white text-[#17231B] hover:bg-[#F7F9F7] disabled:opacity-40 disabled:cursor-not-allowed text-xs font-semibold transition-colors cursor-pointer"
-              >
-                <span>Selanjutnya</span>
-                <ChevronRight className="w-3.5 h-3.5" />
-              </button>
-            </div>
+            <span className="text-[11px] text-[#5F6B63] italic">
+              * Scroll vertikal & horizontal untuk melihat selengkapnya
+            </span>
           </div>
         </>
       )}
