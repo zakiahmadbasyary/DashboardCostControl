@@ -303,6 +303,16 @@ export default function MaterialAnalysisCard({
 
               {/* 2 KPI Cards: Tertinggi (Kuning) & Terendah (Ijo) */}
               <div className="grid grid-cols-2 gap-2">
+                {/* Terendah (Ijo Style) */}
+                <div className="bg-[#F0FDF4] border border-[#DCFCE7] rounded-xl p-2 px-2.5 flex flex-col justify-between">
+                  <div className="flex items-center justify-between text-[10px] font-semibold text-[#166534]">
+                    <span className="uppercase">TERENDAH</span>
+                    <TrendingDown className="w-3.5 h-3.5 text-[#16A34A]" />
+                  </div>
+                  <span className="text-xs sm:text-sm font-bold text-[#15803D] font-mono mt-0.5">
+                    {formatBarValue(minNilai)}
+                  </span>
+                </div>
                 {/* Tertinggi (Kuning #FCE27A Style) */}
                 <div className="bg-[#FEFCE8] border border-[#FDE047] rounded-xl p-2 px-2.5 flex flex-col justify-between">
                   <div className="flex items-center justify-between text-[10px] font-semibold text-[#854D0E]">
@@ -314,16 +324,7 @@ export default function MaterialAnalysisCard({
                   </span>
                 </div>
 
-                {/* Terendah (Ijo Style) */}
-                <div className="bg-[#F0FDF4] border border-[#DCFCE7] rounded-xl p-2 px-2.5 flex flex-col justify-between">
-                  <div className="flex items-center justify-between text-[10px] font-semibold text-[#166534]">
-                    <span className="uppercase">TERENDAH</span>
-                    <TrendingDown className="w-3.5 h-3.5 text-[#16A34A]" />
-                  </div>
-                  <span className="text-xs sm:text-sm font-bold text-[#15803D] font-mono mt-0.5">
-                    {formatBarValue(minNilai)}
-                  </span>
-                </div>
+                
               </div>
 
               {/* Detail Metadata Table */}
