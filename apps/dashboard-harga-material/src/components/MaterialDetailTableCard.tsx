@@ -103,13 +103,13 @@ export default function MaterialDetailTableCard({
             <table className="w-full text-xs text-left border-collapse">
               <thead className="bg-[#F7F9F7] text-[#17231B] uppercase font-bold">
                 <tr>
-                  {/* Sticky Top-Left Corner Column 1 */}
-                  <th className="py-3 px-4 sticky top-0 left-0 bg-[#F7F9F7] z-40 min-w-[140px] w-[140px] border-r border-b border-[#DDE5DF]">
-                    Material
-                  </th>
-                  {/* Sticky Top-Left Corner Column 2 */}
-                  <th className="py-3 px-4 sticky top-0 left-[140px] bg-[#F7F9F7] z-40 min-w-[240px] border-r border-b border-[#DDE5DF] shadow-[4px_0_8px_-2px_rgba(0,0,0,0.06)]">
+                  {/* Sticky Top-Left Corner Column 1: Deskripsi (Frozen on sm+ desktop only) */}
+                  <th className="py-3 px-4 sticky top-0 bg-[#F7F9F7] z-30 min-w-[200px] border-b border-[#DDE5DF] sm:left-0 sm:z-40 sm:min-w-[240px] sm:border-r sm:shadow-[4px_0_8px_-2px_rgba(0,0,0,0.06)]">
                     Deskripsi
+                  </th>
+                  {/* Column 2: Material (Sticky top only, not left-frozen) */}
+                  <th className="py-3 px-4 sticky top-0 bg-[#F7F9F7] z-30 border-b border-[#DDE5DF] min-w-[140px]">
+                    Material
                   </th>
                   {/* Sticky Top Headers for rest of columns */}
                   <th className="py-3 px-4 sticky top-0 bg-[#F7F9F7] z-30 border-b border-[#DDE5DF] min-w-[120px]">
@@ -144,17 +144,17 @@ export default function MaterialDetailTableCard({
 
                     return (
                       <tr key={row.material} className="group hover:bg-[#F7F9F7] text-[#17231B] transition-all">
-                        {/* Material Code (Sticky Left Column 1) */}
-                        <td className="py-3 px-4 font-bold font-mono text-[#17231B] sticky left-0 bg-white group-hover:bg-[#F7F9F7] border-r border-[#DDE5DF]/50 z-10 min-w-[140px] w-[140px] transition-colors">
+                        {/* Description (Sticky Left Column 1 - Frozen on sm+ desktop only) */}
+                        <td className="py-3 px-4 font-semibold text-[#17231B] bg-white group-hover:bg-[#F7F9F7] min-w-[200px] transition-colors sm:sticky sm:left-0 sm:z-10 sm:min-w-[240px] sm:border-r sm:border-[#DDE5DF] sm:shadow-[4px_0_8px_-2px_rgba(0,0,0,0.06)]">
+                          {row.materialDescription || "-"}
+                        </td>
+
+                        {/* Material Code (Column 2 - Scrollable) */}
+                        <td className="py-3 px-4 font-bold font-mono text-[#17231B] min-w-[140px]">
                           <div className="flex items-center gap-2">
                             <span className="w-2 h-2 rounded-full bg-[#16823B] shrink-0" />
                             <span>{row.material}</span>
                           </div>
-                        </td>
-
-                        {/* Description (Sticky Left Column 2) */}
-                        <td className="py-3 px-4 font-semibold text-[#17231B] sticky left-[140px] bg-white group-hover:bg-[#F7F9F7] border-r border-[#DDE5DF] shadow-[4px_0_8px_-2px_rgba(0,0,0,0.06)] z-10 min-w-[240px] transition-colors">
-                          {row.materialDescription || "-"}
                         </td>
 
                         {/* Group */}
