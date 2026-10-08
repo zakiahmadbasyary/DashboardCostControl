@@ -110,7 +110,7 @@ export default function MaterialAnalysisCard({
               Analisis Harga Material
             </h3>
             <p className="text-[11px] sm:text-xs text-[#5F6B63]">
-              Perkembangan harga material bulan 1 sampai 12 berdasarkan data 
+              Trend harga material Januari sd Desember
             </p>
           </div>
         </div>
