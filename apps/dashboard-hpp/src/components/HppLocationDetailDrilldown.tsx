@@ -15,6 +15,7 @@ import { LokasiHppItem } from "@/components/HppLokasiTable";
 
 export interface AktivitasHppItem {
   idAktivitas: string;
+  idMaster?: string;
   lokasi: string;
   tanggalMulaiRawat?: string;
   tanggalMulaiTanam?: string;
@@ -92,18 +93,23 @@ export default function HppLocationDetailDrilldown({
   const validItem = lokasiItems.find((i) => Number(i.luasPanen || 0) > 0 || Number(i.luasAktif || 0) > 0) || lokasiItems[0];
   const masterSheet = validItem?.masterSheet;
   const wilayah = masterSheet?.wilayah || "W01";
-  const jenisBibit = masterSheet?.jenisBibit || "-";
-  const kelasBibit = masterSheet?.kelasBibit || "-";
+  const jenisBibit = validItem?.jenisBibit || masterSheet?.jenisBibit || "-";
+  const kelasBibit = validItem?.kelasBibit || masterSheet?.kelasBibit || "-";
 
   // Use active and harvested area for the selected period
   const luasAktif = Number(validItem?.luasAktif || 0);
   const luasPanen = Number(validItem?.luasPanen || 0);
 
-  // Find forcing & panen dates from location's activities if available
-  const locAktivitas = aktivitasItems.filter((a) => a.lokasi === lokasiCode);
+  // Find forcing & panen dates from masterSheet first, fallback to location's activities if available
+  const locAktivitas = aktivitasItems.filter(
+    (a) => (a.idMaster && a.idMaster === validItem?.idMaster) || a.lokasi === lokasiCode
+  );
   const sampleAktivitas = locAktivitas[0];
-  const rencanaForcing = formatDate(sampleAktivitas?.rencanaForcing);
-  const rencanaPanen = formatDate(sampleAktivitas?.rencanaPanen);
+  const tglRawat = formatDate(masterSheet?.tanggalRawat || sampleAktivitas?.tanggalMulaiRawat);
+  const tglTanam = formatDate(masterSheet?.tanggalTanam || sampleAktivitas?.tanggalMulaiTanam);
+  const rencanaForcing = formatDate(masterSheet?.tanggalRenForcing || sampleAktivitas?.rencanaForcing);
+  const realForcing = formatDate(masterSheet?.tanggalRealForcing || sampleAktivitas?.realForcing);
+  const selesaiPanen = formatDate(masterSheet?.tanggalSelesaiPanen || sampleAktivitas?.rencanaPanen);
 
   // Helper to extract numeric value from ZN code (e.g. "ZN01" -> 1, "ZN10" -> 10)
   const getZnNumber = (groupStr: string): number => {
@@ -267,10 +273,20 @@ export default function HppLocationDetailDrilldown({
           <div className="p-3 bg-white rounded-xl border border-[#E0E8E2] shadow-2xs">
             <span className="text-[10px] font-bold text-[#5F6B63] uppercase tracking-wider block flex items-center gap-1">
               <Calendar className="w-3 h-3 text-purple-600" />
-              Rencana Forcing / Panen
+              Forcing (Ren / Real)
             </span>
             <span className="text-xs font-bold text-purple-900 block truncate">
-              {rencanaForcing} / {rencanaPanen}
+              {rencanaForcing} / {realForcing}
+            </span>
+          </div>
+
+          <div className="p-3 bg-white rounded-xl border border-[#E0E8E2] shadow-2xs">
+            <span className="text-[10px] font-bold text-[#5F6B63] uppercase tracking-wider block flex items-center gap-1">
+              <Calendar className="w-3 h-3 text-[#16823B]" />
+              Selesai Panen
+            </span>
+            <span className="text-xs font-bold text-[#16823B] block truncate">
+              {selesaiPanen}
             </span>
           </div>
 

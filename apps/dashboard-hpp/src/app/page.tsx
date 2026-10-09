@@ -10,12 +10,13 @@ import HppLocationDetailDrilldown, { AktivitasHppItem, BudgetItem } from "@/comp
 export default function DashboardHPPPage() {
   const [mounted, setMounted] = useState(false);
 
-  // Main Filter State per PRD Section 6 (Default periodeFilter = Bulan sekarang saat ini)
+  // Main Filter State per PRD Section 6 (Default periodeFilter = Bulan sekarang saat ini, tahunFilter = Tahun saat ini / tersedia)
   const [filters, setFilters] = useState<HppFilterState>({
     taksasiFilter: "all",
     costGroupFilter: "all",
     statusFilter: "all",
     periodeFilter: getCurrentMonthIndex(),
+    tahunFilter: new Date().getFullYear(),
     reportFilter: "rp_kg",
     wilayahFilter: "all",
   });
@@ -99,6 +100,24 @@ export default function DashboardHPPPage() {
       });
   }, [rawLokasiList]);
 
+  // Extract available Tahun options dynamically from rawLokasiList
+  const availableTahunOptions = useMemo<number[]>(() => {
+    const yearsSet = new Set<number>();
+    rawLokasiList.forEach((item) => {
+      const yr = item.tahun || (item.tanggalRawat ? new Date(item.tanggalRawat).getFullYear() : null);
+      if (yr) yearsSet.add(yr);
+    });
+    const list = Array.from(yearsSet).sort((a, b) => b - a);
+    return list.length > 0 ? list : [new Date().getFullYear()];
+  }, [rawLokasiList]);
+
+  // Automatically sync filters.tahunFilter to available options if current selection is invalid
+  useEffect(() => {
+    if (availableTahunOptions.length > 0 && !availableTahunOptions.includes(filters.tahunFilter)) {
+      setFilters((prev) => ({ ...prev, tahunFilter: availableTahunOptions[0] }));
+    }
+  }, [availableTahunOptions, filters.tahunFilter]);
+
   // Apply Main Filters to rawLokasiList (PRD Section 6 & Section 22)
   const filteredLokasiList = useMemo(() => {
     return rawLokasiList.filter((item) => {
@@ -121,9 +140,10 @@ export default function DashboardHPPPage() {
 
       // 3. Status Filter (NSSC, NSFC, NS = NSSC || NSFC)
       if (filters.statusFilter !== "all") {
+        const itemStatus = item.status || item.masterSheet?.status;
         if (filters.statusFilter === "NS") {
-          if (item.status !== "NSSC" && item.status !== "NSFC") return false;
-        } else if (item.status !== filters.statusFilter) {
+          if (itemStatus !== "NSSC" && itemStatus !== "NSFC") return false;
+        } else if (itemStatus !== filters.statusFilter) {
           return false;
         }
       }
@@ -141,6 +161,12 @@ export default function DashboardHPPPage() {
         }
       }
 
+      // 6. Tahun Filter (Hanya Satu Tahun)
+      const itemYear = item.tahun || (item.tanggalRawat ? new Date(item.tanggalRawat).getFullYear() : null);
+      if (itemYear !== Number(filters.tahunFilter)) {
+        return false;
+      }
+
       return true;
     });
   }, [rawLokasiList, filters]);
@@ -153,7 +179,7 @@ export default function DashboardHPPPage() {
     > = {};
 
     filteredLokasiList.forEach((item) => {
-      const code = item.lokasi;
+      const code = item.idMaster || item.masterSheet?.idMaster || item.lokasi;
       if (!lokasiMap[code]) {
         lokasiMap[code] = {
           totalBiaya: 0,
@@ -207,7 +233,8 @@ export default function DashboardHPPPage() {
     }
 
     let isMounted = true;
-    fetch(`/api/hpp/aktivitas?lokasi=${encodeURIComponent(selectedLokasiCode)}`)
+    const fetchUrl = `/api/hpp/aktivitas?idMaster=${encodeURIComponent(selectedLokasiCode)}&lokasi=${encodeURIComponent(selectedLokasiCode)}`;
+    fetch(fetchUrl)
       .then((res) => res.json())
       .then((data) => {
         if (isMounted && data.status === "success") {
@@ -237,6 +264,9 @@ export default function DashboardHPPPage() {
     const locMap: Record<string, { cost: number; qty: number; luas: number; periode: number }> = {};
 
     rawLokasiList.forEach((item) => {
+      const itemYear = item.tahun || (item.tanggalRawat ? new Date(item.tanggalRawat).getFullYear() : null);
+      if (itemYear && itemYear !== Number(filters.tahunFilter)) return;
+
       if (filters.taksasiFilter === "100_only") {
         const taksasiVal = Number(item.luasAktif) > 0 ? (Number(item.luasPanen) / Number(item.luasAktif)) * 100 : 0;
         if (Math.round(taksasiVal) < 100) return;
@@ -317,6 +347,7 @@ export default function DashboardHPPPage() {
     filters.statusFilter,
     filters.wilayahFilter,
     filters.reportFilter,
+    filters.tahunFilter,
   ]);
 
   // Calculate Wilayah Data (W01–W07) per PRD Section 9 (Matches all filters EXCEPT wilayahFilter)
@@ -333,6 +364,8 @@ export default function DashboardHPPPage() {
     // Aggregate data matching all filters EXCEPT wilayahFilter for selected month
     rawLokasiList.forEach((item) => {
       if (item.periode !== filters.periodeFilter) return;
+      const itemYear = item.tahun || (item.tanggalRawat ? new Date(item.tanggalRawat).getFullYear() : null);
+      if (itemYear && itemYear !== Number(filters.tahunFilter)) return;
       if (filters.taksasiFilter === "100_only") {
         const taksasiVal = Number(item.luasAktif) > 0 ? (Number(item.luasPanen) / Number(item.luasAktif)) * 100 : 0;
         if (Math.round(taksasiVal) < 100) return;
@@ -391,18 +424,23 @@ export default function DashboardHPPPage() {
     filters.statusFilter,
     filters.periodeFilter,
     filters.reportFilter,
+    filters.tahunFilter,
   ]);
 
   // Items for selected location drill-down (filtered by selected location and active period/filters)
   const selectedLokasiItems = useMemo(() => {
     if (!selectedLokasiCode) return [];
     return rawLokasiList.filter((item) => {
-      if (item.lokasi !== selectedLokasiCode) return false;
+      const itemKey = item.idMaster || item.masterSheet?.idMaster || item.lokasi;
+      if (itemKey !== selectedLokasiCode && item.lokasi !== selectedLokasiCode) return false;
       if (item.periode !== filters.periodeFilter) return false;
+      const itemYear = item.tahun || (item.tanggalRawat ? new Date(item.tanggalRawat).getFullYear() : null);
+      if (itemYear && itemYear !== Number(filters.tahunFilter)) return false;
       if (filters.statusFilter !== "all") {
+        const itemStatus = item.status || item.masterSheet?.status;
         if (filters.statusFilter === "NS") {
-          if (item.status !== "NSSC" && item.status !== "NSFC") return false;
-        } else if (item.status !== filters.statusFilter) {
+          if (itemStatus !== "NSSC" && itemStatus !== "NSFC") return false;
+        } else if (itemStatus !== filters.statusFilter) {
           return false;
         }
       }
@@ -420,6 +458,7 @@ export default function DashboardHPPPage() {
     filters.periodeFilter,
     filters.statusFilter,
     filters.wilayahFilter,
+    filters.tahunFilter,
   ]);
 
   if (!mounted) {
@@ -454,6 +493,7 @@ export default function DashboardHPPPage() {
             filters={filters}
             onChangeFilter={handleFilterChange}
             availableGroupOptions={availableGroupOptions}
+            availableTahunOptions={availableTahunOptions}
           />
         </section>
 

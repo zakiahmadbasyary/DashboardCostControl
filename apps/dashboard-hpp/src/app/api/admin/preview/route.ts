@@ -18,11 +18,12 @@ export async function GET(request: NextRequest) {
       const where = search
         ? {
             OR: [
+              { idMaster: { contains: search, mode: "insensitive" as const } },
               { lokasi: { contains: search, mode: "insensitive" as const } },
               { wilayah: { contains: search, mode: "insensitive" as const } },
-              { kodeBibit: { contains: search, mode: "insensitive" as const } },
               { jenisBibit: { contains: search, mode: "insensitive" as const } },
               { kelasBibit: { contains: search, mode: "insensitive" as const } },
+              { status: { contains: search, mode: "insensitive" as const } },
             ],
           }
         : {};
@@ -32,7 +33,7 @@ export async function GET(request: NextRequest) {
           where,
           skip,
           take: limit,
-          orderBy: { lokasi: "asc" },
+          orderBy: { idMaster: "asc" },
         }),
         prisma.masterSheet.count({ where }),
       ]);
@@ -61,6 +62,7 @@ export async function GET(request: NextRequest) {
         ? {
             OR: [
               { idLokasiHpp: { contains: search, mode: "insensitive" as const } },
+              { idMaster: { contains: search, mode: "insensitive" as const } },
               { lokasi: { contains: search, mode: "insensitive" as const } },
               { idBudget: { contains: search, mode: "insensitive" as const } },
               { status: { contains: search, mode: "insensitive" as const } },
@@ -84,9 +86,12 @@ export async function GET(request: NextRequest) {
 
       data = rawList.map((item) => ({
         idLokasiHpp: item.idLokasiHpp,
+        idMaster: item.idMaster,
         lokasi: item.lokasi,
         idBudget: item.idBudget,
         periode: item.periode,
+        tahun: item.tahun,
+        tanggalRawat: item.tanggalRawat ? item.tanggalRawat.toISOString().split("T")[0] : null,
         status: item.status,
         qtyPanen: item.qtyPanen ? Number(item.qtyPanen) : 0,
         luasPanen: item.luasPanen ? Number(item.luasPanen) : 0,
@@ -99,9 +104,8 @@ export async function GET(request: NextRequest) {
           ? Math.round(Number(item.biaya) / Number(item.luasPanen)) 
           : 0,
         wilayah: item.masterSheet?.wilayah || "",
-        kodeBibit: item.masterSheet?.kodeBibit || "",
-        jenisBibit: item.masterSheet?.jenisBibit || "",
-        kelasBibit: item.masterSheet?.kelasBibit || "",
+        jenisBibit: item.jenisBibit || item.masterSheet?.jenisBibit || "",
+        kelasBibit: item.kelasBibit || item.masterSheet?.kelasBibit || "",
       }));
       total = rawCount;
     } else if (tab === "aktivitas") {
@@ -109,6 +113,7 @@ export async function GET(request: NextRequest) {
         ? {
             OR: [
               { idAktivitas: { contains: search, mode: "insensitive" as const } },
+              { idMaster: { contains: search, mode: "insensitive" as const } },
               { lokasi: { contains: search, mode: "insensitive" as const } },
               { aktivitas: { contains: search, mode: "insensitive" as const } },
               { group: { contains: search, mode: "insensitive" as const } },
@@ -130,6 +135,7 @@ export async function GET(request: NextRequest) {
 
       data = rawList.map((item) => ({
         idAktivitas: item.idAktivitas,
+        idMaster: item.idMaster,
         lokasi: item.lokasi,
         tanggalMulaiRawat: item.tanggalMulaiRawat ? item.tanggalMulaiRawat.toISOString().split("T")[0] : null,
         tanggalMulaiTanam: item.tanggalMulaiTanam ? item.tanggalMulaiTanam.toISOString().split("T")[0] : null,
@@ -143,7 +149,6 @@ export async function GET(request: NextRequest) {
         uom: item.uom,
         group: item.group,
         wilayah: item.masterSheet?.wilayah || "",
-        kodeBibit: item.masterSheet?.kodeBibit || "",
         jenisBibit: item.masterSheet?.jenisBibit || "",
         kelasBibit: item.masterSheet?.kelasBibit || "",
       }));

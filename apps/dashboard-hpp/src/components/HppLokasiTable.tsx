@@ -1,14 +1,19 @@
 "use client";
 
 import React, { useState } from "react";
-import { Search, MapPin, Filter, CheckCircle2, ChevronRight, ChevronLeft } from "lucide-react";
+import { Search, MapPin, Filter, CheckCircle2, ChevronRight, ChevronLeft, Calendar } from "lucide-react";
 
 export interface LokasiHppItem {
   idLokasiHpp: string;
+  idMaster?: string | null;
   lokasi: string;
   idBudget: string;
   periode: number;
+  tahun?: number | null;
+  tanggalRawat?: string | null;
   status: string;
+  jenisBibit?: string | null;
+  kelasBibit?: string | null;
   qtyPanen: number;
   luasPanen: number;
   luasAktif: number;
@@ -17,10 +22,18 @@ export interface LokasiHppItem {
   jenisBiaya: string;
   biaya: number;
   masterSheet?: {
+    idMaster?: string;
+    lokasi?: string;
     wilayah: string;
-    kodeBibit: string;
     jenisBibit: string;
     kelasBibit: string;
+    status?: string;
+    tanggalRawat?: string;
+    tanggalTanam?: string;
+    tanggalForcingStandard?: string;
+    tanggalRenForcing?: string;
+    tanggalRealForcing?: string;
+    tanggalSelesaiPanen?: string;
   };
   budgetItem?: {
     budget: number;
@@ -28,10 +41,13 @@ export interface LokasiHppItem {
 }
 
 interface AggregatedLokasi {
+  idMaster: string;
   lokasi: string;
+  tanggalRawat: string;
   wilayah: string;
   jenisBibit: string;
   kelasBibit: string;
+  status: string;
   luasPanen: number;
   luasAktif: number;
   qtyPanen: number;
@@ -50,7 +66,7 @@ interface HppLokasiTableProps {
   onWilayahFilterChange: (wilayah: string) => void;
   reportFilter: "rp_kg" | "rp_ha";
   selectedLokasiCode: string | null;
-  onSelectLokasi: (lokasiCode: string) => void;
+  onSelectLokasi: (lokasiKey: string) => void;
 }
 
 const ITEMS_PER_PAGE = 10;
@@ -74,17 +90,33 @@ export default function HppLokasiTable({
     }).format(val || 0);
   };
 
-  // Group raw items by unique location code
+  const formatDate = (dateStr?: string) => {
+    if (!dateStr) return "-";
+    try {
+      const d = new Date(dateStr);
+      if (isNaN(d.getTime())) return dateStr;
+      return d.toLocaleDateString("id-ID", { year: "numeric", month: "short", day: "numeric" });
+    } catch {
+      return dateStr;
+    }
+  };
+
+  // Group raw items by unique cycle key (idMaster or lokasi) - Option A
   const lokasiMap: Record<string, AggregatedLokasi> = {};
 
   data.forEach((item) => {
-    const code = item.lokasi;
-    if (!lokasiMap[code]) {
-      lokasiMap[code] = {
-        lokasi: code,
+    const key = item.idMaster || item.masterSheet?.idMaster || item.lokasi;
+    const dateRawat = item.tanggalRawat || item.masterSheet?.tanggalRawat || "";
+
+    if (!lokasiMap[key]) {
+      lokasiMap[key] = {
+        idMaster: key,
+        lokasi: item.lokasi,
+        tanggalRawat: dateRawat,
         wilayah: item.masterSheet?.wilayah || "W01",
-        jenisBibit: item.masterSheet?.jenisBibit || "-",
-        kelasBibit: item.masterSheet?.kelasBibit || "-",
+        jenisBibit: item.jenisBibit || item.masterSheet?.jenisBibit || "-",
+        kelasBibit: item.kelasBibit || item.masterSheet?.kelasBibit || "-",
+        status: item.status || item.masterSheet?.status || "NSSC",
         luasPanen: Number(item.luasPanen || 0),
         luasAktif: Number(item.luasAktif || 0),
         qtyPanen: Number(item.qtyPanen || 0),
@@ -96,21 +128,27 @@ export default function HppLokasiTable({
         rawItems: [],
       };
     } else {
-      if (lokasiMap[code].luasPanen === 0 && Number(item.luasPanen || 0) > 0) {
-        lokasiMap[code].luasPanen = Number(item.luasPanen);
+      if ((!lokasiMap[key].jenisBibit || lokasiMap[key].jenisBibit === "-") && item.jenisBibit && item.jenisBibit !== "-") {
+        lokasiMap[key].jenisBibit = item.jenisBibit;
       }
-      if (lokasiMap[code].luasAktif === 0 && Number(item.luasAktif || 0) > 0) {
-        lokasiMap[code].luasAktif = Number(item.luasAktif);
+      if ((!lokasiMap[key].kelasBibit || lokasiMap[key].kelasBibit === "-") && item.kelasBibit && item.kelasBibit !== "-") {
+        lokasiMap[key].kelasBibit = item.kelasBibit;
       }
-      if (lokasiMap[code].qtyPanen === 0 && Number(item.qtyPanen || 0) > 0) {
-        lokasiMap[code].qtyPanen = Number(item.qtyPanen);
+      if (lokasiMap[key].luasPanen === 0 && Number(item.luasPanen || 0) > 0) {
+        lokasiMap[key].luasPanen = Number(item.luasPanen);
+      }
+      if (lokasiMap[key].luasAktif === 0 && Number(item.luasAktif || 0) > 0) {
+        lokasiMap[key].luasAktif = Number(item.luasAktif);
+      }
+      if (lokasiMap[key].qtyPanen === 0 && Number(item.qtyPanen || 0) > 0) {
+        lokasiMap[key].qtyPanen = Number(item.qtyPanen);
       }
     }
-    lokasiMap[code].totalBiaya += Number(item.biaya || 0);
-    lokasiMap[code].rawItems.push(item);
+    lokasiMap[key].totalBiaya += Number(item.biaya || 0);
+    lokasiMap[key].rawItems.push(item);
   });
 
-  // Calculate aggregated HPP Rp/Kg and Rp/Ha for each location
+  // Calculate aggregated HPP Rp/Kg and Rp/Ha for each location cycle
   const aggregatedList = Object.values(lokasiMap).map((loc) => {
     const taksasi = loc.luasAktif > 0 ? (loc.luasPanen / loc.luasAktif) * 100 : 0;
     const yieldVal = loc.luasPanen > 0 ? (loc.qtyPanen / loc.luasPanen) / 1000 : 0;
@@ -136,7 +174,8 @@ export default function HppLokasiTable({
     const matchesSearch =
       loc.lokasi.toLowerCase().includes(searchQuery.toLowerCase()) ||
       loc.wilayah.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      loc.jenisBibit.toLowerCase().includes(searchQuery.toLowerCase());
+      loc.jenisBibit.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      loc.idMaster.toLowerCase().includes(searchQuery.toLowerCase());
 
     const matchesWilayah =
       selectedWilayahFilter === "all" || loc.wilayah.toUpperCase() === selectedWilayahFilter.toUpperCase();
@@ -178,9 +217,9 @@ export default function HppLokasiTable({
             <MapPin className="w-4 h-4" />
           </div>
           <div>
-            <h3 className="font-bold text-base text-[#17231B]">Tabel Daftar Lokasi HPP</h3>
+            <h3 className="font-bold text-base text-[#17231B]">Tabel Daftar Lokasi HPP (Per Siklus Tanam)</h3>
             <p className="text-xs text-[#5F6B63]">
-              Pilih salah satu baris lokasi untuk melihat rincian detail, Group Cost, dan aktivitas.
+              Pilih salah satu baris siklus lokasi untuk melihat rincian detail, Group Cost, dan aktivitas.
             </p>
           </div>
         </div>
@@ -238,6 +277,7 @@ export default function HppLokasiTable({
               <thead className="bg-[#F7F9F7] text-[#17231B] uppercase font-bold border-b border-[#DDE5DF]">
                 <tr>
                   <th className="py-3 px-4">Lokasi</th>
+                  <th className="py-3 px-4">Tgl Rawat</th>
                   <th className="py-3 px-4 text-center">% Taksasi</th>
                   <th className="py-3 px-4 text-right">Yield (Ton/Ha)</th>
                   <th className="py-3 px-4 text-right">{isRpKg ? "HPP (Rp/Kg)" : "HPP (Rp/Ha)"}</th>
@@ -246,13 +286,13 @@ export default function HppLokasiTable({
               </thead>
               <tbody className="divide-y divide-[#DDE5DF]/60">
                 {paginatedList.map((loc) => {
-                  const isSelected = selectedLokasiCode === loc.lokasi;
+                  const isSelected = selectedLokasiCode === loc.idMaster || selectedLokasiCode === loc.lokasi;
                   const hppVal = isRpKg ? loc.rpKg : loc.rpHa;
 
                   return (
                     <tr
-                      key={loc.lokasi}
-                      onClick={() => onSelectLokasi(loc.lokasi)}
+                      key={loc.idMaster}
+                      onClick={() => onSelectLokasi(loc.idMaster)}
                       className={`cursor-pointer transition-all ${
                         isSelected
                           ? "bg-[#A8D437]/20 border-l-4 border-l-[#16823B] font-medium text-[#0B6B32]"
@@ -271,7 +311,15 @@ export default function HppLokasiTable({
                         </div>
                       </td>
 
-                      {/* 2. % Taksasi */}
+                      {/* 2. Tanggal Rawat */}
+                      <td className="py-3 px-4 font-mono font-medium text-[#17231B]">
+                        <div className="flex items-center gap-1.5 text-xs">
+                          <Calendar className="w-3.5 h-3.5 text-[#16823B]" />
+                          <span>{formatDate(loc.tanggalRawat)}</span>
+                        </div>
+                      </td>
+
+                      {/* 3. % Taksasi */}
                       <td className="py-3 px-4 text-center">
                         <span
                           className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold ${
@@ -285,17 +333,17 @@ export default function HppLokasiTable({
                         </span>
                       </td>
 
-                      {/* 3. Yield */}
+                      {/* 4. Yield */}
                       <td className="py-3 px-4 text-right font-mono font-semibold text-[#17231B]">
                         {formatNumber(loc.yieldVal, 2)}
                       </td>
 
-                      {/* 4. HPP */}
+                      {/* 5. HPP */}
                       <td className="py-3 px-4 text-right font-mono font-bold text-[#16823B]">
                         {formatNumber(hppVal, 0)}
                       </td>
 
-                      {/* 5. Status Select */}
+                      {/* 6. Status Select */}
                       <td className="py-3 px-4 text-center">
                         {isSelected ? (
                           <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-[#16823B] text-white text-[10px] font-bold">
@@ -317,7 +365,7 @@ export default function HppLokasiTable({
             <span>
               Menampilkan <strong className="text-[#17231B]">{startIndex + 1}</strong> -{" "}
               <strong className="text-[#17231B]">{endIndex}</strong> dari{" "}
-              <strong className="text-[#16823B] font-bold">{filteredList.length}</strong> lokasi perkebunan
+              <strong className="text-[#16823B] font-bold">{filteredList.length}</strong> siklus lokasi perkebunan
             </span>
 
             <div className="flex items-center gap-1.5">
@@ -349,3 +397,4 @@ export default function HppLokasiTable({
     </div>
   );
 }
+

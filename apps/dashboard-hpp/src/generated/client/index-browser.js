@@ -122,11 +122,18 @@ exports.Prisma.TransactionIsolationLevel = makeStrictEnum({
 });
 
 exports.Prisma.MasterSheetScalarFieldEnum = {
+  idMaster: 'idMaster',
   lokasi: 'lokasi',
   wilayah: 'wilayah',
-  kodeBibit: 'kodeBibit',
   jenisBibit: 'jenisBibit',
   kelasBibit: 'kelasBibit',
+  status: 'status',
+  tanggalRawat: 'tanggalRawat',
+  tanggalTanam: 'tanggalTanam',
+  tanggalForcingStandard: 'tanggalForcingStandard',
+  tanggalRenForcing: 'tanggalRenForcing',
+  tanggalRealForcing: 'tanggalRealForcing',
+  tanggalSelesaiPanen: 'tanggalSelesaiPanen',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 };
@@ -143,10 +150,15 @@ exports.Prisma.BudgetScalarFieldEnum = {
 
 exports.Prisma.LokasiHPPScalarFieldEnum = {
   idLokasiHpp: 'idLokasiHpp',
+  idMaster: 'idMaster',
   lokasi: 'lokasi',
   idBudget: 'idBudget',
   periode: 'periode',
+  tahun: 'tahun',
+  tanggalRawat: 'tanggalRawat',
   status: 'status',
+  jenisBibit: 'jenisBibit',
+  kelasBibit: 'kelasBibit',
   qtyPanen: 'qtyPanen',
   luasPanen: 'luasPanen',
   luasAktif: 'luasAktif',
@@ -160,6 +172,7 @@ exports.Prisma.LokasiHPPScalarFieldEnum = {
 
 exports.Prisma.AktivitasHPPScalarFieldEnum = {
   idAktivitas: 'idAktivitas',
+  idMaster: 'idMaster',
   lokasi: 'lokasi',
   tanggalMulaiRawat: 'tanggalMulaiRawat',
   tanggalMulaiTanam: 'tanggalMulaiTanam',

@@ -55,6 +55,21 @@ function limitStr(val: any, maxLen: number, defaultVal = ""): string {
   return res.substring(0, maxLen);
 }
 
+// Date parser helper
+function parseDate(val: any): Date | null {
+  if (!val) return null;
+  if (val instanceof Date && !isNaN(val.getTime())) return val;
+  if (typeof val === "number") {
+    const d = new Date(Math.round((val - (25567 + 2)) * 86400 * 1000));
+    return isNaN(d.getTime()) ? null : d;
+  }
+  if (typeof val === "string" && val.trim() !== "") {
+    const d = new Date(val);
+    return isNaN(d.getTime()) ? null : d;
+  }
+  return null;
+}
+
 export async function POST(req: Request) {
   try {
     const body = await req.json();
@@ -71,18 +86,42 @@ export async function POST(req: Request) {
 
     if (category === "mastersheet") {
       await prisma.masterSheet.deleteMany();
-      const uniqueMap = new Map<string, { lokasi: string; wilayah: string; kodeBibit: string; jenisBibit: string; kelasBibit: string }>();
+      const uniqueMap = new Map<string, any>();
 
       for (let i = 0; i < data.length; i++) {
         const row = data[i];
         const lokasi = limitStr(getVal(row, ["lokasi", "Lokasi", "LOKASI", "Kode Lokasi"]), 10);
         const wilayah = limitStr(getVal(row, ["wilayah", "Wilayah", "WILAYAH", "Region"]), 10, "W01");
-        const kodeBibit = limitStr(getVal(row, ["kodeBibit", "kode_bibit", "Kode Bibit", "kodebibit"]), 20, "-");
         const jenisBibit = limitStr(getVal(row, ["jenisBibit", "jenis_bibit", "Jenis Bibit", "jenisbibit"]), 20, "-");
         const kelasBibit = limitStr(getVal(row, ["kelasBibit", "kelas_bibit", "Kelas Bibit", "kelasbibit"]), 20, "-");
+        const status = limitStr(getVal(row, ["status", "Status", "STATUS"]), 10, "NSSC");
 
-        if (lokasi) {
-          uniqueMap.set(lokasi, { lokasi, wilayah, kodeBibit, jenisBibit, kelasBibit });
+        const tanggalRawat = parseDate(getVal(row, ["tanggalRawat", "tanggal_rawat", "Tanggal Rawat", "Tgl Rawat"])) || new Date();
+        const tanggalTanam = parseDate(getVal(row, ["tanggalTanam", "tanggal_tanam", "Tanggal Tanam"]));
+        const tanggalForcingStandard = parseDate(getVal(row, ["tanggalForcingStandard", "tanggal_forcing_standard", "Tanggal Forcing Standard"]));
+        const tanggalRenForcing = parseDate(getVal(row, ["tanggalRenForcing", "tanggal_ren_forcing", "Rencana Forcing"]));
+        const tanggalRealForcing = parseDate(getVal(row, ["tanggalRealForcing", "tanggal_real_forcing", "Real Forcing", "Realisasi Forcing"]));
+        const tanggalSelesaiPanen = parseDate(getVal(row, ["tanggalSelesaiPanen", "tanggal_selesai_panen", "Selesai Panen", "Tanggal Selesai Panen", "Rencana Panen"]));
+
+        const rawatStr = tanggalRawat.toISOString().split("T")[0];
+        const rawIdMaster = getVal(row, ["idMaster", "id_master", "ID Master"]);
+        const idMaster = limitStr(rawIdMaster || `${lokasi}_${rawatStr}`, 50);
+
+        if (idMaster && lokasi) {
+          uniqueMap.set(idMaster, {
+            idMaster,
+            lokasi,
+            wilayah,
+            jenisBibit,
+            kelasBibit,
+            status,
+            tanggalRawat,
+            tanggalTanam,
+            tanggalForcingStandard,
+            tanggalRenForcing,
+            tanggalRealForcing,
+            tanggalSelesaiPanen,
+          });
         }
       }
 
@@ -91,7 +130,7 @@ export async function POST(req: Request) {
           await prisma.masterSheet.create({ data: item });
           count++;
         } catch (e) {
-          console.error(`masterSheet error for ${item.lokasi}:`, e);
+          console.error(`masterSheet error for ${item.idMaster}:`, e);
         }
       }
     } else if (category === "budget") {
@@ -131,7 +170,16 @@ export async function POST(req: Request) {
         const rawIdLokasiHpp = getVal(row, ["idLokasiHpp", "id_lokasi_hpp", "ID Lokasi HPP", "idlokasihpp"]);
         const lokasi = limitStr(getVal(row, ["lokasi", "Lokasi", "LOKASI", "Kode Lokasi"]), 10);
         const periode = Math.round(parseNum(getVal(row, ["periode", "Periode", "PERIODE", "Bulan"]), 1));
+        const tahun = Math.round(parseNum(getVal(row, ["tahun", "Tahun", "TAHUN"]), new Date().getFullYear()));
+        const tanggalRawat = parseDate(getVal(row, ["tanggalRawat", "tanggal_rawat", "Tanggal Rawat"])) || new Date();
+        const rawatStr = tanggalRawat.toISOString().split("T")[0];
+
+        const rawIdMaster = getVal(row, ["idMaster", "id_master", "ID Master"]);
+        const idMaster = limitStr(rawIdMaster || `${lokasi}_${rawatStr}`, 50);
+
         const status = limitStr(getVal(row, ["status", "Status", "STATUS"]), 10, "NSSC");
+        const jenisBibit = limitStr(getVal(row, ["jenisBibit", "jenis_bibit", "Jenis Bibit", "jenisbibit"]), 20, "-");
+        const kelasBibit = limitStr(getVal(row, ["kelasBibit", "kelas_bibit", "Kelas Bibit", "kelasbibit"]), 20, "-");
         const group = limitStr(getVal(row, ["group", "Group", "GROUP"]), 10, "ZN01");
         const descGroup = limitStr(getVal(row, ["descGroup", "desc_group", "Desc Group", "Keterangan Group"]), 255, `Group ${group}`);
 
@@ -147,10 +195,15 @@ export async function POST(req: Request) {
         if (lokasi) {
           uniqueMap.set(idLokasiHpp, {
             idLokasiHpp,
+            idMaster,
             lokasi,
             idBudget,
             periode,
+            tahun,
+            tanggalRawat,
             status,
+            jenisBibit,
+            kelasBibit,
             qtyPanen,
             luasPanen,
             luasAktif,
@@ -165,17 +218,21 @@ export async function POST(req: Request) {
       for (const item of Array.from(uniqueMap.values())) {
         try {
           // 1. Auto-create masterSheet record if it doesn't exist yet
-          await prisma.masterSheet.upsert({
-            where: { lokasi: item.lokasi },
-            update: {},
-            create: {
-              lokasi: item.lokasi,
-              wilayah: "W01",
-              kodeBibit: "-",
-              jenisBibit: "-",
-              kelasBibit: "-",
-            },
-          });
+          if (item.idMaster) {
+            await prisma.masterSheet.upsert({
+              where: { idMaster: item.idMaster },
+              update: {},
+              create: {
+                idMaster: item.idMaster,
+                lokasi: item.lokasi,
+                wilayah: "W01",
+                jenisBibit: item.jenisBibit || "-",
+                kelasBibit: item.kelasBibit || "-",
+                status: item.status || "NSSC",
+                tanggalRawat: item.tanggalRawat || new Date(),
+              },
+            });
+          }
 
           // 2. Auto-resolve or create budget record
           let targetIdBudget = item.idBudget;
@@ -219,10 +276,15 @@ export async function POST(req: Request) {
           await prisma.lokasiHPP.create({
             data: {
               idLokasiHpp: item.idLokasiHpp,
+              idMaster: item.idMaster,
               lokasi: item.lokasi,
               idBudget: targetIdBudget,
               periode: item.periode,
+              tahun: item.tahun,
+              tanggalRawat: item.tanggalRawat,
               status: item.status,
+              jenisBibit: item.jenisBibit,
+              kelasBibit: item.kelasBibit,
               qtyPanen: item.qtyPanen,
               luasPanen: item.luasPanen,
               luasAktif: item.luasAktif,
@@ -240,20 +302,6 @@ export async function POST(req: Request) {
     } else if (category === "aktivitas") {
       await prisma.aktivitasHPP.deleteMany();
       const uniqueMap = new Map<string, any>();
-
-      const parseDate = (val: any): Date | null => {
-        if (!val) return null;
-        if (val instanceof Date && !isNaN(val.getTime())) return val;
-        if (typeof val === "number") {
-          const d = new Date(Math.round((val - (25567 + 2)) * 86400 * 1000));
-          return isNaN(d.getTime()) ? null : d;
-        }
-        if (typeof val === "string" && val.trim() !== "") {
-          const d = new Date(val);
-          return isNaN(d.getTime()) ? null : d;
-        }
-        return null;
-      };
 
       for (let i = 0; i < data.length; i++) {
         const row = data[i];
@@ -274,9 +322,14 @@ export async function POST(req: Request) {
         const realForcing = parseDate(getVal(row, ["realForcing", "real_forcing", "Real Forcing"]));
         const rencanaPanen = parseDate(getVal(row, ["rencanaPanen", "rencana_panen", "Rencana Panen"]));
 
+        const rawatStr = (tanggalMulaiRawat || new Date()).toISOString().split("T")[0];
+        const rawIdMaster = getVal(row, ["idMaster", "id_master", "ID Master"]);
+        const idMaster = limitStr(rawIdMaster || `${lokasi}_${rawatStr}`, 50);
+
         if (lokasi) {
           uniqueMap.set(idAktivitas, {
             idAktivitas,
+            idMaster,
             lokasi,
             aktivitas,
             biaya,
@@ -295,17 +348,21 @@ export async function POST(req: Request) {
 
       for (const item of Array.from(uniqueMap.values())) {
         try {
-          await prisma.masterSheet.upsert({
-            where: { lokasi: item.lokasi },
-            update: {},
-            create: {
-              lokasi: item.lokasi,
-              wilayah: "W01",
-              kodeBibit: "-",
-              jenisBibit: "-",
-              kelasBibit: "-",
-            },
-          });
+          if (item.idMaster) {
+            await prisma.masterSheet.upsert({
+              where: { idMaster: item.idMaster },
+              update: {},
+              create: {
+                idMaster: item.idMaster,
+                lokasi: item.lokasi,
+                wilayah: "W01",
+                jenisBibit: "-",
+                kelasBibit: "-",
+                status: "NSSC",
+                tanggalRawat: item.tanggalMulaiRawat || new Date(),
+              },
+            });
+          }
 
           await prisma.aktivitasHPP.create({ data: item });
           count++;

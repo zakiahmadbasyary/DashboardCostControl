@@ -5,20 +5,27 @@ export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
     const rawLokasi = searchParams.get("lokasi")?.trim();
+    const rawIdMaster = searchParams.get("idMaster")?.trim();
     const rawGroup = searchParams.get("group")?.trim();
 
     // Security sanitization: truncate parameter values
     const lokasi = rawLokasi ? rawLokasi.slice(0, 50) : "";
+    const idMaster = rawIdMaster ? rawIdMaster.slice(0, 100) : "";
     const group = rawGroup ? rawGroup.slice(0, 20) : "";
 
     const where: any = {};
-    if (lokasi && lokasi !== "all") where.lokasi = lokasi;
+    if (idMaster && idMaster !== "all") {
+      where.idMaster = idMaster;
+    } else if (lokasi && lokasi !== "all") {
+      where.lokasi = lokasi;
+    }
     if (group && group !== "all") where.group = group;
 
     const aktivitasList = await prisma.aktivitasHPP.findMany({
       where,
       select: {
         idAktivitas: true,
+        idMaster: true,
         lokasi: true,
         tanggalMulaiRawat: true,
         tanggalMulaiTanam: true,
@@ -33,7 +40,7 @@ export async function GET(request: Request) {
         group: true,
       },
       orderBy: { createdAt: "desc" },
-      take: (!lokasi || lokasi === "all") ? 500 : undefined,
+      take: (!lokasi && !idMaster) || lokasi === "all" || idMaster === "all" ? 500 : undefined,
     });
 
     const response = NextResponse.json({

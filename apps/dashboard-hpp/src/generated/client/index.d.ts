@@ -1215,31 +1215,52 @@ export namespace Prisma {
   }
 
   export type MasterSheetMinAggregateOutputType = {
+    idMaster: string | null
     lokasi: string | null
     wilayah: string | null
-    kodeBibit: string | null
     jenisBibit: string | null
     kelasBibit: string | null
+    status: string | null
+    tanggalRawat: Date | null
+    tanggalTanam: Date | null
+    tanggalForcingStandard: Date | null
+    tanggalRenForcing: Date | null
+    tanggalRealForcing: Date | null
+    tanggalSelesaiPanen: Date | null
     createdAt: Date | null
     updatedAt: Date | null
   }
 
   export type MasterSheetMaxAggregateOutputType = {
+    idMaster: string | null
     lokasi: string | null
     wilayah: string | null
-    kodeBibit: string | null
     jenisBibit: string | null
     kelasBibit: string | null
+    status: string | null
+    tanggalRawat: Date | null
+    tanggalTanam: Date | null
+    tanggalForcingStandard: Date | null
+    tanggalRenForcing: Date | null
+    tanggalRealForcing: Date | null
+    tanggalSelesaiPanen: Date | null
     createdAt: Date | null
     updatedAt: Date | null
   }
 
   export type MasterSheetCountAggregateOutputType = {
+    idMaster: number
     lokasi: number
     wilayah: number
-    kodeBibit: number
     jenisBibit: number
     kelasBibit: number
+    status: number
+    tanggalRawat: number
+    tanggalTanam: number
+    tanggalForcingStandard: number
+    tanggalRenForcing: number
+    tanggalRealForcing: number
+    tanggalSelesaiPanen: number
     createdAt: number
     updatedAt: number
     _all: number
@@ -1247,31 +1268,52 @@ export namespace Prisma {
 
 
   export type MasterSheetMinAggregateInputType = {
+    idMaster?: true
     lokasi?: true
     wilayah?: true
-    kodeBibit?: true
     jenisBibit?: true
     kelasBibit?: true
+    status?: true
+    tanggalRawat?: true
+    tanggalTanam?: true
+    tanggalForcingStandard?: true
+    tanggalRenForcing?: true
+    tanggalRealForcing?: true
+    tanggalSelesaiPanen?: true
     createdAt?: true
     updatedAt?: true
   }
 
   export type MasterSheetMaxAggregateInputType = {
+    idMaster?: true
     lokasi?: true
     wilayah?: true
-    kodeBibit?: true
     jenisBibit?: true
     kelasBibit?: true
+    status?: true
+    tanggalRawat?: true
+    tanggalTanam?: true
+    tanggalForcingStandard?: true
+    tanggalRenForcing?: true
+    tanggalRealForcing?: true
+    tanggalSelesaiPanen?: true
     createdAt?: true
     updatedAt?: true
   }
 
   export type MasterSheetCountAggregateInputType = {
+    idMaster?: true
     lokasi?: true
     wilayah?: true
-    kodeBibit?: true
     jenisBibit?: true
     kelasBibit?: true
+    status?: true
+    tanggalRawat?: true
+    tanggalTanam?: true
+    tanggalForcingStandard?: true
+    tanggalRenForcing?: true
+    tanggalRealForcing?: true
+    tanggalSelesaiPanen?: true
     createdAt?: true
     updatedAt?: true
     _all?: true
@@ -1350,11 +1392,18 @@ export namespace Prisma {
   }
 
   export type MasterSheetGroupByOutputType = {
+    idMaster: string
     lokasi: string
     wilayah: string
-    kodeBibit: string
     jenisBibit: string
     kelasBibit: string
+    status: string
+    tanggalRawat: Date
+    tanggalTanam: Date | null
+    tanggalForcingStandard: Date | null
+    tanggalRenForcing: Date | null
+    tanggalRealForcing: Date | null
+    tanggalSelesaiPanen: Date | null
     createdAt: Date
     updatedAt: Date
     _count: MasterSheetCountAggregateOutputType | null
@@ -1377,11 +1426,18 @@ export namespace Prisma {
 
 
   export type MasterSheetSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    idMaster?: boolean
     lokasi?: boolean
     wilayah?: boolean
-    kodeBibit?: boolean
     jenisBibit?: boolean
     kelasBibit?: boolean
+    status?: boolean
+    tanggalRawat?: boolean
+    tanggalTanam?: boolean
+    tanggalForcingStandard?: boolean
+    tanggalRenForcing?: boolean
+    tanggalRealForcing?: boolean
+    tanggalSelesaiPanen?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     lokasiHppList?: boolean | MasterSheet$lokasiHppListArgs<ExtArgs>
@@ -1390,36 +1446,57 @@ export namespace Prisma {
   }, ExtArgs["result"]["masterSheet"]>
 
   export type MasterSheetSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    idMaster?: boolean
     lokasi?: boolean
     wilayah?: boolean
-    kodeBibit?: boolean
     jenisBibit?: boolean
     kelasBibit?: boolean
+    status?: boolean
+    tanggalRawat?: boolean
+    tanggalTanam?: boolean
+    tanggalForcingStandard?: boolean
+    tanggalRenForcing?: boolean
+    tanggalRealForcing?: boolean
+    tanggalSelesaiPanen?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }, ExtArgs["result"]["masterSheet"]>
 
   export type MasterSheetSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    idMaster?: boolean
     lokasi?: boolean
     wilayah?: boolean
-    kodeBibit?: boolean
     jenisBibit?: boolean
     kelasBibit?: boolean
+    status?: boolean
+    tanggalRawat?: boolean
+    tanggalTanam?: boolean
+    tanggalForcingStandard?: boolean
+    tanggalRenForcing?: boolean
+    tanggalRealForcing?: boolean
+    tanggalSelesaiPanen?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }, ExtArgs["result"]["masterSheet"]>
 
   export type MasterSheetSelectScalar = {
+    idMaster?: boolean
     lokasi?: boolean
     wilayah?: boolean
-    kodeBibit?: boolean
     jenisBibit?: boolean
     kelasBibit?: boolean
+    status?: boolean
+    tanggalRawat?: boolean
+    tanggalTanam?: boolean
+    tanggalForcingStandard?: boolean
+    tanggalRenForcing?: boolean
+    tanggalRealForcing?: boolean
+    tanggalSelesaiPanen?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }
 
-  export type MasterSheetOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"lokasi" | "wilayah" | "kodeBibit" | "jenisBibit" | "kelasBibit" | "createdAt" | "updatedAt", ExtArgs["result"]["masterSheet"]>
+  export type MasterSheetOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"idMaster" | "lokasi" | "wilayah" | "jenisBibit" | "kelasBibit" | "status" | "tanggalRawat" | "tanggalTanam" | "tanggalForcingStandard" | "tanggalRenForcing" | "tanggalRealForcing" | "tanggalSelesaiPanen" | "createdAt" | "updatedAt", ExtArgs["result"]["masterSheet"]>
   export type MasterSheetInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     lokasiHppList?: boolean | MasterSheet$lokasiHppListArgs<ExtArgs>
     aktivitasHppList?: boolean | MasterSheet$aktivitasHppListArgs<ExtArgs>
@@ -1435,11 +1512,18 @@ export namespace Prisma {
       aktivitasHppList: Prisma.$AktivitasHPPPayload<ExtArgs>[]
     }
     scalars: $Extensions.GetPayloadResult<{
+      idMaster: string
       lokasi: string
       wilayah: string
-      kodeBibit: string
       jenisBibit: string
       kelasBibit: string
+      status: string
+      tanggalRawat: Date
+      tanggalTanam: Date | null
+      tanggalForcingStandard: Date | null
+      tanggalRenForcing: Date | null
+      tanggalRealForcing: Date | null
+      tanggalSelesaiPanen: Date | null
       createdAt: Date
       updatedAt: Date
     }, ExtArgs["result"]["masterSheet"]>
@@ -1525,8 +1609,8 @@ export namespace Prisma {
      * // Get first 10 MasterSheets
      * const masterSheets = await prisma.masterSheet.findMany({ take: 10 })
      * 
-     * // Only select the `lokasi`
-     * const masterSheetWithLokasiOnly = await prisma.masterSheet.findMany({ select: { lokasi: true } })
+     * // Only select the `idMaster`
+     * const masterSheetWithIdMasterOnly = await prisma.masterSheet.findMany({ select: { idMaster: true } })
      * 
      */
     findMany<T extends MasterSheetFindManyArgs>(args?: SelectSubset<T, MasterSheetFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$MasterSheetPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
@@ -1570,9 +1654,9 @@ export namespace Prisma {
      *   ]
      * })
      * 
-     * // Create many MasterSheets and only return the `lokasi`
-     * const masterSheetWithLokasiOnly = await prisma.masterSheet.createManyAndReturn({
-     *   select: { lokasi: true },
+     * // Create many MasterSheets and only return the `idMaster`
+     * const masterSheetWithIdMasterOnly = await prisma.masterSheet.createManyAndReturn({
+     *   select: { idMaster: true },
      *   data: [
      *     // ... provide data here
      *   ]
@@ -1661,9 +1745,9 @@ export namespace Prisma {
      *   ]
      * })
      * 
-     * // Update zero or more MasterSheets and only return the `lokasi`
-     * const masterSheetWithLokasiOnly = await prisma.masterSheet.updateManyAndReturn({
-     *   select: { lokasi: true },
+     * // Update zero or more MasterSheets and only return the `idMaster`
+     * const masterSheetWithIdMasterOnly = await prisma.masterSheet.updateManyAndReturn({
+     *   select: { idMaster: true },
      *   where: {
      *     // ... provide filter here
      *   },
@@ -1867,11 +1951,18 @@ export namespace Prisma {
    * Fields of the MasterSheet model
    */
   interface MasterSheetFieldRefs {
+    readonly idMaster: FieldRef<"MasterSheet", 'String'>
     readonly lokasi: FieldRef<"MasterSheet", 'String'>
     readonly wilayah: FieldRef<"MasterSheet", 'String'>
-    readonly kodeBibit: FieldRef<"MasterSheet", 'String'>
     readonly jenisBibit: FieldRef<"MasterSheet", 'String'>
     readonly kelasBibit: FieldRef<"MasterSheet", 'String'>
+    readonly status: FieldRef<"MasterSheet", 'String'>
+    readonly tanggalRawat: FieldRef<"MasterSheet", 'DateTime'>
+    readonly tanggalTanam: FieldRef<"MasterSheet", 'DateTime'>
+    readonly tanggalForcingStandard: FieldRef<"MasterSheet", 'DateTime'>
+    readonly tanggalRenForcing: FieldRef<"MasterSheet", 'DateTime'>
+    readonly tanggalRealForcing: FieldRef<"MasterSheet", 'DateTime'>
+    readonly tanggalSelesaiPanen: FieldRef<"MasterSheet", 'DateTime'>
     readonly createdAt: FieldRef<"MasterSheet", 'DateTime'>
     readonly updatedAt: FieldRef<"MasterSheet", 'DateTime'>
   }
@@ -3476,6 +3567,7 @@ export namespace Prisma {
 
   export type LokasiHPPAvgAggregateOutputType = {
     periode: number | null
+    tahun: number | null
     qtyPanen: Decimal | null
     luasPanen: Decimal | null
     luasAktif: Decimal | null
@@ -3484,6 +3576,7 @@ export namespace Prisma {
 
   export type LokasiHPPSumAggregateOutputType = {
     periode: number | null
+    tahun: number | null
     qtyPanen: Decimal | null
     luasPanen: Decimal | null
     luasAktif: Decimal | null
@@ -3492,10 +3585,15 @@ export namespace Prisma {
 
   export type LokasiHPPMinAggregateOutputType = {
     idLokasiHpp: string | null
+    idMaster: string | null
     lokasi: string | null
     idBudget: string | null
     periode: number | null
+    tahun: number | null
+    tanggalRawat: Date | null
     status: string | null
+    jenisBibit: string | null
+    kelasBibit: string | null
     qtyPanen: Decimal | null
     luasPanen: Decimal | null
     luasAktif: Decimal | null
@@ -3509,10 +3607,15 @@ export namespace Prisma {
 
   export type LokasiHPPMaxAggregateOutputType = {
     idLokasiHpp: string | null
+    idMaster: string | null
     lokasi: string | null
     idBudget: string | null
     periode: number | null
+    tahun: number | null
+    tanggalRawat: Date | null
     status: string | null
+    jenisBibit: string | null
+    kelasBibit: string | null
     qtyPanen: Decimal | null
     luasPanen: Decimal | null
     luasAktif: Decimal | null
@@ -3526,10 +3629,15 @@ export namespace Prisma {
 
   export type LokasiHPPCountAggregateOutputType = {
     idLokasiHpp: number
+    idMaster: number
     lokasi: number
     idBudget: number
     periode: number
+    tahun: number
+    tanggalRawat: number
     status: number
+    jenisBibit: number
+    kelasBibit: number
     qtyPanen: number
     luasPanen: number
     luasAktif: number
@@ -3545,6 +3653,7 @@ export namespace Prisma {
 
   export type LokasiHPPAvgAggregateInputType = {
     periode?: true
+    tahun?: true
     qtyPanen?: true
     luasPanen?: true
     luasAktif?: true
@@ -3553,6 +3662,7 @@ export namespace Prisma {
 
   export type LokasiHPPSumAggregateInputType = {
     periode?: true
+    tahun?: true
     qtyPanen?: true
     luasPanen?: true
     luasAktif?: true
@@ -3561,10 +3671,15 @@ export namespace Prisma {
 
   export type LokasiHPPMinAggregateInputType = {
     idLokasiHpp?: true
+    idMaster?: true
     lokasi?: true
     idBudget?: true
     periode?: true
+    tahun?: true
+    tanggalRawat?: true
     status?: true
+    jenisBibit?: true
+    kelasBibit?: true
     qtyPanen?: true
     luasPanen?: true
     luasAktif?: true
@@ -3578,10 +3693,15 @@ export namespace Prisma {
 
   export type LokasiHPPMaxAggregateInputType = {
     idLokasiHpp?: true
+    idMaster?: true
     lokasi?: true
     idBudget?: true
     periode?: true
+    tahun?: true
+    tanggalRawat?: true
     status?: true
+    jenisBibit?: true
+    kelasBibit?: true
     qtyPanen?: true
     luasPanen?: true
     luasAktif?: true
@@ -3595,10 +3715,15 @@ export namespace Prisma {
 
   export type LokasiHPPCountAggregateInputType = {
     idLokasiHpp?: true
+    idMaster?: true
     lokasi?: true
     idBudget?: true
     periode?: true
+    tahun?: true
+    tanggalRawat?: true
     status?: true
+    jenisBibit?: true
+    kelasBibit?: true
     qtyPanen?: true
     luasPanen?: true
     luasAktif?: true
@@ -3699,10 +3824,15 @@ export namespace Prisma {
 
   export type LokasiHPPGroupByOutputType = {
     idLokasiHpp: string
+    idMaster: string | null
     lokasi: string
     idBudget: string
     periode: number
+    tahun: number | null
+    tanggalRawat: Date | null
     status: string
+    jenisBibit: string | null
+    kelasBibit: string | null
     qtyPanen: Decimal
     luasPanen: Decimal
     luasAktif: Decimal
@@ -3735,10 +3865,15 @@ export namespace Prisma {
 
   export type LokasiHPPSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     idLokasiHpp?: boolean
+    idMaster?: boolean
     lokasi?: boolean
     idBudget?: boolean
     periode?: boolean
+    tahun?: boolean
+    tanggalRawat?: boolean
     status?: boolean
+    jenisBibit?: boolean
+    kelasBibit?: boolean
     qtyPanen?: boolean
     luasPanen?: boolean
     luasAktif?: boolean
@@ -3748,16 +3883,21 @@ export namespace Prisma {
     biaya?: boolean
     createdAt?: boolean
     updatedAt?: boolean
-    masterSheet?: boolean | MasterSheetDefaultArgs<ExtArgs>
+    masterSheet?: boolean | LokasiHPP$masterSheetArgs<ExtArgs>
     budgetItem?: boolean | BudgetDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["lokasiHPP"]>
 
   export type LokasiHPPSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     idLokasiHpp?: boolean
+    idMaster?: boolean
     lokasi?: boolean
     idBudget?: boolean
     periode?: boolean
+    tahun?: boolean
+    tanggalRawat?: boolean
     status?: boolean
+    jenisBibit?: boolean
+    kelasBibit?: boolean
     qtyPanen?: boolean
     luasPanen?: boolean
     luasAktif?: boolean
@@ -3767,16 +3907,21 @@ export namespace Prisma {
     biaya?: boolean
     createdAt?: boolean
     updatedAt?: boolean
-    masterSheet?: boolean | MasterSheetDefaultArgs<ExtArgs>
+    masterSheet?: boolean | LokasiHPP$masterSheetArgs<ExtArgs>
     budgetItem?: boolean | BudgetDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["lokasiHPP"]>
 
   export type LokasiHPPSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     idLokasiHpp?: boolean
+    idMaster?: boolean
     lokasi?: boolean
     idBudget?: boolean
     periode?: boolean
+    tahun?: boolean
+    tanggalRawat?: boolean
     status?: boolean
+    jenisBibit?: boolean
+    kelasBibit?: boolean
     qtyPanen?: boolean
     luasPanen?: boolean
     luasAktif?: boolean
@@ -3786,16 +3931,21 @@ export namespace Prisma {
     biaya?: boolean
     createdAt?: boolean
     updatedAt?: boolean
-    masterSheet?: boolean | MasterSheetDefaultArgs<ExtArgs>
+    masterSheet?: boolean | LokasiHPP$masterSheetArgs<ExtArgs>
     budgetItem?: boolean | BudgetDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["lokasiHPP"]>
 
   export type LokasiHPPSelectScalar = {
     idLokasiHpp?: boolean
+    idMaster?: boolean
     lokasi?: boolean
     idBudget?: boolean
     periode?: boolean
+    tahun?: boolean
+    tanggalRawat?: boolean
     status?: boolean
+    jenisBibit?: boolean
+    kelasBibit?: boolean
     qtyPanen?: boolean
     luasPanen?: boolean
     luasAktif?: boolean
@@ -3807,32 +3957,37 @@ export namespace Prisma {
     updatedAt?: boolean
   }
 
-  export type LokasiHPPOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"idLokasiHpp" | "lokasi" | "idBudget" | "periode" | "status" | "qtyPanen" | "luasPanen" | "luasAktif" | "group" | "descGroup" | "jenisBiaya" | "biaya" | "createdAt" | "updatedAt", ExtArgs["result"]["lokasiHPP"]>
+  export type LokasiHPPOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"idLokasiHpp" | "idMaster" | "lokasi" | "idBudget" | "periode" | "tahun" | "tanggalRawat" | "status" | "jenisBibit" | "kelasBibit" | "qtyPanen" | "luasPanen" | "luasAktif" | "group" | "descGroup" | "jenisBiaya" | "biaya" | "createdAt" | "updatedAt", ExtArgs["result"]["lokasiHPP"]>
   export type LokasiHPPInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    masterSheet?: boolean | MasterSheetDefaultArgs<ExtArgs>
+    masterSheet?: boolean | LokasiHPP$masterSheetArgs<ExtArgs>
     budgetItem?: boolean | BudgetDefaultArgs<ExtArgs>
   }
   export type LokasiHPPIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    masterSheet?: boolean | MasterSheetDefaultArgs<ExtArgs>
+    masterSheet?: boolean | LokasiHPP$masterSheetArgs<ExtArgs>
     budgetItem?: boolean | BudgetDefaultArgs<ExtArgs>
   }
   export type LokasiHPPIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    masterSheet?: boolean | MasterSheetDefaultArgs<ExtArgs>
+    masterSheet?: boolean | LokasiHPP$masterSheetArgs<ExtArgs>
     budgetItem?: boolean | BudgetDefaultArgs<ExtArgs>
   }
 
   export type $LokasiHPPPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "LokasiHPP"
     objects: {
-      masterSheet: Prisma.$MasterSheetPayload<ExtArgs>
+      masterSheet: Prisma.$MasterSheetPayload<ExtArgs> | null
       budgetItem: Prisma.$BudgetPayload<ExtArgs>
     }
     scalars: $Extensions.GetPayloadResult<{
       idLokasiHpp: string
+      idMaster: string | null
       lokasi: string
       idBudget: string
       periode: number
+      tahun: number | null
+      tanggalRawat: Date | null
       status: string
+      jenisBibit: string | null
+      kelasBibit: string | null
       qtyPanen: Prisma.Decimal
       luasPanen: Prisma.Decimal
       luasAktif: Prisma.Decimal
@@ -4236,7 +4391,7 @@ export namespace Prisma {
    */
   export interface Prisma__LokasiHPPClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
     readonly [Symbol.toStringTag]: "PrismaPromise"
-    masterSheet<T extends MasterSheetDefaultArgs<ExtArgs> = {}>(args?: Subset<T, MasterSheetDefaultArgs<ExtArgs>>): Prisma__MasterSheetClient<$Result.GetResult<Prisma.$MasterSheetPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    masterSheet<T extends LokasiHPP$masterSheetArgs<ExtArgs> = {}>(args?: Subset<T, LokasiHPP$masterSheetArgs<ExtArgs>>): Prisma__MasterSheetClient<$Result.GetResult<Prisma.$MasterSheetPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
     budgetItem<T extends BudgetDefaultArgs<ExtArgs> = {}>(args?: Subset<T, BudgetDefaultArgs<ExtArgs>>): Prisma__BudgetClient<$Result.GetResult<Prisma.$BudgetPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
@@ -4268,10 +4423,15 @@ export namespace Prisma {
    */
   interface LokasiHPPFieldRefs {
     readonly idLokasiHpp: FieldRef<"LokasiHPP", 'String'>
+    readonly idMaster: FieldRef<"LokasiHPP", 'String'>
     readonly lokasi: FieldRef<"LokasiHPP", 'String'>
     readonly idBudget: FieldRef<"LokasiHPP", 'String'>
     readonly periode: FieldRef<"LokasiHPP", 'Int'>
+    readonly tahun: FieldRef<"LokasiHPP", 'Int'>
+    readonly tanggalRawat: FieldRef<"LokasiHPP", 'DateTime'>
     readonly status: FieldRef<"LokasiHPP", 'String'>
+    readonly jenisBibit: FieldRef<"LokasiHPP", 'String'>
+    readonly kelasBibit: FieldRef<"LokasiHPP", 'String'>
     readonly qtyPanen: FieldRef<"LokasiHPP", 'Decimal'>
     readonly luasPanen: FieldRef<"LokasiHPP", 'Decimal'>
     readonly luasAktif: FieldRef<"LokasiHPP", 'Decimal'>
@@ -4677,6 +4837,25 @@ export namespace Prisma {
   }
 
   /**
+   * LokasiHPP.masterSheet
+   */
+  export type LokasiHPP$masterSheetArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the MasterSheet
+     */
+    select?: MasterSheetSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the MasterSheet
+     */
+    omit?: MasterSheetOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: MasterSheetInclude<ExtArgs> | null
+    where?: MasterSheetWhereInput
+  }
+
+  /**
    * LokasiHPP without action
    */
   export type LokasiHPPDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -4719,6 +4898,7 @@ export namespace Prisma {
 
   export type AktivitasHPPMinAggregateOutputType = {
     idAktivitas: string | null
+    idMaster: string | null
     lokasi: string | null
     tanggalMulaiRawat: Date | null
     tanggalMulaiTanam: Date | null
@@ -4737,6 +4917,7 @@ export namespace Prisma {
 
   export type AktivitasHPPMaxAggregateOutputType = {
     idAktivitas: string | null
+    idMaster: string | null
     lokasi: string | null
     tanggalMulaiRawat: Date | null
     tanggalMulaiTanam: Date | null
@@ -4755,6 +4936,7 @@ export namespace Prisma {
 
   export type AktivitasHPPCountAggregateOutputType = {
     idAktivitas: number
+    idMaster: number
     lokasi: number
     tanggalMulaiRawat: number
     tanggalMulaiTanam: number
@@ -4785,6 +4967,7 @@ export namespace Prisma {
 
   export type AktivitasHPPMinAggregateInputType = {
     idAktivitas?: true
+    idMaster?: true
     lokasi?: true
     tanggalMulaiRawat?: true
     tanggalMulaiTanam?: true
@@ -4803,6 +4986,7 @@ export namespace Prisma {
 
   export type AktivitasHPPMaxAggregateInputType = {
     idAktivitas?: true
+    idMaster?: true
     lokasi?: true
     tanggalMulaiRawat?: true
     tanggalMulaiTanam?: true
@@ -4821,6 +5005,7 @@ export namespace Prisma {
 
   export type AktivitasHPPCountAggregateInputType = {
     idAktivitas?: true
+    idMaster?: true
     lokasi?: true
     tanggalMulaiRawat?: true
     tanggalMulaiTanam?: true
@@ -4926,6 +5111,7 @@ export namespace Prisma {
 
   export type AktivitasHPPGroupByOutputType = {
     idAktivitas: string
+    idMaster: string | null
     lokasi: string
     tanggalMulaiRawat: Date | null
     tanggalMulaiTanam: Date | null
@@ -4963,6 +5149,7 @@ export namespace Prisma {
 
   export type AktivitasHPPSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     idAktivitas?: boolean
+    idMaster?: boolean
     lokasi?: boolean
     tanggalMulaiRawat?: boolean
     tanggalMulaiTanam?: boolean
@@ -4977,11 +5164,12 @@ export namespace Prisma {
     group?: boolean
     createdAt?: boolean
     updatedAt?: boolean
-    masterSheet?: boolean | MasterSheetDefaultArgs<ExtArgs>
+    masterSheet?: boolean | AktivitasHPP$masterSheetArgs<ExtArgs>
   }, ExtArgs["result"]["aktivitasHPP"]>
 
   export type AktivitasHPPSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     idAktivitas?: boolean
+    idMaster?: boolean
     lokasi?: boolean
     tanggalMulaiRawat?: boolean
     tanggalMulaiTanam?: boolean
@@ -4996,11 +5184,12 @@ export namespace Prisma {
     group?: boolean
     createdAt?: boolean
     updatedAt?: boolean
-    masterSheet?: boolean | MasterSheetDefaultArgs<ExtArgs>
+    masterSheet?: boolean | AktivitasHPP$masterSheetArgs<ExtArgs>
   }, ExtArgs["result"]["aktivitasHPP"]>
 
   export type AktivitasHPPSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     idAktivitas?: boolean
+    idMaster?: boolean
     lokasi?: boolean
     tanggalMulaiRawat?: boolean
     tanggalMulaiTanam?: boolean
@@ -5015,11 +5204,12 @@ export namespace Prisma {
     group?: boolean
     createdAt?: boolean
     updatedAt?: boolean
-    masterSheet?: boolean | MasterSheetDefaultArgs<ExtArgs>
+    masterSheet?: boolean | AktivitasHPP$masterSheetArgs<ExtArgs>
   }, ExtArgs["result"]["aktivitasHPP"]>
 
   export type AktivitasHPPSelectScalar = {
     idAktivitas?: boolean
+    idMaster?: boolean
     lokasi?: boolean
     tanggalMulaiRawat?: boolean
     tanggalMulaiTanam?: boolean
@@ -5036,24 +5226,25 @@ export namespace Prisma {
     updatedAt?: boolean
   }
 
-  export type AktivitasHPPOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"idAktivitas" | "lokasi" | "tanggalMulaiRawat" | "tanggalMulaiTanam" | "tanggalForcingStandard" | "rencanaForcing" | "realForcing" | "rencanaPanen" | "aktivitas" | "biaya" | "hasil" | "uom" | "group" | "createdAt" | "updatedAt", ExtArgs["result"]["aktivitasHPP"]>
+  export type AktivitasHPPOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"idAktivitas" | "idMaster" | "lokasi" | "tanggalMulaiRawat" | "tanggalMulaiTanam" | "tanggalForcingStandard" | "rencanaForcing" | "realForcing" | "rencanaPanen" | "aktivitas" | "biaya" | "hasil" | "uom" | "group" | "createdAt" | "updatedAt", ExtArgs["result"]["aktivitasHPP"]>
   export type AktivitasHPPInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    masterSheet?: boolean | MasterSheetDefaultArgs<ExtArgs>
+    masterSheet?: boolean | AktivitasHPP$masterSheetArgs<ExtArgs>
   }
   export type AktivitasHPPIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    masterSheet?: boolean | MasterSheetDefaultArgs<ExtArgs>
+    masterSheet?: boolean | AktivitasHPP$masterSheetArgs<ExtArgs>
   }
   export type AktivitasHPPIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    masterSheet?: boolean | MasterSheetDefaultArgs<ExtArgs>
+    masterSheet?: boolean | AktivitasHPP$masterSheetArgs<ExtArgs>
   }
 
   export type $AktivitasHPPPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "AktivitasHPP"
     objects: {
-      masterSheet: Prisma.$MasterSheetPayload<ExtArgs>
+      masterSheet: Prisma.$MasterSheetPayload<ExtArgs> | null
     }
     scalars: $Extensions.GetPayloadResult<{
       idAktivitas: string
+      idMaster: string | null
       lokasi: string
       tanggalMulaiRawat: Date | null
       tanggalMulaiTanam: Date | null
@@ -5462,7 +5653,7 @@ export namespace Prisma {
    */
   export interface Prisma__AktivitasHPPClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
     readonly [Symbol.toStringTag]: "PrismaPromise"
-    masterSheet<T extends MasterSheetDefaultArgs<ExtArgs> = {}>(args?: Subset<T, MasterSheetDefaultArgs<ExtArgs>>): Prisma__MasterSheetClient<$Result.GetResult<Prisma.$MasterSheetPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    masterSheet<T extends AktivitasHPP$masterSheetArgs<ExtArgs> = {}>(args?: Subset<T, AktivitasHPP$masterSheetArgs<ExtArgs>>): Prisma__MasterSheetClient<$Result.GetResult<Prisma.$MasterSheetPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -5493,6 +5684,7 @@ export namespace Prisma {
    */
   interface AktivitasHPPFieldRefs {
     readonly idAktivitas: FieldRef<"AktivitasHPP", 'String'>
+    readonly idMaster: FieldRef<"AktivitasHPP", 'String'>
     readonly lokasi: FieldRef<"AktivitasHPP", 'String'>
     readonly tanggalMulaiRawat: FieldRef<"AktivitasHPP", 'DateTime'>
     readonly tanggalMulaiTanam: FieldRef<"AktivitasHPP", 'DateTime'>
@@ -5903,6 +6095,25 @@ export namespace Prisma {
   }
 
   /**
+   * AktivitasHPP.masterSheet
+   */
+  export type AktivitasHPP$masterSheetArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the MasterSheet
+     */
+    select?: MasterSheetSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the MasterSheet
+     */
+    omit?: MasterSheetOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: MasterSheetInclude<ExtArgs> | null
+    where?: MasterSheetWhereInput
+  }
+
+  /**
    * AktivitasHPP without action
    */
   export type AktivitasHPPDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -5936,11 +6147,18 @@ export namespace Prisma {
 
 
   export const MasterSheetScalarFieldEnum: {
+    idMaster: 'idMaster',
     lokasi: 'lokasi',
     wilayah: 'wilayah',
-    kodeBibit: 'kodeBibit',
     jenisBibit: 'jenisBibit',
     kelasBibit: 'kelasBibit',
+    status: 'status',
+    tanggalRawat: 'tanggalRawat',
+    tanggalTanam: 'tanggalTanam',
+    tanggalForcingStandard: 'tanggalForcingStandard',
+    tanggalRenForcing: 'tanggalRenForcing',
+    tanggalRealForcing: 'tanggalRealForcing',
+    tanggalSelesaiPanen: 'tanggalSelesaiPanen',
     createdAt: 'createdAt',
     updatedAt: 'updatedAt'
   };
@@ -5963,10 +6181,15 @@ export namespace Prisma {
 
   export const LokasiHPPScalarFieldEnum: {
     idLokasiHpp: 'idLokasiHpp',
+    idMaster: 'idMaster',
     lokasi: 'lokasi',
     idBudget: 'idBudget',
     periode: 'periode',
+    tahun: 'tahun',
+    tanggalRawat: 'tanggalRawat',
     status: 'status',
+    jenisBibit: 'jenisBibit',
+    kelasBibit: 'kelasBibit',
     qtyPanen: 'qtyPanen',
     luasPanen: 'luasPanen',
     luasAktif: 'luasAktif',
@@ -5983,6 +6206,7 @@ export namespace Prisma {
 
   export const AktivitasHPPScalarFieldEnum: {
     idAktivitas: 'idAktivitas',
+    idMaster: 'idMaster',
     lokasi: 'lokasi',
     tanggalMulaiRawat: 'tanggalMulaiRawat',
     tanggalMulaiTanam: 'tanggalMulaiTanam',
@@ -6108,11 +6332,18 @@ export namespace Prisma {
     AND?: MasterSheetWhereInput | MasterSheetWhereInput[]
     OR?: MasterSheetWhereInput[]
     NOT?: MasterSheetWhereInput | MasterSheetWhereInput[]
+    idMaster?: StringFilter<"MasterSheet"> | string
     lokasi?: StringFilter<"MasterSheet"> | string
     wilayah?: StringFilter<"MasterSheet"> | string
-    kodeBibit?: StringFilter<"MasterSheet"> | string
     jenisBibit?: StringFilter<"MasterSheet"> | string
     kelasBibit?: StringFilter<"MasterSheet"> | string
+    status?: StringFilter<"MasterSheet"> | string
+    tanggalRawat?: DateTimeFilter<"MasterSheet"> | Date | string
+    tanggalTanam?: DateTimeNullableFilter<"MasterSheet"> | Date | string | null
+    tanggalForcingStandard?: DateTimeNullableFilter<"MasterSheet"> | Date | string | null
+    tanggalRenForcing?: DateTimeNullableFilter<"MasterSheet"> | Date | string | null
+    tanggalRealForcing?: DateTimeNullableFilter<"MasterSheet"> | Date | string | null
+    tanggalSelesaiPanen?: DateTimeNullableFilter<"MasterSheet"> | Date | string | null
     createdAt?: DateTimeFilter<"MasterSheet"> | Date | string
     updatedAt?: DateTimeFilter<"MasterSheet"> | Date | string
     lokasiHppList?: LokasiHPPListRelationFilter
@@ -6120,11 +6351,18 @@ export namespace Prisma {
   }
 
   export type MasterSheetOrderByWithRelationInput = {
+    idMaster?: SortOrder
     lokasi?: SortOrder
     wilayah?: SortOrder
-    kodeBibit?: SortOrder
     jenisBibit?: SortOrder
     kelasBibit?: SortOrder
+    status?: SortOrder
+    tanggalRawat?: SortOrder
+    tanggalTanam?: SortOrderInput | SortOrder
+    tanggalForcingStandard?: SortOrderInput | SortOrder
+    tanggalRenForcing?: SortOrderInput | SortOrder
+    tanggalRealForcing?: SortOrderInput | SortOrder
+    tanggalSelesaiPanen?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     lokasiHppList?: LokasiHPPOrderByRelationAggregateInput
@@ -6132,26 +6370,40 @@ export namespace Prisma {
   }
 
   export type MasterSheetWhereUniqueInput = Prisma.AtLeast<{
-    lokasi?: string
+    idMaster?: string
     AND?: MasterSheetWhereInput | MasterSheetWhereInput[]
     OR?: MasterSheetWhereInput[]
     NOT?: MasterSheetWhereInput | MasterSheetWhereInput[]
+    lokasi?: StringFilter<"MasterSheet"> | string
     wilayah?: StringFilter<"MasterSheet"> | string
-    kodeBibit?: StringFilter<"MasterSheet"> | string
     jenisBibit?: StringFilter<"MasterSheet"> | string
     kelasBibit?: StringFilter<"MasterSheet"> | string
+    status?: StringFilter<"MasterSheet"> | string
+    tanggalRawat?: DateTimeFilter<"MasterSheet"> | Date | string
+    tanggalTanam?: DateTimeNullableFilter<"MasterSheet"> | Date | string | null
+    tanggalForcingStandard?: DateTimeNullableFilter<"MasterSheet"> | Date | string | null
+    tanggalRenForcing?: DateTimeNullableFilter<"MasterSheet"> | Date | string | null
+    tanggalRealForcing?: DateTimeNullableFilter<"MasterSheet"> | Date | string | null
+    tanggalSelesaiPanen?: DateTimeNullableFilter<"MasterSheet"> | Date | string | null
     createdAt?: DateTimeFilter<"MasterSheet"> | Date | string
     updatedAt?: DateTimeFilter<"MasterSheet"> | Date | string
     lokasiHppList?: LokasiHPPListRelationFilter
     aktivitasHppList?: AktivitasHPPListRelationFilter
-  }, "lokasi">
+  }, "idMaster">
 
   export type MasterSheetOrderByWithAggregationInput = {
+    idMaster?: SortOrder
     lokasi?: SortOrder
     wilayah?: SortOrder
-    kodeBibit?: SortOrder
     jenisBibit?: SortOrder
     kelasBibit?: SortOrder
+    status?: SortOrder
+    tanggalRawat?: SortOrder
+    tanggalTanam?: SortOrderInput | SortOrder
+    tanggalForcingStandard?: SortOrderInput | SortOrder
+    tanggalRenForcing?: SortOrderInput | SortOrder
+    tanggalRealForcing?: SortOrderInput | SortOrder
+    tanggalSelesaiPanen?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     _count?: MasterSheetCountOrderByAggregateInput
@@ -6163,11 +6415,18 @@ export namespace Prisma {
     AND?: MasterSheetScalarWhereWithAggregatesInput | MasterSheetScalarWhereWithAggregatesInput[]
     OR?: MasterSheetScalarWhereWithAggregatesInput[]
     NOT?: MasterSheetScalarWhereWithAggregatesInput | MasterSheetScalarWhereWithAggregatesInput[]
+    idMaster?: StringWithAggregatesFilter<"MasterSheet"> | string
     lokasi?: StringWithAggregatesFilter<"MasterSheet"> | string
     wilayah?: StringWithAggregatesFilter<"MasterSheet"> | string
-    kodeBibit?: StringWithAggregatesFilter<"MasterSheet"> | string
     jenisBibit?: StringWithAggregatesFilter<"MasterSheet"> | string
     kelasBibit?: StringWithAggregatesFilter<"MasterSheet"> | string
+    status?: StringWithAggregatesFilter<"MasterSheet"> | string
+    tanggalRawat?: DateTimeWithAggregatesFilter<"MasterSheet"> | Date | string
+    tanggalTanam?: DateTimeNullableWithAggregatesFilter<"MasterSheet"> | Date | string | null
+    tanggalForcingStandard?: DateTimeNullableWithAggregatesFilter<"MasterSheet"> | Date | string | null
+    tanggalRenForcing?: DateTimeNullableWithAggregatesFilter<"MasterSheet"> | Date | string | null
+    tanggalRealForcing?: DateTimeNullableWithAggregatesFilter<"MasterSheet"> | Date | string | null
+    tanggalSelesaiPanen?: DateTimeNullableWithAggregatesFilter<"MasterSheet"> | Date | string | null
     createdAt?: DateTimeWithAggregatesFilter<"MasterSheet"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"MasterSheet"> | Date | string
   }
@@ -6244,10 +6503,15 @@ export namespace Prisma {
     OR?: LokasiHPPWhereInput[]
     NOT?: LokasiHPPWhereInput | LokasiHPPWhereInput[]
     idLokasiHpp?: StringFilter<"LokasiHPP"> | string
+    idMaster?: StringNullableFilter<"LokasiHPP"> | string | null
     lokasi?: StringFilter<"LokasiHPP"> | string
     idBudget?: StringFilter<"LokasiHPP"> | string
     periode?: IntFilter<"LokasiHPP"> | number
+    tahun?: IntNullableFilter<"LokasiHPP"> | number | null
+    tanggalRawat?: DateTimeNullableFilter<"LokasiHPP"> | Date | string | null
     status?: StringFilter<"LokasiHPP"> | string
+    jenisBibit?: StringNullableFilter<"LokasiHPP"> | string | null
+    kelasBibit?: StringNullableFilter<"LokasiHPP"> | string | null
     qtyPanen?: DecimalFilter<"LokasiHPP"> | Decimal | DecimalJsLike | number | string
     luasPanen?: DecimalFilter<"LokasiHPP"> | Decimal | DecimalJsLike | number | string
     luasAktif?: DecimalFilter<"LokasiHPP"> | Decimal | DecimalJsLike | number | string
@@ -6257,16 +6521,21 @@ export namespace Prisma {
     biaya?: DecimalFilter<"LokasiHPP"> | Decimal | DecimalJsLike | number | string
     createdAt?: DateTimeFilter<"LokasiHPP"> | Date | string
     updatedAt?: DateTimeFilter<"LokasiHPP"> | Date | string
-    masterSheet?: XOR<MasterSheetScalarRelationFilter, MasterSheetWhereInput>
+    masterSheet?: XOR<MasterSheetNullableScalarRelationFilter, MasterSheetWhereInput> | null
     budgetItem?: XOR<BudgetScalarRelationFilter, BudgetWhereInput>
   }
 
   export type LokasiHPPOrderByWithRelationInput = {
     idLokasiHpp?: SortOrder
+    idMaster?: SortOrderInput | SortOrder
     lokasi?: SortOrder
     idBudget?: SortOrder
     periode?: SortOrder
+    tahun?: SortOrderInput | SortOrder
+    tanggalRawat?: SortOrderInput | SortOrder
     status?: SortOrder
+    jenisBibit?: SortOrderInput | SortOrder
+    kelasBibit?: SortOrderInput | SortOrder
     qtyPanen?: SortOrder
     luasPanen?: SortOrder
     luasAktif?: SortOrder
@@ -6285,10 +6554,15 @@ export namespace Prisma {
     AND?: LokasiHPPWhereInput | LokasiHPPWhereInput[]
     OR?: LokasiHPPWhereInput[]
     NOT?: LokasiHPPWhereInput | LokasiHPPWhereInput[]
+    idMaster?: StringNullableFilter<"LokasiHPP"> | string | null
     lokasi?: StringFilter<"LokasiHPP"> | string
     idBudget?: StringFilter<"LokasiHPP"> | string
     periode?: IntFilter<"LokasiHPP"> | number
+    tahun?: IntNullableFilter<"LokasiHPP"> | number | null
+    tanggalRawat?: DateTimeNullableFilter<"LokasiHPP"> | Date | string | null
     status?: StringFilter<"LokasiHPP"> | string
+    jenisBibit?: StringNullableFilter<"LokasiHPP"> | string | null
+    kelasBibit?: StringNullableFilter<"LokasiHPP"> | string | null
     qtyPanen?: DecimalFilter<"LokasiHPP"> | Decimal | DecimalJsLike | number | string
     luasPanen?: DecimalFilter<"LokasiHPP"> | Decimal | DecimalJsLike | number | string
     luasAktif?: DecimalFilter<"LokasiHPP"> | Decimal | DecimalJsLike | number | string
@@ -6298,16 +6572,21 @@ export namespace Prisma {
     biaya?: DecimalFilter<"LokasiHPP"> | Decimal | DecimalJsLike | number | string
     createdAt?: DateTimeFilter<"LokasiHPP"> | Date | string
     updatedAt?: DateTimeFilter<"LokasiHPP"> | Date | string
-    masterSheet?: XOR<MasterSheetScalarRelationFilter, MasterSheetWhereInput>
+    masterSheet?: XOR<MasterSheetNullableScalarRelationFilter, MasterSheetWhereInput> | null
     budgetItem?: XOR<BudgetScalarRelationFilter, BudgetWhereInput>
   }, "idLokasiHpp">
 
   export type LokasiHPPOrderByWithAggregationInput = {
     idLokasiHpp?: SortOrder
+    idMaster?: SortOrderInput | SortOrder
     lokasi?: SortOrder
     idBudget?: SortOrder
     periode?: SortOrder
+    tahun?: SortOrderInput | SortOrder
+    tanggalRawat?: SortOrderInput | SortOrder
     status?: SortOrder
+    jenisBibit?: SortOrderInput | SortOrder
+    kelasBibit?: SortOrderInput | SortOrder
     qtyPanen?: SortOrder
     luasPanen?: SortOrder
     luasAktif?: SortOrder
@@ -6329,10 +6608,15 @@ export namespace Prisma {
     OR?: LokasiHPPScalarWhereWithAggregatesInput[]
     NOT?: LokasiHPPScalarWhereWithAggregatesInput | LokasiHPPScalarWhereWithAggregatesInput[]
     idLokasiHpp?: StringWithAggregatesFilter<"LokasiHPP"> | string
+    idMaster?: StringNullableWithAggregatesFilter<"LokasiHPP"> | string | null
     lokasi?: StringWithAggregatesFilter<"LokasiHPP"> | string
     idBudget?: StringWithAggregatesFilter<"LokasiHPP"> | string
     periode?: IntWithAggregatesFilter<"LokasiHPP"> | number
+    tahun?: IntNullableWithAggregatesFilter<"LokasiHPP"> | number | null
+    tanggalRawat?: DateTimeNullableWithAggregatesFilter<"LokasiHPP"> | Date | string | null
     status?: StringWithAggregatesFilter<"LokasiHPP"> | string
+    jenisBibit?: StringNullableWithAggregatesFilter<"LokasiHPP"> | string | null
+    kelasBibit?: StringNullableWithAggregatesFilter<"LokasiHPP"> | string | null
     qtyPanen?: DecimalWithAggregatesFilter<"LokasiHPP"> | Decimal | DecimalJsLike | number | string
     luasPanen?: DecimalWithAggregatesFilter<"LokasiHPP"> | Decimal | DecimalJsLike | number | string
     luasAktif?: DecimalWithAggregatesFilter<"LokasiHPP"> | Decimal | DecimalJsLike | number | string
@@ -6349,6 +6633,7 @@ export namespace Prisma {
     OR?: AktivitasHPPWhereInput[]
     NOT?: AktivitasHPPWhereInput | AktivitasHPPWhereInput[]
     idAktivitas?: StringFilter<"AktivitasHPP"> | string
+    idMaster?: StringNullableFilter<"AktivitasHPP"> | string | null
     lokasi?: StringFilter<"AktivitasHPP"> | string
     tanggalMulaiRawat?: DateTimeNullableFilter<"AktivitasHPP"> | Date | string | null
     tanggalMulaiTanam?: DateTimeNullableFilter<"AktivitasHPP"> | Date | string | null
@@ -6363,11 +6648,12 @@ export namespace Prisma {
     group?: StringFilter<"AktivitasHPP"> | string
     createdAt?: DateTimeFilter<"AktivitasHPP"> | Date | string
     updatedAt?: DateTimeFilter<"AktivitasHPP"> | Date | string
-    masterSheet?: XOR<MasterSheetScalarRelationFilter, MasterSheetWhereInput>
+    masterSheet?: XOR<MasterSheetNullableScalarRelationFilter, MasterSheetWhereInput> | null
   }
 
   export type AktivitasHPPOrderByWithRelationInput = {
     idAktivitas?: SortOrder
+    idMaster?: SortOrderInput | SortOrder
     lokasi?: SortOrder
     tanggalMulaiRawat?: SortOrderInput | SortOrder
     tanggalMulaiTanam?: SortOrderInput | SortOrder
@@ -6390,6 +6676,7 @@ export namespace Prisma {
     AND?: AktivitasHPPWhereInput | AktivitasHPPWhereInput[]
     OR?: AktivitasHPPWhereInput[]
     NOT?: AktivitasHPPWhereInput | AktivitasHPPWhereInput[]
+    idMaster?: StringNullableFilter<"AktivitasHPP"> | string | null
     lokasi?: StringFilter<"AktivitasHPP"> | string
     tanggalMulaiRawat?: DateTimeNullableFilter<"AktivitasHPP"> | Date | string | null
     tanggalMulaiTanam?: DateTimeNullableFilter<"AktivitasHPP"> | Date | string | null
@@ -6404,11 +6691,12 @@ export namespace Prisma {
     group?: StringFilter<"AktivitasHPP"> | string
     createdAt?: DateTimeFilter<"AktivitasHPP"> | Date | string
     updatedAt?: DateTimeFilter<"AktivitasHPP"> | Date | string
-    masterSheet?: XOR<MasterSheetScalarRelationFilter, MasterSheetWhereInput>
+    masterSheet?: XOR<MasterSheetNullableScalarRelationFilter, MasterSheetWhereInput> | null
   }, "idAktivitas">
 
   export type AktivitasHPPOrderByWithAggregationInput = {
     idAktivitas?: SortOrder
+    idMaster?: SortOrderInput | SortOrder
     lokasi?: SortOrder
     tanggalMulaiRawat?: SortOrderInput | SortOrder
     tanggalMulaiTanam?: SortOrderInput | SortOrder
@@ -6435,6 +6723,7 @@ export namespace Prisma {
     OR?: AktivitasHPPScalarWhereWithAggregatesInput[]
     NOT?: AktivitasHPPScalarWhereWithAggregatesInput | AktivitasHPPScalarWhereWithAggregatesInput[]
     idAktivitas?: StringWithAggregatesFilter<"AktivitasHPP"> | string
+    idMaster?: StringNullableWithAggregatesFilter<"AktivitasHPP"> | string | null
     lokasi?: StringWithAggregatesFilter<"AktivitasHPP"> | string
     tanggalMulaiRawat?: DateTimeNullableWithAggregatesFilter<"AktivitasHPP"> | Date | string | null
     tanggalMulaiTanam?: DateTimeNullableWithAggregatesFilter<"AktivitasHPP"> | Date | string | null
@@ -6452,11 +6741,18 @@ export namespace Prisma {
   }
 
   export type MasterSheetCreateInput = {
+    idMaster: string
     lokasi: string
     wilayah: string
-    kodeBibit: string
     jenisBibit: string
     kelasBibit: string
+    status?: string
+    tanggalRawat: Date | string
+    tanggalTanam?: Date | string | null
+    tanggalForcingStandard?: Date | string | null
+    tanggalRenForcing?: Date | string | null
+    tanggalRealForcing?: Date | string | null
+    tanggalSelesaiPanen?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     lokasiHppList?: LokasiHPPCreateNestedManyWithoutMasterSheetInput
@@ -6464,11 +6760,18 @@ export namespace Prisma {
   }
 
   export type MasterSheetUncheckedCreateInput = {
+    idMaster: string
     lokasi: string
     wilayah: string
-    kodeBibit: string
     jenisBibit: string
     kelasBibit: string
+    status?: string
+    tanggalRawat: Date | string
+    tanggalTanam?: Date | string | null
+    tanggalForcingStandard?: Date | string | null
+    tanggalRenForcing?: Date | string | null
+    tanggalRealForcing?: Date | string | null
+    tanggalSelesaiPanen?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     lokasiHppList?: LokasiHPPUncheckedCreateNestedManyWithoutMasterSheetInput
@@ -6476,11 +6779,18 @@ export namespace Prisma {
   }
 
   export type MasterSheetUpdateInput = {
+    idMaster?: StringFieldUpdateOperationsInput | string
     lokasi?: StringFieldUpdateOperationsInput | string
     wilayah?: StringFieldUpdateOperationsInput | string
-    kodeBibit?: StringFieldUpdateOperationsInput | string
     jenisBibit?: StringFieldUpdateOperationsInput | string
     kelasBibit?: StringFieldUpdateOperationsInput | string
+    status?: StringFieldUpdateOperationsInput | string
+    tanggalRawat?: DateTimeFieldUpdateOperationsInput | Date | string
+    tanggalTanam?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    tanggalForcingStandard?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    tanggalRenForcing?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    tanggalRealForcing?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    tanggalSelesaiPanen?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     lokasiHppList?: LokasiHPPUpdateManyWithoutMasterSheetNestedInput
@@ -6488,11 +6798,18 @@ export namespace Prisma {
   }
 
   export type MasterSheetUncheckedUpdateInput = {
+    idMaster?: StringFieldUpdateOperationsInput | string
     lokasi?: StringFieldUpdateOperationsInput | string
     wilayah?: StringFieldUpdateOperationsInput | string
-    kodeBibit?: StringFieldUpdateOperationsInput | string
     jenisBibit?: StringFieldUpdateOperationsInput | string
     kelasBibit?: StringFieldUpdateOperationsInput | string
+    status?: StringFieldUpdateOperationsInput | string
+    tanggalRawat?: DateTimeFieldUpdateOperationsInput | Date | string
+    tanggalTanam?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    tanggalForcingStandard?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    tanggalRenForcing?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    tanggalRealForcing?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    tanggalSelesaiPanen?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     lokasiHppList?: LokasiHPPUncheckedUpdateManyWithoutMasterSheetNestedInput
@@ -6500,31 +6817,52 @@ export namespace Prisma {
   }
 
   export type MasterSheetCreateManyInput = {
+    idMaster: string
     lokasi: string
     wilayah: string
-    kodeBibit: string
     jenisBibit: string
     kelasBibit: string
+    status?: string
+    tanggalRawat: Date | string
+    tanggalTanam?: Date | string | null
+    tanggalForcingStandard?: Date | string | null
+    tanggalRenForcing?: Date | string | null
+    tanggalRealForcing?: Date | string | null
+    tanggalSelesaiPanen?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
 
   export type MasterSheetUpdateManyMutationInput = {
+    idMaster?: StringFieldUpdateOperationsInput | string
     lokasi?: StringFieldUpdateOperationsInput | string
     wilayah?: StringFieldUpdateOperationsInput | string
-    kodeBibit?: StringFieldUpdateOperationsInput | string
     jenisBibit?: StringFieldUpdateOperationsInput | string
     kelasBibit?: StringFieldUpdateOperationsInput | string
+    status?: StringFieldUpdateOperationsInput | string
+    tanggalRawat?: DateTimeFieldUpdateOperationsInput | Date | string
+    tanggalTanam?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    tanggalForcingStandard?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    tanggalRenForcing?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    tanggalRealForcing?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    tanggalSelesaiPanen?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type MasterSheetUncheckedUpdateManyInput = {
+    idMaster?: StringFieldUpdateOperationsInput | string
     lokasi?: StringFieldUpdateOperationsInput | string
     wilayah?: StringFieldUpdateOperationsInput | string
-    kodeBibit?: StringFieldUpdateOperationsInput | string
     jenisBibit?: StringFieldUpdateOperationsInput | string
     kelasBibit?: StringFieldUpdateOperationsInput | string
+    status?: StringFieldUpdateOperationsInput | string
+    tanggalRawat?: DateTimeFieldUpdateOperationsInput | Date | string
+    tanggalTanam?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    tanggalForcingStandard?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    tanggalRenForcing?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    tanggalRealForcing?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    tanggalSelesaiPanen?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -6605,8 +6943,13 @@ export namespace Prisma {
 
   export type LokasiHPPCreateInput = {
     idLokasiHpp: string
+    lokasi: string
     periode: number
+    tahun?: number | null
+    tanggalRawat?: Date | string | null
     status: string
+    jenisBibit?: string | null
+    kelasBibit?: string | null
     qtyPanen: Decimal | DecimalJsLike | number | string
     luasPanen: Decimal | DecimalJsLike | number | string
     luasAktif: Decimal | DecimalJsLike | number | string
@@ -6616,16 +6959,21 @@ export namespace Prisma {
     biaya: Decimal | DecimalJsLike | number | string
     createdAt?: Date | string
     updatedAt?: Date | string
-    masterSheet: MasterSheetCreateNestedOneWithoutLokasiHppListInput
+    masterSheet?: MasterSheetCreateNestedOneWithoutLokasiHppListInput
     budgetItem: BudgetCreateNestedOneWithoutLokasiHppListInput
   }
 
   export type LokasiHPPUncheckedCreateInput = {
     idLokasiHpp: string
+    idMaster?: string | null
     lokasi: string
     idBudget: string
     periode: number
+    tahun?: number | null
+    tanggalRawat?: Date | string | null
     status: string
+    jenisBibit?: string | null
+    kelasBibit?: string | null
     qtyPanen: Decimal | DecimalJsLike | number | string
     luasPanen: Decimal | DecimalJsLike | number | string
     luasAktif: Decimal | DecimalJsLike | number | string
@@ -6639,8 +6987,13 @@ export namespace Prisma {
 
   export type LokasiHPPUpdateInput = {
     idLokasiHpp?: StringFieldUpdateOperationsInput | string
+    lokasi?: StringFieldUpdateOperationsInput | string
     periode?: IntFieldUpdateOperationsInput | number
+    tahun?: NullableIntFieldUpdateOperationsInput | number | null
+    tanggalRawat?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     status?: StringFieldUpdateOperationsInput | string
+    jenisBibit?: NullableStringFieldUpdateOperationsInput | string | null
+    kelasBibit?: NullableStringFieldUpdateOperationsInput | string | null
     qtyPanen?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     luasPanen?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     luasAktif?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
@@ -6650,16 +7003,21 @@ export namespace Prisma {
     biaya?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    masterSheet?: MasterSheetUpdateOneRequiredWithoutLokasiHppListNestedInput
+    masterSheet?: MasterSheetUpdateOneWithoutLokasiHppListNestedInput
     budgetItem?: BudgetUpdateOneRequiredWithoutLokasiHppListNestedInput
   }
 
   export type LokasiHPPUncheckedUpdateInput = {
     idLokasiHpp?: StringFieldUpdateOperationsInput | string
+    idMaster?: NullableStringFieldUpdateOperationsInput | string | null
     lokasi?: StringFieldUpdateOperationsInput | string
     idBudget?: StringFieldUpdateOperationsInput | string
     periode?: IntFieldUpdateOperationsInput | number
+    tahun?: NullableIntFieldUpdateOperationsInput | number | null
+    tanggalRawat?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     status?: StringFieldUpdateOperationsInput | string
+    jenisBibit?: NullableStringFieldUpdateOperationsInput | string | null
+    kelasBibit?: NullableStringFieldUpdateOperationsInput | string | null
     qtyPanen?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     luasPanen?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     luasAktif?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
@@ -6673,10 +7031,15 @@ export namespace Prisma {
 
   export type LokasiHPPCreateManyInput = {
     idLokasiHpp: string
+    idMaster?: string | null
     lokasi: string
     idBudget: string
     periode: number
+    tahun?: number | null
+    tanggalRawat?: Date | string | null
     status: string
+    jenisBibit?: string | null
+    kelasBibit?: string | null
     qtyPanen: Decimal | DecimalJsLike | number | string
     luasPanen: Decimal | DecimalJsLike | number | string
     luasAktif: Decimal | DecimalJsLike | number | string
@@ -6690,8 +7053,13 @@ export namespace Prisma {
 
   export type LokasiHPPUpdateManyMutationInput = {
     idLokasiHpp?: StringFieldUpdateOperationsInput | string
+    lokasi?: StringFieldUpdateOperationsInput | string
     periode?: IntFieldUpdateOperationsInput | number
+    tahun?: NullableIntFieldUpdateOperationsInput | number | null
+    tanggalRawat?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     status?: StringFieldUpdateOperationsInput | string
+    jenisBibit?: NullableStringFieldUpdateOperationsInput | string | null
+    kelasBibit?: NullableStringFieldUpdateOperationsInput | string | null
     qtyPanen?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     luasPanen?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     luasAktif?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
@@ -6705,10 +7073,15 @@ export namespace Prisma {
 
   export type LokasiHPPUncheckedUpdateManyInput = {
     idLokasiHpp?: StringFieldUpdateOperationsInput | string
+    idMaster?: NullableStringFieldUpdateOperationsInput | string | null
     lokasi?: StringFieldUpdateOperationsInput | string
     idBudget?: StringFieldUpdateOperationsInput | string
     periode?: IntFieldUpdateOperationsInput | number
+    tahun?: NullableIntFieldUpdateOperationsInput | number | null
+    tanggalRawat?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     status?: StringFieldUpdateOperationsInput | string
+    jenisBibit?: NullableStringFieldUpdateOperationsInput | string | null
+    kelasBibit?: NullableStringFieldUpdateOperationsInput | string | null
     qtyPanen?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     luasPanen?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     luasAktif?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
@@ -6722,6 +7095,7 @@ export namespace Prisma {
 
   export type AktivitasHPPCreateInput = {
     idAktivitas: string
+    lokasi: string
     tanggalMulaiRawat?: Date | string | null
     tanggalMulaiTanam?: Date | string | null
     tanggalForcingStandard?: Date | string | null
@@ -6735,11 +7109,12 @@ export namespace Prisma {
     group: string
     createdAt?: Date | string
     updatedAt?: Date | string
-    masterSheet: MasterSheetCreateNestedOneWithoutAktivitasHppListInput
+    masterSheet?: MasterSheetCreateNestedOneWithoutAktivitasHppListInput
   }
 
   export type AktivitasHPPUncheckedCreateInput = {
     idAktivitas: string
+    idMaster?: string | null
     lokasi: string
     tanggalMulaiRawat?: Date | string | null
     tanggalMulaiTanam?: Date | string | null
@@ -6758,6 +7133,7 @@ export namespace Prisma {
 
   export type AktivitasHPPUpdateInput = {
     idAktivitas?: StringFieldUpdateOperationsInput | string
+    lokasi?: StringFieldUpdateOperationsInput | string
     tanggalMulaiRawat?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     tanggalMulaiTanam?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     tanggalForcingStandard?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -6771,11 +7147,12 @@ export namespace Prisma {
     group?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    masterSheet?: MasterSheetUpdateOneRequiredWithoutAktivitasHppListNestedInput
+    masterSheet?: MasterSheetUpdateOneWithoutAktivitasHppListNestedInput
   }
 
   export type AktivitasHPPUncheckedUpdateInput = {
     idAktivitas?: StringFieldUpdateOperationsInput | string
+    idMaster?: NullableStringFieldUpdateOperationsInput | string | null
     lokasi?: StringFieldUpdateOperationsInput | string
     tanggalMulaiRawat?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     tanggalMulaiTanam?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -6794,6 +7171,7 @@ export namespace Prisma {
 
   export type AktivitasHPPCreateManyInput = {
     idAktivitas: string
+    idMaster?: string | null
     lokasi: string
     tanggalMulaiRawat?: Date | string | null
     tanggalMulaiTanam?: Date | string | null
@@ -6812,6 +7190,7 @@ export namespace Prisma {
 
   export type AktivitasHPPUpdateManyMutationInput = {
     idAktivitas?: StringFieldUpdateOperationsInput | string
+    lokasi?: StringFieldUpdateOperationsInput | string
     tanggalMulaiRawat?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     tanggalMulaiTanam?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     tanggalForcingStandard?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -6829,6 +7208,7 @@ export namespace Prisma {
 
   export type AktivitasHPPUncheckedUpdateManyInput = {
     idAktivitas?: StringFieldUpdateOperationsInput | string
+    idMaster?: NullableStringFieldUpdateOperationsInput | string | null
     lokasi?: StringFieldUpdateOperationsInput | string
     tanggalMulaiRawat?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     tanggalMulaiTanam?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -6871,6 +7251,17 @@ export namespace Prisma {
     not?: NestedDateTimeFilter<$PrismaModel> | Date | string
   }
 
+  export type DateTimeNullableFilter<$PrismaModel = never> = {
+    equals?: Date | string | DateTimeFieldRefInput<$PrismaModel> | null
+    in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
+    notIn?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
+    lt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    lte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    not?: NestedDateTimeNullableFilter<$PrismaModel> | Date | string | null
+  }
+
   export type LokasiHPPListRelationFilter = {
     every?: LokasiHPPWhereInput
     some?: LokasiHPPWhereInput
@@ -6883,6 +7274,11 @@ export namespace Prisma {
     none?: AktivitasHPPWhereInput
   }
 
+  export type SortOrderInput = {
+    sort: SortOrder
+    nulls?: NullsOrder
+  }
+
   export type LokasiHPPOrderByRelationAggregateInput = {
     _count?: SortOrder
   }
@@ -6892,31 +7288,52 @@ export namespace Prisma {
   }
 
   export type MasterSheetCountOrderByAggregateInput = {
+    idMaster?: SortOrder
     lokasi?: SortOrder
     wilayah?: SortOrder
-    kodeBibit?: SortOrder
     jenisBibit?: SortOrder
     kelasBibit?: SortOrder
+    status?: SortOrder
+    tanggalRawat?: SortOrder
+    tanggalTanam?: SortOrder
+    tanggalForcingStandard?: SortOrder
+    tanggalRenForcing?: SortOrder
+    tanggalRealForcing?: SortOrder
+    tanggalSelesaiPanen?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
 
   export type MasterSheetMaxOrderByAggregateInput = {
+    idMaster?: SortOrder
     lokasi?: SortOrder
     wilayah?: SortOrder
-    kodeBibit?: SortOrder
     jenisBibit?: SortOrder
     kelasBibit?: SortOrder
+    status?: SortOrder
+    tanggalRawat?: SortOrder
+    tanggalTanam?: SortOrder
+    tanggalForcingStandard?: SortOrder
+    tanggalRenForcing?: SortOrder
+    tanggalRealForcing?: SortOrder
+    tanggalSelesaiPanen?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
 
   export type MasterSheetMinOrderByAggregateInput = {
+    idMaster?: SortOrder
     lokasi?: SortOrder
     wilayah?: SortOrder
-    kodeBibit?: SortOrder
     jenisBibit?: SortOrder
     kelasBibit?: SortOrder
+    status?: SortOrder
+    tanggalRawat?: SortOrder
+    tanggalTanam?: SortOrder
+    tanggalForcingStandard?: SortOrder
+    tanggalRenForcing?: SortOrder
+    tanggalRealForcing?: SortOrder
+    tanggalSelesaiPanen?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -6951,6 +7368,20 @@ export namespace Prisma {
     _count?: NestedIntFilter<$PrismaModel>
     _min?: NestedDateTimeFilter<$PrismaModel>
     _max?: NestedDateTimeFilter<$PrismaModel>
+  }
+
+  export type DateTimeNullableWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: Date | string | DateTimeFieldRefInput<$PrismaModel> | null
+    in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
+    notIn?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
+    lt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    lte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    not?: NestedDateTimeNullableWithAggregatesFilter<$PrismaModel> | Date | string | null
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _min?: NestedDateTimeNullableFilter<$PrismaModel>
+    _max?: NestedDateTimeNullableFilter<$PrismaModel>
   }
 
   export type IntFilter<$PrismaModel = never> = {
@@ -7047,9 +7478,35 @@ export namespace Prisma {
     _max?: NestedDecimalFilter<$PrismaModel>
   }
 
-  export type MasterSheetScalarRelationFilter = {
-    is?: MasterSheetWhereInput
-    isNot?: MasterSheetWhereInput
+  export type StringNullableFilter<$PrismaModel = never> = {
+    equals?: string | StringFieldRefInput<$PrismaModel> | null
+    in?: string[] | ListStringFieldRefInput<$PrismaModel> | null
+    notIn?: string[] | ListStringFieldRefInput<$PrismaModel> | null
+    lt?: string | StringFieldRefInput<$PrismaModel>
+    lte?: string | StringFieldRefInput<$PrismaModel>
+    gt?: string | StringFieldRefInput<$PrismaModel>
+    gte?: string | StringFieldRefInput<$PrismaModel>
+    contains?: string | StringFieldRefInput<$PrismaModel>
+    startsWith?: string | StringFieldRefInput<$PrismaModel>
+    endsWith?: string | StringFieldRefInput<$PrismaModel>
+    mode?: QueryMode
+    not?: NestedStringNullableFilter<$PrismaModel> | string | null
+  }
+
+  export type IntNullableFilter<$PrismaModel = never> = {
+    equals?: number | IntFieldRefInput<$PrismaModel> | null
+    in?: number[] | ListIntFieldRefInput<$PrismaModel> | null
+    notIn?: number[] | ListIntFieldRefInput<$PrismaModel> | null
+    lt?: number | IntFieldRefInput<$PrismaModel>
+    lte?: number | IntFieldRefInput<$PrismaModel>
+    gt?: number | IntFieldRefInput<$PrismaModel>
+    gte?: number | IntFieldRefInput<$PrismaModel>
+    not?: NestedIntNullableFilter<$PrismaModel> | number | null
+  }
+
+  export type MasterSheetNullableScalarRelationFilter = {
+    is?: MasterSheetWhereInput | null
+    isNot?: MasterSheetWhereInput | null
   }
 
   export type BudgetScalarRelationFilter = {
@@ -7059,10 +7516,15 @@ export namespace Prisma {
 
   export type LokasiHPPCountOrderByAggregateInput = {
     idLokasiHpp?: SortOrder
+    idMaster?: SortOrder
     lokasi?: SortOrder
     idBudget?: SortOrder
     periode?: SortOrder
+    tahun?: SortOrder
+    tanggalRawat?: SortOrder
     status?: SortOrder
+    jenisBibit?: SortOrder
+    kelasBibit?: SortOrder
     qtyPanen?: SortOrder
     luasPanen?: SortOrder
     luasAktif?: SortOrder
@@ -7076,6 +7538,7 @@ export namespace Prisma {
 
   export type LokasiHPPAvgOrderByAggregateInput = {
     periode?: SortOrder
+    tahun?: SortOrder
     qtyPanen?: SortOrder
     luasPanen?: SortOrder
     luasAktif?: SortOrder
@@ -7084,10 +7547,15 @@ export namespace Prisma {
 
   export type LokasiHPPMaxOrderByAggregateInput = {
     idLokasiHpp?: SortOrder
+    idMaster?: SortOrder
     lokasi?: SortOrder
     idBudget?: SortOrder
     periode?: SortOrder
+    tahun?: SortOrder
+    tanggalRawat?: SortOrder
     status?: SortOrder
+    jenisBibit?: SortOrder
+    kelasBibit?: SortOrder
     qtyPanen?: SortOrder
     luasPanen?: SortOrder
     luasAktif?: SortOrder
@@ -7101,10 +7569,15 @@ export namespace Prisma {
 
   export type LokasiHPPMinOrderByAggregateInput = {
     idLokasiHpp?: SortOrder
+    idMaster?: SortOrder
     lokasi?: SortOrder
     idBudget?: SortOrder
     periode?: SortOrder
+    tahun?: SortOrder
+    tanggalRawat?: SortOrder
     status?: SortOrder
+    jenisBibit?: SortOrder
+    kelasBibit?: SortOrder
     qtyPanen?: SortOrder
     luasPanen?: SortOrder
     luasAktif?: SortOrder
@@ -7118,30 +7591,50 @@ export namespace Prisma {
 
   export type LokasiHPPSumOrderByAggregateInput = {
     periode?: SortOrder
+    tahun?: SortOrder
     qtyPanen?: SortOrder
     luasPanen?: SortOrder
     luasAktif?: SortOrder
     biaya?: SortOrder
   }
 
-  export type DateTimeNullableFilter<$PrismaModel = never> = {
-    equals?: Date | string | DateTimeFieldRefInput<$PrismaModel> | null
-    in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
-    notIn?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
-    lt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    lte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    not?: NestedDateTimeNullableFilter<$PrismaModel> | Date | string | null
+  export type StringNullableWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: string | StringFieldRefInput<$PrismaModel> | null
+    in?: string[] | ListStringFieldRefInput<$PrismaModel> | null
+    notIn?: string[] | ListStringFieldRefInput<$PrismaModel> | null
+    lt?: string | StringFieldRefInput<$PrismaModel>
+    lte?: string | StringFieldRefInput<$PrismaModel>
+    gt?: string | StringFieldRefInput<$PrismaModel>
+    gte?: string | StringFieldRefInput<$PrismaModel>
+    contains?: string | StringFieldRefInput<$PrismaModel>
+    startsWith?: string | StringFieldRefInput<$PrismaModel>
+    endsWith?: string | StringFieldRefInput<$PrismaModel>
+    mode?: QueryMode
+    not?: NestedStringNullableWithAggregatesFilter<$PrismaModel> | string | null
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _min?: NestedStringNullableFilter<$PrismaModel>
+    _max?: NestedStringNullableFilter<$PrismaModel>
   }
 
-  export type SortOrderInput = {
-    sort: SortOrder
-    nulls?: NullsOrder
+  export type IntNullableWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: number | IntFieldRefInput<$PrismaModel> | null
+    in?: number[] | ListIntFieldRefInput<$PrismaModel> | null
+    notIn?: number[] | ListIntFieldRefInput<$PrismaModel> | null
+    lt?: number | IntFieldRefInput<$PrismaModel>
+    lte?: number | IntFieldRefInput<$PrismaModel>
+    gt?: number | IntFieldRefInput<$PrismaModel>
+    gte?: number | IntFieldRefInput<$PrismaModel>
+    not?: NestedIntNullableWithAggregatesFilter<$PrismaModel> | number | null
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _avg?: NestedFloatNullableFilter<$PrismaModel>
+    _sum?: NestedIntNullableFilter<$PrismaModel>
+    _min?: NestedIntNullableFilter<$PrismaModel>
+    _max?: NestedIntNullableFilter<$PrismaModel>
   }
 
   export type AktivitasHPPCountOrderByAggregateInput = {
     idAktivitas?: SortOrder
+    idMaster?: SortOrder
     lokasi?: SortOrder
     tanggalMulaiRawat?: SortOrder
     tanggalMulaiTanam?: SortOrder
@@ -7165,6 +7658,7 @@ export namespace Prisma {
 
   export type AktivitasHPPMaxOrderByAggregateInput = {
     idAktivitas?: SortOrder
+    idMaster?: SortOrder
     lokasi?: SortOrder
     tanggalMulaiRawat?: SortOrder
     tanggalMulaiTanam?: SortOrder
@@ -7183,6 +7677,7 @@ export namespace Prisma {
 
   export type AktivitasHPPMinOrderByAggregateInput = {
     idAktivitas?: SortOrder
+    idMaster?: SortOrder
     lokasi?: SortOrder
     tanggalMulaiRawat?: SortOrder
     tanggalMulaiTanam?: SortOrder
@@ -7202,20 +7697,6 @@ export namespace Prisma {
   export type AktivitasHPPSumOrderByAggregateInput = {
     biaya?: SortOrder
     hasil?: SortOrder
-  }
-
-  export type DateTimeNullableWithAggregatesFilter<$PrismaModel = never> = {
-    equals?: Date | string | DateTimeFieldRefInput<$PrismaModel> | null
-    in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
-    notIn?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
-    lt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    lte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    not?: NestedDateTimeNullableWithAggregatesFilter<$PrismaModel> | Date | string | null
-    _count?: NestedIntNullableFilter<$PrismaModel>
-    _min?: NestedDateTimeNullableFilter<$PrismaModel>
-    _max?: NestedDateTimeNullableFilter<$PrismaModel>
   }
 
   export type LokasiHPPCreateNestedManyWithoutMasterSheetInput = {
@@ -7252,6 +7733,10 @@ export namespace Prisma {
 
   export type DateTimeFieldUpdateOperationsInput = {
     set?: Date | string
+  }
+
+  export type NullableDateTimeFieldUpdateOperationsInput = {
+    set?: Date | string | null
   }
 
   export type LokasiHPPUpdateManyWithoutMasterSheetNestedInput = {
@@ -7380,10 +7865,24 @@ export namespace Prisma {
     connect?: BudgetWhereUniqueInput
   }
 
-  export type MasterSheetUpdateOneRequiredWithoutLokasiHppListNestedInput = {
+  export type NullableIntFieldUpdateOperationsInput = {
+    set?: number | null
+    increment?: number
+    decrement?: number
+    multiply?: number
+    divide?: number
+  }
+
+  export type NullableStringFieldUpdateOperationsInput = {
+    set?: string | null
+  }
+
+  export type MasterSheetUpdateOneWithoutLokasiHppListNestedInput = {
     create?: XOR<MasterSheetCreateWithoutLokasiHppListInput, MasterSheetUncheckedCreateWithoutLokasiHppListInput>
     connectOrCreate?: MasterSheetCreateOrConnectWithoutLokasiHppListInput
     upsert?: MasterSheetUpsertWithoutLokasiHppListInput
+    disconnect?: MasterSheetWhereInput | boolean
+    delete?: MasterSheetWhereInput | boolean
     connect?: MasterSheetWhereUniqueInput
     update?: XOR<XOR<MasterSheetUpdateToOneWithWhereWithoutLokasiHppListInput, MasterSheetUpdateWithoutLokasiHppListInput>, MasterSheetUncheckedUpdateWithoutLokasiHppListInput>
   }
@@ -7402,14 +7901,12 @@ export namespace Prisma {
     connect?: MasterSheetWhereUniqueInput
   }
 
-  export type NullableDateTimeFieldUpdateOperationsInput = {
-    set?: Date | string | null
-  }
-
-  export type MasterSheetUpdateOneRequiredWithoutAktivitasHppListNestedInput = {
+  export type MasterSheetUpdateOneWithoutAktivitasHppListNestedInput = {
     create?: XOR<MasterSheetCreateWithoutAktivitasHppListInput, MasterSheetUncheckedCreateWithoutAktivitasHppListInput>
     connectOrCreate?: MasterSheetCreateOrConnectWithoutAktivitasHppListInput
     upsert?: MasterSheetUpsertWithoutAktivitasHppListInput
+    disconnect?: MasterSheetWhereInput | boolean
+    delete?: MasterSheetWhereInput | boolean
     connect?: MasterSheetWhereUniqueInput
     update?: XOR<XOR<MasterSheetUpdateToOneWithWhereWithoutAktivitasHppListInput, MasterSheetUpdateWithoutAktivitasHppListInput>, MasterSheetUncheckedUpdateWithoutAktivitasHppListInput>
   }
@@ -7437,6 +7934,17 @@ export namespace Prisma {
     gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
     gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
     not?: NestedDateTimeFilter<$PrismaModel> | Date | string
+  }
+
+  export type NestedDateTimeNullableFilter<$PrismaModel = never> = {
+    equals?: Date | string | DateTimeFieldRefInput<$PrismaModel> | null
+    in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
+    notIn?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
+    lt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    lte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    not?: NestedDateTimeNullableFilter<$PrismaModel> | Date | string | null
   }
 
   export type NestedStringWithAggregatesFilter<$PrismaModel = never> = {
@@ -7479,6 +7987,31 @@ export namespace Prisma {
     _count?: NestedIntFilter<$PrismaModel>
     _min?: NestedDateTimeFilter<$PrismaModel>
     _max?: NestedDateTimeFilter<$PrismaModel>
+  }
+
+  export type NestedDateTimeNullableWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: Date | string | DateTimeFieldRefInput<$PrismaModel> | null
+    in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
+    notIn?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
+    lt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    lte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    not?: NestedDateTimeNullableWithAggregatesFilter<$PrismaModel> | Date | string | null
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _min?: NestedDateTimeNullableFilter<$PrismaModel>
+    _max?: NestedDateTimeNullableFilter<$PrismaModel>
+  }
+
+  export type NestedIntNullableFilter<$PrismaModel = never> = {
+    equals?: number | IntFieldRefInput<$PrismaModel> | null
+    in?: number[] | ListIntFieldRefInput<$PrismaModel> | null
+    notIn?: number[] | ListIntFieldRefInput<$PrismaModel> | null
+    lt?: number | IntFieldRefInput<$PrismaModel>
+    lte?: number | IntFieldRefInput<$PrismaModel>
+    gt?: number | IntFieldRefInput<$PrismaModel>
+    gte?: number | IntFieldRefInput<$PrismaModel>
+    not?: NestedIntNullableFilter<$PrismaModel> | number | null
   }
 
   export type NestedDecimalFilter<$PrismaModel = never> = {
@@ -7535,32 +8068,38 @@ export namespace Prisma {
     _max?: NestedDecimalFilter<$PrismaModel>
   }
 
-  export type NestedDateTimeNullableFilter<$PrismaModel = never> = {
-    equals?: Date | string | DateTimeFieldRefInput<$PrismaModel> | null
-    in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
-    notIn?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
-    lt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    lte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    not?: NestedDateTimeNullableFilter<$PrismaModel> | Date | string | null
+  export type NestedStringNullableFilter<$PrismaModel = never> = {
+    equals?: string | StringFieldRefInput<$PrismaModel> | null
+    in?: string[] | ListStringFieldRefInput<$PrismaModel> | null
+    notIn?: string[] | ListStringFieldRefInput<$PrismaModel> | null
+    lt?: string | StringFieldRefInput<$PrismaModel>
+    lte?: string | StringFieldRefInput<$PrismaModel>
+    gt?: string | StringFieldRefInput<$PrismaModel>
+    gte?: string | StringFieldRefInput<$PrismaModel>
+    contains?: string | StringFieldRefInput<$PrismaModel>
+    startsWith?: string | StringFieldRefInput<$PrismaModel>
+    endsWith?: string | StringFieldRefInput<$PrismaModel>
+    not?: NestedStringNullableFilter<$PrismaModel> | string | null
   }
 
-  export type NestedDateTimeNullableWithAggregatesFilter<$PrismaModel = never> = {
-    equals?: Date | string | DateTimeFieldRefInput<$PrismaModel> | null
-    in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
-    notIn?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
-    lt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    lte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    not?: NestedDateTimeNullableWithAggregatesFilter<$PrismaModel> | Date | string | null
+  export type NestedStringNullableWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: string | StringFieldRefInput<$PrismaModel> | null
+    in?: string[] | ListStringFieldRefInput<$PrismaModel> | null
+    notIn?: string[] | ListStringFieldRefInput<$PrismaModel> | null
+    lt?: string | StringFieldRefInput<$PrismaModel>
+    lte?: string | StringFieldRefInput<$PrismaModel>
+    gt?: string | StringFieldRefInput<$PrismaModel>
+    gte?: string | StringFieldRefInput<$PrismaModel>
+    contains?: string | StringFieldRefInput<$PrismaModel>
+    startsWith?: string | StringFieldRefInput<$PrismaModel>
+    endsWith?: string | StringFieldRefInput<$PrismaModel>
+    not?: NestedStringNullableWithAggregatesFilter<$PrismaModel> | string | null
     _count?: NestedIntNullableFilter<$PrismaModel>
-    _min?: NestedDateTimeNullableFilter<$PrismaModel>
-    _max?: NestedDateTimeNullableFilter<$PrismaModel>
+    _min?: NestedStringNullableFilter<$PrismaModel>
+    _max?: NestedStringNullableFilter<$PrismaModel>
   }
 
-  export type NestedIntNullableFilter<$PrismaModel = never> = {
+  export type NestedIntNullableWithAggregatesFilter<$PrismaModel = never> = {
     equals?: number | IntFieldRefInput<$PrismaModel> | null
     in?: number[] | ListIntFieldRefInput<$PrismaModel> | null
     notIn?: number[] | ListIntFieldRefInput<$PrismaModel> | null
@@ -7568,13 +8107,34 @@ export namespace Prisma {
     lte?: number | IntFieldRefInput<$PrismaModel>
     gt?: number | IntFieldRefInput<$PrismaModel>
     gte?: number | IntFieldRefInput<$PrismaModel>
-    not?: NestedIntNullableFilter<$PrismaModel> | number | null
+    not?: NestedIntNullableWithAggregatesFilter<$PrismaModel> | number | null
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _avg?: NestedFloatNullableFilter<$PrismaModel>
+    _sum?: NestedIntNullableFilter<$PrismaModel>
+    _min?: NestedIntNullableFilter<$PrismaModel>
+    _max?: NestedIntNullableFilter<$PrismaModel>
+  }
+
+  export type NestedFloatNullableFilter<$PrismaModel = never> = {
+    equals?: number | FloatFieldRefInput<$PrismaModel> | null
+    in?: number[] | ListFloatFieldRefInput<$PrismaModel> | null
+    notIn?: number[] | ListFloatFieldRefInput<$PrismaModel> | null
+    lt?: number | FloatFieldRefInput<$PrismaModel>
+    lte?: number | FloatFieldRefInput<$PrismaModel>
+    gt?: number | FloatFieldRefInput<$PrismaModel>
+    gte?: number | FloatFieldRefInput<$PrismaModel>
+    not?: NestedFloatNullableFilter<$PrismaModel> | number | null
   }
 
   export type LokasiHPPCreateWithoutMasterSheetInput = {
     idLokasiHpp: string
+    lokasi: string
     periode: number
+    tahun?: number | null
+    tanggalRawat?: Date | string | null
     status: string
+    jenisBibit?: string | null
+    kelasBibit?: string | null
     qtyPanen: Decimal | DecimalJsLike | number | string
     luasPanen: Decimal | DecimalJsLike | number | string
     luasAktif: Decimal | DecimalJsLike | number | string
@@ -7589,9 +8149,14 @@ export namespace Prisma {
 
   export type LokasiHPPUncheckedCreateWithoutMasterSheetInput = {
     idLokasiHpp: string
+    lokasi: string
     idBudget: string
     periode: number
+    tahun?: number | null
+    tanggalRawat?: Date | string | null
     status: string
+    jenisBibit?: string | null
+    kelasBibit?: string | null
     qtyPanen: Decimal | DecimalJsLike | number | string
     luasPanen: Decimal | DecimalJsLike | number | string
     luasAktif: Decimal | DecimalJsLike | number | string
@@ -7615,6 +8180,7 @@ export namespace Prisma {
 
   export type AktivitasHPPCreateWithoutMasterSheetInput = {
     idAktivitas: string
+    lokasi: string
     tanggalMulaiRawat?: Date | string | null
     tanggalMulaiTanam?: Date | string | null
     tanggalForcingStandard?: Date | string | null
@@ -7632,6 +8198,7 @@ export namespace Prisma {
 
   export type AktivitasHPPUncheckedCreateWithoutMasterSheetInput = {
     idAktivitas: string
+    lokasi: string
     tanggalMulaiRawat?: Date | string | null
     tanggalMulaiTanam?: Date | string | null
     tanggalForcingStandard?: Date | string | null
@@ -7678,10 +8245,15 @@ export namespace Prisma {
     OR?: LokasiHPPScalarWhereInput[]
     NOT?: LokasiHPPScalarWhereInput | LokasiHPPScalarWhereInput[]
     idLokasiHpp?: StringFilter<"LokasiHPP"> | string
+    idMaster?: StringNullableFilter<"LokasiHPP"> | string | null
     lokasi?: StringFilter<"LokasiHPP"> | string
     idBudget?: StringFilter<"LokasiHPP"> | string
     periode?: IntFilter<"LokasiHPP"> | number
+    tahun?: IntNullableFilter<"LokasiHPP"> | number | null
+    tanggalRawat?: DateTimeNullableFilter<"LokasiHPP"> | Date | string | null
     status?: StringFilter<"LokasiHPP"> | string
+    jenisBibit?: StringNullableFilter<"LokasiHPP"> | string | null
+    kelasBibit?: StringNullableFilter<"LokasiHPP"> | string | null
     qtyPanen?: DecimalFilter<"LokasiHPP"> | Decimal | DecimalJsLike | number | string
     luasPanen?: DecimalFilter<"LokasiHPP"> | Decimal | DecimalJsLike | number | string
     luasAktif?: DecimalFilter<"LokasiHPP"> | Decimal | DecimalJsLike | number | string
@@ -7714,6 +8286,7 @@ export namespace Prisma {
     OR?: AktivitasHPPScalarWhereInput[]
     NOT?: AktivitasHPPScalarWhereInput | AktivitasHPPScalarWhereInput[]
     idAktivitas?: StringFilter<"AktivitasHPP"> | string
+    idMaster?: StringNullableFilter<"AktivitasHPP"> | string | null
     lokasi?: StringFilter<"AktivitasHPP"> | string
     tanggalMulaiRawat?: DateTimeNullableFilter<"AktivitasHPP"> | Date | string | null
     tanggalMulaiTanam?: DateTimeNullableFilter<"AktivitasHPP"> | Date | string | null
@@ -7732,8 +8305,13 @@ export namespace Prisma {
 
   export type LokasiHPPCreateWithoutBudgetItemInput = {
     idLokasiHpp: string
+    lokasi: string
     periode: number
+    tahun?: number | null
+    tanggalRawat?: Date | string | null
     status: string
+    jenisBibit?: string | null
+    kelasBibit?: string | null
     qtyPanen: Decimal | DecimalJsLike | number | string
     luasPanen: Decimal | DecimalJsLike | number | string
     luasAktif: Decimal | DecimalJsLike | number | string
@@ -7743,14 +8321,19 @@ export namespace Prisma {
     biaya: Decimal | DecimalJsLike | number | string
     createdAt?: Date | string
     updatedAt?: Date | string
-    masterSheet: MasterSheetCreateNestedOneWithoutLokasiHppListInput
+    masterSheet?: MasterSheetCreateNestedOneWithoutLokasiHppListInput
   }
 
   export type LokasiHPPUncheckedCreateWithoutBudgetItemInput = {
     idLokasiHpp: string
+    idMaster?: string | null
     lokasi: string
     periode: number
+    tahun?: number | null
+    tanggalRawat?: Date | string | null
     status: string
+    jenisBibit?: string | null
+    kelasBibit?: string | null
     qtyPanen: Decimal | DecimalJsLike | number | string
     luasPanen: Decimal | DecimalJsLike | number | string
     luasAktif: Decimal | DecimalJsLike | number | string
@@ -7789,22 +8372,36 @@ export namespace Prisma {
   }
 
   export type MasterSheetCreateWithoutLokasiHppListInput = {
+    idMaster: string
     lokasi: string
     wilayah: string
-    kodeBibit: string
     jenisBibit: string
     kelasBibit: string
+    status?: string
+    tanggalRawat: Date | string
+    tanggalTanam?: Date | string | null
+    tanggalForcingStandard?: Date | string | null
+    tanggalRenForcing?: Date | string | null
+    tanggalRealForcing?: Date | string | null
+    tanggalSelesaiPanen?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     aktivitasHppList?: AktivitasHPPCreateNestedManyWithoutMasterSheetInput
   }
 
   export type MasterSheetUncheckedCreateWithoutLokasiHppListInput = {
+    idMaster: string
     lokasi: string
     wilayah: string
-    kodeBibit: string
     jenisBibit: string
     kelasBibit: string
+    status?: string
+    tanggalRawat: Date | string
+    tanggalTanam?: Date | string | null
+    tanggalForcingStandard?: Date | string | null
+    tanggalRenForcing?: Date | string | null
+    tanggalRealForcing?: Date | string | null
+    tanggalSelesaiPanen?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     aktivitasHppList?: AktivitasHPPUncheckedCreateNestedManyWithoutMasterSheetInput
@@ -7852,22 +8449,36 @@ export namespace Prisma {
   }
 
   export type MasterSheetUpdateWithoutLokasiHppListInput = {
+    idMaster?: StringFieldUpdateOperationsInput | string
     lokasi?: StringFieldUpdateOperationsInput | string
     wilayah?: StringFieldUpdateOperationsInput | string
-    kodeBibit?: StringFieldUpdateOperationsInput | string
     jenisBibit?: StringFieldUpdateOperationsInput | string
     kelasBibit?: StringFieldUpdateOperationsInput | string
+    status?: StringFieldUpdateOperationsInput | string
+    tanggalRawat?: DateTimeFieldUpdateOperationsInput | Date | string
+    tanggalTanam?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    tanggalForcingStandard?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    tanggalRenForcing?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    tanggalRealForcing?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    tanggalSelesaiPanen?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     aktivitasHppList?: AktivitasHPPUpdateManyWithoutMasterSheetNestedInput
   }
 
   export type MasterSheetUncheckedUpdateWithoutLokasiHppListInput = {
+    idMaster?: StringFieldUpdateOperationsInput | string
     lokasi?: StringFieldUpdateOperationsInput | string
     wilayah?: StringFieldUpdateOperationsInput | string
-    kodeBibit?: StringFieldUpdateOperationsInput | string
     jenisBibit?: StringFieldUpdateOperationsInput | string
     kelasBibit?: StringFieldUpdateOperationsInput | string
+    status?: StringFieldUpdateOperationsInput | string
+    tanggalRawat?: DateTimeFieldUpdateOperationsInput | Date | string
+    tanggalTanam?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    tanggalForcingStandard?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    tanggalRenForcing?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    tanggalRealForcing?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    tanggalSelesaiPanen?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     aktivitasHppList?: AktivitasHPPUncheckedUpdateManyWithoutMasterSheetNestedInput
@@ -7905,22 +8516,36 @@ export namespace Prisma {
   }
 
   export type MasterSheetCreateWithoutAktivitasHppListInput = {
+    idMaster: string
     lokasi: string
     wilayah: string
-    kodeBibit: string
     jenisBibit: string
     kelasBibit: string
+    status?: string
+    tanggalRawat: Date | string
+    tanggalTanam?: Date | string | null
+    tanggalForcingStandard?: Date | string | null
+    tanggalRenForcing?: Date | string | null
+    tanggalRealForcing?: Date | string | null
+    tanggalSelesaiPanen?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     lokasiHppList?: LokasiHPPCreateNestedManyWithoutMasterSheetInput
   }
 
   export type MasterSheetUncheckedCreateWithoutAktivitasHppListInput = {
+    idMaster: string
     lokasi: string
     wilayah: string
-    kodeBibit: string
     jenisBibit: string
     kelasBibit: string
+    status?: string
+    tanggalRawat: Date | string
+    tanggalTanam?: Date | string | null
+    tanggalForcingStandard?: Date | string | null
+    tanggalRenForcing?: Date | string | null
+    tanggalRealForcing?: Date | string | null
+    tanggalSelesaiPanen?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     lokasiHppList?: LokasiHPPUncheckedCreateNestedManyWithoutMasterSheetInput
@@ -7943,22 +8568,36 @@ export namespace Prisma {
   }
 
   export type MasterSheetUpdateWithoutAktivitasHppListInput = {
+    idMaster?: StringFieldUpdateOperationsInput | string
     lokasi?: StringFieldUpdateOperationsInput | string
     wilayah?: StringFieldUpdateOperationsInput | string
-    kodeBibit?: StringFieldUpdateOperationsInput | string
     jenisBibit?: StringFieldUpdateOperationsInput | string
     kelasBibit?: StringFieldUpdateOperationsInput | string
+    status?: StringFieldUpdateOperationsInput | string
+    tanggalRawat?: DateTimeFieldUpdateOperationsInput | Date | string
+    tanggalTanam?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    tanggalForcingStandard?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    tanggalRenForcing?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    tanggalRealForcing?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    tanggalSelesaiPanen?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     lokasiHppList?: LokasiHPPUpdateManyWithoutMasterSheetNestedInput
   }
 
   export type MasterSheetUncheckedUpdateWithoutAktivitasHppListInput = {
+    idMaster?: StringFieldUpdateOperationsInput | string
     lokasi?: StringFieldUpdateOperationsInput | string
     wilayah?: StringFieldUpdateOperationsInput | string
-    kodeBibit?: StringFieldUpdateOperationsInput | string
     jenisBibit?: StringFieldUpdateOperationsInput | string
     kelasBibit?: StringFieldUpdateOperationsInput | string
+    status?: StringFieldUpdateOperationsInput | string
+    tanggalRawat?: DateTimeFieldUpdateOperationsInput | Date | string
+    tanggalTanam?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    tanggalForcingStandard?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    tanggalRenForcing?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    tanggalRealForcing?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    tanggalSelesaiPanen?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     lokasiHppList?: LokasiHPPUncheckedUpdateManyWithoutMasterSheetNestedInput
@@ -7966,9 +8605,14 @@ export namespace Prisma {
 
   export type LokasiHPPCreateManyMasterSheetInput = {
     idLokasiHpp: string
+    lokasi: string
     idBudget: string
     periode: number
+    tahun?: number | null
+    tanggalRawat?: Date | string | null
     status: string
+    jenisBibit?: string | null
+    kelasBibit?: string | null
     qtyPanen: Decimal | DecimalJsLike | number | string
     luasPanen: Decimal | DecimalJsLike | number | string
     luasAktif: Decimal | DecimalJsLike | number | string
@@ -7982,6 +8626,7 @@ export namespace Prisma {
 
   export type AktivitasHPPCreateManyMasterSheetInput = {
     idAktivitas: string
+    lokasi: string
     tanggalMulaiRawat?: Date | string | null
     tanggalMulaiTanam?: Date | string | null
     tanggalForcingStandard?: Date | string | null
@@ -7999,8 +8644,13 @@ export namespace Prisma {
 
   export type LokasiHPPUpdateWithoutMasterSheetInput = {
     idLokasiHpp?: StringFieldUpdateOperationsInput | string
+    lokasi?: StringFieldUpdateOperationsInput | string
     periode?: IntFieldUpdateOperationsInput | number
+    tahun?: NullableIntFieldUpdateOperationsInput | number | null
+    tanggalRawat?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     status?: StringFieldUpdateOperationsInput | string
+    jenisBibit?: NullableStringFieldUpdateOperationsInput | string | null
+    kelasBibit?: NullableStringFieldUpdateOperationsInput | string | null
     qtyPanen?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     luasPanen?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     luasAktif?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
@@ -8015,9 +8665,14 @@ export namespace Prisma {
 
   export type LokasiHPPUncheckedUpdateWithoutMasterSheetInput = {
     idLokasiHpp?: StringFieldUpdateOperationsInput | string
+    lokasi?: StringFieldUpdateOperationsInput | string
     idBudget?: StringFieldUpdateOperationsInput | string
     periode?: IntFieldUpdateOperationsInput | number
+    tahun?: NullableIntFieldUpdateOperationsInput | number | null
+    tanggalRawat?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     status?: StringFieldUpdateOperationsInput | string
+    jenisBibit?: NullableStringFieldUpdateOperationsInput | string | null
+    kelasBibit?: NullableStringFieldUpdateOperationsInput | string | null
     qtyPanen?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     luasPanen?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     luasAktif?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
@@ -8031,9 +8686,14 @@ export namespace Prisma {
 
   export type LokasiHPPUncheckedUpdateManyWithoutMasterSheetInput = {
     idLokasiHpp?: StringFieldUpdateOperationsInput | string
+    lokasi?: StringFieldUpdateOperationsInput | string
     idBudget?: StringFieldUpdateOperationsInput | string
     periode?: IntFieldUpdateOperationsInput | number
+    tahun?: NullableIntFieldUpdateOperationsInput | number | null
+    tanggalRawat?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     status?: StringFieldUpdateOperationsInput | string
+    jenisBibit?: NullableStringFieldUpdateOperationsInput | string | null
+    kelasBibit?: NullableStringFieldUpdateOperationsInput | string | null
     qtyPanen?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     luasPanen?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     luasAktif?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
@@ -8047,6 +8707,7 @@ export namespace Prisma {
 
   export type AktivitasHPPUpdateWithoutMasterSheetInput = {
     idAktivitas?: StringFieldUpdateOperationsInput | string
+    lokasi?: StringFieldUpdateOperationsInput | string
     tanggalMulaiRawat?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     tanggalMulaiTanam?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     tanggalForcingStandard?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -8064,6 +8725,7 @@ export namespace Prisma {
 
   export type AktivitasHPPUncheckedUpdateWithoutMasterSheetInput = {
     idAktivitas?: StringFieldUpdateOperationsInput | string
+    lokasi?: StringFieldUpdateOperationsInput | string
     tanggalMulaiRawat?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     tanggalMulaiTanam?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     tanggalForcingStandard?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -8081,6 +8743,7 @@ export namespace Prisma {
 
   export type AktivitasHPPUncheckedUpdateManyWithoutMasterSheetInput = {
     idAktivitas?: StringFieldUpdateOperationsInput | string
+    lokasi?: StringFieldUpdateOperationsInput | string
     tanggalMulaiRawat?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     tanggalMulaiTanam?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     tanggalForcingStandard?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -8098,9 +8761,14 @@ export namespace Prisma {
 
   export type LokasiHPPCreateManyBudgetItemInput = {
     idLokasiHpp: string
+    idMaster?: string | null
     lokasi: string
     periode: number
+    tahun?: number | null
+    tanggalRawat?: Date | string | null
     status: string
+    jenisBibit?: string | null
+    kelasBibit?: string | null
     qtyPanen: Decimal | DecimalJsLike | number | string
     luasPanen: Decimal | DecimalJsLike | number | string
     luasAktif: Decimal | DecimalJsLike | number | string
@@ -8114,8 +8782,13 @@ export namespace Prisma {
 
   export type LokasiHPPUpdateWithoutBudgetItemInput = {
     idLokasiHpp?: StringFieldUpdateOperationsInput | string
+    lokasi?: StringFieldUpdateOperationsInput | string
     periode?: IntFieldUpdateOperationsInput | number
+    tahun?: NullableIntFieldUpdateOperationsInput | number | null
+    tanggalRawat?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     status?: StringFieldUpdateOperationsInput | string
+    jenisBibit?: NullableStringFieldUpdateOperationsInput | string | null
+    kelasBibit?: NullableStringFieldUpdateOperationsInput | string | null
     qtyPanen?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     luasPanen?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     luasAktif?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
@@ -8125,14 +8798,19 @@ export namespace Prisma {
     biaya?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    masterSheet?: MasterSheetUpdateOneRequiredWithoutLokasiHppListNestedInput
+    masterSheet?: MasterSheetUpdateOneWithoutLokasiHppListNestedInput
   }
 
   export type LokasiHPPUncheckedUpdateWithoutBudgetItemInput = {
     idLokasiHpp?: StringFieldUpdateOperationsInput | string
+    idMaster?: NullableStringFieldUpdateOperationsInput | string | null
     lokasi?: StringFieldUpdateOperationsInput | string
     periode?: IntFieldUpdateOperationsInput | number
+    tahun?: NullableIntFieldUpdateOperationsInput | number | null
+    tanggalRawat?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     status?: StringFieldUpdateOperationsInput | string
+    jenisBibit?: NullableStringFieldUpdateOperationsInput | string | null
+    kelasBibit?: NullableStringFieldUpdateOperationsInput | string | null
     qtyPanen?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     luasPanen?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     luasAktif?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
@@ -8146,9 +8824,14 @@ export namespace Prisma {
 
   export type LokasiHPPUncheckedUpdateManyWithoutBudgetItemInput = {
     idLokasiHpp?: StringFieldUpdateOperationsInput | string
+    idMaster?: NullableStringFieldUpdateOperationsInput | string | null
     lokasi?: StringFieldUpdateOperationsInput | string
     periode?: IntFieldUpdateOperationsInput | number
+    tahun?: NullableIntFieldUpdateOperationsInput | number | null
+    tanggalRawat?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     status?: StringFieldUpdateOperationsInput | string
+    jenisBibit?: NullableStringFieldUpdateOperationsInput | string | null
+    kelasBibit?: NullableStringFieldUpdateOperationsInput | string | null
     qtyPanen?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     luasPanen?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     luasAktif?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string

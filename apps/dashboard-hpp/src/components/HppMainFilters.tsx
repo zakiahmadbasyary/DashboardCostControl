@@ -13,6 +13,7 @@ export interface HppFilterState {
   costGroupFilter: string;
   statusFilter: "all" | "NSSC" | "NSFC" | "NS";
   periodeFilter: number; // 1 s/d 12 (Tanpa opsi "Semua Bulan")
+  tahunFilter: number;
   reportFilter: "rp_kg" | "rp_ha";
   wilayahFilter: string;
 }
@@ -21,6 +22,7 @@ interface HppMainFiltersProps {
   filters: HppFilterState;
   onChangeFilter: (newFilters: HppFilterState) => void;
   availableGroupOptions: CostGroupOption[];
+  availableTahunOptions?: number[];
 }
 
 export const MONTH_NAMES = [
@@ -48,6 +50,7 @@ export default function HppMainFilters({
   filters,
   onChangeFilter,
   availableGroupOptions,
+  availableTahunOptions = [new Date().getFullYear()],
 }: HppMainFiltersProps) {
   // Local state for filter selections — ONLY applied when "Terapkan" or "Reset" is clicked
   const [localFilters, setLocalFilters] = useState<HppFilterState>(filters);
@@ -76,6 +79,7 @@ export default function HppMainFilters({
       costGroupFilter: "all",
       statusFilter: "all",
       periodeFilter: currentMonth, // Default bulan sekarang saat ini
+      tahunFilter: availableTahunOptions[0] || new Date().getFullYear(),
       reportFilter: "rp_kg",
       wilayahFilter: "all",
     };
@@ -86,11 +90,13 @@ export default function HppMainFilters({
 
   // Count active non-default filters for mobile badge
   const currentMonth = getCurrentMonthIndex();
+  const defaultYear = availableTahunOptions[0] || new Date().getFullYear();
   const activeCount = [
     localFilters.taksasiFilter !== "all",
     localFilters.costGroupFilter !== "all",
     localFilters.statusFilter !== "all",
     localFilters.periodeFilter !== currentMonth,
+    localFilters.tahunFilter !== defaultYear,
     localFilters.wilayahFilter !== "all",
   ].filter(Boolean).length;
 
@@ -108,7 +114,7 @@ export default function HppMainFilters({
         </div>
 
         {/* Select Dropdowns Grid */}
-        <div className="grid grid-cols-2 sm:grid-cols-5 flex-1 gap-2 sm:gap-2.5">
+        <div className="grid grid-cols-2 sm:grid-cols-6 flex-1 gap-2 sm:gap-2.5">
           
           {/* Taksasi */}
           <div className="flex flex-col gap-0.5">
@@ -168,6 +174,22 @@ export default function HppMainFilters({
               {MONTH_NAMES.map((name, index) => (
                 <option key={index + 1} value={index + 1}>
                   {index + 1} - {name}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* Tahun — HANYA Salah Satu Tahun (Tanpa "Semua Tahun") */}
+          <div className="flex flex-col gap-0.5">
+            <label className="text-[10px] font-semibold text-[#5F6B63] uppercase tracking-wide">Tahun</label>
+            <select
+              value={localFilters.tahunFilter}
+              onChange={(e) => handleChange("tahunFilter", Number(e.target.value))}
+              className="w-full bg-[#F7F9F7] border border-[#DDE5DF] rounded-lg px-2.5 py-1.5 text-xs text-[#17231B] focus:outline-none focus:border-[#16823B] transition-colors cursor-pointer font-bold"
+            >
+              {availableTahunOptions.map((yr) => (
+                <option key={yr} value={yr}>
+                  {yr}
                 </option>
               ))}
             </select>
@@ -336,6 +358,22 @@ export default function HppMainFilters({
                   {MONTH_NAMES.map((name, index) => (
                     <option key={index + 1} value={index + 1}>
                       {index + 1} - {name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Tahun */}
+              <div>
+                <label className="block text-xs font-bold text-[#17231B] mb-1.5 uppercase tracking-wide">Tahun</label>
+                <select
+                  value={localFilters.tahunFilter}
+                  onChange={(e) => handleChange("tahunFilter", Number(e.target.value))}
+                  className="w-full bg-[#F7F9F7] border border-[#DDE5DF] rounded-xl px-3 py-2.5 text-xs text-[#17231B] focus:outline-none focus:border-[#16823B] transition-colors cursor-pointer font-bold"
+                >
+                  {availableTahunOptions.map((yr) => (
+                    <option key={yr} value={yr}>
+                      {yr}
                     </option>
                   ))}
                 </select>
