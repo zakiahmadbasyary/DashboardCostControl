@@ -17,17 +17,37 @@ export async function GET(request: Request) {
 
     const aktivitasList = await prisma.aktivitasHPP.findMany({
       where,
-      include: {
-        masterSheet: true,
+      select: {
+        idAktivitas: true,
+        lokasi: true,
+        tanggalMulaiRawat: true,
+        tanggalMulaiTanam: true,
+        tanggalForcingStandard: true,
+        rencanaForcing: true,
+        realForcing: true,
+        rencanaPanen: true,
+        aktivitas: true,
+        biaya: true,
+        hasil: true,
+        uom: true,
+        group: true,
       },
       orderBy: { createdAt: "desc" },
       take: (!lokasi || lokasi === "all") ? 500 : undefined,
     });
 
-    return NextResponse.json({
+    const response = NextResponse.json({
       status: "success",
+      count: aktivitasList.length,
       data: aktivitasList,
     });
+
+    response.headers.set(
+      "Cache-Control",
+      "public, s-maxage=30, stale-while-revalidate=60"
+    );
+
+    return response;
   } catch (error: any) {
     console.error("Error fetching Aktivitas HPP list:", error);
     return NextResponse.json(
@@ -36,4 +56,5 @@ export async function GET(request: Request) {
     );
   }
 }
+
 

@@ -61,6 +61,9 @@ model LokasiHPP {
   masterSheet MasterSheet @relation(fields: [lokasi], references: [lokasi], onDelete: Cascade)
   budgetItem  Budget      @relation(fields: [idBudget], references: [idBudget], onDelete: Cascade)
 
+  @@index([periode, status])
+  @@index([lokasi])
+  @@index([group])
   @@map("lokasiHPP")
 }
 
@@ -84,5 +87,7 @@ model AktivitasHPP {
 
   masterSheet MasterSheet @relation(fields: [lokasi], references: [lokasi], onDelete: Cascade)
 
+  @@index([lokasi])
+  @@index([group])
   @@map("aktivitasHPP")
 }
