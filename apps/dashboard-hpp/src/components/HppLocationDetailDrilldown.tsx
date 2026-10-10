@@ -92,6 +92,7 @@ export default function HppLocationDetailDrilldown({
   // 1. Compute Master Location Metrics from lokasiItems
   const validItem = lokasiItems.find((i) => Number(i.luasPanen || 0) > 0 || Number(i.luasAktif || 0) > 0) || lokasiItems[0];
   const masterSheet = validItem?.masterSheet;
+  const displayLokasi = validItem?.lokasi || masterSheet?.lokasi || (lokasiCode.includes("_") ? lokasiCode.split("_")[0] : lokasiCode);
   const wilayah = masterSheet?.wilayah || "W01";
   const jenisBibit = validItem?.jenisBibit || masterSheet?.jenisBibit || "-";
   const kelasBibit = validItem?.kelasBibit || masterSheet?.kelasBibit || "-";
@@ -223,7 +224,7 @@ export default function HppLocationDetailDrilldown({
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <h2 className="text-xl font-black tracking-tight">Detail Lokasi {lokasiCode}</h2>
+                <h2 className="text-xl font-black tracking-tight">Detail Lokasi {displayLokasi}</h2>
                 <span className="px-2 py-0.5 rounded bg-[#A8D437] text-[#0B6B32] font-black text-xs">
                   Wilayah {wilayah}
                 </span>
@@ -242,50 +243,50 @@ export default function HppLocationDetailDrilldown({
           </div>
         </div>
 
-        {/* Info Grid Cards */}
-        <div className="p-4 sm:p-6 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 sm:gap-4 bg-[#F8FAF9]">
+        {/* Info Grid Cards - Single row on desktop */}
+        <div className="p-4 sm:p-5 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-7 gap-3 bg-[#F8FAF9]">
           
           <div className="p-3 bg-white rounded-xl border border-[#E0E8E2] shadow-2xs">
             <span className="text-[10px] font-bold text-[#5F6B63] uppercase tracking-wider block">Lokasi</span>
-            <span className="text-base font-black text-[#17231B]">{lokasiCode}</span>
+            <span className="text-base font-black text-[#17231B] block truncate" title={displayLokasi}>{displayLokasi}</span>
           </div>
 
           <div className="p-3 bg-white rounded-xl border border-[#E0E8E2] shadow-2xs">
             <span className="text-[10px] font-bold text-[#5F6B63] uppercase tracking-wider block">Jenis Bibit</span>
-            <span className="text-sm font-extrabold text-[#16823B] capitalize">{jenisBibit}</span>
+            <span className="text-sm font-extrabold text-[#16823B] capitalize block truncate">{jenisBibit}</span>
           </div>
 
           <div className="p-3 bg-white rounded-xl border border-[#E0E8E2] shadow-2xs">
             <span className="text-[10px] font-bold text-[#5F6B63] uppercase tracking-wider block">Kelas Bibit</span>
-            <span className="text-sm font-extrabold text-[#2C3830] capitalize">{kelasBibit}</span>
+            <span className="text-sm font-extrabold text-[#2C3830] capitalize block truncate">{kelasBibit}</span>
           </div>
 
           <div className="p-3 bg-white rounded-xl border border-[#E0E8E2] shadow-2xs">
             <span className="text-[10px] font-bold text-[#5F6B63] uppercase tracking-wider block">Luas Aktif</span>
-            <span className="text-sm font-extrabold text-[#17231B]">{formatNumber(luasAktif)} Ha</span>
+            <span className="text-sm font-extrabold text-[#17231B] block truncate">{formatNumber(luasAktif)} Ha</span>
           </div>
 
           <div className="p-3 bg-white rounded-xl border border-[#E0E8E2] shadow-2xs">
             <span className="text-[10px] font-bold text-[#5F6B63] uppercase tracking-wider block">Luas Panen</span>
-            <span className="text-sm font-extrabold text-[#16823B]">{formatNumber(luasPanen)} Ha</span>
+            <span className="text-sm font-extrabold text-[#16823B] block truncate">{formatNumber(luasPanen)} Ha</span>
           </div>
 
           <div className="p-3 bg-white rounded-xl border border-[#E0E8E2] shadow-2xs">
             <span className="text-[10px] font-bold text-[#5F6B63] uppercase tracking-wider block flex items-center gap-1">
-              <Calendar className="w-3 h-3 text-purple-600" />
-              Forcing (Ren / Real)
+              <Calendar className="w-3 h-3 text-purple-600 shrink-0" />
+              <span className="truncate">Forcing (Ren / Real)</span>
             </span>
-            <span className="text-xs font-bold text-purple-900 block truncate">
+            <span className="text-xs font-bold text-purple-900 block truncate" title={`${rencanaForcing} / ${realForcing}`}>
               {rencanaForcing} / {realForcing}
             </span>
           </div>
 
           <div className="p-3 bg-white rounded-xl border border-[#E0E8E2] shadow-2xs">
             <span className="text-[10px] font-bold text-[#5F6B63] uppercase tracking-wider block flex items-center gap-1">
-              <Calendar className="w-3 h-3 text-[#16823B]" />
-              Selesai Panen
+              <Calendar className="w-3 h-3 text-[#16823B] shrink-0" />
+              <span className="truncate">Selesai Panen</span>
             </span>
-            <span className="text-xs font-bold text-[#16823B] block truncate">
+            <span className="text-xs font-bold text-[#16823B] block truncate" title={selesaiPanen}>
               {selesaiPanen}
             </span>
           </div>
@@ -310,7 +311,7 @@ export default function HppLocationDetailDrilldown({
                 </div>
                 <div>
                   <h3 className="font-bold text-base text-[#17231B]">
-                    Group Cost ({lokasiCode})
+                    Group Cost ({displayLokasi})
                   </h3>
                   <p className="text-xs text-[#5F6B63]">
                     Kelompok biaya &amp; anggaran budget
