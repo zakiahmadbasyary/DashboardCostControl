@@ -1,10 +1,25 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { hppPreviewService } from "@/services/hppPreviewService";
-import { Search, Table as TableIcon, MapPin, Calculator, Activity, ChevronLeft, ChevronRight } from "lucide-react";
+import { hppPreviewService, PreviewFilterParams } from "@/services/hppPreviewService";
+import { Search, Table as TableIcon, MapPin, Calculator, Activity, ChevronLeft, ChevronRight, Filter, RotateCcw } from "lucide-react";
 
 type TabType = "mastersheet" | "budget" | "lokasi" | "aktivitas";
+
+const MONTH_NAMES = [
+  "Januari",
+  "Februari",
+  "Maret",
+  "April",
+  "Mei",
+  "Juni",
+  "Juli",
+  "Agustus",
+  "September",
+  "Oktober",
+  "November",
+  "Desember",
+];
 
 export default function AdminPreviewPage() {
   const [activeTab, setActiveTab] = useState<TabType>("mastersheet");
@@ -12,16 +27,40 @@ export default function AdminPreviewPage() {
   const [page, setPage] = useState<number>(1);
   const limit = 50;
 
+  // Filter states
+  const [filterWilayah, setFilterWilayah] = useState<string>("all");
+  const [filterStatus, setFilterStatus] = useState<string>("all");
+  const [filterPeriode, setFilterPeriode] = useState<string>("all");
+  const [filterTahun, setFilterTahun] = useState<string>("all");
+
+  // Dynamic filter options loaded from database
+  const [dynamicOptions, setDynamicOptions] = useState<{
+    wilayahList: string[];
+    statusList: string[];
+    periodeList: number[];
+    tahunList: number[];
+  }>({
+    wilayahList: [],
+    statusList: [],
+    periodeList: [],
+    tahunList: [],
+  });
+
   // Data states
   const [tableData, setTableData] = useState<Record<string, unknown>[]>([]);
   const [totalRecords, setTotalRecords] = useState<number>(0);
   const [totalPages, setTotalPages] = useState<number>(1);
   const [loading, setLoading] = useState<boolean>(true);
 
-  // Reset page when tab or search changes
+  // Reset filters and page when tab changes
   const handleTabChange = (tab: TabType) => {
     setActiveTab(tab);
+    setSearchQuery("");
     setPage(1);
+    setFilterWilayah("all");
+    setFilterStatus("all");
+    setFilterPeriode("all");
+    setFilterTahun("all");
   };
 
   const handleSearchChange = (value: string) => {
@@ -29,14 +68,38 @@ export default function AdminPreviewPage() {
     setPage(1);
   };
 
+  const handleResetFilters = () => {
+    setSearchQuery("");
+    setPage(1);
+    setFilterWilayah("all");
+    setFilterStatus("all");
+    setFilterPeriode("all");
+    setFilterTahun("all");
+  };
+
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
       try {
-        const res = await hppPreviewService.getTableData(activeTab, searchQuery, page, limit);
+        const filters: PreviewFilterParams = {
+          wilayah: filterWilayah,
+          status: filterStatus,
+          periode: filterPeriode,
+          tahun: filterTahun,
+        };
+        const res = await hppPreviewService.getTableData(activeTab, searchQuery, page, limit, filters);
         setTableData(res.data || []);
         setTotalRecords(res.total || 0);
         setTotalPages(res.totalPages || 1);
+
+        if (res.filterOptions) {
+          setDynamicOptions((prev) => ({
+            wilayahList: res.filterOptions?.wilayahList?.length ? res.filterOptions.wilayahList : prev.wilayahList,
+            statusList: res.filterOptions?.statusList?.length ? res.filterOptions.statusList : prev.statusList,
+            periodeList: res.filterOptions?.periodeList?.length ? res.filterOptions.periodeList : prev.periodeList,
+            tahunList: res.filterOptions?.tahunList?.length ? res.filterOptions.tahunList : prev.tahunList,
+          }));
+        }
       } catch (err) {
         console.error("Error fetching preview data:", err);
         setTableData([]);
@@ -48,7 +111,24 @@ export default function AdminPreviewPage() {
     };
 
     fetchData();
-  }, [activeTab, searchQuery, page]);
+  }, [activeTab, searchQuery, page, filterWilayah, filterStatus, filterPeriode, filterTahun]);
+
+  const defaultWilayahList = ["W01", "W02", "W03", "W04", "W05", "W06", "W07", "RS1"];
+  const wilayahOptions = Array.from(new Set([...defaultWilayahList, ...dynamicOptions.wilayahList])).sort();
+
+  const defaultStatusList = ["NSSC", "NSFC"];
+  const statusOptions = Array.from(new Set([...defaultStatusList, ...dynamicOptions.statusList])).sort();
+
+  const periodeOptions = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
+
+  const defaultTahunList = [2024, 2025, 2026, 2027];
+  const tahunOptions = Array.from(new Set([...defaultTahunList, ...dynamicOptions.tahunList])).sort((a, b) => b - a);
+
+  const hasActiveFilter =
+    (activeTab === "mastersheet" && (filterWilayah !== "all" || filterStatus !== "all")) ||
+    (activeTab === "budget" && (filterStatus !== "all" || filterPeriode !== "all")) ||
+    (activeTab === "lokasi" && (filterPeriode !== "all" || filterTahun !== "all")) ||
+    searchQuery.trim().length > 0;
 
   const formatCurrency = (val: unknown) => {
     if (val === null || val === undefined) return "-";
@@ -97,60 +177,210 @@ export default function AdminPreviewPage() {
 
       {/* Tabs & Search Bar */}
       <div className="bg-white border border-[#DDE5DF] rounded-2xl p-5 shadow-xs space-y-4" suppressHydrationWarning>
-        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 border-b border-[#DDE5DF] pb-4" suppressHydrationWarning>
-          {/* 4 Tabs */}
-          <div className="flex items-center gap-2 overflow-x-auto pb-1 sm:pb-0 max-w-full shrink-0 scrollbar-none" suppressHydrationWarning>
-            <button
-              onClick={() => handleTabChange("mastersheet")}
-              suppressHydrationWarning
-              className={`inline-flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
-                activeTab === "mastersheet"
-                  ? "bg-[#16823B] text-white shadow-xs"
-                  : "bg-[#F7F9F7] text-[#5F6B63] hover:text-[#17231B]"
-              }`}
-            >
-              <TableIcon className="w-4 h-4" />
-              <span>MasterSheet</span>
-            </button>
+        <div className="flex items-center gap-2 overflow-x-auto pb-1 sm:pb-0 max-w-full shrink-0 scrollbar-none border-b border-[#DDE5DF] pb-4" suppressHydrationWarning>
+          <button
+            onClick={() => handleTabChange("mastersheet")}
+            suppressHydrationWarning
+            className={`inline-flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+              activeTab === "mastersheet"
+                ? "bg-[#16823B] text-white shadow-xs"
+                : "bg-[#F7F9F7] text-[#5F6B63] hover:text-[#17231B]"
+            }`}
+          >
+            <TableIcon className="w-4 h-4" />
+            <span>MasterSheet</span>
+          </button>
 
-            <button
-              onClick={() => handleTabChange("budget")}
-              suppressHydrationWarning
-              className={`inline-flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
-                activeTab === "budget"
-                  ? "bg-[#16823B] text-white shadow-xs"
-                  : "bg-[#F7F9F7] text-[#5F6B63] hover:text-[#17231B]"
-              }`}
-            >
-              <Calculator className="w-4 h-4" />
-              <span>Data Budget</span>
-            </button>
+          <button
+            onClick={() => handleTabChange("budget")}
+            suppressHydrationWarning
+            className={`inline-flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+              activeTab === "budget"
+                ? "bg-[#16823B] text-white shadow-xs"
+                : "bg-[#F7F9F7] text-[#5F6B63] hover:text-[#17231B]"
+            }`}
+          >
+            <Calculator className="w-4 h-4" />
+            <span>Data Budget</span>
+          </button>
 
-            <button
-              onClick={() => handleTabChange("lokasi")}
-              suppressHydrationWarning
-              className={`inline-flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
-                activeTab === "lokasi"
-                  ? "bg-[#16823B] text-white shadow-xs"
-                  : "bg-[#F7F9F7] text-[#5F6B63] hover:text-[#17231B]"
-              }`}
-            >
-              <MapPin className="w-4 h-4" />
-              <span>Data Lokasi HPP</span>
-            </button>
+          <button
+            onClick={() => handleTabChange("lokasi")}
+            suppressHydrationWarning
+            className={`inline-flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+              activeTab === "lokasi"
+                ? "bg-[#16823B] text-white shadow-xs"
+                : "bg-[#F7F9F7] text-[#5F6B63] hover:text-[#17231B]"
+            }`}
+          >
+            <MapPin className="w-4 h-4" />
+            <span>Data Lokasi HPP</span>
+          </button>
 
-            <button
-              onClick={() => handleTabChange("aktivitas")}
-              suppressHydrationWarning
-              className={`inline-flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
-                activeTab === "aktivitas"
-                  ? "bg-[#16823B] text-white shadow-xs"
-                  : "bg-[#F7F9F7] text-[#5F6B63] hover:text-[#17231B]"
-              }`}
-            >
-              <Activity className="w-4 h-4" />
-              <span>Data Aktivitas HPP</span>
-            </button>
+          <button
+            onClick={() => handleTabChange("aktivitas")}
+            suppressHydrationWarning
+            className={`inline-flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+              activeTab === "aktivitas"
+                ? "bg-[#16823B] text-white shadow-xs"
+                : "bg-[#F7F9F7] text-[#5F6B63] hover:text-[#17231B]"
+            }`}
+          >
+            <Activity className="w-4 h-4" />
+            <span>Data Aktivitas HPP</span>
+          </button>
+        </div>
+
+        {/* Toolbar: Filters & Search */}
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3 pt-1" suppressHydrationWarning>
+          {/* Filter Section */}
+          <div className="flex flex-wrap items-center gap-2.5" suppressHydrationWarning>
+            {activeTab !== "aktivitas" && (
+              <div className="flex items-center gap-1.5 text-xs font-bold text-[#17231B] mr-1" suppressHydrationWarning>
+                <Filter className="w-3.5 h-3.5 text-[#16823B]" />
+                <span>Filter:</span>
+              </div>
+            )}
+
+            {/* MasterSheet: Filter Wilayah & Status */}
+            {activeTab === "mastersheet" && (
+              <>
+                <div className="flex items-center gap-1.5" suppressHydrationWarning>
+                  <label className="text-[11px] font-semibold text-[#5F6B63] whitespace-nowrap">Wilayah:</label>
+                  <select
+                    value={filterWilayah}
+                    onChange={(e) => {
+                      setFilterWilayah(e.target.value);
+                      setPage(1);
+                    }}
+                    suppressHydrationWarning
+                    className="bg-[#F7F9F7] border border-[#DDE5DF] rounded-xl px-2.5 py-1.5 text-xs text-[#17231B] font-semibold focus:outline-none focus:border-[#16823B] cursor-pointer"
+                  >
+                    <option value="all">Semua Wilayah</option>
+                    {wilayahOptions.map((w) => (
+                      <option key={w} value={w}>{w}</option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className="flex items-center gap-1.5" suppressHydrationWarning>
+                  <label className="text-[11px] font-semibold text-[#5F6B63] whitespace-nowrap">Status:</label>
+                  <select
+                    value={filterStatus}
+                    onChange={(e) => {
+                      setFilterStatus(e.target.value);
+                      setPage(1);
+                    }}
+                    suppressHydrationWarning
+                    className="bg-[#F7F9F7] border border-[#DDE5DF] rounded-xl px-2.5 py-1.5 text-xs text-[#17231B] font-semibold focus:outline-none focus:border-[#16823B] cursor-pointer"
+                  >
+                    <option value="all">Semua Status</option>
+                    {statusOptions.map((s) => (
+                      <option key={s} value={s}>{s}</option>
+                    ))}
+                  </select>
+                </div>
+              </>
+            )}
+
+            {/* Budget: Filter Status & Periode */}
+            {activeTab === "budget" && (
+              <>
+                <div className="flex items-center gap-1.5" suppressHydrationWarning>
+                  <label className="text-[11px] font-semibold text-[#5F6B63] whitespace-nowrap">Status:</label>
+                  <select
+                    value={filterStatus}
+                    onChange={(e) => {
+                      setFilterStatus(e.target.value);
+                      setPage(1);
+                    }}
+                    suppressHydrationWarning
+                    className="bg-[#F7F9F7] border border-[#DDE5DF] rounded-xl px-2.5 py-1.5 text-xs text-[#17231B] font-semibold focus:outline-none focus:border-[#16823B] cursor-pointer"
+                  >
+                    <option value="all">Semua Status</option>
+                    {statusOptions.map((s) => (
+                      <option key={s} value={s}>{s}</option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className="flex items-center gap-1.5" suppressHydrationWarning>
+                  <label className="text-[11px] font-semibold text-[#5F6B63] whitespace-nowrap">Periode:</label>
+                  <select
+                    value={filterPeriode}
+                    onChange={(e) => {
+                      setFilterPeriode(e.target.value);
+                      setPage(1);
+                    }}
+                    suppressHydrationWarning
+                    className="bg-[#F7F9F7] border border-[#DDE5DF] rounded-xl px-2.5 py-1.5 text-xs text-[#17231B] font-semibold focus:outline-none focus:border-[#16823B] cursor-pointer"
+                  >
+                    <option value="all">Semua Periode</option>
+                    {periodeOptions.map((p) => (
+                      <option key={p} value={String(p)}>
+                        Periode {p} ({MONTH_NAMES[p - 1]})
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </>
+            )}
+
+            {/* Lokasi: Filter Periode & Tahun */}
+            {activeTab === "lokasi" && (
+              <>
+                <div className="flex items-center gap-1.5" suppressHydrationWarning>
+                  <label className="text-[11px] font-semibold text-[#5F6B63] whitespace-nowrap">Periode:</label>
+                  <select
+                    value={filterPeriode}
+                    onChange={(e) => {
+                      setFilterPeriode(e.target.value);
+                      setPage(1);
+                    }}
+                    suppressHydrationWarning
+                    className="bg-[#F7F9F7] border border-[#DDE5DF] rounded-xl px-2.5 py-1.5 text-xs text-[#17231B] font-semibold focus:outline-none focus:border-[#16823B] cursor-pointer"
+                  >
+                    <option value="all">Semua Periode</option>
+                    {periodeOptions.map((p) => (
+                      <option key={p} value={String(p)}>
+                        Periode {p} ({MONTH_NAMES[p - 1]})
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className="flex items-center gap-1.5" suppressHydrationWarning>
+                  <label className="text-[11px] font-semibold text-[#5F6B63] whitespace-nowrap">Tahun:</label>
+                  <select
+                    value={filterTahun}
+                    onChange={(e) => {
+                      setFilterTahun(e.target.value);
+                      setPage(1);
+                    }}
+                    suppressHydrationWarning
+                    className="bg-[#F7F9F7] border border-[#DDE5DF] rounded-xl px-2.5 py-1.5 text-xs text-[#17231B] font-semibold focus:outline-none focus:border-[#16823B] cursor-pointer"
+                  >
+                    <option value="all">Semua Tahun</option>
+                    {tahunOptions.map((t) => (
+                      <option key={t} value={String(t)}>{t}</option>
+                    ))}
+                  </select>
+                </div>
+              </>
+            )}
+
+            {/* Reset Button */}
+            {hasActiveFilter && (
+              <button
+                onClick={handleResetFilters}
+                suppressHydrationWarning
+                className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-xl border border-[#DDE5DF] bg-[#F7F9F7] hover:bg-[#DDE5DF]/60 text-[#5F6B63] hover:text-[#17231B] text-xs font-semibold transition-colors cursor-pointer"
+                title="Reset filter & pencarian"
+              >
+                <RotateCcw className="w-3.5 h-3.5" />
+                <span>Reset</span>
+              </button>
+            )}
           </div>
 
           {/* Search Box */}

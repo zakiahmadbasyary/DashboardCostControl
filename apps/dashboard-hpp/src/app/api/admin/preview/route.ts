@@ -9,33 +9,63 @@ export async function GET(request: NextRequest) {
     const page = Math.max(1, parseInt(searchParams.get("page") || "1", 10));
     const limit = Math.max(1, parseInt(searchParams.get("limit") || "50", 10));
 
+    // Filter dropdown params
+    const wilayah = searchParams.get("wilayah")?.trim();
+    const status = searchParams.get("status")?.trim();
+    const periode = searchParams.get("periode")?.trim();
+    const tahun = searchParams.get("tahun")?.trim();
+
     const skip = (page - 1) * limit;
 
     let data: unknown[] = [];
     let total = 0;
+    let filterOptions: Record<string, unknown> = {};
 
     if (tab === "mastersheet") {
-      const where = search
-        ? {
-            OR: [
-              { idMaster: { contains: search, mode: "insensitive" as const } },
-              { lokasi: { contains: search, mode: "insensitive" as const } },
-              { wilayah: { contains: search, mode: "insensitive" as const } },
-              { jenisBibit: { contains: search, mode: "insensitive" as const } },
-              { kelasBibit: { contains: search, mode: "insensitive" as const } },
-              { status: { contains: search, mode: "insensitive" as const } },
-            ],
-          }
-        : {};
+      // Filter MasterSheet: wilayah & status
+      const andConditions: Record<string, unknown>[] = [];
 
-      const [rawList, rawCount] = await Promise.all([
+      if (search) {
+        andConditions.push({
+          OR: [
+            { idMaster: { contains: search, mode: "insensitive" as const } },
+            { lokasi: { contains: search, mode: "insensitive" as const } },
+            { wilayah: { contains: search, mode: "insensitive" as const } },
+            { jenisBibit: { contains: search, mode: "insensitive" as const } },
+            { kelasBibit: { contains: search, mode: "insensitive" as const } },
+            { status: { contains: search, mode: "insensitive" as const } },
+          ],
+        });
+      }
+
+      if (wilayah && wilayah !== "all") {
+        andConditions.push({ wilayah: { equals: wilayah, mode: "insensitive" as const } });
+      }
+
+      if (status && status !== "all") {
+        andConditions.push({ status: { equals: status, mode: "insensitive" as const } });
+      }
+
+      const where = andConditions.length > 0 ? { AND: andConditions } : {};
+
+      const [rawList, rawCount, distinctWilayah, distinctStatus] = await Promise.all([
         prisma.masterSheet.findMany({
           where,
           skip,
           take: limit,
-          orderBy: { idMaster: "asc" },
+          orderBy: [{ wilayah: "asc" }, { lokasi: "asc" }, { idMaster: "asc" }],
         }),
         prisma.masterSheet.count({ where }),
+        prisma.masterSheet.findMany({
+          select: { wilayah: true },
+          distinct: ["wilayah"],
+          orderBy: { wilayah: "asc" },
+        }),
+        prisma.masterSheet.findMany({
+          select: { status: true },
+          distinct: ["status"],
+          orderBy: { status: "asc" },
+        }),
       ]);
 
       data = rawList.map((item) => ({
@@ -48,50 +78,119 @@ export async function GET(request: NextRequest) {
         tanggalSelesaiPanen: item.tanggalSelesaiPanen ? item.tanggalSelesaiPanen.toISOString().split("T")[0] : null,
       }));
       total = rawCount;
-    } else if (tab === "budget") {
-      const where = search
-        ? {
-            OR: [
-              { idBudget: { contains: search, mode: "insensitive" as const } },
-              { group: { contains: search, mode: "insensitive" as const } },
-              { status: { contains: search, mode: "insensitive" as const } },
-            ],
-          }
-        : {};
 
-      [data, total] = await Promise.all([
+      filterOptions = {
+        wilayahList: distinctWilayah.map((x) => x.wilayah).filter(Boolean),
+        statusList: distinctStatus.map((x) => x.status).filter(Boolean),
+      };
+    } else if (tab === "budget") {
+      // Filter Budget: status & periode
+      const andConditions: Record<string, unknown>[] = [];
+
+      if (search) {
+        andConditions.push({
+          OR: [
+            { idBudget: { contains: search, mode: "insensitive" as const } },
+            { group: { contains: search, mode: "insensitive" as const } },
+            { status: { contains: search, mode: "insensitive" as const } },
+          ],
+        });
+      }
+
+      if (status && status !== "all") {
+        andConditions.push({ status: { equals: status, mode: "insensitive" as const } });
+      }
+
+      if (periode && periode !== "all") {
+        const pNum = parseInt(periode, 10);
+        if (!isNaN(pNum)) {
+          andConditions.push({ periode: pNum });
+        }
+      }
+
+      const where = andConditions.length > 0 ? { AND: andConditions } : {};
+
+      const [rawList, rawCount, distinctStatus, distinctPeriode] = await Promise.all([
         prisma.budget.findMany({
           where,
           skip,
           take: limit,
-          orderBy: { idBudget: "asc" },
+          orderBy: [{ periode: "asc" }, { group: "asc" }, { idBudget: "asc" }],
         }),
         prisma.budget.count({ where }),
+        prisma.budget.findMany({
+          select: { status: true },
+          distinct: ["status"],
+          orderBy: { status: "asc" },
+        }),
+        prisma.budget.findMany({
+          select: { periode: true },
+          distinct: ["periode"],
+          orderBy: { periode: "asc" },
+        }),
       ]);
-    } else if (tab === "lokasi") {
-      const where = search
-        ? {
-            OR: [
-              { idLokasiHpp: { contains: search, mode: "insensitive" as const } },
-              { idMaster: { contains: search, mode: "insensitive" as const } },
-              { lokasi: { contains: search, mode: "insensitive" as const } },
-              { idBudget: { contains: search, mode: "insensitive" as const } },
-              { status: { contains: search, mode: "insensitive" as const } },
-              { group: { contains: search, mode: "insensitive" as const } },
-              { descGroup: { contains: search, mode: "insensitive" as const } },
-              { jenisBiaya: { contains: search, mode: "insensitive" as const } },
-            ],
-          }
-        : {};
 
-      const [rawList, rawCount] = await Promise.all([
+      data = rawList;
+      total = rawCount;
+
+      filterOptions = {
+        statusList: distinctStatus.map((x) => x.status).filter(Boolean),
+        periodeList: distinctPeriode.map((x) => x.periode).filter((p) => p !== null && p !== undefined),
+      };
+    } else if (tab === "lokasi") {
+      // Filter Lokasi: periode & tahun
+      const andConditions: Record<string, unknown>[] = [];
+
+      if (search) {
+        andConditions.push({
+          OR: [
+            { idLokasiHpp: { contains: search, mode: "insensitive" as const } },
+            { idMaster: { contains: search, mode: "insensitive" as const } },
+            { lokasi: { contains: search, mode: "insensitive" as const } },
+            { idBudget: { contains: search, mode: "insensitive" as const } },
+            { status: { contains: search, mode: "insensitive" as const } },
+            { group: { contains: search, mode: "insensitive" as const } },
+            { descGroup: { contains: search, mode: "insensitive" as const } },
+            { jenisBiaya: { contains: search, mode: "insensitive" as const } },
+          ],
+        });
+      }
+
+      if (periode && periode !== "all") {
+        const pNum = parseInt(periode, 10);
+        if (!isNaN(pNum)) {
+          andConditions.push({ periode: pNum });
+        }
+      }
+
+      if (tahun && tahun !== "all") {
+        const tNum = parseInt(tahun, 10);
+        if (!isNaN(tNum)) {
+          andConditions.push({ tahun: tNum });
+        }
+      }
+
+      const where = andConditions.length > 0 ? { AND: andConditions } : {};
+
+      const [rawList, rawCount, distinctPeriode, distinctTahun] = await Promise.all([
         prisma.lokasiHPP.findMany({
           where,
           skip,
           take: limit,
-          orderBy: { idLokasiHpp: "asc" },
+          orderBy: [{ periode: "asc" }, { lokasi: "asc" }, { idLokasiHpp: "asc" }],
         }),
         prisma.lokasiHPP.count({ where }),
+        prisma.lokasiHPP.findMany({
+          select: { periode: true },
+          distinct: ["periode"],
+          orderBy: { periode: "asc" },
+        }),
+        prisma.lokasiHPP.findMany({
+          select: { tahun: true },
+          distinct: ["tahun"],
+          where: { tahun: { not: null } },
+          orderBy: { tahun: "asc" },
+        }),
       ]);
 
       data = rawList.map((item) => ({
@@ -114,6 +213,11 @@ export async function GET(request: NextRequest) {
         biaya: item.biaya ? Number(item.biaya) : 0,
       }));
       total = rawCount;
+
+      filterOptions = {
+        periodeList: distinctPeriode.map((x) => x.periode).filter((p) => p !== null && p !== undefined),
+        tahunList: distinctTahun.map((x) => x.tahun).filter((t): t is number => t !== null && t !== undefined),
+      };
     } else if (tab === "aktivitas") {
       const where = search
         ? {
@@ -133,7 +237,7 @@ export async function GET(request: NextRequest) {
           where,
           skip,
           take: limit,
-          orderBy: { idAktivitas: "asc" },
+          orderBy: [{ lokasi: "asc" }, { idAktivitas: "asc" }],
         }),
         prisma.aktivitasHPP.count({ where }),
       ]);
@@ -166,6 +270,7 @@ export async function GET(request: NextRequest) {
       page,
       limit,
       totalPages,
+      filterOptions,
     });
   } catch (error: unknown) {
     console.error("Error in admin preview API route:", error);
