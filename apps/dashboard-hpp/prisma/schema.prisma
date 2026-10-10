@@ -54,6 +54,7 @@ model LokasiHPP {
   idLokasiHpp  String    @id @map("id_lokasi_hpp") @db.VarChar(20)
   idMaster     String?   @map("id_master") @db.VarChar(50)
   lokasi       String    @map("lokasi") @db.VarChar(10)
+  wilayah      String?   @map("wilayah") @db.VarChar(10)
   idBudget     String    @map("id_budget") @db.VarChar(20)
   periode      Int       @map("periode")
   tahun        Int?      @map("tahun")
@@ -77,6 +78,7 @@ model LokasiHPP {
   @@index([idMaster])
   @@index([periode, status])
   @@index([lokasi])
+  @@index([wilayah])
   @@index([group])
   @@map("lokasiHPP")
 }

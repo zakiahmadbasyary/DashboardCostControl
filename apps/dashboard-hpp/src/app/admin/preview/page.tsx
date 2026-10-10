@@ -493,6 +493,7 @@ export default function AdminPreviewPage() {
                   <thead className="bg-[#F7F9F7] text-[#17231B] uppercase font-bold border-b border-[#DDE5DF] whitespace-nowrap">
                     <tr>
                       <th className="py-2.5 px-3">Lokasi</th>
+                      <th className="py-2.5 px-3">Wilayah</th>
                       <th className="py-2.5 px-3">Status</th>
                       <th className="py-2.5 px-3 text-center">Periode</th>
                       <th className="py-2.5 px-3 text-center">Tahun</th>
@@ -512,6 +513,7 @@ export default function AdminPreviewPage() {
                     {tableData.map((item, idx) => (
                       <tr key={idx} className="hover:bg-[#F7F9F7]">
                         <td className="py-2.5 px-3 font-bold text-[#16823B]">{String(item.lokasi ?? "-")}</td>
+                        <td className="py-2.5 px-3 font-semibold text-[#17231B]">{String(item.wilayah ?? "-")}</td>
                         <td className="py-2.5 px-3">
                           <span className="px-2 py-0.5 rounded-full bg-slate-100 text-slate-700 font-bold text-[10px]">
                             {String(item.status ?? "-")}

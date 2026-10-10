@@ -13,24 +13,37 @@ export async function GET(request: Request) {
     // Security & input sanitization: truncate long search inputs
     const search = rawSearch ? rawSearch.slice(0, 100).replace(/[^\w\s-]/gi, "") : "";
 
-    const where: any = {};
-    if (group && group !== "all") where.group = group.slice(0, 20);
-    if (status && status !== "all") where.status = status.slice(0, 20);
+    const andConditions: any[] = [];
+    if (group && group !== "all") andConditions.push({ group: group.slice(0, 20) });
+    if (status && status !== "all") andConditions.push({ status: status.slice(0, 20) });
     if (periode && periode !== "all" && !isNaN(Number(periode))) {
-      where.periode = Number(periode);
+      andConditions.push({ periode: Number(periode) });
     }
     if (wilayah && wilayah !== "all") {
-      where.masterSheet = {
-        wilayah: { equals: wilayah.slice(0, 10), mode: "insensitive" },
-      };
+      const wTarget = wilayah.slice(0, 10);
+      andConditions.push({
+        OR: [
+          { wilayah: { equals: wTarget, mode: "insensitive" } },
+          {
+            wilayah: null,
+            masterSheet: {
+              wilayah: { equals: wTarget, mode: "insensitive" },
+            },
+          },
+        ],
+      });
     }
     if (search) {
-      where.OR = [
-        { lokasi: { contains: search, mode: "insensitive" } },
-        { descGroup: { contains: search, mode: "insensitive" } },
-        { jenisBiaya: { contains: search, mode: "insensitive" } },
-      ];
+      andConditions.push({
+        OR: [
+          { lokasi: { contains: search, mode: "insensitive" } },
+          { descGroup: { contains: search, mode: "insensitive" } },
+          { jenisBiaya: { contains: search, mode: "insensitive" } },
+        ],
+      });
     }
+
+    const where = andConditions.length > 0 ? { AND: andConditions } : {};
 
     const lokasiList = await prisma.lokasiHPP.findMany({
       where,
@@ -38,6 +51,7 @@ export async function GET(request: Request) {
         idLokasiHpp: true,
         idMaster: true,
         lokasi: true,
+        wilayah: true,
         idBudget: true,
         periode: true,
         tahun: true,

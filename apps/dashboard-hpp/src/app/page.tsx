@@ -155,7 +155,7 @@ export default function DashboardHPPPage() {
 
       // 5. Wilayah Filter
       if (filters.wilayahFilter !== "all") {
-        const itemWilayah = item.masterSheet?.wilayah || "";
+        const itemWilayah = item.wilayah || item.masterSheet?.wilayah || "-";
         if (itemWilayah.toUpperCase() !== filters.wilayahFilter.toUpperCase()) {
           return false;
         }
@@ -284,7 +284,7 @@ export default function DashboardHPPPage() {
         } else if (item.status !== filters.statusFilter) return;
       }
       if (filters.wilayahFilter !== "all") {
-        const itemWilayah = item.masterSheet?.wilayah || "";
+        const itemWilayah = item.wilayah || item.masterSheet?.wilayah || "-";
         if (itemWilayah.toUpperCase() !== filters.wilayahFilter.toUpperCase()) return;
       }
 
@@ -383,13 +383,14 @@ export default function DashboardHPPPage() {
         } else if (item.status !== filters.statusFilter) return;
       }
 
+      const itemWilayah = item.wilayah || item.masterSheet?.wilayah || "-";
       const key = `${item.lokasi}_P${item.periode}`;
       if (!locMap[key]) {
         locMap[key] = {
           cost: 0,
           qty: Number(item.qtyPanen || 0),
           luas: Number(item.luasPanen || 0),
-          wilayah: (item.masterSheet?.wilayah || "W01").toUpperCase(),
+          wilayah: itemWilayah.toUpperCase(),
         };
       }
       locMap[key].cost += Number(item.biaya || 0);
@@ -397,15 +398,17 @@ export default function DashboardHPPPage() {
 
     Object.values(locMap).forEach((loc) => {
       const reg = loc.wilayah;
-      if (regionStats[reg]) {
-        regionStats[reg].cost += loc.cost;
-        regionStats[reg].qty += loc.qty;
-        regionStats[reg].luas += loc.luas;
+      if (!regionStats[reg]) {
+        regionStats[reg] = { cost: 0, qty: 0, luas: 0 };
       }
+      regionStats[reg].cost += loc.cost;
+      regionStats[reg].qty += loc.qty;
+      regionStats[reg].luas += loc.luas;
     });
 
-    const list: WilayahPoint[] = regions.map((reg) => {
-      const s = regionStats[reg];
+    const allRegions = Array.from(new Set([...regions, ...Object.keys(regionStats)]));
+    const list: WilayahPoint[] = allRegions.map((reg) => {
+      const s = regionStats[reg] || { cost: 0, qty: 0, luas: 0 };
       return {
         wilayah: reg,
         cost: s.cost,

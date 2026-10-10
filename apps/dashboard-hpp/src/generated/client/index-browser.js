@@ -152,6 +152,7 @@ exports.Prisma.LokasiHPPScalarFieldEnum = {
   idLokasiHpp: 'idLokasiHpp',
   idMaster: 'idMaster',
   lokasi: 'lokasi',
+  wilayah: 'wilayah',
   idBudget: 'idBudget',
   periode: 'periode',
   tahun: 'tahun',

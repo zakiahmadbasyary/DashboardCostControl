@@ -7,6 +7,7 @@ export interface LokasiHppItem {
   idLokasiHpp: string;
   idMaster?: string | null;
   lokasi: string;
+  wilayah?: string | null;
   idBudget: string;
   periode: number;
   tahun?: number | null;
@@ -111,9 +112,9 @@ export default function HppLokasiTable({
     if (!lokasiMap[key]) {
       lokasiMap[key] = {
         idMaster: key,
-        lokasi: item.lokasi,
+        lokasi: item.lokasi || item.masterSheet?.lokasi || "-",
         tanggalRawat: dateRawat,
-        wilayah: item.masterSheet?.wilayah || "W01",
+        wilayah: item.wilayah || item.masterSheet?.wilayah || "-",
         jenisBibit: item.jenisBibit || item.masterSheet?.jenisBibit || "-",
         kelasBibit: item.kelasBibit || item.masterSheet?.kelasBibit || "-",
         status: item.status || item.masterSheet?.status || "NSSC",

@@ -3587,6 +3587,7 @@ export namespace Prisma {
     idLokasiHpp: string | null
     idMaster: string | null
     lokasi: string | null
+    wilayah: string | null
     idBudget: string | null
     periode: number | null
     tahun: number | null
@@ -3609,6 +3610,7 @@ export namespace Prisma {
     idLokasiHpp: string | null
     idMaster: string | null
     lokasi: string | null
+    wilayah: string | null
     idBudget: string | null
     periode: number | null
     tahun: number | null
@@ -3631,6 +3633,7 @@ export namespace Prisma {
     idLokasiHpp: number
     idMaster: number
     lokasi: number
+    wilayah: number
     idBudget: number
     periode: number
     tahun: number
@@ -3673,6 +3676,7 @@ export namespace Prisma {
     idLokasiHpp?: true
     idMaster?: true
     lokasi?: true
+    wilayah?: true
     idBudget?: true
     periode?: true
     tahun?: true
@@ -3695,6 +3699,7 @@ export namespace Prisma {
     idLokasiHpp?: true
     idMaster?: true
     lokasi?: true
+    wilayah?: true
     idBudget?: true
     periode?: true
     tahun?: true
@@ -3717,6 +3722,7 @@ export namespace Prisma {
     idLokasiHpp?: true
     idMaster?: true
     lokasi?: true
+    wilayah?: true
     idBudget?: true
     periode?: true
     tahun?: true
@@ -3826,6 +3832,7 @@ export namespace Prisma {
     idLokasiHpp: string
     idMaster: string | null
     lokasi: string
+    wilayah: string | null
     idBudget: string
     periode: number
     tahun: number | null
@@ -3867,6 +3874,7 @@ export namespace Prisma {
     idLokasiHpp?: boolean
     idMaster?: boolean
     lokasi?: boolean
+    wilayah?: boolean
     idBudget?: boolean
     periode?: boolean
     tahun?: boolean
@@ -3891,6 +3899,7 @@ export namespace Prisma {
     idLokasiHpp?: boolean
     idMaster?: boolean
     lokasi?: boolean
+    wilayah?: boolean
     idBudget?: boolean
     periode?: boolean
     tahun?: boolean
@@ -3915,6 +3924,7 @@ export namespace Prisma {
     idLokasiHpp?: boolean
     idMaster?: boolean
     lokasi?: boolean
+    wilayah?: boolean
     idBudget?: boolean
     periode?: boolean
     tahun?: boolean
@@ -3939,6 +3949,7 @@ export namespace Prisma {
     idLokasiHpp?: boolean
     idMaster?: boolean
     lokasi?: boolean
+    wilayah?: boolean
     idBudget?: boolean
     periode?: boolean
     tahun?: boolean
@@ -3957,7 +3968,7 @@ export namespace Prisma {
     updatedAt?: boolean
   }
 
-  export type LokasiHPPOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"idLokasiHpp" | "idMaster" | "lokasi" | "idBudget" | "periode" | "tahun" | "tanggalRawat" | "status" | "jenisBibit" | "kelasBibit" | "qtyPanen" | "luasPanen" | "luasAktif" | "group" | "descGroup" | "jenisBiaya" | "biaya" | "createdAt" | "updatedAt", ExtArgs["result"]["lokasiHPP"]>
+  export type LokasiHPPOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"idLokasiHpp" | "idMaster" | "lokasi" | "wilayah" | "idBudget" | "periode" | "tahun" | "tanggalRawat" | "status" | "jenisBibit" | "kelasBibit" | "qtyPanen" | "luasPanen" | "luasAktif" | "group" | "descGroup" | "jenisBiaya" | "biaya" | "createdAt" | "updatedAt", ExtArgs["result"]["lokasiHPP"]>
   export type LokasiHPPInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     masterSheet?: boolean | LokasiHPP$masterSheetArgs<ExtArgs>
     budgetItem?: boolean | BudgetDefaultArgs<ExtArgs>
@@ -3981,6 +3992,7 @@ export namespace Prisma {
       idLokasiHpp: string
       idMaster: string | null
       lokasi: string
+      wilayah: string | null
       idBudget: string
       periode: number
       tahun: number | null
@@ -4425,6 +4437,7 @@ export namespace Prisma {
     readonly idLokasiHpp: FieldRef<"LokasiHPP", 'String'>
     readonly idMaster: FieldRef<"LokasiHPP", 'String'>
     readonly lokasi: FieldRef<"LokasiHPP", 'String'>
+    readonly wilayah: FieldRef<"LokasiHPP", 'String'>
     readonly idBudget: FieldRef<"LokasiHPP", 'String'>
     readonly periode: FieldRef<"LokasiHPP", 'Int'>
     readonly tahun: FieldRef<"LokasiHPP", 'Int'>
@@ -6183,6 +6196,7 @@ export namespace Prisma {
     idLokasiHpp: 'idLokasiHpp',
     idMaster: 'idMaster',
     lokasi: 'lokasi',
+    wilayah: 'wilayah',
     idBudget: 'idBudget',
     periode: 'periode',
     tahun: 'tahun',
@@ -6505,6 +6519,7 @@ export namespace Prisma {
     idLokasiHpp?: StringFilter<"LokasiHPP"> | string
     idMaster?: StringNullableFilter<"LokasiHPP"> | string | null
     lokasi?: StringFilter<"LokasiHPP"> | string
+    wilayah?: StringNullableFilter<"LokasiHPP"> | string | null
     idBudget?: StringFilter<"LokasiHPP"> | string
     periode?: IntFilter<"LokasiHPP"> | number
     tahun?: IntNullableFilter<"LokasiHPP"> | number | null
@@ -6529,6 +6544,7 @@ export namespace Prisma {
     idLokasiHpp?: SortOrder
     idMaster?: SortOrderInput | SortOrder
     lokasi?: SortOrder
+    wilayah?: SortOrderInput | SortOrder
     idBudget?: SortOrder
     periode?: SortOrder
     tahun?: SortOrderInput | SortOrder
@@ -6556,6 +6572,7 @@ export namespace Prisma {
     NOT?: LokasiHPPWhereInput | LokasiHPPWhereInput[]
     idMaster?: StringNullableFilter<"LokasiHPP"> | string | null
     lokasi?: StringFilter<"LokasiHPP"> | string
+    wilayah?: StringNullableFilter<"LokasiHPP"> | string | null
     idBudget?: StringFilter<"LokasiHPP"> | string
     periode?: IntFilter<"LokasiHPP"> | number
     tahun?: IntNullableFilter<"LokasiHPP"> | number | null
@@ -6580,6 +6597,7 @@ export namespace Prisma {
     idLokasiHpp?: SortOrder
     idMaster?: SortOrderInput | SortOrder
     lokasi?: SortOrder
+    wilayah?: SortOrderInput | SortOrder
     idBudget?: SortOrder
     periode?: SortOrder
     tahun?: SortOrderInput | SortOrder
@@ -6610,6 +6628,7 @@ export namespace Prisma {
     idLokasiHpp?: StringWithAggregatesFilter<"LokasiHPP"> | string
     idMaster?: StringNullableWithAggregatesFilter<"LokasiHPP"> | string | null
     lokasi?: StringWithAggregatesFilter<"LokasiHPP"> | string
+    wilayah?: StringNullableWithAggregatesFilter<"LokasiHPP"> | string | null
     idBudget?: StringWithAggregatesFilter<"LokasiHPP"> | string
     periode?: IntWithAggregatesFilter<"LokasiHPP"> | number
     tahun?: IntNullableWithAggregatesFilter<"LokasiHPP"> | number | null
@@ -6944,6 +6963,7 @@ export namespace Prisma {
   export type LokasiHPPCreateInput = {
     idLokasiHpp: string
     lokasi: string
+    wilayah?: string | null
     periode: number
     tahun?: number | null
     tanggalRawat?: Date | string | null
@@ -6967,6 +6987,7 @@ export namespace Prisma {
     idLokasiHpp: string
     idMaster?: string | null
     lokasi: string
+    wilayah?: string | null
     idBudget: string
     periode: number
     tahun?: number | null
@@ -6988,6 +7009,7 @@ export namespace Prisma {
   export type LokasiHPPUpdateInput = {
     idLokasiHpp?: StringFieldUpdateOperationsInput | string
     lokasi?: StringFieldUpdateOperationsInput | string
+    wilayah?: NullableStringFieldUpdateOperationsInput | string | null
     periode?: IntFieldUpdateOperationsInput | number
     tahun?: NullableIntFieldUpdateOperationsInput | number | null
     tanggalRawat?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -7011,6 +7033,7 @@ export namespace Prisma {
     idLokasiHpp?: StringFieldUpdateOperationsInput | string
     idMaster?: NullableStringFieldUpdateOperationsInput | string | null
     lokasi?: StringFieldUpdateOperationsInput | string
+    wilayah?: NullableStringFieldUpdateOperationsInput | string | null
     idBudget?: StringFieldUpdateOperationsInput | string
     periode?: IntFieldUpdateOperationsInput | number
     tahun?: NullableIntFieldUpdateOperationsInput | number | null
@@ -7033,6 +7056,7 @@ export namespace Prisma {
     idLokasiHpp: string
     idMaster?: string | null
     lokasi: string
+    wilayah?: string | null
     idBudget: string
     periode: number
     tahun?: number | null
@@ -7054,6 +7078,7 @@ export namespace Prisma {
   export type LokasiHPPUpdateManyMutationInput = {
     idLokasiHpp?: StringFieldUpdateOperationsInput | string
     lokasi?: StringFieldUpdateOperationsInput | string
+    wilayah?: NullableStringFieldUpdateOperationsInput | string | null
     periode?: IntFieldUpdateOperationsInput | number
     tahun?: NullableIntFieldUpdateOperationsInput | number | null
     tanggalRawat?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -7075,6 +7100,7 @@ export namespace Prisma {
     idLokasiHpp?: StringFieldUpdateOperationsInput | string
     idMaster?: NullableStringFieldUpdateOperationsInput | string | null
     lokasi?: StringFieldUpdateOperationsInput | string
+    wilayah?: NullableStringFieldUpdateOperationsInput | string | null
     idBudget?: StringFieldUpdateOperationsInput | string
     periode?: IntFieldUpdateOperationsInput | number
     tahun?: NullableIntFieldUpdateOperationsInput | number | null
@@ -7518,6 +7544,7 @@ export namespace Prisma {
     idLokasiHpp?: SortOrder
     idMaster?: SortOrder
     lokasi?: SortOrder
+    wilayah?: SortOrder
     idBudget?: SortOrder
     periode?: SortOrder
     tahun?: SortOrder
@@ -7549,6 +7576,7 @@ export namespace Prisma {
     idLokasiHpp?: SortOrder
     idMaster?: SortOrder
     lokasi?: SortOrder
+    wilayah?: SortOrder
     idBudget?: SortOrder
     periode?: SortOrder
     tahun?: SortOrder
@@ -7571,6 +7599,7 @@ export namespace Prisma {
     idLokasiHpp?: SortOrder
     idMaster?: SortOrder
     lokasi?: SortOrder
+    wilayah?: SortOrder
     idBudget?: SortOrder
     periode?: SortOrder
     tahun?: SortOrder
@@ -7865,16 +7894,16 @@ export namespace Prisma {
     connect?: BudgetWhereUniqueInput
   }
 
+  export type NullableStringFieldUpdateOperationsInput = {
+    set?: string | null
+  }
+
   export type NullableIntFieldUpdateOperationsInput = {
     set?: number | null
     increment?: number
     decrement?: number
     multiply?: number
     divide?: number
-  }
-
-  export type NullableStringFieldUpdateOperationsInput = {
-    set?: string | null
   }
 
   export type MasterSheetUpdateOneWithoutLokasiHppListNestedInput = {
@@ -8129,6 +8158,7 @@ export namespace Prisma {
   export type LokasiHPPCreateWithoutMasterSheetInput = {
     idLokasiHpp: string
     lokasi: string
+    wilayah?: string | null
     periode: number
     tahun?: number | null
     tanggalRawat?: Date | string | null
@@ -8150,6 +8180,7 @@ export namespace Prisma {
   export type LokasiHPPUncheckedCreateWithoutMasterSheetInput = {
     idLokasiHpp: string
     lokasi: string
+    wilayah?: string | null
     idBudget: string
     periode: number
     tahun?: number | null
@@ -8247,6 +8278,7 @@ export namespace Prisma {
     idLokasiHpp?: StringFilter<"LokasiHPP"> | string
     idMaster?: StringNullableFilter<"LokasiHPP"> | string | null
     lokasi?: StringFilter<"LokasiHPP"> | string
+    wilayah?: StringNullableFilter<"LokasiHPP"> | string | null
     idBudget?: StringFilter<"LokasiHPP"> | string
     periode?: IntFilter<"LokasiHPP"> | number
     tahun?: IntNullableFilter<"LokasiHPP"> | number | null
@@ -8306,6 +8338,7 @@ export namespace Prisma {
   export type LokasiHPPCreateWithoutBudgetItemInput = {
     idLokasiHpp: string
     lokasi: string
+    wilayah?: string | null
     periode: number
     tahun?: number | null
     tanggalRawat?: Date | string | null
@@ -8328,6 +8361,7 @@ export namespace Prisma {
     idLokasiHpp: string
     idMaster?: string | null
     lokasi: string
+    wilayah?: string | null
     periode: number
     tahun?: number | null
     tanggalRawat?: Date | string | null
@@ -8606,6 +8640,7 @@ export namespace Prisma {
   export type LokasiHPPCreateManyMasterSheetInput = {
     idLokasiHpp: string
     lokasi: string
+    wilayah?: string | null
     idBudget: string
     periode: number
     tahun?: number | null
@@ -8645,6 +8680,7 @@ export namespace Prisma {
   export type LokasiHPPUpdateWithoutMasterSheetInput = {
     idLokasiHpp?: StringFieldUpdateOperationsInput | string
     lokasi?: StringFieldUpdateOperationsInput | string
+    wilayah?: NullableStringFieldUpdateOperationsInput | string | null
     periode?: IntFieldUpdateOperationsInput | number
     tahun?: NullableIntFieldUpdateOperationsInput | number | null
     tanggalRawat?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -8666,6 +8702,7 @@ export namespace Prisma {
   export type LokasiHPPUncheckedUpdateWithoutMasterSheetInput = {
     idLokasiHpp?: StringFieldUpdateOperationsInput | string
     lokasi?: StringFieldUpdateOperationsInput | string
+    wilayah?: NullableStringFieldUpdateOperationsInput | string | null
     idBudget?: StringFieldUpdateOperationsInput | string
     periode?: IntFieldUpdateOperationsInput | number
     tahun?: NullableIntFieldUpdateOperationsInput | number | null
@@ -8687,6 +8724,7 @@ export namespace Prisma {
   export type LokasiHPPUncheckedUpdateManyWithoutMasterSheetInput = {
     idLokasiHpp?: StringFieldUpdateOperationsInput | string
     lokasi?: StringFieldUpdateOperationsInput | string
+    wilayah?: NullableStringFieldUpdateOperationsInput | string | null
     idBudget?: StringFieldUpdateOperationsInput | string
     periode?: IntFieldUpdateOperationsInput | number
     tahun?: NullableIntFieldUpdateOperationsInput | number | null
@@ -8763,6 +8801,7 @@ export namespace Prisma {
     idLokasiHpp: string
     idMaster?: string | null
     lokasi: string
+    wilayah?: string | null
     periode: number
     tahun?: number | null
     tanggalRawat?: Date | string | null
@@ -8783,6 +8822,7 @@ export namespace Prisma {
   export type LokasiHPPUpdateWithoutBudgetItemInput = {
     idLokasiHpp?: StringFieldUpdateOperationsInput | string
     lokasi?: StringFieldUpdateOperationsInput | string
+    wilayah?: NullableStringFieldUpdateOperationsInput | string | null
     periode?: IntFieldUpdateOperationsInput | number
     tahun?: NullableIntFieldUpdateOperationsInput | number | null
     tanggalRawat?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -8805,6 +8845,7 @@ export namespace Prisma {
     idLokasiHpp?: StringFieldUpdateOperationsInput | string
     idMaster?: NullableStringFieldUpdateOperationsInput | string | null
     lokasi?: StringFieldUpdateOperationsInput | string
+    wilayah?: NullableStringFieldUpdateOperationsInput | string | null
     periode?: IntFieldUpdateOperationsInput | number
     tahun?: NullableIntFieldUpdateOperationsInput | number | null
     tanggalRawat?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -8826,6 +8867,7 @@ export namespace Prisma {
     idLokasiHpp?: StringFieldUpdateOperationsInput | string
     idMaster?: NullableStringFieldUpdateOperationsInput | string | null
     lokasi?: StringFieldUpdateOperationsInput | string
+    wilayah?: NullableStringFieldUpdateOperationsInput | string | null
     periode?: IntFieldUpdateOperationsInput | number
     tahun?: NullableIntFieldUpdateOperationsInput | number | null
     tanggalRawat?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null

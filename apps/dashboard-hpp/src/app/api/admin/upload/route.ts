@@ -208,11 +208,47 @@ export async function POST(req: Request) {
       const masterSheetsNeeded = new Map<string, any>();
       const budgetCache = new Map<string, string>();
 
+      // Pre-fetch known location -> wilayah mappings from existing masterSheet & lokasiHPP
+      const knownLocationWilayah = new Map<string, string>();
+      try {
+        const [knownMasters, knownLokasis] = await Promise.all([
+          prisma.masterSheet.findMany({
+            select: { lokasi: true, wilayah: true },
+            where: { wilayah: { not: "" } },
+          }),
+          prisma.lokasiHPP.findMany({
+            select: { lokasi: true, wilayah: true },
+            where: { wilayah: { not: null } },
+            distinct: ["lokasi"],
+          }),
+        ]);
+        for (const m of knownMasters) {
+          if (m.lokasi && m.wilayah && m.wilayah !== "-") {
+            knownLocationWilayah.set(m.lokasi, m.wilayah);
+          }
+        }
+        for (const l of knownLokasis) {
+          if (l.lokasi && l.wilayah && l.wilayah !== "-" && !knownLocationWilayah.has(l.lokasi)) {
+            knownLocationWilayah.set(l.lokasi, l.wilayah);
+          }
+        }
+      } catch (e) {
+        console.error("Error pre-fetching known location wilayah:", e);
+      }
+
       for (let i = 0; i < data.length; i++) {
         const row = data[i];
         const rawIdLokasiHpp = getVal(row, ["idLokasiHpp", "id_lokasi_hpp", "ID Lokasi HPP", "idlokasihpp"]);
         const lokasi = limitStr(getVal(row, ["lokasi", "Lokasi", "LOKASI", "Kode Lokasi"]), 10);
         if (!lokasi) continue;
+
+        // Ambil wilayah dari file excel lokasi jika ada, jika tidak ada cari riwayat lokasi lama di database, fallback "-"
+        const rawWilayah = getVal(row, ["wilayah", "Wilayah", "WILAYAH", "Region", "Area"]);
+        const rowWilayah = rawWilayah ? limitStr(rawWilayah, 10) : "";
+        const resolvedWilayah = rowWilayah || knownLocationWilayah.get(lokasi) || "-";
+        if (rowWilayah && rowWilayah !== "-") {
+          knownLocationWilayah.set(lokasi, rowWilayah);
+        }
 
         const periode = Math.round(parseNum(getVal(row, ["periode", "Periode", "PERIODE", "Bulan"]), 1));
         const tahun = Math.round(parseNum(getVal(row, ["tahun", "Tahun", "TAHUN"]), new Date().getFullYear()));
@@ -247,7 +283,7 @@ export async function POST(req: Request) {
           masterSheetsNeeded.set(idMaster, {
             idMaster,
             lokasi,
-            wilayah: "W01",
+            wilayah: resolvedWilayah,
             jenisBibit: jenisBibit || "-",
             kelasBibit: kelasBibit || "-",
             status: status || "NSSC",
@@ -259,6 +295,7 @@ export async function POST(req: Request) {
           idLokasiHpp,
           idMaster,
           lokasi,
+          wilayah: resolvedWilayah,
           idBudget,
           periode,
           tahun,
@@ -281,7 +318,9 @@ export async function POST(req: Request) {
         try {
           await prisma.masterSheet.upsert({
             where: { idMaster: ms.idMaster },
-            update: {},
+            update: {
+              ...(ms.wilayah && ms.wilayah !== "-" ? { wilayah: ms.wilayah } : {}),
+            },
             create: ms,
           });
         } catch (e) {
@@ -342,6 +381,7 @@ export async function POST(req: Request) {
               idLokasiHpp: item.idLokasiHpp,
               idMaster: item.idMaster,
               lokasi: item.lokasi,
+              wilayah: item.wilayah,
               idBudget: targetIdBudget,
               periode: item.periode,
               tahun: item.tahun,

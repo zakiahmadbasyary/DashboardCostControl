@@ -92,8 +92,8 @@ export default function HppLocationDetailDrilldown({
   // 1. Compute Master Location Metrics from lokasiItems
   const validItem = lokasiItems.find((i) => Number(i.luasPanen || 0) > 0 || Number(i.luasAktif || 0) > 0) || lokasiItems[0];
   const masterSheet = validItem?.masterSheet;
-  const displayLokasi = validItem?.lokasi || masterSheet?.lokasi || (lokasiCode.includes("_") ? lokasiCode.split("_")[0] : lokasiCode);
-  const wilayah = masterSheet?.wilayah || "W01";
+  const displayLokasi = validItem?.lokasi || masterSheet?.lokasi || (lokasiCode.includes("_") ? lokasiCode.split("_")[0] : lokasiCode) || "-";
+  const wilayah = validItem?.wilayah || masterSheet?.wilayah || "-";
   const jenisBibit = validItem?.jenisBibit || masterSheet?.jenisBibit || "-";
   const kelasBibit = validItem?.kelasBibit || masterSheet?.kelasBibit || "-";
 
