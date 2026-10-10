@@ -50,6 +50,38 @@ export default function AdminPreviewPage() {
     fetchData();
   }, [activeTab, searchQuery, page]);
 
+  const formatCurrency = (val: unknown) => {
+    if (val === null || val === undefined) return "-";
+    const num = Number(val);
+    if (isNaN(num)) return "-";
+    return `Rp ${num.toLocaleString("id-ID")}`;
+  };
+
+  const formatNumber = (val: unknown, decimals = 2) => {
+    if (val === null || val === undefined) return "-";
+    const num = Number(val);
+    if (isNaN(num)) return "-";
+    return new Intl.NumberFormat("id-ID", {
+      maximumFractionDigits: decimals,
+    }).format(num);
+  };
+
+  const formatDate = (val: unknown) => {
+    if (!val) return "-";
+    const str = String(val).trim();
+    if (!str || str === "null" || str === "undefined") return "-";
+    if (/^\d{4}-\d{2}-\d{2}/.test(str)) {
+      return str.split("T")[0];
+    }
+    try {
+      const d = new Date(str);
+      if (isNaN(d.getTime())) return str;
+      return d.toISOString().split("T")[0];
+    } catch {
+      return str;
+    }
+  };
+
   const startRecord = totalRecords > 0 ? (page - 1) * limit + 1 : 0;
   const endRecord = Math.min(page * limit, totalRecords);
 
@@ -59,7 +91,7 @@ export default function AdminPreviewPage() {
       <div suppressHydrationWarning>
         <h1 className="text-xl font-extrabold text-[#17231B]">Preview Data Database HPP</h1>
         <p className="text-xs text-[#5F6B63] mt-1">
-          Inspeksi data mentah dari 4 tabel database HPP (MasterSheet, Data Budget, Data Lokasi HPP, dan Data Aktivitas HPP) dengan paginasi 50 data per halaman.
+          Inspeksi data dari 4 tabel database HPP (MasterSheet, Data Budget, Data Lokasi HPP, dan Data Aktivitas HPP) dengan paginasi 50 data per halaman.
         </p>
       </div>
 
@@ -148,29 +180,43 @@ export default function AdminPreviewPage() {
           </div>
         ) : (
           <div>
-            {/* 1. MasterSheet Table */}
+            {/* 1. MasterSheet Table: Semua kolom kecuali ID, createdAt, updatedAt */}
             {activeTab === "mastersheet" && (
               <div className="overflow-x-auto rounded-xl border border-[#DDE5DF]">
                 <table className="w-full text-xs text-left">
-                  <thead className="bg-[#F7F9F7] text-[#17231B] uppercase font-bold border-b border-[#DDE5DF]">
+                  <thead className="bg-[#F7F9F7] text-[#17231B] uppercase font-bold border-b border-[#DDE5DF] whitespace-nowrap">
                     <tr>
                       <th className="py-2.5 px-3">Lokasi</th>
                       <th className="py-2.5 px-3">Wilayah</th>
-                      <th className="py-2.5 px-3">Kode Bibit</th>
                       <th className="py-2.5 px-3">Jenis Bibit</th>
                       <th className="py-2.5 px-3">Kelas Bibit</th>
+                      <th className="py-2.5 px-3">Status</th>
+                      <th className="py-2.5 px-3">Tgl Rawat</th>
+                      <th className="py-2.5 px-3">Tgl Tanam</th>
+                      <th className="py-2.5 px-3">Forcing Std</th>
+                      <th className="py-2.5 px-3">Rencana Forcing</th>
+                      <th className="py-2.5 px-3">Real Forcing</th>
+                      <th className="py-2.5 px-3">Selesai Panen</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-[#DDE5DF]/60 text-[#17231B]">
+                  <tbody className="divide-y divide-[#DDE5DF]/60 text-[#17231B] whitespace-nowrap">
                     {tableData.map((item, idx) => (
                       <tr key={idx} className="hover:bg-[#F7F9F7]">
-                        <td className="py-2.5 px-3 font-bold">{String(item.lokasi ?? "")}</td>
-                        <td className="py-2.5 px-3">{String(item.wilayah ?? "")}</td>
-                        <td className="py-2.5 px-3 font-mono text-[11px] text-[#5F6B63]">
-                          {item.kodeBibit ? String(item.kodeBibit) : "-"}
+                        <td className="py-2.5 px-3 font-bold text-[#16823B]">{String(item.lokasi ?? "-")}</td>
+                        <td className="py-2.5 px-3">{String(item.wilayah ?? "-")}</td>
+                        <td className="py-2.5 px-3 font-medium capitalize">{String(item.jenisBibit ?? "-")}</td>
+                        <td className="py-2.5 px-3 capitalize">{String(item.kelasBibit ?? "-")}</td>
+                        <td className="py-2.5 px-3">
+                          <span className="px-2 py-0.5 rounded-full bg-[#16823B]/10 text-[#16823B] font-bold text-[10px]">
+                            {String(item.status ?? "-")}
+                          </span>
                         </td>
-                        <td className="py-2.5 px-3 font-medium">{item.jenisBibit ? String(item.jenisBibit) : "-"}</td>
-                        <td className="py-2.5 px-3">{item.kelasBibit ? String(item.kelasBibit) : "-"}</td>
+                        <td className="py-2.5 px-3 font-mono text-[11px] text-[#5F6B63]">{formatDate(item.tanggalRawat)}</td>
+                        <td className="py-2.5 px-3 font-mono text-[11px] text-[#5F6B63]">{formatDate(item.tanggalTanam)}</td>
+                        <td className="py-2.5 px-3 font-mono text-[11px] text-[#5F6B63]">{formatDate(item.tanggalForcingStandard)}</td>
+                        <td className="py-2.5 px-3 font-mono text-[11px] text-[#5F6B63]">{formatDate(item.tanggalRenForcing)}</td>
+                        <td className="py-2.5 px-3 font-mono text-[11px] text-[#5F6B63]">{formatDate(item.tanggalRealForcing)}</td>
+                        <td className="py-2.5 px-3 font-mono text-[11px] text-[#5F6B63]">{formatDate(item.tanggalSelesaiPanen)}</td>
                       </tr>
                     ))}
                   </tbody>
@@ -178,28 +224,30 @@ export default function AdminPreviewPage() {
               </div>
             )}
 
-            {/* 2. Data Budget Table */}
+            {/* 2. Data Budget Table: Semua kolom kecuali ID, createdAt, updatedAt */}
             {activeTab === "budget" && (
               <div className="overflow-x-auto rounded-xl border border-[#DDE5DF]">
                 <table className="w-full text-xs text-left">
-                  <thead className="bg-[#F7F9F7] text-[#17231B] uppercase font-bold border-b border-[#DDE5DF]">
+                  <thead className="bg-[#F7F9F7] text-[#17231B] uppercase font-bold border-b border-[#DDE5DF] whitespace-nowrap">
                     <tr>
-                      <th className="py-2.5 px-3">ID Budget</th>
-                      <th className="py-2.5 px-3">Group</th>
+                      <th className="py-2.5 px-3">Group Cost</th>
                       <th className="py-2.5 px-3">Status</th>
                       <th className="py-2.5 px-3 text-center">Periode</th>
                       <th className="py-2.5 px-3 text-right">Budget (Rp / Ha)</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-[#DDE5DF]/60 text-[#17231B]">
+                  <tbody className="divide-y divide-[#DDE5DF]/60 text-[#17231B] whitespace-nowrap">
                     {tableData.map((item, idx) => (
                       <tr key={idx} className="hover:bg-[#F7F9F7]">
-                        <td className="py-2.5 px-3 font-bold font-mono text-[#16823B]">{String(item.idBudget ?? "")}</td>
-                        <td className="py-2.5 px-3 font-mono text-[11px]">{String(item.group ?? "-")}</td>
-                        <td className="py-2.5 px-3 font-medium">{String(item.status ?? "-")}</td>
-                        <td className="py-2.5 px-3 text-center font-mono">{String(item.periode ?? "-")}</td>
+                        <td className="py-2.5 px-3 font-mono font-bold text-[#16823B]">{String(item.group ?? "-")}</td>
+                        <td className="py-2.5 px-3 font-medium">
+                          <span className="px-2 py-0.5 rounded-full bg-slate-100 text-slate-700 font-bold text-[10px]">
+                            {String(item.status ?? "-")}
+                          </span>
+                        </td>
+                        <td className="py-2.5 px-3 text-center font-mono font-semibold">{String(item.periode ?? "-")}</td>
                         <td className="py-2.5 px-3 text-right font-mono font-bold text-[#16823B]">
-                          Rp {Number(item.budget ?? 0).toLocaleString("id-ID")}
+                          {formatCurrency(item.budget)}
                         </td>
                       </tr>
                     ))}
@@ -208,46 +256,50 @@ export default function AdminPreviewPage() {
               </div>
             )}
 
-            {/* 3. Data Lokasi HPP Table */}
+            {/* 3. Data Lokasi HPP Table: Hanya kolom bawaan tabel LokasiHPP (kecuali ID & timestamps) */}
             {activeTab === "lokasi" && (
               <div className="overflow-x-auto rounded-xl border border-[#DDE5DF]">
                 <table className="w-full text-xs text-left">
-                  <thead className="bg-[#F7F9F7] text-[#17231B] uppercase font-bold border-b border-[#DDE5DF]">
+                  <thead className="bg-[#F7F9F7] text-[#17231B] uppercase font-bold border-b border-[#DDE5DF] whitespace-nowrap">
                     <tr>
-                      <th className="py-2.5 px-3">ID Lokasi HPP</th>
                       <th className="py-2.5 px-3">Lokasi</th>
-                      <th className="py-2.5 px-3">Wilayah</th>
-                      <th className="py-2.5 px-3">ID Budget</th>
                       <th className="py-2.5 px-3">Status</th>
+                      <th className="py-2.5 px-3 text-center">Periode</th>
+                      <th className="py-2.5 px-3 text-center">Tahun</th>
+                      <th className="py-2.5 px-3">Tgl Rawat</th>
+                      <th className="py-2.5 px-3">Jenis Bibit</th>
+                      <th className="py-2.5 px-3">Kelas Bibit</th>
                       <th className="py-2.5 px-3 text-right">Qty Panen (Kg)</th>
                       <th className="py-2.5 px-3 text-right">Luas Panen (Ha)</th>
                       <th className="py-2.5 px-3 text-right">Luas Aktif (Ha)</th>
-                      <th className="py-2.5 px-3">Group</th>
+                      <th className="py-2.5 px-3">Group Cost</th>
                       <th className="py-2.5 px-3">Desc Group</th>
                       <th className="py-2.5 px-3">Jenis Biaya</th>
-                      <th className="py-2.5 px-3 text-right">Biaya (Rp)</th>
-                      <th className="py-2.5 px-3 text-right">Cost / Ha (Rp)</th>
+                      <th className="py-2.5 px-3 text-right">Total Biaya (Rp)</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-[#DDE5DF]/60 text-[#17231B]">
+                  <tbody className="divide-y divide-[#DDE5DF]/60 text-[#17231B] whitespace-nowrap">
                     {tableData.map((item, idx) => (
                       <tr key={idx} className="hover:bg-[#F7F9F7]">
-                        <td className="py-2.5 px-3 font-mono text-[11px] text-[#5F6B63]">{String(item.idLokasiHpp ?? "")}</td>
-                        <td className="py-2.5 px-3 font-bold">{String(item.lokasi ?? "")}</td>
-                        <td className="py-2.5 px-3">{String(item.wilayah ?? "")}</td>
-                        <td className="py-2.5 px-3 font-mono text-[11px] text-[#16823B]">{String(item.idBudget ?? "")}</td>
-                        <td className="py-2.5 px-3">{String(item.status ?? "")}</td>
-                        <td className="py-2.5 px-3 text-right font-mono">{Number(item.qtyPanen ?? 0).toLocaleString("id-ID")}</td>
-                        <td className="py-2.5 px-3 text-right font-mono">{Number(item.luasPanen ?? 0).toLocaleString("id-ID")} Ha</td>
-                        <td className="py-2.5 px-3 text-right font-mono">{Number(item.luasAktif ?? 0).toLocaleString("id-ID")} Ha</td>
-                        <td className="py-2.5 px-3 font-mono text-[11px]">{String(item.group ?? "")}</td>
-                        <td className="py-2.5 px-3 font-medium">{String(item.descGroup ?? "")}</td>
-                        <td className="py-2.5 px-3 text-[#5F6B63]">{String(item.jenisBiaya ?? "")}</td>
-                        <td className="py-2.5 px-3 text-right font-mono font-bold text-[#16823B]">
-                          Rp {Number(item.biaya ?? 0).toLocaleString("id-ID")}
+                        <td className="py-2.5 px-3 font-bold text-[#16823B]">{String(item.lokasi ?? "-")}</td>
+                        <td className="py-2.5 px-3">
+                          <span className="px-2 py-0.5 rounded-full bg-slate-100 text-slate-700 font-bold text-[10px]">
+                            {String(item.status ?? "-")}
+                          </span>
                         </td>
-                        <td className="py-2.5 px-3 text-right font-mono font-semibold">
-                          Rp {Number(item.costHa ?? 0).toLocaleString("id-ID")}
+                        <td className="py-2.5 px-3 text-center font-mono font-semibold">{String(item.periode ?? "-")}</td>
+                        <td className="py-2.5 px-3 text-center font-mono">{String(item.tahun ?? "-")}</td>
+                        <td className="py-2.5 px-3 font-mono text-[11px] text-[#5F6B63]">{formatDate(item.tanggalRawat)}</td>
+                        <td className="py-2.5 px-3 capitalize">{String(item.jenisBibit ?? "-")}</td>
+                        <td className="py-2.5 px-3 capitalize">{String(item.kelasBibit ?? "-")}</td>
+                        <td className="py-2.5 px-3 text-right font-mono">{formatNumber(item.qtyPanen)}</td>
+                        <td className="py-2.5 px-3 text-right font-mono">{formatNumber(item.luasPanen)} Ha</td>
+                        <td className="py-2.5 px-3 text-right font-mono">{formatNumber(item.luasAktif)} Ha</td>
+                        <td className="py-2.5 px-3 font-mono text-[11px] font-bold text-amber-800">{String(item.group ?? "-")}</td>
+                        <td className="py-2.5 px-3 font-medium">{String(item.descGroup ?? "-")}</td>
+                        <td className="py-2.5 px-3 text-[#5F6B63]">{String(item.jenisBiaya ?? "-")}</td>
+                        <td className="py-2.5 px-3 text-right font-mono font-bold text-[#16823B]">
+                          {formatCurrency(item.biaya)}
                         </td>
                       </tr>
                     ))}
@@ -256,17 +308,15 @@ export default function AdminPreviewPage() {
               </div>
             )}
 
-            {/* 4. Data Aktivitas HPP Table */}
+            {/* 4. Data Aktivitas HPP Table: Hanya kolom bawaan tabel AktivitasHPP (kecuali ID & timestamps) */}
             {activeTab === "aktivitas" && (
               <div className="overflow-x-auto rounded-xl border border-[#DDE5DF]">
                 <table className="w-full text-xs text-left">
-                  <thead className="bg-[#F7F9F7] text-[#17231B] uppercase font-bold border-b border-[#DDE5DF]">
+                  <thead className="bg-[#F7F9F7] text-[#17231B] uppercase font-bold border-b border-[#DDE5DF] whitespace-nowrap">
                     <tr>
-                      <th className="py-2.5 px-3">ID Aktivitas</th>
                       <th className="py-2.5 px-3">Lokasi</th>
-                      <th className="py-2.5 px-3">Wilayah</th>
-                      <th className="py-2.5 px-3">Aktivitas</th>
-                      <th className="py-2.5 px-3">Group</th>
+                      <th className="py-2.5 px-3">Nama Aktivitas</th>
+                      <th className="py-2.5 px-3">Group Cost</th>
                       <th className="py-2.5 px-3">UoM</th>
                       <th className="py-2.5 px-3 text-right">Hasil</th>
                       <th className="py-2.5 px-3 text-right">Total Biaya (Rp)</th>
@@ -278,25 +328,23 @@ export default function AdminPreviewPage() {
                       <th className="py-2.5 px-3">Rencana Panen</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-[#DDE5DF]/60 text-[#17231B]">
+                  <tbody className="divide-y divide-[#DDE5DF]/60 text-[#17231B] whitespace-nowrap">
                     {tableData.map((item, idx) => (
                       <tr key={idx} className="hover:bg-[#F7F9F7]">
-                        <td className="py-2.5 px-3 font-mono text-[11px] text-[#5F6B63]">{String(item.idAktivitas ?? "")}</td>
-                        <td className="py-2.5 px-3 font-bold">{String(item.lokasi ?? "")}</td>
-                        <td className="py-2.5 px-3">{String(item.wilayah ?? "")}</td>
-                        <td className="py-2.5 px-3 font-bold">{String(item.aktivitas ?? "")}</td>
-                        <td className="py-2.5 px-3 font-mono text-[11px]">{String(item.group ?? "")}</td>
-                        <td className="py-2.5 px-3 font-medium">{String(item.uom ?? "")}</td>
-                        <td className="py-2.5 px-3 text-right font-mono">{Number(item.hasil ?? 0).toLocaleString("id-ID")}</td>
+                        <td className="py-2.5 px-3 font-bold text-[#16823B]">{String(item.lokasi ?? "-")}</td>
+                        <td className="py-2.5 px-3 font-bold text-[#17231B]">{String(item.aktivitas ?? "-")}</td>
+                        <td className="py-2.5 px-3 font-mono text-[11px] font-bold text-amber-800">{String(item.group ?? "-")}</td>
+                        <td className="py-2.5 px-3 font-medium">{String(item.uom ?? "-")}</td>
+                        <td className="py-2.5 px-3 text-right font-mono">{formatNumber(item.hasil)}</td>
                         <td className="py-2.5 px-3 text-right font-mono font-bold text-[#16823B]">
-                          Rp {Number(item.biaya ?? 0).toLocaleString("id-ID")}
+                          {formatCurrency(item.biaya)}
                         </td>
-                        <td className="py-2.5 px-3 font-mono text-[11px] text-[#5F6B63]">{item.tanggalMulaiRawat ? String(item.tanggalMulaiRawat) : "-"}</td>
-                        <td className="py-2.5 px-3 font-mono text-[11px] text-[#5F6B63]">{item.tanggalMulaiTanam ? String(item.tanggalMulaiTanam) : "-"}</td>
-                        <td className="py-2.5 px-3 font-mono text-[11px] text-[#5F6B63]">{item.tanggalForcingStandard ? String(item.tanggalForcingStandard) : "-"}</td>
-                        <td className="py-2.5 px-3 font-mono text-[11px] text-[#5F6B63]">{item.rencanaForcing ? String(item.rencanaForcing) : "-"}</td>
-                        <td className="py-2.5 px-3 font-mono text-[11px] text-[#5F6B63]">{item.realForcing ? String(item.realForcing) : "-"}</td>
-                        <td className="py-2.5 px-3 font-mono text-[11px] text-[#5F6B63]">{item.rencanaPanen ? String(item.rencanaPanen) : "-"}</td>
+                        <td className="py-2.5 px-3 font-mono text-[11px] text-[#5F6B63]">{formatDate(item.tanggalMulaiRawat)}</td>
+                        <td className="py-2.5 px-3 font-mono text-[11px] text-[#5F6B63]">{formatDate(item.tanggalMulaiTanam)}</td>
+                        <td className="py-2.5 px-3 font-mono text-[11px] text-[#5F6B63]">{formatDate(item.tanggalForcingStandard)}</td>
+                        <td className="py-2.5 px-3 font-mono text-[11px] text-[#5F6B63]">{formatDate(item.rencanaForcing)}</td>
+                        <td className="py-2.5 px-3 font-mono text-[11px] text-[#5F6B63]">{formatDate(item.realForcing)}</td>
+                        <td className="py-2.5 px-3 font-mono text-[11px] text-[#5F6B63]">{formatDate(item.rencanaPanen)}</td>
                       </tr>
                     ))}
                   </tbody>

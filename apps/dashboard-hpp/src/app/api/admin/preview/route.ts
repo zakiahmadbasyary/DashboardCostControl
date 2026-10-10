@@ -28,7 +28,7 @@ export async function GET(request: NextRequest) {
           }
         : {};
 
-      [data, total] = await Promise.all([
+      const [rawList, rawCount] = await Promise.all([
         prisma.masterSheet.findMany({
           where,
           skip,
@@ -37,6 +37,17 @@ export async function GET(request: NextRequest) {
         }),
         prisma.masterSheet.count({ where }),
       ]);
+
+      data = rawList.map((item) => ({
+        ...item,
+        tanggalRawat: item.tanggalRawat ? item.tanggalRawat.toISOString().split("T")[0] : null,
+        tanggalTanam: item.tanggalTanam ? item.tanggalTanam.toISOString().split("T")[0] : null,
+        tanggalForcingStandard: item.tanggalForcingStandard ? item.tanggalForcingStandard.toISOString().split("T")[0] : null,
+        tanggalRenForcing: item.tanggalRenForcing ? item.tanggalRenForcing.toISOString().split("T")[0] : null,
+        tanggalRealForcing: item.tanggalRealForcing ? item.tanggalRealForcing.toISOString().split("T")[0] : null,
+        tanggalSelesaiPanen: item.tanggalSelesaiPanen ? item.tanggalSelesaiPanen.toISOString().split("T")[0] : null,
+      }));
+      total = rawCount;
     } else if (tab === "budget") {
       const where = search
         ? {
@@ -76,7 +87,6 @@ export async function GET(request: NextRequest) {
       const [rawList, rawCount] = await Promise.all([
         prisma.lokasiHPP.findMany({
           where,
-          include: { masterSheet: true },
           skip,
           take: limit,
           orderBy: { idLokasiHpp: "asc" },
@@ -93,6 +103,8 @@ export async function GET(request: NextRequest) {
         tahun: item.tahun,
         tanggalRawat: item.tanggalRawat ? item.tanggalRawat.toISOString().split("T")[0] : null,
         status: item.status,
+        jenisBibit: item.jenisBibit,
+        kelasBibit: item.kelasBibit,
         qtyPanen: item.qtyPanen ? Number(item.qtyPanen) : 0,
         luasPanen: item.luasPanen ? Number(item.luasPanen) : 0,
         luasAktif: item.luasAktif ? Number(item.luasAktif) : 0,
@@ -100,12 +112,6 @@ export async function GET(request: NextRequest) {
         descGroup: item.descGroup,
         jenisBiaya: item.jenisBiaya,
         biaya: item.biaya ? Number(item.biaya) : 0,
-        costHa: item.luasPanen && Number(item.luasPanen) > 0 
-          ? Math.round(Number(item.biaya) / Number(item.luasPanen)) 
-          : 0,
-        wilayah: item.masterSheet?.wilayah || "",
-        jenisBibit: item.jenisBibit || item.masterSheet?.jenisBibit || "",
-        kelasBibit: item.kelasBibit || item.masterSheet?.kelasBibit || "",
       }));
       total = rawCount;
     } else if (tab === "aktivitas") {
@@ -125,7 +131,6 @@ export async function GET(request: NextRequest) {
       const [rawList, rawCount] = await Promise.all([
         prisma.aktivitasHPP.findMany({
           where,
-          include: { masterSheet: true },
           skip,
           take: limit,
           orderBy: { idAktivitas: "asc" },
@@ -148,9 +153,6 @@ export async function GET(request: NextRequest) {
         hasil: item.hasil ? Number(item.hasil) : 0,
         uom: item.uom,
         group: item.group,
-        wilayah: item.masterSheet?.wilayah || "",
-        jenisBibit: item.masterSheet?.jenisBibit || "",
-        kelasBibit: item.masterSheet?.kelasBibit || "",
       }));
       total = rawCount;
     }

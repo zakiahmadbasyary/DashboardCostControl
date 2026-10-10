@@ -137,7 +137,7 @@ export default function HppAdminUploadPage() {
             1. <strong>MasterSheet</strong> (Master Lokasi) &rarr; 2. <strong>Data Budget</strong> (Acuan Budget) &rarr; 3. <strong>Data Lokasi HPP</strong> &rarr; 4. <strong>Data Aktivitas HPP</strong>.
           </p>
           <p className="text-[11px] text-[#5F6B63]">
-            * Anda dapat mengunduh <strong>Template Excel</strong> pada setiap kartu di bawah. Tersedia tombol <strong>Reset Data Tabel</strong> jika ingin mengosongkan tabel.
+            * Sistem upload menggunakan metode <strong>Pembaruan Inkremental</strong>: Data MasterSheet &amp; Budget diperbarui/ditambahkan berdasarkan ID unik (upsert), sedangkan Data Lokasi &amp; Aktivitas akan selalu ditambahkan sebagai data baru. Gunakan tombol <strong>Reset Data</strong> jika ingin mengosongkan tabel tertentu.
           </p>
         </div>
       </div>

@@ -85,7 +85,6 @@ export async function POST(req: Request) {
     let count = 0;
 
     if (category === "mastersheet") {
-      await prisma.masterSheet.deleteMany();
       const uniqueMap = new Map<string, any>();
 
       for (let i = 0; i < data.length; i++) {
@@ -127,14 +126,29 @@ export async function POST(req: Request) {
 
       for (const item of Array.from(uniqueMap.values())) {
         try {
-          await prisma.masterSheet.create({ data: item });
+          await prisma.masterSheet.upsert({
+            where: { idMaster: item.idMaster },
+            update: {
+              lokasi: item.lokasi,
+              wilayah: item.wilayah,
+              jenisBibit: item.jenisBibit,
+              kelasBibit: item.kelasBibit,
+              status: item.status,
+              tanggalRawat: item.tanggalRawat,
+              tanggalTanam: item.tanggalTanam,
+              tanggalForcingStandard: item.tanggalForcingStandard,
+              tanggalRenForcing: item.tanggalRenForcing,
+              tanggalRealForcing: item.tanggalRealForcing,
+              tanggalSelesaiPanen: item.tanggalSelesaiPanen,
+            },
+            create: item,
+          });
           count++;
         } catch (e) {
-          console.error(`masterSheet error for ${item.idMaster}:`, e);
+          console.error(`masterSheet upsert error for ${item.idMaster}:`, e);
         }
       }
     } else if (category === "budget") {
-      await prisma.budget.deleteMany();
       const uniqueMap = new Map<string, { idBudget: string; group: string; status: string; periode: number; budget: number }>();
 
       for (let i = 0; i < data.length; i++) {
@@ -155,20 +169,51 @@ export async function POST(req: Request) {
 
       for (const item of Array.from(uniqueMap.values())) {
         try {
-          await prisma.budget.create({ data: item });
+          await prisma.budget.upsert({
+            where: { idBudget: item.idBudget },
+            update: {
+              group: item.group,
+              status: item.status,
+              periode: item.periode,
+              budget: item.budget,
+            },
+            create: item,
+          });
           count++;
         } catch (e) {
-          console.error(`budget error for ${item.idBudget}:`, e);
+          console.error(`budget upsert error for ${item.idBudget}:`, e);
         }
       }
     } else if (category === "lokasi") {
-      await prisma.lokasiHPP.deleteMany();
-      const uniqueMap = new Map<string, any>();
+      // 1. Prepare items to insert
+      const itemsToInsert: any[] = [];
+      const timeKey = Date.now().toString(36);
+
+      // Check existing IDs to avoid duplicate key conflict if user supplied existing ID
+      const providedIds: string[] = [];
+      for (let i = 0; i < data.length; i++) {
+        const rawId = getVal(data[i], ["idLokasiHpp", "id_lokasi_hpp", "ID Lokasi HPP", "idlokasihpp"]);
+        if (rawId) providedIds.push(limitStr(rawId, 20));
+      }
+
+      const existingIdSet = new Set<string>();
+      if (providedIds.length > 0) {
+        const existing = await prisma.lokasiHPP.findMany({
+          where: { idLokasiHpp: { in: providedIds } },
+          select: { idLokasiHpp: true },
+        });
+        existing.forEach((r) => existingIdSet.add(r.idLokasiHpp));
+      }
+
+      const masterSheetsNeeded = new Map<string, any>();
+      const budgetCache = new Map<string, string>();
 
       for (let i = 0; i < data.length; i++) {
         const row = data[i];
         const rawIdLokasiHpp = getVal(row, ["idLokasiHpp", "id_lokasi_hpp", "ID Lokasi HPP", "idlokasihpp"]);
         const lokasi = limitStr(getVal(row, ["lokasi", "Lokasi", "LOKASI", "Kode Lokasi"]), 10);
+        if (!lokasi) continue;
+
         const periode = Math.round(parseNum(getVal(row, ["periode", "Periode", "PERIODE", "Bulan"]), 1));
         const tahun = Math.round(parseNum(getVal(row, ["tahun", "Tahun", "TAHUN"]), new Date().getFullYear()));
         const tanggalRawat = parseDate(getVal(row, ["tanggalRawat", "tanggal_rawat", "Tanggal Rawat"])) || new Date();
@@ -183,8 +228,14 @@ export async function POST(req: Request) {
         const group = limitStr(getVal(row, ["group", "Group", "GROUP"]), 10, "ZN01");
         const descGroup = limitStr(getVal(row, ["descGroup", "desc_group", "Desc Group", "Keterangan Group"]), 255, `Group ${group}`);
 
-        const fallbackIdHpp = `LH_${lokasi}_P${periode}_${i + 1}`;
-        const idLokasiHpp = limitStr(rawIdLokasiHpp || fallbackIdHpp, 20);
+        // Generate unique idLokasiHpp (Max 20 chars, e.g. "LH_m8c8k1a_1_3f")
+        let idLokasiHpp = rawIdLokasiHpp ? limitStr(rawIdLokasiHpp, 20) : "";
+        if (!idLokasiHpp || existingIdSet.has(idLokasiHpp)) {
+          const randHex = Math.random().toString(36).substring(2, 5);
+          idLokasiHpp = `LH_${timeKey}_${(i + 1).toString(36)}_${randHex}`.substring(0, 20);
+        }
+        existingIdSet.add(idLokasiHpp);
+
         const idBudget = limitStr(getVal(row, ["idBudget", "id_budget", "ID Budget", "idbudget"]), 20);
         const qtyPanen = parseNum(getVal(row, ["qtyPanen", "qty_panen", "Qty Panen", "Hasil Panen"]), 0);
         const luasPanen = parseNum(getVal(row, ["luasPanen", "luas_panen", "Luas Panen"]), 0);
@@ -192,69 +243,82 @@ export async function POST(req: Request) {
         const jenisBiaya = limitStr(getVal(row, ["jenisBiaya", "jenis_biaya", "Jenis Biaya", "Kategori Biaya"]), 50, "Umum");
         const biaya = parseNum(getVal(row, ["biaya", "Biaya", "BIAYA", "Total Biaya"]), 0);
 
-        if (lokasi) {
-          uniqueMap.set(idLokasiHpp, {
-            idLokasiHpp,
+        if (idMaster) {
+          masterSheetsNeeded.set(idMaster, {
             idMaster,
             lokasi,
-            idBudget,
-            periode,
-            tahun,
+            wilayah: "W01",
+            jenisBibit: jenisBibit || "-",
+            kelasBibit: kelasBibit || "-",
+            status: status || "NSSC",
             tanggalRawat,
-            status,
-            jenisBibit,
-            kelasBibit,
-            qtyPanen,
-            luasPanen,
-            luasAktif,
-            group,
-            descGroup,
-            jenisBiaya,
-            biaya,
           });
+        }
+
+        itemsToInsert.push({
+          idLokasiHpp,
+          idMaster,
+          lokasi,
+          idBudget,
+          periode,
+          tahun,
+          tanggalRawat,
+          status,
+          jenisBibit,
+          kelasBibit,
+          qtyPanen,
+          luasPanen,
+          luasAktif,
+          group,
+          descGroup,
+          jenisBiaya,
+          biaya,
+        });
+      }
+
+      // Auto-upsert needed MasterSheet records so foreign key constraint is satisfied
+      for (const ms of Array.from(masterSheetsNeeded.values())) {
+        try {
+          await prisma.masterSheet.upsert({
+            where: { idMaster: ms.idMaster },
+            update: {},
+            create: ms,
+          });
+        } catch (e) {
+          console.error(`MasterSheet auto-create error for ${ms.idMaster}:`, e);
         }
       }
 
-      for (const item of Array.from(uniqueMap.values())) {
+      // Insert each location row with resolved budget
+      for (const item of itemsToInsert) {
         try {
-          // 1. Auto-create masterSheet record if it doesn't exist yet
-          if (item.idMaster) {
-            await prisma.masterSheet.upsert({
-              where: { idMaster: item.idMaster },
-              update: {},
-              create: {
-                idMaster: item.idMaster,
-                lokasi: item.lokasi,
-                wilayah: "W01",
-                jenisBibit: item.jenisBibit || "-",
-                kelasBibit: item.kelasBibit || "-",
-                status: item.status || "NSSC",
-                tanggalRawat: item.tanggalRawat || new Date(),
-              },
-            });
-          }
-
-          // 2. Auto-resolve or create budget record
           let targetIdBudget = item.idBudget;
+          const budgetKey = `${item.periode}_${item.group}_${item.status}`;
+
           if (!targetIdBudget) {
-            const matchedBudget = await prisma.budget.findFirst({
-              where: { periode: item.periode, group: item.group, status: item.status },
-            });
-            if (matchedBudget) {
-              targetIdBudget = matchedBudget.idBudget;
+            if (budgetCache.has(budgetKey)) {
+              targetIdBudget = budgetCache.get(budgetKey)!;
             } else {
-              targetIdBudget = limitStr(`B_AUTO_${item.group}_${item.status}_P${item.periode}`, 20);
-              await prisma.budget.upsert({
-                where: { idBudget: targetIdBudget },
-                update: {},
-                create: {
-                  idBudget: targetIdBudget,
-                  group: item.group,
-                  status: item.status,
-                  periode: item.periode,
-                  budget: 0,
-                },
+              const matchedBudget = await prisma.budget.findFirst({
+                where: { periode: item.periode, group: item.group, status: item.status },
               });
+              if (matchedBudget) {
+                targetIdBudget = matchedBudget.idBudget;
+              } else {
+                targetIdBudget = limitStr(`B_AUTO_${item.group}_${item.status}_P${item.periode}`, 20);
+                await prisma.budget.upsert({
+                  where: { idBudget: targetIdBudget },
+                  update: {},
+                  create: {
+                    idBudget: targetIdBudget,
+                    group: item.group,
+                    status: item.status,
+                    periode: item.periode,
+                    budget: 0,
+                  },
+                });
+              }
+              budgetCache.set(budgetKey, targetIdBudget);
             }
           } else {
             const existBudget = await prisma.budget.findUnique({
@@ -296,19 +360,43 @@ export async function POST(req: Request) {
           });
           count++;
         } catch (e) {
-          console.error(`lokasiHPP error for ${item.idLokasiHpp}:`, e);
+          console.error(`lokasiHPP insert error for ${item.idLokasiHpp}:`, e);
         }
       }
     } else if (category === "aktivitas") {
-      await prisma.aktivitasHPP.deleteMany();
-      const uniqueMap = new Map<string, any>();
+      const itemsToInsert: any[] = [];
+      const timeKey = Date.now().toString(36);
+
+      const providedIds: string[] = [];
+      for (let i = 0; i < data.length; i++) {
+        const rawId = getVal(data[i], ["idAktivitas", "id_aktivitas", "ID Aktivitas", "idaktivitas"]);
+        if (rawId) providedIds.push(limitStr(rawId, 20));
+      }
+
+      const existingIdSet = new Set<string>();
+      if (providedIds.length > 0) {
+        const existing = await prisma.aktivitasHPP.findMany({
+          where: { idAktivitas: { in: providedIds } },
+          select: { idAktivitas: true },
+        });
+        existing.forEach((r) => existingIdSet.add(r.idAktivitas));
+      }
+
+      const masterSheetsNeeded = new Map<string, any>();
 
       for (let i = 0; i < data.length; i++) {
         const row = data[i];
         const rawIdAktivitas = getVal(row, ["idAktivitas", "id_aktivitas", "ID Aktivitas", "idaktivitas"]);
         const lokasi = limitStr(getVal(row, ["lokasi", "Lokasi", "LOKASI", "Kode Lokasi"]), 10);
-        const fallbackIdAct = `ACT_${lokasi}_${i + 1}`;
-        const idAktivitas = limitStr(rawIdAktivitas || fallbackIdAct, 20);
+        if (!lokasi) continue;
+
+        let idAktivitas = rawIdAktivitas ? limitStr(rawIdAktivitas, 20) : "";
+        if (!idAktivitas || existingIdSet.has(idAktivitas)) {
+          const randHex = Math.random().toString(36).substring(2, 5);
+          idAktivitas = `AC_${timeKey}_${(i + 1).toString(36)}_${randHex}`.substring(0, 20);
+        }
+        existingIdSet.add(idAktivitas);
+
         const aktivitas = limitStr(getVal(row, ["aktivitas", "Aktivitas", "Nama Aktivitas", "Pekerjaan"]), 100, "Aktivitas");
         const biaya = parseNum(getVal(row, ["biaya", "Biaya", "BIAYA"]), 0);
         const hasil = parseNum(getVal(row, ["hasil", "Hasil", "HASIL"]), 0);
@@ -326,55 +414,63 @@ export async function POST(req: Request) {
         const rawIdMaster = getVal(row, ["idMaster", "id_master", "ID Master"]);
         const idMaster = limitStr(rawIdMaster || `${lokasi}_${rawatStr}`, 50);
 
-        if (lokasi) {
-          uniqueMap.set(idAktivitas, {
-            idAktivitas,
+        if (idMaster) {
+          masterSheetsNeeded.set(idMaster, {
             idMaster,
             lokasi,
-            aktivitas,
-            biaya,
-            hasil,
-            uom,
-            group,
-            tanggalMulaiRawat,
-            tanggalMulaiTanam,
-            tanggalForcingStandard,
-            rencanaForcing,
-            realForcing,
-            rencanaPanen,
+            wilayah: "W01",
+            jenisBibit: "-",
+            kelasBibit: "-",
+            status: "NSSC",
+            tanggalRawat: tanggalMulaiRawat || new Date(),
           });
+        }
+
+        itemsToInsert.push({
+          idAktivitas,
+          idMaster,
+          lokasi,
+          aktivitas,
+          biaya,
+          hasil,
+          uom,
+          group,
+          tanggalMulaiRawat,
+          tanggalMulaiTanam,
+          tanggalForcingStandard,
+          rencanaForcing,
+          realForcing,
+          rencanaPanen,
+        });
+      }
+
+      // Auto-upsert needed MasterSheet records
+      for (const ms of Array.from(masterSheetsNeeded.values())) {
+        try {
+          await prisma.masterSheet.upsert({
+            where: { idMaster: ms.idMaster },
+            update: {},
+            create: ms,
+          });
+        } catch (e) {
+          console.error(`MasterSheet auto-create error for ${ms.idMaster}:`, e);
         }
       }
 
-      for (const item of Array.from(uniqueMap.values())) {
+      // Insert each activity row
+      for (const item of itemsToInsert) {
         try {
-          if (item.idMaster) {
-            await prisma.masterSheet.upsert({
-              where: { idMaster: item.idMaster },
-              update: {},
-              create: {
-                idMaster: item.idMaster,
-                lokasi: item.lokasi,
-                wilayah: "W01",
-                jenisBibit: "-",
-                kelasBibit: "-",
-                status: "NSSC",
-                tanggalRawat: item.tanggalMulaiRawat || new Date(),
-              },
-            });
-          }
-
           await prisma.aktivitasHPP.create({ data: item });
           count++;
         } catch (e) {
-          console.error(`aktivitasHPP error for ${item.idAktivitas}:`, e);
+          console.error(`aktivitasHPP insert error for ${item.idAktivitas}:`, e);
         }
       }
     }
 
     return NextResponse.json({
       status: "success",
-      message: `Berhasil mengunggah & menyimpan ${count} baris data ${category} ke database PostgreSQL.`,
+      message: `Berhasil memproses & menambahkan/memperbarui ${count} baris data ${category} di database PostgreSQL.`,
       count,
     });
   } catch (error: any) {
