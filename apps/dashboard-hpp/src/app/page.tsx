@@ -78,6 +78,20 @@ export default function DashboardHPPPage() {
     setFilters((prev) => ({ ...prev, ...newFilters }));
   };
 
+  // Handler memilih lokasi dan auto smooth-scroll langsung ke detail drilldown
+  const handleSelectLokasi = (code: string) => {
+    setSelectedLokasiCode(code);
+    setTimeout(() => {
+      const el = document.getElementById("detail-drilldown-section");
+      if (el) {
+        // Offset aman (-185px) agar detail tidak tertutup oleh sticky header (80px) + sticky main filter (~75px)
+        const yOffset = -185;
+        const y = el.getBoundingClientRect().top + window.pageYOffset + yOffset;
+        window.scrollTo({ top: Math.max(0, y), behavior: "smooth" });
+      }
+    }, 120);
+  };
+
   // Extract available Cost Group options with desc_group column data from lokasiHPP
   const availableGroupOptions = useMemo<CostGroupOption[]>(() => {
     const groupMap: Record<string, string> = {};
@@ -514,7 +528,7 @@ export default function DashboardHPPPage() {
         </section>
 
         {/* PRD Section 10: Daftar Lokasi Table */}
-        <section suppressHydrationWarning>
+        <section id="daftar-lokasi-section" className="scroll-mt-48 sm:scroll-mt-52" suppressHydrationWarning>
           <HppLokasiTable
             data={filteredLokasiList}
             loading={loading}
@@ -522,19 +536,24 @@ export default function DashboardHPPPage() {
             onWilayahFilterChange={(w) => handleFilterChange({ wilayahFilter: w })}
             reportFilter={filters.reportFilter}
             selectedLokasiCode={selectedLokasiCode}
-            onSelectLokasi={(code) => setSelectedLokasiCode(code)}
+            onSelectLokasi={handleSelectLokasi}
           />
         </section>
 
         {/* PRD Section 11, 12, 13: Detail Lokasi, Group Cost Table & Aktivitas Table */}
         {selectedLokasiCode && (
-          <section className="pt-2 animate-in fade-in duration-300" suppressHydrationWarning>
+          <section
+            id="detail-drilldown-section"
+            className="pt-2 animate-in fade-in duration-300 scroll-mt-48 sm:scroll-mt-52"
+            suppressHydrationWarning
+          >
             <HppLocationDetailDrilldown
               lokasiCode={selectedLokasiCode}
               lokasiItems={selectedLokasiItems}
               aktivitasItems={rawAktivitasList}
               budgetItems={rawBudgetList}
               reportFilter={filters.reportFilter}
+              onClose={() => setSelectedLokasiCode(null)}
             />
           </section>
         )}

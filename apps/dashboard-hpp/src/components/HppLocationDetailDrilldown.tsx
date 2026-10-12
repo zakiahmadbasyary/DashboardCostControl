@@ -10,6 +10,8 @@ import {
   ChevronRight,
   ChevronLeft,
   CheckCircle2,
+  X,
+  ArrowUp,
 } from "lucide-react";
 import { LokasiHppItem } from "@/components/HppLokasiTable";
 
@@ -44,6 +46,7 @@ interface HppLocationDetailDrilldownProps {
   aktivitasItems: AktivitasHppItem[];
   budgetItems: BudgetItem[];
   reportFilter: "rp_kg" | "rp_ha";
+  onClose?: () => void;
 }
 
 export default function HppLocationDetailDrilldown({
@@ -52,6 +55,7 @@ export default function HppLocationDetailDrilldown({
   aktivitasItems,
   budgetItems,
   reportFilter,
+  onClose,
 }: HppLocationDetailDrilldownProps) {
   const [selectedGroup, setSelectedGroup] = useState<string | null>(null);
   const [aktCurrentPage, setAktCurrentPage] = useState<number>(1);
@@ -235,11 +239,36 @@ export default function HppLocationDetailDrilldown({
             </div>
           </div>
 
-          <div className="flex items-center gap-2 text-xs font-bold bg-white/15 px-3 py-1.5 rounded-xl border border-white/20">
-            <Sprout className="w-4 h-4 text-[#A8D437]" />
-            <span className="capitalize">{jenisBibit}</span>
-            <span>•</span>
-            <span className="capitalize">Kelas: {kelasBibit}</span>
+          <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 text-xs font-bold bg-white/15 px-3 py-1.5 rounded-xl border border-white/20">
+              <Sprout className="w-4 h-4 text-[#A8D437]" />
+              <span className="capitalize">{jenisBibit}</span>
+              <span>•</span>
+              <span className="capitalize">Kelas: {kelasBibit}</span>
+            </div>
+
+            {onClose && (
+              <button
+                type="button"
+                onClick={() => {
+                  onClose();
+                  setTimeout(() => {
+                    const tableEl = document.getElementById("daftar-lokasi-section");
+                    if (tableEl) {
+                      const yOffset = -185;
+                      const y = tableEl.getBoundingClientRect().top + window.pageYOffset + yOffset;
+                      window.scrollTo({ top: Math.max(0, y), behavior: "smooth" });
+                    }
+                  }, 50);
+                }}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/20 hover:bg-white/30 text-white text-xs font-bold transition-all cursor-pointer border border-white/20 shadow-2xs"
+                title="Tutup Detail & Kembali ke Tabel"
+              >
+                <ArrowUp className="w-3.5 h-3.5" />
+                <span className="hidden sm:inline">Tutup Detail</span>
+                <X className="w-3.5 h-3.5 sm:hidden" />
+              </button>
+            )}
           </div>
         </div>
 

@@ -169,7 +169,7 @@ export default function HppMainFilters({
             <select
               value={localFilters.periodeFilter}
               onChange={(e) => handleChange("periodeFilter", Number(e.target.value))}
-              className="w-full bg-[#F7F9F7] border border-[#DDE5DF] rounded-lg px-2.5 py-1.5 text-xs text-[#17231B] focus:outline-none focus:border-[#16823B] transition-colors cursor-pointer font-bold"
+              className="w-full bg-[#F7F9F7] border border-[#DDE5DF] rounded-lg px-2.5 py-1.5 text-xs text-[#17231B] focus:outline-none focus:border-[#16823B] transition-colors cursor-pointer font-medium"
             >
               {MONTH_NAMES.map((name, index) => (
                 <option key={index + 1} value={index + 1}>
@@ -185,7 +185,7 @@ export default function HppMainFilters({
             <select
               value={localFilters.tahunFilter}
               onChange={(e) => handleChange("tahunFilter", Number(e.target.value))}
-              className="w-full bg-[#F7F9F7] border border-[#DDE5DF] rounded-lg px-2.5 py-1.5 text-xs text-[#17231B] focus:outline-none focus:border-[#16823B] transition-colors cursor-pointer font-bold"
+              className="w-full bg-[#F7F9F7] border border-[#DDE5DF] rounded-lg px-2.5 py-1.5 text-xs text-[#17231B] focus:outline-none focus:border-[#16823B] transition-colors cursor-pointer font-medium"
             >
               {availableTahunOptions.map((yr) => (
                 <option key={yr} value={yr}>
@@ -353,7 +353,7 @@ export default function HppMainFilters({
                 <select
                   value={localFilters.periodeFilter}
                   onChange={(e) => handleChange("periodeFilter", Number(e.target.value))}
-                  className="w-full bg-[#F7F9F7] border border-[#DDE5DF] rounded-xl px-3 py-2.5 text-xs text-[#17231B] focus:outline-none focus:border-[#16823B] transition-colors cursor-pointer font-bold"
+                  className="w-full bg-[#F7F9F7] border border-[#DDE5DF] rounded-xl px-3 py-2.5 text-xs text-[#17231B] focus:outline-none focus:border-[#16823B] transition-colors cursor-pointer"
                 >
                   {MONTH_NAMES.map((name, index) => (
                     <option key={index + 1} value={index + 1}>
@@ -369,7 +369,7 @@ export default function HppMainFilters({
                 <select
                   value={localFilters.tahunFilter}
                   onChange={(e) => handleChange("tahunFilter", Number(e.target.value))}
-                  className="w-full bg-[#F7F9F7] border border-[#DDE5DF] rounded-xl px-3 py-2.5 text-xs text-[#17231B] focus:outline-none focus:border-[#16823B] transition-colors cursor-pointer font-bold"
+                  className="w-full bg-[#F7F9F7] border border-[#DDE5DF] rounded-xl px-3 py-2.5 text-xs text-[#17231B] focus:outline-none focus:border-[#16823B] transition-colors cursor-pointer"
                 >
                   {availableTahunOptions.map((yr) => (
                     <option key={yr} value={yr}>

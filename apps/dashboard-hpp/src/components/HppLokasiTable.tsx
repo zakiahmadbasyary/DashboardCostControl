@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { Search, MapPin, Filter, CheckCircle2, ChevronRight, ChevronLeft, Calendar } from "lucide-react";
+import { Search, MapPin, Filter, CheckCircle2, ChevronRight, ChevronLeft, Calendar, ArrowDown } from "lucide-react";
 
 export interface LokasiHppItem {
   idLokasiHpp: string;
@@ -220,7 +220,7 @@ export default function HppLokasiTable({
           <div>
             <h3 className="font-bold text-base text-[#17231B]">Tabel Daftar Lokasi HPP (Per Siklus Tanam)</h3>
             <p className="text-xs text-[#5F6B63]">
-              Pilih salah satu baris siklus lokasi untuk melihat rincian detail, Group Cost, dan aktivitas.
+              Pilih salah satu siklus lokasi untuk langsung diarahkan (direct scroll) ke rincian detail drilldown.
             </p>
           </div>
         </div>
@@ -282,7 +282,7 @@ export default function HppLokasiTable({
                   <th className="py-3 px-4 text-center">% Taksasi</th>
                   <th className="py-3 px-4 text-right">Yield (Ton/Ha)</th>
                   <th className="py-3 px-4 text-right">{isRpKg ? "HPP (Rp/Kg)" : "HPP (Rp/Ha)"}</th>
-                  <th className="py-3 px-4 text-center">Status Select</th>
+                  <th className="py-3 px-4 text-center">Aksi</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-[#DDE5DF]/60">
@@ -344,14 +344,25 @@ export default function HppLokasiTable({
                         {formatNumber(hppVal, 0)}
                       </td>
 
-                      {/* 6. Status Select */}
+                      {/* 6. Aksi / Status Select */}
                       <td className="py-3 px-4 text-center">
                         {isSelected ? (
-                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-[#16823B] text-white text-[10px] font-bold">
-                            <CheckCircle2 className="w-3 h-3" /> Selected
+                          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#16823B] text-white text-[10px] font-bold shadow-2xs">
+                            <CheckCircle2 className="w-3.5 h-3.5" /> Terpilih
                           </span>
                         ) : (
-                          <span className="text-[10px] text-[#89938D]">Klik pilih</span>
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              onSelectLokasi(loc.idMaster);
+                            }}
+                            className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-[#16823B]/10 hover:bg-[#16823B] text-[#16823B] hover:text-white border border-[#16823B]/20 text-[10px] font-bold transition-all shadow-2xs cursor-pointer group"
+                            title="Pilih lokasi & lihat detail drilldown"
+                          >
+                            <span>Detail</span>
+                            <ArrowDown className="w-3 h-3 group-hover:translate-y-0.5 transition-transform" />
+                          </button>
                         )}
                       </td>
                     </tr>
