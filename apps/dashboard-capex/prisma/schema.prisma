@@ -1,0 +1,216 @@
+// Prisma Schema for Dashboard CAPEX (Cost Control Platform)
+// Berdasarkan rancangan skema yang sudah dikonfirmasi — versi final
+// Semua relasi ke FK "SOFT" dikelola di level aplikasi, bukan DB constraint
+// karena data ETL dari Excel bisa tidak selalu konsisten referensial.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ─────────────────────────────────────────────
+// ENUM
+// ─────────────────────────────────────────────
+
+enum BudgetStatus {
+  in_process @map("in process")
+  approved
+
+  @@map("budget_status")
+}
+
+enum StatusCapex {
+  Belum_Created  @map("Belum Created")
+  Sudah_Created  @map("Sudah Created")
+  Final_Approve  @map("Final Approve")
+  Sudah_PO       @map("Sudah PO")
+  Sudah_Close    @map("Sudah Close")
+
+  @@map("status_capex")
+}
+
+// ─────────────────────────────────────────────
+// TABEL MASTER
+// ─────────────────────────────────────────────
+
+/// Master grup purchasing (PGR)
+model Purchasing {
+  pgr         String  @id @map("pgr")
+  description String? @map("description")
+  telephone   String? @map("telephone")
+  faxNumber   String? @map("fax_number")
+
+  // Relasi (SOFT di level aplikasi — tidak enforce FK ke po.pgr secara hard karena ETL)
+  poList Po[]
+
+  @@map("purchasing")
+}
+
+/// Master informasi CAPEX — capex_no dikonfirmasi unique sebagai PK
+model Kategori {
+  capexNo     String  @id @map("capex_no")
+  description String? @map("description")
+  costCenter  String? @map("cost_center")
+  kategori    String? @map("kategori")
+  komoditi    String? @map("komoditi")
+
+  // Relasi SOFT ke created (tidak semua capex_no di created ada di tabel ini)
+  createdList Created[]
+
+  @@map("kategori")
+}
+
+/// Master approver — kolom `pending` tidak disimpan, dihitung via query
+model UserApprover {
+  kodeApprover String @id @map("kode_approver")
+  nama         String? @map("nama")
+
+  // pending dihitung: SELECT COUNT(*) FROM created WHERE kode_approver = ? AND budget_status = 'in process'
+  createdList Created[]
+
+  @@map("user_approver")
+}
+
+// ─────────────────────────────────────────────
+// TABEL TRANSAKSIONAL
+// ─────────────────────────────────────────────
+
+/// Data PR/PO dari sumber — nomor_pr dikonfirmasi unique sebagai PK
+model Po {
+  nomorPr       String        @id @map("nomor_pr")
+  keterangan    String?       @map("keterangan")
+  quantity      Decimal?      @map("quantity")        @db.Decimal(15, 4)
+  unitOfMeasure String?       @map("unit_of_measure")
+  valuationPrice Decimal?     @map("valuation_price") @db.Decimal(18, 2)
+  total         Decimal?      @map("total")           @db.Decimal(18, 2) // dari sumber — tidak dihitung ulang
+  requestDate   DateTime?     @map("request_date")    @db.Date
+  pgr           String?       @map("pgr")             // FK SOFT ke purchasing.pgr
+  noPo          String?       @map("no_po")
+
+  // Relasi ke Purchasing (optional — SOFT karena ETL bisa belum lengkap)
+  purchasing    Purchasing?   @relation(fields: [pgr], references: [pgr])
+
+  // Relasi ke Total (1:1 optional — nomorPr disimpan di total.nomor_pr)
+  total_record  Total?
+
+  @@map("po")
+}
+
+/// Data anggaran CAPEX dari sumber — setiap baris dipertahankan, tidak pernah dihapus/digabung
+/// Baris dengan capex_no = NULL tetap baris mandiri tersendiri
+model Budget {
+  idBudget      BigInt        @id @default(autoincrement()) @map("id_budget")
+  idTotal       BigInt?       @map("id_total")       // FK SOFT ke total.id_total; nullable sebelum rekonsiliasi
+  io            String?       @map("io")
+  mo            String?       @map("mo")
+  wbs           String?       @map("wbs")
+  description   String?       @map("description")
+  costCenter    String?       @map("cost_center")
+  quantity      Decimal?      @map("quantity")        @db.Decimal(15, 4)
+  amount        Decimal?      @map("amount")          @db.Decimal(18, 2)
+  groupCapex    String?       @map("group_capex")
+  capexNo       String?       @map("capex_no")       // Boleh NULL; NULL bukan kunci penggabungan
+  kategori      String?       @map("kategori")
+  komoditi      String?       @map("komoditi")
+  budgetStatus  BudgetStatus? @map("budget_status")
+
+  // Relasi SOFT ke total (diisi setelah rekonsiliasi)
+  totalRecord   Total?        @relation(fields: [idTotal], references: [idTotal])
+
+  @@map("budget")
+}
+
+/// Data pengajuan/approval CAPEX — setiap baris punya identitas sendiri
+/// capex_no boleh duplikat. Kolom nama/kategori/komoditi = audit historis (disengaja)
+model Created {
+  idCreated     BigInt        @id @default(autoincrement()) @map("id_created")
+  idTotal       BigInt?       @map("id_total")       // FK SOFT ke total.id_total; nullable sebelum rekonsiliasi
+  capexNo       String?       @map("capex_no")       // Boleh duplikat; SOFT ref ke kategori.capex_no
+  type          String?       @map("type")           // WBS / order / MO
+  requestor     String?       @map("requestor")
+  reqDate       DateTime?     @map("req_date")       @db.Date // kunci pemilihan baris representatif (terlama)
+  budgetType    String?       @map("budget_type")
+  io            String?       @map("io")
+  mo            String?       @map("mo")
+  wbs           String?       @map("wbs")
+  costCenter    String?       @map("cost_center")
+  quantity      Decimal?      @map("quantity")        @db.Decimal(15, 4)
+  amount        Decimal?      @map("amount")          @db.Decimal(18, 2)
+  description   String?       @map("description")
+  kodeApprover  String?       @map("kode_approver")  // SOFT ref ke user_approver.kode_approver
+  nama          String?       @map("nama")            // AUDIT HISTORIS — nilai saat input, tidak diupdate
+  dateApprove   DateTime?     @map("date_approve")   @db.Date
+  noPr          String?       @map("no_pr")           // = po.nomor_pr; dipakai untuk isi total.nomor_pr
+  orderNo       String?       @map("order_no")
+  notes         String?       @map("notes")
+  budgetStatus  BudgetStatus? @map("budget_status")
+  kategori      String?       @map("kategori")       // AUDIT HISTORIS — nilai saat input, tidak diupdate
+  komoditi      String?       @map("komoditi")       // AUDIT HISTORIS — nilai saat input, tidak diupdate
+
+  // Relasi SOFT ke Total (diisi setelah rekonsiliasi)
+  totalRecord   Total?        @relation(fields: [idTotal], references: [idTotal])
+
+  // Relasi SOFT ke UserApprover (nullable — approver boleh belum terdaftar saat import historis)
+  approver      UserApprover? @relation(fields: [kodeApprover], references: [kodeApprover])
+
+  // Relasi SOFT ke Kategori (nullable — tidak semua capex_no di created ada di kategori)
+  kategoriRef   Kategori?     @relation(fields: [capexNo], references: [capexNo])
+
+  @@map("created")
+}
+
+// ─────────────────────────────────────────────
+// TABEL REKONSILIASI
+// ─────────────────────────────────────────────
+
+/// Entitas rekonsiliasi logis Budget + Created.
+/// Tabel fisik (bukan view) agar status manual "Sudah Close" bisa disimpan permanen.
+/// Status_capex dihitung berdasarkan business rule; is_manually_closed mencegah override otomatis.
+///
+/// Aturan prioritas status_capex:
+///   1. Sudah Close  — is_manually_closed = true (manual admin, tidak bisa ditimpa)
+///   2. Sudah PO     — nomor_pr TIDAK NULL && io TIDAK NULL && wbs NULL && mo NULL
+///   3. Final Approve — budget_status = 'approved'
+///   4. Sudah Created — capex_no TIDAK NULL && budget_status = 'in process'
+///   5. Belum Created — capex_no NULL && budget_status NULL
+///   — NULL           — semua kondisi lain (ambigu)
+model Total {
+  idTotal           BigInt        @id @default(autoincrement()) @map("id_total")
+  nomorPr           String?       @unique @map("nomor_pr")      // 1:1 optional ke po; diisi otomatis dari created.no_pr
+  capexNo           String?       @map("capex_no")              // Dari created; NULL jika tidak ada
+  description       String?       @map("description")           // Prioritas: created → budget
+  budgetType        String?       @map("budget_type")           // Dari created
+  budgetStatus      BudgetStatus? @map("budget_status")         // Prioritas: created → budget
+  reqDate           DateTime?     @map("req_date")              @db.Date // Dari created (baris terlama)
+  quantity          Decimal?      @map("quantity")              @db.Decimal(15, 4) // Prioritas: created → budget
+  amount            Decimal?      @map("amount")                @db.Decimal(18, 2) // Prioritas: budget → created
+  costCenter        String?       @map("cost_center")           // Prioritas: created → budget
+  io                String?       @map("io")                    // Prioritas: created → budget
+  mo                String?       @map("mo")                    // Prioritas: created → budget
+  wbs               String?       @map("wbs")                   // Prioritas: created → budget
+  statusCapex       StatusCapex?  @map("status_capex")          // Dihitung oleh business rule
+  tahun             Int?          @map("tahun")                 @db.SmallInt // Disimpan; dari EXTRACT(YEAR FROM req_date)
+  komoditi          String?       @map("komoditi")              // Prioritas: created → budget
+
+  // Audit trail untuk status manual "Sudah Close"
+  isManuallyClose   Boolean       @default(false) @map("is_manually_closed") // Guard: jika true, rekonsiliasi skip baris ini
+  closedAt          DateTime?     @map("closed_at")             // Waktu admin menutup CAPEX
+  closedBy          String?       @map("closed_by")             // Identitas admin yang menutup
+
+  // Timestamps
+  createdAt         DateTime      @default(now()) @map("created_at")
+  updatedAt         DateTime      @updatedAt      @map("updated_at")
+
+  // Relasi ke sumber data
+  budgetList        Budget[]      // 1:N — baris budget yang dikelompokkan ke total ini
+  createdList       Created[]     // 1:N — baris created yang dikelompokkan ke total ini
+
+  // Relasi ke PO (1:1 optional via nomorPr)
+  po                Po?           @relation(fields: [nomorPr], references: [nomorPr])
+
+  @@map("total")
+}

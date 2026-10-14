@@ -1,9 +1,9 @@
-import type { Metadata } from "next";
+﻿import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Dashboard Capex | Capital Expenditure",
-  description: "Modul Manajemen & Pengawasan Belanja Modal (Capital Expenditure)",
+  title: "Dashboard CAPEX | Capital Expenditure",
+  description: "Modul Manajemen & Pengawasan Belanja Modal (Capital Expenditure) - GGF AgroMetric",
   icons: {
     icon: "/logo.png",
     shortcut: "/logo.png",
@@ -13,8 +13,10 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="id">
-      <body className="antialiased min-h-screen bg-slate-950 text-slate-100">{children}</body>
+    <html lang="id" suppressHydrationWarning>
+      <body className="antialiased min-h-screen bg-[#F7F9F7] text-[#17231B]" suppressHydrationWarning>
+        {children}
+      </body>
     </html>
   );
 }
