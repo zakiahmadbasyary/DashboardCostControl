@@ -319,7 +319,7 @@ export default function CapexDetailCard({
             </span>
           </div>
 
-          <div className="overflow-x-auto max-h-[220px]">
+          <div className="overflow-x-auto">
             {!selectedItem.createdList || selectedItem.createdList.length === 0 ? (
               <div className="py-8 text-center text-[#89938D] text-xs">
                 <Inbox className="w-6 h-6 text-[#DDE5DF] mx-auto mb-1.5" />
@@ -328,7 +328,7 @@ export default function CapexDetailCard({
             ) : (
               <table className="w-full text-left text-xs min-w-[420px]">
                 <thead>
-                  <tr className="bg-[#FAFCFB] text-[#5F6B63] border-b border-[#E8EFE9] sticky top-0 z-10">
+                  <tr className="bg-[#FAFCFB] text-[#5F6B63] border-b border-[#E8EFE9]">
                     <th className="py-2 px-3 font-semibold text-[10px] uppercase w-[160px]">
                       Approver
                     </th>

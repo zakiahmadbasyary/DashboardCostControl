@@ -240,6 +240,9 @@ export default function CapexAdminUploadPage() {
             <li>
               <strong>Auto-Reconciliation:</strong> Tabel <span className="font-semibold text-[#17231B]">Total</span> akan otomatis direkonsiliasi setelah upload Created/PO/Budget selesai. Status manual <span className="font-semibold text-emerald-700">Sudah Close</span> tetap dipertahankan.
             </li>
+            <li>
+              <strong>Auto-Sync Master:</strong> Jika pada file <span className="font-semibold text-[#17231B]">Created</span> terdapat <em>kode approver</em> atau <em>capex_no</em> yang belum terdaftar, sistem akan otomatis mendaftarkannya ke tabel <span className="font-semibold text-[#17231B]">User Approver</span> dan <span className="font-semibold text-[#17231B]">Kategori</span>.
+            </li>
           </ul>
         </div>
       </div>

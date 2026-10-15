@@ -69,8 +69,8 @@ model UserApprover {
   kodeApprover String @id @map("kode_approver")
   nama         String? @map("nama")
 
-  // pending dihitung: SELECT COUNT(*) FROM created WHERE kode_approver = ? AND budget_status = 'in process'
-  createdList Created[]
+  // pending dihitung: SELECT COUNT(*) FROM created WHERE kode_approver = ? AND date_approve IS NULL
+  createdList  Created[]
 
   @@map("user_approver")
 }

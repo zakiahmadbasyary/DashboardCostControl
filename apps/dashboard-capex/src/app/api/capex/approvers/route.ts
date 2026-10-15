@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
-import { BudgetStatus } from "@prisma/client";
 
 export async function GET() {
   try {
@@ -12,10 +11,7 @@ export async function GET() {
       include: {
         createdList: {
           where: {
-            OR: [
-              { dateApprove: null },
-              { budgetStatus: BudgetStatus.in_process },
-            ],
+            dateApprove: null,
           },
           orderBy: {
             reqDate: "asc",

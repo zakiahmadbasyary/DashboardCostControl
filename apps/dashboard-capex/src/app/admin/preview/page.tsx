@@ -161,25 +161,43 @@ export default function CapexAdminPreviewPage() {
               <tbody className="divide-y divide-[#DDE5DF]/60">
                 {tableData.map((row, idx) => (
                   <tr key={idx} className="hover:bg-[#F7F9F7]/60 transition-colors">
-                    {Object.entries(row).map(([colName, cellVal], cellIdx) => (
-                      <td key={cellIdx} className="py-2.5 px-3.5 whitespace-nowrap text-[#17231B]">
-                        {cellVal === null || cellVal === undefined ? (
-                          <span className="text-[#89938D] italic">-</span>
-                        ) : typeof cellVal === "boolean" ? (
-                          <span
-                            className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
-                              cellVal ? "bg-emerald-100 text-emerald-800" : "bg-gray-100 text-gray-700"
-                            }`}
-                          >
-                            {cellVal ? "Ya" : "Tidak"}
-                          </span>
-                        ) : typeof cellVal === "string" && cellVal.length > 40 ? (
-                          <span title={cellVal}>{cellVal.slice(0, 40)}...</span>
-                        ) : (
-                          String(cellVal)
-                        )}
-                      </td>
-                    ))}
+                    {Object.entries(row).map(([colName, cellVal], cellIdx) => {
+                      const isDateCol = /date|approve|closed|created_at|updated_at/i.test(colName);
+                      const isIsoDate = typeof cellVal === "string" && /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/.test(cellVal);
+
+                      return (
+                        <td key={cellIdx} className="py-2.5 px-3.5 whitespace-nowrap text-[#17231B]">
+                          {cellVal === null || cellVal === undefined ? (
+                            <span className="text-[#89938D] italic">-</span>
+                          ) : typeof cellVal === "boolean" ? (
+                            <span
+                              className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
+                                cellVal ? "bg-emerald-100 text-emerald-800" : "bg-gray-100 text-gray-700"
+                              }`}
+                            >
+                              {cellVal ? "Ya" : "Tidak"}
+                            </span>
+                          ) : isIsoDate || (isDateCol && typeof cellVal === "string" && /^\d{4}-\d{2}-\d{2}/.test(cellVal)) ? (
+                            (() => {
+                              const d = new Date(String(cellVal));
+                              if (isNaN(d.getTime())) return String(cellVal);
+                              const day = String(d.getUTCDate()).padStart(2, "0");
+                              const month = String(d.getUTCMonth() + 1).padStart(2, "0");
+                              const year = d.getUTCFullYear();
+                              return (
+                                <span className="font-mono text-emerald-800 bg-emerald-50 px-1.5 py-0.5 rounded text-[11px] font-medium border border-emerald-200">
+                                  {`${day}/${month}/${year}`}
+                                </span>
+                              );
+                            })()
+                          ) : typeof cellVal === "string" && cellVal.length > 40 ? (
+                            <span title={cellVal}>{cellVal.slice(0, 40)}...</span>
+                          ) : (
+                            String(cellVal)
+                          )}
+                        </td>
+                      );
+                    })}
                   </tr>
                 ))}
               </tbody>

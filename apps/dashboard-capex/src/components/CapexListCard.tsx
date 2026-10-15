@@ -23,7 +23,7 @@ interface CapexListCardProps {
   onRetry: () => void;
 }
 
-const ITEMS_PER_PAGE = 8;
+const ITEMS_PER_PAGE = 12;
 
 export default function CapexListCard({
   items,
