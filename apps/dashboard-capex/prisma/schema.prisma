@@ -116,7 +116,6 @@ model Budget {
   capexNo       String?       @map("capex_no")       // Boleh NULL; NULL bukan kunci penggabungan
   kategori      String?       @map("kategori")
   komoditi      String?       @map("komoditi")
-  budgetStatus  BudgetStatus? @map("budget_status")
 
   // Relasi SOFT ke total (diisi setelah rekonsiliasi)
   totalRecord   Total?        @relation(fields: [idTotal], references: [idTotal])

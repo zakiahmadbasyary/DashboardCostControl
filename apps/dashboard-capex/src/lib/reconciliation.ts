@@ -131,7 +131,7 @@ export async function runCapexReconciliation() {
       // Extract fields with priority
       const description = cRep?.description || bRep?.description || null;
       const budgetType = cRep?.budgetType || null;
-      const budgetStatus = cRep?.budgetStatus || bRep?.budgetStatus || null;
+      const budgetStatus = cRep?.budgetStatus || null;
       const reqDate = cRep?.reqDate || null;
       const quantity = cRep?.quantity ?? bRep?.quantity ?? null;
       
@@ -207,7 +207,7 @@ export async function runCapexReconciliation() {
     // 6. Standalone Budget rows with no capexNo
     for (const b of budgetWithoutCapex) {
       const description = b.description || null;
-      const budgetStatus = b.budgetStatus || null;
+      const budgetStatus = null;
       const quantity = b.quantity || null;
       const amount = b.amount || null;
       const costCenter = b.costCenter || null;
@@ -216,12 +216,7 @@ export async function runCapexReconciliation() {
       const wbs = b.wbs || null;
       const komoditi = b.komoditi || null;
 
-      let statusCapex: StatusCapex = StatusCapex.Belum_Created;
-      if (budgetStatus === BudgetStatus.approved) {
-        statusCapex = StatusCapex.Final_Approve;
-      } else if (budgetStatus === BudgetStatus.in_process) {
-        statusCapex = StatusCapex.Sudah_Created;
-      }
+      const statusCapex: StatusCapex = StatusCapex.Belum_Created;
 
       const tahun = new Date().getFullYear();
 

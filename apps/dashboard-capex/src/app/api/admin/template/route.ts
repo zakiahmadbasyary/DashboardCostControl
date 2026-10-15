@@ -71,7 +71,6 @@ export async function GET(request: NextRequest) {
             capex_no: "CAP-2025-001",
             kategori: "Infrastruktur",
             komoditi: "Bangunan",
-            budget_status: "approved",
           },
         ];
         break;

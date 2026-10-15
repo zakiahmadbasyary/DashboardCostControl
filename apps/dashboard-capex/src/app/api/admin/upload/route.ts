@@ -260,7 +260,6 @@ export async function POST(request: NextRequest) {
           const capexNo = String(getVal(row, ["capex_no", "capexno", "no_capex"]) || "").trim() || null;
           const kategoriVal = String(getVal(row, ["kategori", "category"]) || "").trim() || null;
           const komoditiVal = String(getVal(row, ["komoditi", "commodity"]) || "").trim() || null;
-          const budgetStatus = parseBudgetStatus(getVal(row, ["budget_status", "budgetstatus", "status_budget"]));
 
           if (!io && !mo && !wbs && !description && !capexNo) return null;
 
@@ -276,7 +275,6 @@ export async function POST(request: NextRequest) {
             capexNo,
             kategori: kategoriVal,
             komoditi: komoditiVal,
-            budgetStatus,
           };
         })
         .filter((item): item is NonNullable<typeof item> => item !== null);
