@@ -232,7 +232,7 @@ export default function UserApproverSection({
             <div className="flex items-center gap-2">
               <Clock className="w-4 h-4 text-[#b45309]" />
               <div>
-                <h3 className="font-bold text-xs sm:text-sm text-[#17231B]  tracking-wide">
+                <h3 className="font-bold text-xs sm:text-sm text-[#17231B] tracking-wide">
                   Daftar CAPEX Pending
                 </h3>
                 {selectedApprover && (
