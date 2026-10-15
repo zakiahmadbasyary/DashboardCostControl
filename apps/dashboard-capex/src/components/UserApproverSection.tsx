@@ -60,24 +60,26 @@ export default function UserApproverSection({
   return (
     <section className="space-y-4 font-sans" suppressHydrationWarning>
       {/* ── SECTION HEADER ── */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 pb-2 border-b border-[#DDE5DF]">
-        <div className="flex items-center gap-2.5">
-          <div className="p-2 rounded-xl bg-[#16823B]/10 text-[#16823B] shrink-0">
-            <UserCheck className="w-5 h-5" />
+      <div className="flex items-center gap-2.5">
+        <div className="p-2 rounded-lg bg-[#16823B]/10 text-[#16823B] shrink-0">
+          <UserCheck className="w-4 h-4" />
+        </div>
+        <div>
+          <div className="flex items-center gap-2">
+            <h3 className="font-bold text-base text-[#17231B]">
+              Area User Approver & Tracking Pending CAPEX
+            </h3>
+            <span className="text-[10px] bg-[#FEF6E5] text-[#b45309] border border-[#FCDFA8] px-2 py-0.5 rounded-full font-semibold">
+              {totalPendingAcrossAll} Pending Total
+            </span>
           </div>
-          <div>
-            <div className="flex items-center gap-2">
-              <h2 className="text-base sm:text-lg font-extrabold text-[#17231B] tracking-tight">
-                Area User Approver & Tracking Pending CAPEX
-              </h2>
-              <span className="text-[10px] bg-[#FEF6E5] text-[#b45309] border border-[#FCDFA8] px-2.5 py-0.5 rounded-full font-bold">
-                {totalPendingAcrossAll} Pending Total
-              </span>
-            </div>
-            <p className="text-xs text-[#5F6B63]">
-              Bagian ini <strong className="text-[#17231B]">independen dari Main Filter</strong>. Menampilkan seluruh data approval per pejabat yang berwenang.
-            </p>
-          </div>
+          <p className="text-xs text-[#5F6B63]">
+            Bagian ini{" "}
+            <span className="font-semibold text-[#16823B]">
+              independen dari Main Filter
+            </span>
+            . Menampilkan seluruh data approval per approver yang berwenang.
+          </p>
         </div>
       </div>
 
@@ -109,12 +111,12 @@ export default function UserApproverSection({
           <div className="flex items-center justify-between pb-3 border-b border-[#E8EFE9] gap-2">
             <div className="flex items-center gap-2">
               <Users className="w-4 h-4 text-[#16823B]" />
-              <h3 className="font-bold text-xs sm:text-sm text-[#17231B] uppercase tracking-wide">
+              <h3 className="font-bold text-xs sm:text-sm text-[#17231B] tracking-wide">
                 Daftar User Approver
               </h3>
             </div>
             <span className="text-[10px] text-[#89938D] font-medium">
-              {approvers.length} Pejabat
+              {approvers.length} approver
             </span>
           </div>
 
@@ -230,7 +232,7 @@ export default function UserApproverSection({
             <div className="flex items-center gap-2">
               <Clock className="w-4 h-4 text-[#b45309]" />
               <div>
-                <h3 className="font-bold text-xs sm:text-sm text-[#17231B] uppercase tracking-wide">
+                <h3 className="font-bold text-xs sm:text-sm text-[#17231B]  tracking-wide">
                   Daftar CAPEX Pending
                 </h3>
                 {selectedApprover && (
@@ -327,11 +329,6 @@ export default function UserApproverSection({
                           <div className="font-medium text-[#17231B] text-xs line-clamp-2">
                             {p.description || "—"}
                           </div>
-                          {p.notes && (
-                            <div className="text-[10px] text-[#b45309] mt-0.5 italic truncate">
-                              Catatan: {p.notes}
-                            </div>
-                          )}
                         </td>
 
                         {/* 3. Price */}
