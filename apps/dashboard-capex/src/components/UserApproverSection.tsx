@@ -110,7 +110,7 @@ export default function UserApproverSection({
             <div className="flex items-center gap-2">
               <Users className="w-4 h-4 text-[#16823B]" />
               <h3 className="font-bold text-xs sm:text-sm text-[#17231B] uppercase tracking-wide">
-                4.1 Daftar User Approver
+                Daftar User Approver
               </h3>
             </div>
             <span className="text-[10px] text-[#89938D] font-medium">
@@ -231,7 +231,7 @@ export default function UserApproverSection({
               <Clock className="w-4 h-4 text-[#b45309]" />
               <div>
                 <h3 className="font-bold text-xs sm:text-sm text-[#17231B] uppercase tracking-wide">
-                  4.2 Daftar CAPEX Pending
+                  Daftar CAPEX Pending
                 </h3>
                 {selectedApprover && (
                   <p className="text-[11px] text-[#5F6B63]">

@@ -75,3 +75,9 @@ export interface UserApproverItem {
   pendingCount: number;
   pendingItems: PendingCapexItem[];
 }
+
+export interface CapexMainFilterValues {
+  kategori: string;
+  costCenter: string;
+  statusCapex: string;
+}

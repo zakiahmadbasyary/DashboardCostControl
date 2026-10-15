@@ -6,23 +6,23 @@ import CapexMainFilters from "@/components/CapexMainFilters";
 import CapexListCard from "@/components/CapexListCard";
 import CapexDetailCard from "@/components/CapexDetailCard";
 import UserApproverSection from "@/components/UserApproverSection";
-import { CapexItem, UserApproverItem } from "@/types/capex";
+import { CapexItem, UserApproverItem, CapexMainFilterValues } from "@/types/capex";
 import {
   Layers,
 } from "lucide-react";
 
 export default function DashboardCapexPage() {
-  // ─── FILTER STATES ──────────────────────────────────────────────────────────
+  // ─── FILTER STATES (Main Filter: Kategori, Cost Center, Status CAPEX) ─────
   const [kategoris, setKategoris] = useState<string[]>([]);
   const [costCenters, setCostCenters] = useState<string[]>([]);
   const [statusList, setStatusList] = useState<string[]>([]);
-  const [tahuns, setTahuns] = useState<string[]>([]);
 
-  const [selectedKategori, setSelectedKategori] = useState("Semua");
-  const [selectedCostCenter, setSelectedCostCenter] = useState("Semua");
-  const [selectedStatus, setSelectedStatus] = useState("Semua");
-  const [selectedTahun, setSelectedTahun] = useState("Semua");
-  const [searchQuery, setSearchQuery] = useState("");
+  // Filters are only applied when user clicks "Terapkan" or "Reset"
+  const [appliedFilters, setAppliedFilters] = useState<CapexMainFilterValues>({
+    kategori: "Semua",
+    costCenter: "Semua",
+    statusCapex: "Semua",
+  });
 
   // ─── DATA STATES ────────────────────────────────────────────────────────────
   const [capexList, setCapexList] = useState<CapexItem[]>([]);
@@ -47,7 +47,6 @@ export default function DashboardCapexPage() {
         setKategoris(json.data.kategoris || []);
         setCostCenters(json.data.costCenters || []);
         setStatusList(json.data.statusCapexList || []);
-        setTahuns(json.data.tahuns || []);
       }
     } catch (err) {
       console.error("Gagal memuat filter opsi:", err);
@@ -56,18 +55,16 @@ export default function DashboardCapexPage() {
     }
   }, []);
 
-  // ─── 2. FETCH CAPEX LIST (AFFECTED BY MAIN FILTER) ──────────────────────────
-  const fetchCapexList = useCallback(async (isRefresh = false) => {
+  // ─── 2. FETCH CAPEX LIST (AFFECTED ONLY BY APPLIED MAIN FILTER) ─────────────
+  const fetchCapexList = useCallback(async (filters: CapexMainFilterValues, isRefresh = false) => {
     try {
       if (isRefresh) setLoadingCapex(true);
       setErrorCapex(null);
 
       const params = new URLSearchParams();
-      if (selectedKategori !== "Semua") params.append("kategori", selectedKategori);
-      if (selectedCostCenter !== "Semua") params.append("costCenter", selectedCostCenter);
-      if (selectedStatus !== "Semua") params.append("statusCapex", selectedStatus);
-      if (selectedTahun !== "Semua") params.append("tahun", selectedTahun);
-      if (searchQuery.trim()) params.append("search", searchQuery.trim());
+      if (filters.kategori !== "Semua") params.append("kategori", filters.kategori);
+      if (filters.costCenter !== "Semua") params.append("costCenter", filters.costCenter);
+      if (filters.statusCapex !== "Semua") params.append("statusCapex", filters.statusCapex);
 
       const res = await fetch(`/api/capex/list?${params.toString()}`);
       const json = await res.json();
@@ -94,7 +91,7 @@ export default function DashboardCapexPage() {
     } finally {
       setLoadingCapex(false);
     }
-  }, [selectedKategori, selectedCostCenter, selectedStatus, selectedTahun, searchQuery]);
+  }, []);
 
   // ─── 3. FETCH APPROVERS (INDEPENDENT FROM MAIN FILTER) ───────────────────────
   const fetchApprovers = useCallback(async () => {
@@ -124,22 +121,12 @@ export default function DashboardCapexPage() {
   }, [fetchFilters, fetchApprovers]);
 
   useEffect(() => {
-    fetchCapexList();
-  }, [fetchCapexList]);
+    fetchCapexList(appliedFilters);
+  }, [fetchCapexList, appliedFilters]);
 
-  // Handle Reset Filters
-  const handleResetFilters = () => {
-    setSelectedKategori("Semua");
-    setSelectedCostCenter("Semua");
-    setSelectedStatus("Semua");
-    setSelectedTahun("Semua");
-    setSearchQuery("");
-  };
-
-  const handleGlobalRefresh = () => {
-    fetchFilters();
-    fetchCapexList();
-    fetchApprovers();
+  // Handle Apply from Main Filter (only triggers on Terapkan or Reset)
+  const handleApplyFilters = (newFilters: CapexMainFilterValues) => {
+    setAppliedFilters(newFilters);
   };
 
   return (
@@ -148,35 +135,36 @@ export default function DashboardCapexPage() {
       <CapexDashboardHeader />
 
       {/* ── MAIN CONTENT ── */}
-      <main className="w-full max-w-[95%] mx-auto px-3 sm:px-6 lg:px-8 py-5 sm:py-7 space-y-6 flex-1">
-        {/* ── 2. MAIN FILTER (Kategori, Cost Center, Status CAPEX, Tahun, Search) ── */}
-        <CapexMainFilters
-          kategoris={kategoris}
-          costCenters={costCenters}
-          statusList={statusList}
-          tahuns={tahuns}
-          selectedKategori={selectedKategori}
-          selectedCostCenter={selectedCostCenter}
-          selectedStatus={selectedStatus}
-          selectedTahun={selectedTahun}
-          searchQuery={searchQuery}
-          onKategoriChange={setSelectedKategori}
-          onCostCenterChange={setSelectedCostCenter}
-          onStatusChange={setSelectedStatus}
-          onTahunChange={setSelectedTahun}
-          onSearchChange={setSearchQuery}
-          onReset={handleResetFilters}
-          onRefresh={handleGlobalRefresh}
-          loading={loadingCapex || loadingFilters}
-        />
+      <main className="w-full max-w-[95%] mx-auto px-3 sm:px-6 lg:px-8 py-5 sm:py-7 flex flex-col gap-6 sm:gap-8 flex-1">
+        {/* ── MAIN FILTER SECTION (Sticky / Freeze like WIP) ── */}
+        <section className="sticky top-16 sm:top-20 z-20 bg-[#F7F9F7] py-2">
+          <CapexMainFilters
+            kategoris={kategoris}
+            costCenters={costCenters}
+            statusList={statusList}
+            initialFilters={appliedFilters}
+            onApplyFilters={handleApplyFilters}
+            loading={loadingCapex || loadingFilters}
+          />
+        </section>
 
-        {/* ── 3. AREA CAPEX: DUA CARD KIRI & KANAN ── */}
-        <section className="space-y-3">
-          <div className="flex items-center gap-2">
-            <Layers className="w-4 h-4 text-[#16823B]" />
-            <h2 className="text-sm font-bold text-[#17231B] uppercase tracking-wider">
-              3. Area Informasi & Tracking CAPEX
-            </h2>
+        {/* ── AREA CAPEX: DUA CARD KIRI & KANAN ── */}
+        <section className="space-y-4">
+          <div className="flex items-center gap-2.5">
+            <div className="p-2 rounded-lg bg-[#16823B]/10 text-[#16823B] shrink-0">
+              <Layers className="w-4 h-4" />
+            </div>
+            <div>
+              <h3 className="font-bold text-base text-[#17231B]">
+                Area Informasi & Tracking CAPEX
+              </h3>
+              <p className="text-xs text-[#5F6B63]">
+                Pilih salah satu baris CAPEX untuk melihat rincian & tracking persetujuan.{" "}
+                <span className="font-semibold text-[#16823B]">
+                  * Seluruh nilai biaya disajikan dalam Rupiah (Rp)
+                </span>
+              </p>
+            </div>
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-6 items-start">
@@ -188,7 +176,7 @@ export default function DashboardCapexPage() {
                 onSelect={setSelectedCapex}
                 loading={loadingCapex}
                 error={errorCapex}
-                onRetry={fetchCapexList}
+                onRetry={() => fetchCapexList(appliedFilters, true)}
               />
             </div>
 
