@@ -1,13 +1,4 @@
 import React from "react";
-import {
-  AlertCircle,
-  Clock,
-  Stamp,
-  ShoppingCart,
-  Lock,
-  CheckCircle2,
-  HelpCircle,
-} from "lucide-react";
 
 interface StatusBadgeProps {
   status: string | null | undefined;
@@ -21,82 +12,138 @@ export const STATUS_CONFIG: Record<
     color: string;
     bg: string;
     border: string;
-    icon: React.ElementType;
-    description: string;
   }
 > = {
+  // 1. Belum Created (Paling Hijau Muda / Sangat Muda)
   "Belum Created": {
     label: "Belum Created",
-    color: "text-[#5F6B63]",
-    bg: "bg-[#F4F7F5]",
-    border: "border-[#DDE5DF]",
-    icon: AlertCircle,
-    description: "Belum diajukan ke proses approval",
+    color: "text-[#16A34A]",
+    bg: "bg-[#F0FDF4]",
+    border: "border-[#BBF7D0]",
   },
+  "Belum_Created": {
+    label: "Belum Created",
+    color: "text-[#16A34A]",
+    bg: "bg-[#F0FDF4]",
+    border: "border-[#BBF7D0]",
+  },
+  belum_created: {
+    label: "Belum Created",
+    color: "text-[#16A34A]",
+    bg: "bg-[#F0FDF4]",
+    border: "border-[#BBF7D0]",
+  },
+
+  // 2. Sudah Created (Hijau Muda Sedang)
   "Sudah Created": {
     label: "Sudah Created",
-    color: "text-[#B45309]",
-    bg: "bg-[#FEF6E5]",
-    border: "border-[#FCDFA8]",
-    icon: Clock,
-    description: "Pengajuan sedang dalam proses approval",
+    color: "text-[#15803D]",
+    bg: "bg-[#DCFCE7]",
+    border: "border-[#86EFAC]",
   },
+  "Sudah_Created": {
+    label: "Sudah Created",
+    color: "text-[#15803D]",
+    bg: "bg-[#DCFCE7]",
+    border: "border-[#86EFAC]",
+  },
+  sudah_created: {
+    label: "Sudah Created",
+    color: "text-[#15803D]",
+    bg: "bg-[#DCFCE7]",
+    border: "border-[#86EFAC]",
+  },
+
+  // 3. Final Approve (Hijau Medium)
   "Final Approve": {
     label: "Final Approve",
-    color: "text-[#0369A1]",
-    bg: "bg-[#E5F6FC]",
-    border: "border-[#B8E4F4]",
-    icon: Stamp,
-    description: "Semua approver telah menyetujui",
+    color: "text-[#0D6D32]",
+    bg: "bg-[#C6F1D5]",
+    border: "border-[#5DC283]",
   },
+  "Final_Approve": {
+    label: "Final Approve",
+    color: "text-[#0D6D32]",
+    bg: "bg-[#C6F1D5]",
+    border: "border-[#5DC283]",
+  },
+  final_approve: {
+    label: "Final Approve",
+    color: "text-[#0D6D32]",
+    bg: "bg-[#C6F1D5]",
+    border: "border-[#5DC283]",
+  },
+
+  // 4. Sudah PO (Hijau Tua Sedang)
   "Sudah PO": {
     label: "Sudah PO",
-    color: "text-[#6D28D9]",
-    bg: "bg-[#F3EEFF]",
-    border: "border-[#D8C8FB]",
-    icon: ShoppingCart,
-    description: "Purchase Order telah diterbitkan",
+    color: "text-[#075322]",
+    bg: "bg-[#A7E2B9]",
+    border: "border-[#3CA464]",
   },
+  "Sudah_PO": {
+    label: "Sudah PO",
+    color: "text-[#075322]",
+    bg: "bg-[#A7E2B9]",
+    border: "border-[#3CA464]",
+  },
+  sudah_po: {
+    label: "Sudah PO",
+    color: "text-[#075322]",
+    bg: "bg-[#A7E2B9]",
+    border: "border-[#3CA464]",
+  },
+
+  // 5. Sudah Close (Paling Hijau Tua)
   "Sudah Close": {
     label: "Sudah Close",
-    color: "text-[#16823B]",
-    bg: "bg-[#EAF3EC]",
-    border: "border-[#CBE0D1]",
-    icon: Lock,
-    description: "Proyek CAPEX telah ditutup",
+    color: "text-white",
+    bg: "bg-[#0D5224]",
+    border: "border-[#093C1A]",
+  },
+  "Sudah_Close": {
+    label: "Sudah Close",
+    color: "text-white",
+    bg: "bg-[#0D5224]",
+    border: "border-[#093C1A]",
+  },
+  sudah_close: {
+    label: "Sudah Close",
+    color: "text-white",
+    bg: "bg-[#0D5224]",
+    border: "border-[#093C1A]",
   },
 };
 
 export default function StatusBadge({ status, size = "sm" }: StatusBadgeProps) {
   if (!status) {
     return (
-      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold text-[#89938D] bg-[#F4F7F5] border border-[#DDE5DF]">
-        <HelpCircle className="w-2.5 h-2.5" />
+      <span className="inline-flex items-center justify-center px-2.5 py-0.5 rounded-full text-[10px] font-semibold text-[#89938D] bg-[#F4F7F5] border border-[#DDE5DF]">
         <span>—</span>
       </span>
     );
   }
 
-  const config = STATUS_CONFIG[status] || {
-    label: status,
-    color: "text-[#5F6B63]",
-    bg: "bg-[#F4F7F5]",
-    border: "border-[#DDE5DF]",
-    icon: CheckCircle2,
-    description: status,
-  };
+  // Normalisasi string (misal "Sudah_Close", "sudah_close", "Sudah Close" -> "sudah_close")
+  const normalizedKey = status.trim().toLowerCase().replace(/[\s-]+/g, "_");
 
-  const Icon = config.icon;
+  const config =
+    STATUS_CONFIG[status] ||
+    STATUS_CONFIG[normalizedKey] || {
+      label: status.replace(/_/g, " "),
+      color: "text-[#16A34A]",
+      bg: "bg-[#F0FDF4]",
+      border: "border-[#86EFAC]",
+    };
+
   const isMd = size === "md";
 
   return (
     <span
-      className={`inline-flex items-center gap-1.5 rounded-full font-bold border transition-colors ${config.bg} ${config.color} ${config.border} ${
+      className={`inline-flex items-center justify-center rounded-full font-semibold border transition-colors ${config.bg} ${config.color} ${config.border} ${
         isMd ? "px-3 py-1 text-xs" : "px-2.5 py-0.5 text-[10px]"
       }`}
-      title={config.description}
     >
-      <Icon className={isMd ? "w-3.5 h-3.5 shrink-0" : "w-3 h-3 shrink-0"} />
       <span className="truncate">{config.label}</span>
     </span>
   );

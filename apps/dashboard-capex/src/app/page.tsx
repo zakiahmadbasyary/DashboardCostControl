@@ -167,9 +167,9 @@ export default function DashboardCapexPage() {
             </div>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-6 items-start">
-            {/* CARD KIRI: TABEL DAFTAR CAPEX (5 cols) */}
-            <div className="lg:col-span-5 h-full">
+          <div className="grid grid-cols-1 lg:grid-cols-5 gap-4 sm:gap-6 items-start">
+            {/* CARD KIRI: TABEL DAFTAR CAPEX (60% = 3/5 cols) */}
+            <div className="lg:col-span-3 h-full">
               <CapexListCard
                 items={capexList}
                 selectedId={selectedCapex?.idTotal || null}
@@ -180,8 +180,8 @@ export default function DashboardCapexPage() {
               />
             </div>
 
-            {/* CARD KANAN: INFORMASI CAPEX TERPILIH (7 cols) */}
-            <div className="lg:col-span-7 h-full">
+            {/* CARD KANAN: INFORMASI CAPEX TERPILIH (40% = 2/5 cols) */}
+            <div className="lg:col-span-2 h-full">
               <CapexDetailCard
                 selectedItem={selectedCapex}
                 loading={loadingCapex}

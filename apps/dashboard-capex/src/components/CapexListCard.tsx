@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import { CapexItem } from "@/types/capex";
 import StatusBadge from "./StatusBadge";
-import { getIoWbsMoDisplay, formatCurrencyRp } from "@/lib/formatters";
+import { getIoWbsMoDisplay, formatNumberId } from "@/lib/formatters";
 import {
   FileSpreadsheet,
   AlertCircle,
@@ -23,7 +23,7 @@ interface CapexListCardProps {
   onRetry: () => void;
 }
 
-const ITEMS_PER_PAGE = 7;
+const ITEMS_PER_PAGE = 8;
 
 export default function CapexListCard({
   items,
@@ -185,17 +185,6 @@ export default function CapexListCard({
                       <div className="line-clamp-2 text-[#17231B] font-medium text-xs leading-snug">
                         {item.description || "—"}
                       </div>
-                      <div className="flex items-center gap-2 mt-0.5 text-[10px] text-[#89938D]">
-                        {item.capexNo && (
-                          <span className="font-mono text-[#5F6B63] font-semibold">
-                            {item.capexNo}
-                          </span>
-                        )}
-                        {item.costCenter && (
-                          <span>• CC: {item.costCenter}</span>
-                        )}
-                        {item.kategori && <span>• {item.kategori}</span>}
-                      </div>
                     </td>
 
                     {/* 3. Status */}
@@ -206,7 +195,7 @@ export default function CapexListCard({
                     {/* 4. Price */}
                     <td className="py-3 px-3 text-right whitespace-nowrap">
                       <span className="font-bold text-[#17231B] text-xs font-mono">
-                        {formatCurrencyRp(item.amount)}
+                        {formatNumberId(item.amount)}
                       </span>
                     </td>
                   </tr>

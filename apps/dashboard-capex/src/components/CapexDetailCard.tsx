@@ -5,7 +5,7 @@ import { CapexItem } from "@/types/capex";
 import StatusBadge from "./StatusBadge";
 import {
   getIoWbsMoDisplay,
-  formatCurrencyRp,
+  formatNumberId,
   calculateUnitPrice,
   formatDateIndo,
 } from "@/lib/formatters";
@@ -14,7 +14,6 @@ import {
   Clock,
   ShoppingCart,
   Users,
-  CheckCircle2,
   Hash,
   FileText,
   Inbox,
@@ -83,6 +82,7 @@ export default function CapexDetailCard({
             </div>
             <p className="text-[11px] text-[#5F6B63] truncate">
               ID Total: #{selectedItem.idTotal} · Tahun {selectedItem.tahun || "—"}
+              {ioDisplay.value !== "—" ? ` · ${ioDisplay.type}: ${ioDisplay.value}` : ""}
             </p>
           </div>
         </div>
@@ -97,97 +97,105 @@ export default function CapexDetailCard({
         )}
       </div>
 
-      {/* ── BAGIAN A: DETAIL CAPEX ── */}
-      <div className="bg-[#F8FAF9] border border-[#E8EFE9] rounded-xl p-3.5 sm:p-4 space-y-3">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2 text-xs font-bold text-[#17231B] uppercase tracking-wider">
-            <FileText className="w-3.5 h-3.5 text-[#16823B]" />
-            <span>A. Detail CAPEX</span>
-          </div>
-          {selectedItem.budgetType && (
-            <span className="text-[10px] font-semibold text-[#5F6B63] bg-white border border-[#DDE5DF] px-2 py-0.5 rounded-md">
-              Tipe: {selectedItem.budgetType}
-            </span>
-          )}
-        </div>
-
-        {/* Description Highlight */}
-        <div>
-          <span className="text-[10px] font-semibold text-[#89938D] uppercase tracking-wide block mb-0.5">
-            Deskripsi Proyek
-          </span>
-          <p className="text-xs sm:text-sm font-semibold text-[#17231B] leading-relaxed">
-            {selectedItem.description || "—"}
-          </p>
-        </div>
-
-        {/* 6 Key Attributes Grid */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5 pt-1">
-          {/* 1. IO - WBS - MO */}
-          <div className="bg-white border border-[#E8EFE9] rounded-xl p-2.5 shadow-2xs">
-            <span className="text-[10px] text-[#89938D] font-medium block">
-              IO - WBS - MO
-            </span>
-            <div className="flex items-center gap-1 mt-0.5">
-              <span className="font-mono text-xs font-extrabold text-[#16823B]">
-                {ioDisplay.value}
-              </span>
-              {ioDisplay.type !== "NONE" && (
-                <span className="text-[9px] text-[#89938D]">({ioDisplay.type})</span>
-              )}
+      {/* ── DETAIL CAPEX (LAYOUT REFERENSI DENGAN IO-WBS-MO) ── */}
+      <div className="space-y-3 font-sans">
+        {/* Header */}
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <div className="flex flex-wrap items-center gap-2">
+            <div className="p-1.5 rounded-lg bg-[#16823B]/10 text-[#16823B]">
+              <FileText className="w-3.5 h-3.5" />
             </div>
+            <h4 className="font-bold text-xs text-[#17231B] uppercase tracking-wider">
+              DETAIL CAPEX
+            </h4>
+            
           </div>
-
-          {/* 2. No CAPEX */}
-          <div className="bg-white border border-[#E8EFE9] rounded-xl p-2.5 shadow-2xs">
-            <span className="text-[10px] text-[#89938D] font-medium block">
-              No CAPEX
-            </span>
-            <span className="font-mono text-xs font-bold text-[#17231B] mt-0.5 block truncate">
-              {selectedItem.capexNo || <span className="text-[#89938D] italic">—</span>}
-            </span>
+          <div className="flex items-center gap-1.5">
+            {selectedItem.kategori && (
+              <span className="text-[10px] font-medium text-[#16823B] bg-[#EAF3EC] border border-[#CBE0D1] px-2 py-0.5 rounded-md">
+              {selectedItem.kategori}
+              </span>
+            )}
+            {selectedItem.komoditi && (
+              <span className="text-[10px] font-medium text-[#5F6B63] bg-[#F8FAF9] border border-[#DDE5DF] px-2 py-0.5 rounded-md">
+              {selectedItem.komoditi}
+              </span>
+            )}
+            {ioDisplay.value !== "—" && (
+              <span className="text-[10px] font-mono font-medium text-[#16823B] bg-[#EAF3EC] border border-[#CBE0D1] px-2 py-0.5 rounded-md">
+              {ioDisplay.value}
+              </span>
+            )}
           </div>
+        </div>
 
-          {/* 3. Cost Center */}
-          <div className="bg-white border border-[#E8EFE9] rounded-xl p-2.5 shadow-2xs">
-            <span className="text-[10px] text-[#89938D] font-medium block">
-              Cost Center
-            </span>
-            <span className="font-mono text-xs font-bold text-[#17231B] mt-0.5 block truncate">
-              {selectedItem.costCenter || "—"}
-            </span>
-          </div>
-
-          {/* 4. Unit Price (Safe Calculation) */}
-          <div className="bg-white border border-[#E8EFE9] rounded-xl p-2.5 shadow-2xs">
-            <span className="text-[10px] text-[#89938D] font-medium block">
-              Unit Price (Amount / Qty)
-            </span>
-            <span className="font-mono text-xs font-bold text-[#17231B] mt-0.5 block truncate">
-              {unitPrice.formatted}
-            </span>
-          </div>
-
-          {/* 5. Qty */}
-          <div className="bg-white border border-[#E8EFE9] rounded-xl p-2.5 shadow-2xs">
-            <span className="text-[10px] text-[#89938D] font-medium block">
-              Quantity
-            </span>
-            <span className="font-mono text-xs font-bold text-[#17231B] mt-0.5 block">
-              {selectedItem.quantity != null
-                ? new Intl.NumberFormat("id-ID").format(selectedItem.quantity)
-                : "—"}
+        {/* 1. Box: Capex item Descriptions */}
+        <div className="border border-[#DDE5DF] rounded-xl overflow-hidden shadow-2xs">
+          <div className="bg-[#16823B] px-3 py-1.5 text-center">
+            <span className="text-[11px] sm:text-xs font-semibold text-white tracking-wide">
+              Capex item Descriptions
             </span>
           </div>
+          <div className="bg-white px-3 py-2.5 text-center">
+            <p className="text-xs sm:text-[13px] font-medium text-[#17231B] leading-relaxed">
+              {selectedItem.description || "—"}
+            </p>
+          </div>
+        </div>
 
-          {/* 6. Total Price */}
-          <div className="bg-white border border-[#CBE0D1] bg-gradient-to-br from-white to-[#EAF3EC]/40 rounded-xl p-2.5 shadow-2xs">
-            <span className="text-[10px] text-[#16823B] font-bold block">
-              Total Price (Amount)
-            </span>
-            <span className="font-mono text-xs font-extrabold text-[#16823B] mt-0.5 block truncate">
-              {formatCurrencyRp(selectedItem.amount)}
-            </span>
+        {/* 2. Table: No Capex | IO - WBS - MO | Unit Price | Qty | Total Price */}
+        <div className="border border-[#DDE5DF] rounded-xl overflow-hidden shadow-2xs">
+          <div className="overflow-x-auto">
+            <div className="min-w-[480px]">
+              <div className="grid grid-cols-5 bg-[#16823B] divide-x divide-white/20 text-center py-1.5 px-1">
+                <div className="text-[10px] sm:text-[11px] font-semibold text-white tracking-wide px-1">
+                  No Capex
+                </div>
+                <div className="text-[10px] sm:text-[11px] font-semibold text-white tracking-wide px-1">
+                  IO - WBS - MO
+                </div>
+                <div className="text-[10px] sm:text-[11px] font-semibold text-white tracking-wide px-1">
+                  Unit Price
+                </div>
+                <div className="text-[10px] sm:text-[11px] font-semibold text-white tracking-wide px-1">
+                  Qty
+                </div>
+                <div className="text-[10px] sm:text-[11px] font-semibold text-white tracking-wide px-1">
+                  Total Price
+                </div>
+              </div>
+              <div className="grid grid-cols-5 bg-white divide-x divide-[#E8EFE9] text-center py-2.5 px-1 items-center">
+                <div
+                  className="font-mono text-[11px] sm:text-xs font-medium text-[#17231B] px-1 truncate"
+                  title={selectedItem.capexNo || undefined}
+                >
+                  {selectedItem.capexNo || <span className="text-[#89938D] font-normal italic">—</span>}
+                </div>
+                <div
+                  className="font-mono text-[11px] sm:text-xs font-medium text-[#16823B] px-1 truncate"
+                  title={`${ioDisplay.value}${ioDisplay.type !== "NONE" ? ` (${ioDisplay.type})` : ""}`}
+                >
+                  {ioDisplay.value}
+                </div>
+                <div
+                  className="font-mono text-[11px] sm:text-xs font-medium text-[#17231B] px-1 truncate"
+                  title={unitPrice.raw != null ? formatNumberId(unitPrice.raw) : undefined}
+                >
+                  {unitPrice.raw != null ? formatNumberId(unitPrice.raw) : "—"}
+                </div>
+                <div className="font-mono text-[11px] sm:text-xs font-medium text-[#17231B] px-1">
+                  {selectedItem.quantity != null
+                    ? new Intl.NumberFormat("id-ID").format(selectedItem.quantity)
+                    : "—"}
+                </div>
+                <div
+                  className="font-mono text-[11px] sm:text-xs font-semibold text-[#16823B] px-1 truncate"
+                  title={selectedItem.amount != null ? formatNumberId(selectedItem.amount) : undefined}
+                >
+                  {selectedItem.amount != null ? formatNumberId(selectedItem.amount) : "—"}
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -196,7 +204,7 @@ export default function CapexDetailCard({
       <div className="space-y-4">
         <div className="flex items-center gap-2 text-xs font-bold text-[#17231B] uppercase tracking-wider">
           <Clock className="w-3.5 h-3.5 text-[#16823B]" />
-          <span>B. Tracking CAPEX</span>
+          <span>Tracking CAPEX</span>
         </div>
 
         {/* ── TABEL 1: Informasi PR/PO/Purchasing ── */}
@@ -324,64 +332,40 @@ export default function CapexDetailCard({
                     <th className="py-2 px-3 font-semibold text-[10px] uppercase w-[160px]">
                       Approver
                     </th>
-                    <th className="py-2 px-3 font-semibold text-[10px] uppercase w-[120px]">
+                    <th className="py-2 px-3 font-semibold text-[10px] uppercase w-[130px]">
                       Tanggal
                     </th>
                     <th className="py-2 px-3 font-semibold text-[10px] uppercase">
                       Notes / Catatan
                     </th>
-                    <th className="py-2 px-3 font-semibold text-[10px] uppercase text-center w-[90px]">
-                      Status
-                    </th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-[#F0F5F1]">
-                  {selectedItem.createdList.map((created, idx) => {
-                    const isApproved =
-                      Boolean(created.dateApprove) ||
-                      created.budgetStatus === "approved";
+                  {selectedItem.createdList.map((created, idx) => (
+                    <tr key={created.idCreated || idx} className="hover:bg-[#F8FAF9]">
+                      {/* Approver */}
+                      <td className="py-2.5 px-3">
+                        <div className="font-semibold text-[#17231B] text-[11px]">
+                          {created.nama || "—"}
+                        </div>
+                        {created.kodeApprover && (
+                          <span className="text-[9px] text-[#89938D] font-mono">
+                            {created.kodeApprover}
+                          </span>
+                        )}
+                      </td>
 
-                    return (
-                      <tr key={created.idCreated || idx} className="hover:bg-[#F8FAF9]">
-                        {/* Approver */}
-                        <td className="py-2.5 px-3">
-                          <div className="font-semibold text-[#17231B] text-[11px]">
-                            {created.nama || "—"}
-                          </div>
-                          {created.kodeApprover && (
-                            <span className="text-[9px] text-[#89938D] font-mono">
-                              {created.kodeApprover}
-                            </span>
-                          )}
-                        </td>
+                      {/* Tanggal */}
+                      <td className="py-2.5 px-3 whitespace-nowrap text-[11px] text-[#5F6B63] font-mono">
+                        {formatDateIndo(created.dateApprove)}
+                      </td>
 
-                        {/* Tanggal */}
-                        <td className="py-2.5 px-3 whitespace-nowrap text-[11px] text-[#5F6B63] font-mono">
-                          {formatDateIndo(created.dateApprove)}
-                        </td>
-
-                        {/* Notes */}
-                        <td className="py-2.5 px-3 text-[11px] text-[#2C3830]">
-                          {created.notes || <span className="text-[#89938D] italic">—</span>}
-                        </td>
-
-                        {/* Status */}
-                        <td className="py-2.5 px-3 text-center whitespace-nowrap">
-                          {isApproved ? (
-                            <span className="inline-flex items-center gap-1 text-[9px] font-bold text-[#16823B] bg-[#EAF3EC] border border-[#CBE0D1] px-2 py-0.5 rounded-full">
-                              <CheckCircle2 className="w-2.5 h-2.5" />
-                              Approved
-                            </span>
-                          ) : (
-                            <span className="inline-flex items-center gap-1 text-[9px] font-bold text-[#b45309] bg-[#FEF6E5] border border-[#FCDFA8] px-2 py-0.5 rounded-full">
-                              <Clock className="w-2.5 h-2.5" />
-                              In Process
-                            </span>
-                          )}
-                        </td>
-                      </tr>
-                    );
-                  })}
+                      {/* Notes */}
+                      <td className="py-2.5 px-3 text-[11px] text-[#2C3830]">
+                        {created.notes || <span className="text-[#89938D] italic">—</span>}
+                      </td>
+                    </tr>
+                  ))}
                 </tbody>
               </table>
             )}

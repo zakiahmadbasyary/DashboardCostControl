@@ -34,6 +34,16 @@ export function formatCurrencyRp(val: number | null | undefined): string {
 }
 
 /**
+ * Format angka dengan pemisah ribuan standar Indonesia tanpa simbol Rp
+ */
+export function formatNumberId(val: number | null | undefined): string {
+  if (val == null || isNaN(val)) return "—";
+  return new Intl.NumberFormat("id-ID", {
+    maximumFractionDigits: 0,
+  }).format(val);
+}
+
+/**
  * Perhitungan aman Unit Price: Total.amount / Total.quantity
  * Menghindari Infinity, NaN, atau division by zero.
  */
