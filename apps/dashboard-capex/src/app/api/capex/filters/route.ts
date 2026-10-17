@@ -73,6 +73,17 @@ export async function GET() {
       .map((r) => (r.tahun ? String(r.tahun) : null))
       .filter((t): t is string => Boolean(t));
 
+    // 5. Get all cost center descriptions from Master Cost Center
+    const costCenterRecords = await prisma.costCenter.findMany({
+      select: { kodeCostCenter: true, keterangan: true },
+    });
+    const costCenterMap: Record<string, string> = {};
+    costCenterRecords.forEach((cc) => {
+      if (cc.kodeCostCenter && cc.keterangan) {
+        costCenterMap[cc.kodeCostCenter.trim()] = cc.keterangan.trim();
+      }
+    });
+
     return NextResponse.json({
       success: true,
       data: {
@@ -80,6 +91,7 @@ export async function GET() {
         costCenters,
         statusCapexList,
         tahuns,
+        costCenterMap,
       },
     });
   } catch (error: unknown) {

@@ -15,6 +15,8 @@ export const capexUploadService = {
         return "kategori";
       case "User Approver":
         return "approver";
+      case "Master Cost Center":
+        return "cost_center";
       default:
         return "";
     }

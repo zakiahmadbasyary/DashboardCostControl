@@ -23,6 +23,15 @@ export const COST_CENTER_MAP: Record<string, string> = {
 };
 
 /**
+ * Mendaftarkan / memperbarui kamus Cost Center secara dinamis (misal dari database/API)
+ */
+export function registerCostCenters(map: Record<string, string>) {
+  if (map && typeof map === "object") {
+    Object.assign(COST_CENTER_MAP, map);
+  }
+}
+
+/**
  * Mengambil nama/arti keterangan Cost Center dari kodenya.
  * Jika kode tidak terdaftar dalam kamus, kembalikan kodenya sendiri.
  */
@@ -42,3 +51,4 @@ export function getCostCenterFullLabel(code: string | null | undefined): string 
   if (!label) return trimmed;
   return `${label} (${trimmed})`;
 }
+

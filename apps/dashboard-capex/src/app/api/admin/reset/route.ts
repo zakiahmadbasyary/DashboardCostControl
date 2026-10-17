@@ -52,6 +52,19 @@ export async function POST(request: NextRequest) {
           deletedCount = resApprover.count;
           break;
 
+        case "cost_center":
+        case "costcenter":
+        case "cost center":
+        case "master_cost_center":
+          label = "Master Cost Center";
+          await tx.total.updateMany({ data: { costCenter: null } });
+          await tx.created.updateMany({ data: { costCenter: null } });
+          await tx.budget.updateMany({ data: { costCenter: null } });
+          await tx.kategori.updateMany({ data: { costCenter: null } });
+          const resCostCenter = await tx.costCenter.deleteMany();
+          deletedCount = resCostCenter.count;
+          break;
+
         default:
           throw new Error("Kategori tidak valid untuk reset data.");
       }

@@ -154,6 +154,26 @@ export async function GET(request: NextRequest) {
         }),
         prisma.userApprover.count({ where }),
       ]);
+    } else if (table === "cost_center" || table === "costcenter" || table === "cost center") {
+      const where = search
+        ? {
+            OR: [
+              { kodeCostCenter: { contains: search, mode: "insensitive" as const } },
+              { keterangan: { contains: search, mode: "insensitive" as const } },
+              { wilayah: { contains: search, mode: "insensitive" as const } },
+            ],
+          }
+        : {};
+
+      [data, total] = await Promise.all([
+        prisma.costCenter.findMany({
+          where,
+          skip,
+          take: limit,
+          orderBy: { kodeCostCenter: "asc" },
+        }),
+        prisma.costCenter.count({ where }),
+      ]);
     } else if (table === "total") {
       const where = search
         ? {

@@ -19,7 +19,7 @@ import {
 } from "lucide-react";
 import { formatCurrencyRp, formatNumberId } from "@/lib/formatters";
 
-type CapexTabType = "created" | "po" | "budget" | "purchasing" | "kategori" | "approver";
+type CapexTabType = "created" | "po" | "budget" | "purchasing" | "kategori" | "approver" | "cost_center";
 
 interface TabItem {
   key: CapexTabType;
@@ -36,6 +36,7 @@ const TABS: TabItem[] = [
   { key: "purchasing", label: "Purchasing", shortLabel: "Purchasing", icon: Building, description: "Data departemen purchasing/pengadaan" },
   { key: "kategori", label: "Kategori", shortLabel: "Kategori", icon: TableIcon, description: "Klasifikasi dan mapping kategori CAPEX" },
   { key: "approver", label: "User Approver", shortLabel: "Approver", icon: Users, description: "Daftar approver & PIC persetujuan" },
+  { key: "cost_center", label: "Master Cost Center", shortLabel: "Cost Center", icon: Building, description: "Master kamus kode cost center dan keterangannya" },
 ];
 
 // Helper to filter out internal database ID columns

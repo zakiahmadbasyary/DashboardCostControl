@@ -26,6 +26,7 @@ export default function CapexAdminUploadPage() {
     "Data Purchasing": null,
     "Data Kategori": null,
     "User Approver": null,
+    "Master Cost Center": null,
   });
 
   const [resetModalCategory, setResetModalCategory] = useState<CapexUploadCategory | null>(null);
@@ -39,6 +40,7 @@ export default function CapexAdminUploadPage() {
     "Data Purchasing": useRef<HTMLInputElement | null>(null),
     "Data Kategori": useRef<HTMLInputElement | null>(null),
     "User Approver": useRef<HTMLInputElement | null>(null),
+    "Master Cost Center": useRef<HTMLInputElement | null>(null),
   };
 
   const handleFileChange = async (category: CapexUploadCategory, e: React.ChangeEvent<HTMLInputElement>) => {
@@ -156,6 +158,16 @@ export default function CapexAdminUploadPage() {
       step: 6,
       desc: "Master kode approver dan nama pejabat/manajemen yang berwenang (upsert).",
       sampleFile: "Data_Approver.xlsx",
+    },
+    {
+      title: "Master Cost Center",
+      categoryKey: "cost_center",
+      frequency: "on_demand",
+      frequencyLabel: "Saat Ada Data Baru",
+      frequencyBadgeColor: "bg-amber-50 text-amber-800 border-amber-200",
+      step: 7,
+      desc: "Master kode cost center, nama keterangan bagian/divisi, dan wilayah (upsert).",
+      sampleFile: "Data_Cost_Center.xlsx",
     },
   ];
 

@@ -4,7 +4,8 @@ export type CapexUploadCategory =
   | "Data Budget"
   | "Data Purchasing"
   | "Data Kategori"
-  | "User Approver";
+  | "User Approver"
+  | "Master Cost Center";
 
 export type UploadFrequency = "harian" | "tahunan" | "on_demand";
 

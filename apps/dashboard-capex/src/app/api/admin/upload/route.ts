@@ -4,6 +4,7 @@ import * as XLSX from "xlsx";
 import * as path from "path";
 import { BudgetStatus, Prisma } from "@prisma/client";
 import { runCapexReconciliation } from "@/lib/reconciliation";
+import { COST_CENTER_MAP } from "@/lib/costCenters";
 
 const MAX_FILE_SIZE_BYTES = 25 * 1024 * 1024; // 25 MB
 
@@ -201,6 +202,37 @@ function getVal(row: Record<string, unknown>, keys: string[]): unknown {
   return undefined;
 }
 
+// Ensure all referenced cost center codes exist in cost_center table
+async function ensureCostCentersExist(
+  tx: Prisma.TransactionClient,
+  costCenters: (string | null | undefined)[]
+) {
+  const distinct = Array.from(
+    new Set(
+      costCenters
+        .filter((cc): cc is string => Boolean(cc && cc.trim()))
+        .map((cc) => cc.trim())
+    )
+  );
+
+  for (const code of distinct) {
+    const existing = await tx.costCenter.findUnique({
+      where: { kodeCostCenter: code },
+    });
+    if (!existing) {
+      const ket = COST_CENTER_MAP[code] || code;
+      const wilayah = code.includes("PG1") ? "PG1" : code.includes("PG2") ? "PG2" : null;
+      await tx.costCenter.create({
+        data: {
+          kodeCostCenter: code,
+          keterangan: ket,
+          wilayah,
+        },
+      });
+    }
+  }
+}
+
 export async function POST(request: NextRequest) {
   try {
     const formData = await request.formData();
@@ -357,7 +389,13 @@ export async function POST(request: NextRequest) {
           }
         }
 
-        // 2. Auto-insert Kategori jika capexNo belum ada di tabel kategori
+        // 2. Auto-insert CostCenter jika costCenter belum ada di tabel cost_center
+        await ensureCostCentersExist(
+          tx,
+          parsedRows.map((r) => r.costCenter)
+        );
+
+        // 3. Auto-insert Kategori jika capexNo belum ada di tabel kategori
         const kategoriMap = new Map<
           string,
           {
@@ -568,6 +606,12 @@ export async function POST(request: NextRequest) {
       }
 
       await prisma.$transaction(async (tx) => {
+        // Auto-insert CostCenter jika costCenter dari Budget belum ada di tabel cost_center
+        await ensureCostCentersExist(
+          tx,
+          parsedRows.map((r) => r.costCenter)
+        );
+
         // Auto-insert Kategori jika capexNo dari Budget belum ada di tabel kategori
         const kategoriMap = new Map<
           string,
@@ -705,6 +749,11 @@ export async function POST(request: NextRequest) {
 
       // UPSERT (Opsi A): Insert or Update without deleting existing records
       await prisma.$transaction(async (tx) => {
+        await ensureCostCentersExist(
+          tx,
+          parsedRows.map((r) => r.costCenter)
+        );
+
         for (const item of parsedRows) {
           await tx.kategori.upsert({
             where: { capexNo: item.capexNo },
@@ -752,6 +801,80 @@ export async function POST(request: NextRequest) {
             create: item,
             update: {
               nama: item.nama,
+            },
+          });
+        }
+      });
+
+      importedCount = parsedRows.length;
+    } else if (
+      category === "cost_center" ||
+      category === "costcenter" ||
+      category === "cost center" ||
+      category === "master_cost_center"
+    ) {
+      categoryTitle = "Master Cost Center";
+
+      const parsedRows = rawRows
+        .map((row) => {
+          const kodeCostCenter = String(
+            getVal(row, [
+              "kode_cost_center",
+              "kodecostcenter",
+              "cost_center",
+              "costcenter",
+              "kode_cc",
+              "kode",
+              "cc",
+            ]) || ""
+          ).trim();
+          if (!kodeCostCenter) return null;
+
+          const keterangan =
+            String(
+              getVal(row, [
+                "keterangan",
+                "description",
+                "deskripsi",
+                "nama",
+                "nama_cost_center",
+                "nama_bagian",
+                "bagian",
+              ]) || ""
+            ).trim() || kodeCostCenter;
+
+          const wilayah =
+            String(
+              getVal(row, ["wilayah", "region", "area", "lokasi", "pg"]) || ""
+            ).trim() || null;
+
+          return {
+            kodeCostCenter,
+            keterangan,
+            wilayah,
+          };
+        })
+        .filter((item): item is NonNullable<typeof item> => item !== null);
+
+      if (parsedRows.length === 0) {
+        return NextResponse.json(
+          {
+            success: false,
+            message: "Kolom wajib 'kode_cost_center' tidak ditemukan atau kosong.",
+          },
+          { status: 400 }
+        );
+      }
+
+      // UPSERT: Insert or update without deleting
+      await prisma.$transaction(async (tx) => {
+        for (const item of parsedRows) {
+          await tx.costCenter.upsert({
+            where: { kodeCostCenter: item.kodeCostCenter },
+            create: item,
+            update: {
+              keterangan: item.keterangan,
+              wilayah: item.wilayah,
             },
           });
         }

@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import * as XLSX from "xlsx";
+import fs from "fs";
+import path from "path";
 
 export async function GET(request: NextRequest) {
   try {
@@ -8,10 +10,12 @@ export async function GET(request: NextRequest) {
 
     let sampleRows: Record<string, unknown>[] = [];
     let fileName = "template.xlsx";
+    let candidateFileNames: string[] = [];
 
     switch (category) {
       case "created":
         fileName = "template_created.xlsx";
+        candidateFileNames = ["template_created.xlsx", "Data_Created.xlsx", "data_created.xlsx"];
         sampleRows = [
           {
             capex_no: "CAP-2025-001",
@@ -41,6 +45,7 @@ export async function GET(request: NextRequest) {
 
       case "po":
         fileName = "template_po.xlsx";
+        candidateFileNames = ["template_po.xlsx", "Data_PO.xlsx", "data_po.xlsx"];
         sampleRows = [
           {
             nomor_pr: "PR-2025-001",
@@ -58,6 +63,7 @@ export async function GET(request: NextRequest) {
 
       case "budget":
         fileName = "template_budget.xlsx";
+        candidateFileNames = ["template_budget.xlsx", "Data_Budget.xlsx", "data_budget.xlsx"];
         sampleRows = [
           {
             io: "IO-2025-001",
@@ -77,6 +83,7 @@ export async function GET(request: NextRequest) {
 
       case "purchasing":
         fileName = "template_purchasing.xlsx";
+        candidateFileNames = ["template_purchasing.xlsx", "Data_Purchasing.xlsx", "data_purchasing.xlsx"];
         sampleRows = [
           {
             pgr: "P01",
@@ -89,6 +96,7 @@ export async function GET(request: NextRequest) {
 
       case "kategori":
         fileName = "template_kategori.xlsx";
+        candidateFileNames = ["template_kategori.xlsx", "Data_Kategori.xlsx", "data_kategori.xlsx"];
         sampleRows = [
           {
             capex_no: "CAP-2025-001",
@@ -103,10 +111,39 @@ export async function GET(request: NextRequest) {
       case "approver":
       case "user_approver":
         fileName = "template_user_approver.xlsx";
+        candidateFileNames = [
+          "template_user_approver.xlsx",
+          "Data_Approver.xlsx",
+          "data_approver.xlsx",
+          "template_approver.xlsx",
+        ];
         sampleRows = [
           {
             kode_approver: "APP-MGR-01",
             nama: "Budi Santoso (Dept Head Civil)",
+          },
+        ];
+        break;
+
+      case "cost_center":
+      case "costcenter":
+      case "cost center":
+        fileName = "template_cost_center.xlsx";
+        candidateFileNames = [
+          "template_cost_center.xlsx",
+          "Data_Cost_Center.xlsx",
+          "data_cost_center.xlsx",
+        ];
+        sampleRows = [
+          {
+            kode_cost_center: "10PPG1FC99",
+            keterangan: "Common Field Support PG1",
+            wilayah: "PG1",
+          },
+          {
+            kode_cost_center: "10PPG1PP01",
+            keterangan: "PPIC PG1",
+            wilayah: "PG1",
           },
         ];
         break;
@@ -118,6 +155,24 @@ export async function GET(request: NextRequest) {
         );
     }
 
+    // 1. Cek apakah ada file template fisik kustom di public/templates/
+    const templatesDir = path.join(process.cwd(), "public", "templates");
+    for (const name of candidateFileNames) {
+      const candidatePath = path.join(templatesDir, name);
+      if (fs.existsSync(candidatePath)) {
+        const fileBuffer = fs.readFileSync(candidatePath);
+        return new Response(fileBuffer, {
+          status: 200,
+          headers: {
+            "Content-Type":
+              "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            "Content-Disposition": `attachment; filename="${name}"`,
+          },
+        });
+      }
+    }
+
+    // 2. Fallback: Generate spreadsheet secara dinamis jika file fisik belum ada
     const worksheet = XLSX.utils.json_to_sheet(sampleRows);
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, worksheet, "Template");

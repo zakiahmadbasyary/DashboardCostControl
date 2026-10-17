@@ -7,6 +7,7 @@ import CapexListCard from "@/components/CapexListCard";
 import CapexDetailCard from "@/components/CapexDetailCard";
 import UserApproverSection from "@/components/UserApproverSection";
 import { CapexItem, UserApproverItem, CapexMainFilterValues } from "@/types/capex";
+import { registerCostCenters } from "@/lib/costCenters";
 import {
   Layers,
 } from "lucide-react";
@@ -44,6 +45,9 @@ export default function DashboardCapexPage() {
       const res = await fetch("/api/capex/filters");
       const json = await res.json();
       if (json.success && json.data) {
+        if (json.data.costCenterMap) {
+          registerCostCenters(json.data.costCenterMap);
+        }
         setKategoris(json.data.kategoris || []);
         setCostCenters(json.data.costCenters || []);
         setStatusList(json.data.statusCapexList || []);

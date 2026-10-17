@@ -59,9 +59,27 @@ model Kategori {
   komoditi    String? @map("komoditi")
 
   // Relasi SOFT ke created (tidak semua capex_no di created ada di tabel ini)
-  createdList Created[]
+  createdList   Created[]
+  costCenterRef CostCenter? @relation(fields: [costCenter], references: [kodeCostCenter])
 
   @@map("kategori")
+}
+
+/// Master kamus Cost Center beserta keterangannya
+model CostCenter {
+  kodeCostCenter String   @id @map("kode_cost_center")
+  keterangan     String   @map("keterangan")
+  wilayah        String?  @map("wilayah")
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @updatedAt @map("updated_at")
+
+  // Relasi ke tabel-tabel transaksi & rekonsiliasi
+  totalList    Total[]
+  createdList  Created[]
+  budgetList   Budget[]
+  kategoriList Kategori[]
+
+  @@map("cost_center")
 }
 
 /// Master approver — kolom `pending` tidak disimpan, dihitung via query
@@ -120,6 +138,9 @@ model Budget {
   // Relasi SOFT ke total (diisi setelah rekonsiliasi)
   totalRecord   Total?        @relation(fields: [idTotal], references: [idTotal])
 
+  // Relasi SOFT ke CostCenter
+  costCenterRef CostCenter?   @relation(fields: [costCenter], references: [kodeCostCenter])
+
   @@map("budget")
 }
 
@@ -158,6 +179,9 @@ model Created {
 
   // Relasi SOFT ke Kategori (nullable — tidak semua capex_no di created ada di kategori)
   kategoriRef   Kategori?     @relation(fields: [capexNo], references: [capexNo])
+
+  // Relasi SOFT ke CostCenter
+  costCenterRef CostCenter?   @relation(fields: [costCenter], references: [kodeCostCenter])
 
   @@map("created")
 }
@@ -210,6 +234,9 @@ model Total {
 
   // Relasi ke PO (1:1 optional via nomorPr)
   po                Po?           @relation(fields: [nomorPr], references: [nomorPr])
+
+  // Relasi ke CostCenter
+  costCenterRef     CostCenter?   @relation(fields: [costCenter], references: [kodeCostCenter])
 
   @@map("total")
 }
