@@ -166,7 +166,7 @@ export default function CapexAdminUploadPage() {
       frequencyLabel: "Saat Ada Data Baru",
       frequencyBadgeColor: "bg-amber-50 text-amber-800 border-amber-200",
       step: 7,
-      desc: "Master kode cost center, nama keterangan bagian/divisi, dan wilayah (upsert).",
+      desc: "Master kode cost center dan nama keterangan bagian/divisi (upsert).",
       sampleFile: "Data_Cost_Center.xlsx",
     },
   ];
@@ -197,7 +197,7 @@ export default function CapexAdminUploadPage() {
                 : "text-[#5F6B63] hover:text-[#17231B] hover:bg-[#F7F9F7]"
             }`}
           >
-            Semua (6)
+            Semua (7)
           </button>
           <button
             onClick={() => setSelectedFilter("harian")}
@@ -227,7 +227,7 @@ export default function CapexAdminUploadPage() {
                 : "text-[#5F6B63] hover:text-[#17231B] hover:bg-[#F7F9F7]"
             }`}
           >
-            Data Baru (2)
+            Data Baru (3)
           </button>
         </div>
       </div>

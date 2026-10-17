@@ -69,7 +69,6 @@ model Kategori {
 model CostCenter {
   kodeCostCenter String   @id @map("kode_cost_center")
   keterangan     String   @map("keterangan")
-  wilayah        String?  @map("wilayah")
   createdAt      DateTime @default(now()) @map("created_at")
   updatedAt      DateTime @updatedAt @map("updated_at")
 

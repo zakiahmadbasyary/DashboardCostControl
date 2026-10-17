@@ -160,7 +160,6 @@ export async function GET(request: NextRequest) {
             OR: [
               { kodeCostCenter: { contains: search, mode: "insensitive" as const } },
               { keterangan: { contains: search, mode: "insensitive" as const } },
-              { wilayah: { contains: search, mode: "insensitive" as const } },
             ],
           }
         : {};

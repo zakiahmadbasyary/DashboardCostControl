@@ -30,7 +30,6 @@ async function main() {
     CREATE TABLE IF NOT EXISTS "cost_center" (
       "kode_cost_center" TEXT NOT NULL,
       "keterangan" TEXT NOT NULL,
-      "wilayah" TEXT,
       "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
       "updated_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
       CONSTRAINT "cost_center_pkey" PRIMARY KEY ("kode_cost_center")
@@ -41,19 +40,16 @@ async function main() {
   let inserted = 0;
   for (const code of allCodes) {
     const ket = COST_CENTER_MAP[code] || code;
-    // Guess wilayah if PG1 / PG2
-    const wilayah = code.includes("PG1") ? "PG1" : code.includes("PG2") ? "PG2" : null;
 
     await prisma.$executeRawUnsafe(
       `
-      INSERT INTO "cost_center" ("kode_cost_center", "keterangan", "wilayah", "updated_at")
-      VALUES ($1, $2, $3, CURRENT_TIMESTAMP)
+      INSERT INTO "cost_center" ("kode_cost_center", "keterangan", "updated_at")
+      VALUES ($1, $2, CURRENT_TIMESTAMP)
       ON CONFLICT ("kode_cost_center") DO UPDATE
-      SET "keterangan" = EXCLUDED."keterangan", "wilayah" = COALESCE(EXCLUDED."wilayah", "cost_center"."wilayah");
+      SET "keterangan" = EXCLUDED."keterangan";
     `,
       code,
-      ket,
-      wilayah
+      ket
     );
     inserted++;
   }

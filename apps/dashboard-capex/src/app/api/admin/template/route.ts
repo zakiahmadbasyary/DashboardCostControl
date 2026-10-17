@@ -138,12 +138,10 @@ export async function GET(request: NextRequest) {
           {
             kode_cost_center: "10PPG1FC99",
             keterangan: "Common Field Support PG1",
-            wilayah: "PG1",
           },
           {
             kode_cost_center: "10PPG1PP01",
             keterangan: "PPIC PG1",
-            wilayah: "PG1",
           },
         ];
         break;

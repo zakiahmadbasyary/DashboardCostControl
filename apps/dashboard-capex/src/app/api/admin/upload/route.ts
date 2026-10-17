@@ -221,12 +221,10 @@ async function ensureCostCentersExist(
     });
     if (!existing) {
       const ket = COST_CENTER_MAP[code] || code;
-      const wilayah = code.includes("PG1") ? "PG1" : code.includes("PG2") ? "PG2" : null;
       await tx.costCenter.create({
         data: {
           kodeCostCenter: code,
           keterangan: ket,
-          wilayah,
         },
       });
     }
@@ -843,15 +841,9 @@ export async function POST(request: NextRequest) {
               ]) || ""
             ).trim() || kodeCostCenter;
 
-          const wilayah =
-            String(
-              getVal(row, ["wilayah", "region", "area", "lokasi", "pg"]) || ""
-            ).trim() || null;
-
           return {
             kodeCostCenter,
             keterangan,
-            wilayah,
           };
         })
         .filter((item): item is NonNullable<typeof item> => item !== null);
@@ -874,7 +866,6 @@ export async function POST(request: NextRequest) {
             create: item,
             update: {
               keterangan: item.keterangan,
-              wilayah: item.wilayah,
             },
           });
         }
