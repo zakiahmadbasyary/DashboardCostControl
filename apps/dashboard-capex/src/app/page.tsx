@@ -135,9 +135,9 @@ export default function DashboardCapexPage() {
       <CapexDashboardHeader />
 
       {/* ── MAIN CONTENT ── */}
-      <main className="w-full max-w-[95%] mx-auto px-3 sm:px-6 lg:px-8 py-5 sm:py-7 flex flex-col gap-6 sm:gap-8 flex-1">
+      <main className="w-full max-w-[95%] mx-auto px-3 sm:px-6 lg:px-8 py-3.5 sm:py-4 flex flex-col gap-2.5 sm:gap-3 flex-1">
         {/* ── MAIN FILTER SECTION (Sticky / Freeze like WIP) ── */}
-        <section className="sticky top-16 sm:top-20 z-20 bg-[#F7F9F7] py-2">
+        <section className="sticky top-16 sm:top-20 z-20 bg-[#F7F9F7] py-1">
           <CapexMainFilters
             kategoris={kategoris}
             costCenters={costCenters}
@@ -149,13 +149,13 @@ export default function DashboardCapexPage() {
         </section>
 
         {/* ── AREA CAPEX: DUA CARD KIRI & KANAN ── */}
-        <section className="space-y-4">
+        <section className="space-y-2.5 sm:space-y-3">
           <div className="flex items-center gap-2.5">
-            <div className="p-2 rounded-lg bg-[#16823B]/10 text-[#16823B] shrink-0">
+            <div className="p-1.5 rounded-lg bg-[#16823B]/10 text-[#16823B] shrink-0">
               <Layers className="w-4 h-4" />
             </div>
             <div>
-              <h3 className="font-bold text-base text-[#17231B]">
+              <h3 className="font-bold text-sm sm:text-base text-[#17231B]">
                 Area Informasi & Tracking CAPEX
               </h3>
               <p className="text-xs text-[#5F6B63]">
@@ -167,7 +167,7 @@ export default function DashboardCapexPage() {
             </div>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-5 gap-4 sm:gap-6 items-start">
+          <div className="grid grid-cols-1 lg:grid-cols-5 gap-3.5 sm:gap-5 items-start">
             {/* CARD KIRI: TABEL DAFTAR CAPEX (60% = 3/5 cols) */}
             <div className="lg:col-span-3 h-full">
               <CapexListCard
@@ -191,12 +191,14 @@ export default function DashboardCapexPage() {
         </section>
 
         {/* ── 4. AREA USER APPROVER (DUA CARD KIRI & KANAN, INDEPENDEN DARI FILTER) ── */}
-        <UserApproverSection
-          approvers={approvers}
-          loading={loadingApprovers}
-          error={errorApprovers}
-          onRetry={fetchApprovers}
-        />
+        <div className="pt-2 sm:pt-3">
+          <UserApproverSection
+            approvers={approvers}
+            loading={loadingApprovers}
+            error={errorApprovers}
+            onRetry={fetchApprovers}
+          />
+        </div>
       </main>
 
       {/* ── GLOBAL FOOTER ── */}
