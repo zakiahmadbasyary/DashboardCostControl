@@ -44,14 +44,6 @@ export default function CapexDashboardHeader() {
               <span>Portal Utama</span>
             </a>
 
-            <a
-              href="/admin/upload"
-              className="hidden sm:inline-flex items-center gap-2 px-3.5 py-2 rounded-xl border border-[#16823B]/30 bg-[#16823B]/10 hover:bg-[#16823B]/20 text-[#16823B] font-bold text-xs sm:text-sm transition-all shadow-xs"
-              title="Buka Panel Admin CAPEX"
-            >
-              <ShieldCheck className="w-4 h-4 text-[#16823B]" />
-              <span>Admin CAPEX</span>
-            </a>
 
             <a
               href={adminUrl}

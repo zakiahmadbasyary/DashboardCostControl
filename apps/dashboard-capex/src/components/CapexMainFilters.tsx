@@ -1,8 +1,9 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { Filter, RotateCcw, Check, X, SlidersHorizontal } from "lucide-react";
 import { CapexMainFilterValues } from "@/types/capex";
+import { getCostCenterLabel } from "@/lib/costCenters";
 
 interface CapexMainFiltersProps {
   kategoris: string[];
@@ -31,6 +32,13 @@ export default function CapexMainFilters({
 
   // Temporary state for mobile modal
   const [tempFilters, setTempFilters] = useState<CapexMainFilterValues>(initialFilters);
+
+  // Urutkan cost center secara alfabetis berdasarkan artinya
+  const sortedCostCenters = useMemo(() => {
+    return [...costCenters].sort((a, b) =>
+      getCostCenterLabel(a).localeCompare(getCostCenterLabel(b), "id", { sensitivity: "base" })
+    );
+  }, [costCenters]);
 
   const handleOpenMobile = () => {
     setTempFilters(filters);
@@ -110,9 +118,9 @@ export default function CapexMainFilters({
               className="w-full bg-[#F7F9F7] border border-[#DDE5DF] rounded-lg px-2.5 py-1.5 text-xs text-[#17231B] focus:outline-none focus:border-[#16823B] transition-colors truncate"
             >
               <option value="Semua">Semua Cost Center</option>
-              {costCenters.map((cc) => (
+              {sortedCostCenters.map((cc) => (
                 <option key={cc} value={cc}>
-                  {cc}
+                  {getCostCenterLabel(cc)}
                 </option>
               ))}
             </select>
@@ -252,9 +260,9 @@ export default function CapexMainFilters({
                   className="w-full bg-[#F7F9F7] border border-[#DDE5DF] rounded-xl px-3 py-2.5 text-xs text-[#17231B] focus:outline-none focus:border-[#16823B] transition-colors"
                 >
                   <option value="Semua">Semua Cost Center</option>
-                  {costCenters.map((cc) => (
+                  {sortedCostCenters.map((cc) => (
                     <option key={cc} value={cc}>
-                      {cc}
+                      {getCostCenterLabel(cc)}
                     </option>
                   ))}
                 </select>

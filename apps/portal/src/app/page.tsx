@@ -73,7 +73,7 @@ export default function PortalHomePage() {
       url: capexUrl,
       icon: Building2,
       badge: "Belanja Modal",
-      isHosted: false,
+      isHosted: true,
     },
     {
       id: "opex",

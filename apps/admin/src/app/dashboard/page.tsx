@@ -362,9 +362,9 @@ export default function AdminDashboardPage() {
       name: "Dashboard Capex (Capital Expenditure)",
       desc: "Manajemen & pengawasan pengeluaran belanja modal (investasi & aset)",
       url: capexUrl,
-      adminUrl: hppM3AdminUrl,
+      adminUrl: `${capexUrl}/admin/upload`,
       icon: Building2,
-      isHosted: false,
+      isHosted: true,
     },
     {
       code: "opex",

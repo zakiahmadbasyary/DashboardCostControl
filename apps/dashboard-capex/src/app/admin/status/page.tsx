@@ -23,6 +23,7 @@ import {
 } from "lucide-react";
 import StatusBadge from "@/components/StatusBadge";
 import { formatCurrencyRp, formatNumberId, getIoWbsMoDisplay } from "@/lib/formatters";
+import { getCostCenterLabel } from "@/lib/costCenters";
 
 interface CapexStatusItem {
   idTotal: string;
@@ -749,8 +750,17 @@ export default function CapexAdminStatusPage() {
                         </td>
 
                         {/* 8. Cost Center */}
-                        <td className="py-2.5 px-3.5 whitespace-nowrap text-xs text-[#17231B]">
-                          {item.costCenter || "—"}
+                        <td className="py-2.5 px-3.5 whitespace-nowrap text-xs text-[#17231B]" title={item.costCenter || ""}>
+                          {item.costCenter ? (
+                            <div>
+                              <span className="font-semibold">{getCostCenterLabel(item.costCenter)}</span>
+                              {item.costCenter !== getCostCenterLabel(item.costCenter) && (
+                                <span className="block text-[10px] text-[#89938D] font-mono">{item.costCenter}</span>
+                              )}
+                            </div>
+                          ) : (
+                            "—"
+                          )}
                         </td>
 
                         {/* 9. Nomor PR */}

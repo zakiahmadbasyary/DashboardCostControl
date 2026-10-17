@@ -9,6 +9,7 @@ import {
   calculateUnitPrice,
   formatDateIndo,
 } from "@/lib/formatters";
+import { getCostCenterLabel } from "@/lib/costCenters";
 import {
   Info,
   Clock,
@@ -252,8 +253,19 @@ export default function CapexDetailCard({
               <tbody>
                 <tr className="hover:bg-[#F8FAF9] transition-colors">
                   {/* Cost Center */}
-                  <td className="py-2.5 px-3 font-mono text-[11px] text-[#17231B]">
-                    {selectedItem.costCenter || "—"}
+                  <td className="py-2.5 px-3 text-[11px] text-[#17231B]">
+                    {selectedItem.costCenter ? (
+                      <div>
+                        <div className="font-semibold text-[#17231B]">
+                          {getCostCenterLabel(selectedItem.costCenter)}
+                        </div>
+                        <div className="text-[10px] text-[#89938D] font-mono">
+                          {selectedItem.costCenter}
+                        </div>
+                      </div>
+                    ) : (
+                      "—"
+                    )}
                   </td>
 
                   {/* No PR */}
