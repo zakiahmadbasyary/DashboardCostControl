@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { UploadCloud, Eye, LogOut, LayoutDashboard, Menu, X, Shield } from "lucide-react";
+import { UploadCloud, Eye, LogOut, LayoutDashboard, Menu, X, Shield, CheckCircle2 } from "lucide-react";
 
 export default function AdminSidebar() {
   const pathname = usePathname();
@@ -24,6 +24,7 @@ export default function AdminSidebar() {
   const navItems = [
     { label: "Upload Data Excel", href: "/admin/upload", icon: UploadCloud },
     { label: "Preview Data", href: "/admin/preview", icon: Eye },
+    { label: "Status CAPEX", href: "/admin/status", icon: CheckCircle2 },
   ];
 
   const sidebarContent = (
