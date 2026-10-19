@@ -135,8 +135,23 @@ export async function runCapexReconciliation() {
       const reqDate = cRep?.reqDate || null;
       const quantity = cRep?.quantity ?? bRep?.quantity ?? null;
       
-      // Amount priority: Budget -> Created
-      const amount = bRep?.amount ?? cRep?.amount ?? null;
+      // Amount priority: Budget -> Created (must be > 0)
+      let resolvedAmount: (typeof bList)[0]["amount"] = null;
+      const bValid = bList.find((b) => b.amount && Number(b.amount) > 0);
+      const cValid = cList.find((c) => c.amount && Number(c.amount) > 0);
+
+      if (bValid?.amount) {
+        resolvedAmount = bValid.amount;
+      } else if (cValid?.amount) {
+        resolvedAmount = cValid.amount;
+      }
+
+      // If no valid amount > 0 found, skip adding this capex item to Total table
+      if (!resolvedAmount || Number(resolvedAmount) <= 0) {
+        continue;
+      }
+
+      const amount = resolvedAmount;
       
       const costCenter = cRep?.costCenter || bRep?.costCenter || null;
       const io = cRep?.io || bRep?.io || null;
@@ -206,10 +221,14 @@ export async function runCapexReconciliation() {
 
     // 6. Standalone Budget rows with no capexNo
     for (const b of budgetWithoutCapex) {
+      if (!b.amount || Number(b.amount) <= 0) {
+        continue;
+      }
+
       const description = b.description || null;
       const budgetStatus = null;
       const quantity = b.quantity || null;
-      const amount = b.amount || null;
+      const amount = b.amount;
       const costCenter = b.costCenter || null;
       const io = b.io || null;
       const mo = b.mo || null;
@@ -249,6 +268,10 @@ export async function runCapexReconciliation() {
 
     // 7. Standalone Created rows with no capexNo
     for (const c of createdWithoutCapex) {
+      if (!c.amount || Number(c.amount) <= 0) {
+        continue;
+      }
+
       let nomorPr: string | null = null;
       if (c.noPr && poSet.has(c.noPr) && !usedNomorPr.has(c.noPr)) {
         nomorPr = c.noPr;

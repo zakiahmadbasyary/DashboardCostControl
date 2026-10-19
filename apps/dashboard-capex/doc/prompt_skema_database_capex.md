@@ -140,7 +140,7 @@ Aturan prioritas nilai pada `Total`:
 - `budget_status`: dari Created atau sumber yang sudah disepakati; jangan menetapkan sumbernya tanpa menjelaskan asumsi.
 - `req_date`: dari `Created`; jika tidak ada, kosong.
 - `quantity`: dari `Created`; jika tidak ada, dari `Budget`.
-- `amount`: dari `Budget`; jika tidak ada, dari `Created`.
+- `amount`: dari `Budget` (yang bernilai > 0); jika tidak ada atau bernilai 0/NULL di `Budget`, ambil dari `Created` (yang bernilai > 0). **Syarat penting:** Baris dari `Budget` maupun `Created` hanya dimasukkan ke tabel `Total` jika memiliki nominal `amount > 0`. Jika nilai akhirnya bernilai 0, <= 0, atau kosong (NULL), maka data ini **tidak dimasukkan** ke dalam tabel `Total`.
 - `cost_center`: dari `Created`; jika tidak ada, dari `Budget`.
 - `IO`, `MO`, `WBS`: dari `Created`; jika tidak ada, dari `Budget`.
 - `nomorPR`: berasal dari pemetaan ke `PO`.
