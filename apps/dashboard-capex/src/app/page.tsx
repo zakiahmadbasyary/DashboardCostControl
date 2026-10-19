@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useCallback } from "react";
 import CapexDashboardHeader from "@/components/CapexDashboardHeader";
 import CapexMainFilters from "@/components/CapexMainFilters";
+import CapexAnalyticsChartsCard from "@/components/CapexAnalyticsChartsCard";
 import CapexListCard from "@/components/CapexListCard";
 import CapexDetailCard from "@/components/CapexDetailCard";
 import UserApproverSection from "@/components/UserApproverSection";
@@ -133,6 +134,51 @@ export default function DashboardCapexPage() {
     setAppliedFilters(newFilters);
   };
 
+  // ─── ACTION FILTER DARI GRAFIK BATANG ─────────────────────────────────────────
+  // 1. Klik batang status (contoh: klik Belum Created)
+  const handleSelectStatusFromChart = (statusLabel: string) => {
+    const norm = statusLabel.trim().toLowerCase().replace(/[\s-]+/g, "_");
+    const matched =
+      statusList.find(
+        (s) => s.trim().toLowerCase().replace(/[\s-]+/g, "_") === norm
+      ) || statusLabel;
+
+    const currentNorm = appliedFilters.statusCapex.trim().toLowerCase().replace(/[\s-]+/g, "_");
+    const nextStatus = currentNorm === norm ? "Semua" : matched;
+
+    setAppliedFilters((prev) => ({
+      ...prev,
+      statusCapex: nextStatus,
+    }));
+  };
+
+  // 2. Klik batang kategori (contoh: klik salah satu kategori)
+  const handleSelectCategoryFromChart = (categoryName: string) => {
+    const nextCategory =
+      appliedFilters.kategori.toLowerCase() === categoryName.toLowerCase()
+        ? "Semua"
+        : categoryName;
+
+    setAppliedFilters((prev) => ({
+      ...prev,
+      kategori: nextCategory,
+    }));
+  };
+
+  const handleResetStatusFromChart = () => {
+    setAppliedFilters((prev) => ({
+      ...prev,
+      statusCapex: "Semua",
+    }));
+  };
+
+  const handleResetCategoryFromChart = () => {
+    setAppliedFilters((prev) => ({
+      ...prev,
+      kategori: "Semua",
+    }));
+  };
+
   return (
     <div className="min-h-screen bg-[#F7F9F7] font-sans antialiased flex flex-col">
       {/* ── GLOBAL NAVBAR (Kept untouched as required) ── */}
@@ -141,7 +187,7 @@ export default function DashboardCapexPage() {
       {/* ── MAIN CONTENT ── */}
       <main className="w-full max-w-[95%] mx-auto px-3 sm:px-6 lg:px-8 py-3.5 sm:py-4 flex flex-col gap-2.5 sm:gap-3 flex-1">
         {/* ── MAIN FILTER SECTION (Sticky / Freeze like WIP) ── */}
-        <section className="sticky top-16 sm:top-20 z-20 bg-[#F7F9F7] py-1">
+        <section className="sticky top-16 sm:top-20 z-20 bg-[#F7F9F7] py-1" suppressHydrationWarning>
           <CapexMainFilters
             kategoris={kategoris}
             costCenters={costCenters}
@@ -149,6 +195,20 @@ export default function DashboardCapexPage() {
             initialFilters={appliedFilters}
             onApplyFilters={handleApplyFilters}
             loading={loadingCapex || loadingFilters}
+          />
+        </section>
+
+        {/* ── CARD BARU: GRAFIK ANALISIS STATUS & KATEGORI CAPEX (INTERAKTIF FILTER) ── */}
+        <section>
+          <CapexAnalyticsChartsCard
+            items={capexList}
+            loading={loadingCapex}
+            activeFilters={appliedFilters}
+            statusList={statusList}
+            onSelectStatus={handleSelectStatusFromChart}
+            onSelectCategory={handleSelectCategoryFromChart}
+            onResetStatus={handleResetStatusFromChart}
+            onResetCategory={handleResetCategoryFromChart}
           />
         </section>
 

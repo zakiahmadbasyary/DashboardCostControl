@@ -95,6 +95,7 @@ export default function CapexListCard({
               setCurrentPage(1);
             }}
             className="w-full pl-8.5 pr-3 py-1.5 text-xs bg-[#F7F9F7] border border-[#DDE5DF] rounded-xl focus:outline-none focus:border-[#16823B] text-[#17231B] font-medium"
+            suppressHydrationWarning
           />
         </div>
       </div>
@@ -224,6 +225,7 @@ export default function CapexListCard({
               disabled={effectivePage === 1}
               className="p-1.5 rounded-lg border border-[#DDE5DF] bg-[#F8FAF9] hover:bg-[#EEF4F0] disabled:opacity-40 disabled:cursor-not-allowed transition-all cursor-pointer"
               title="Halaman Sebelumnya"
+              suppressHydrationWarning
             >
               <ChevronLeft className="w-3.5 h-3.5" />
             </button>
@@ -236,6 +238,7 @@ export default function CapexListCard({
               disabled={effectivePage === totalPages}
               className="p-1.5 rounded-lg border border-[#DDE5DF] bg-[#F8FAF9] hover:bg-[#EEF4F0] disabled:opacity-40 disabled:cursor-not-allowed transition-all cursor-pointer"
               title="Halaman Berikutnya"
+              suppressHydrationWarning
             >
               <ChevronRight className="w-3.5 h-3.5" />
             </button>

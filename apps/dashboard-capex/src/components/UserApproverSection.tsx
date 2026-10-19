@@ -129,6 +129,7 @@ export default function UserApproverSection({
               value={approverSearch}
               onChange={(e) => setApproverSearch(e.target.value)}
               className="w-full pl-8.5 pr-3 py-1.5 text-xs bg-[#F7F9F7] border border-[#DDE5DF] rounded-xl focus:outline-none focus:border-[#16823B] text-[#17231B] font-medium"
+              suppressHydrationWarning
             />
           </div>
 
@@ -263,6 +264,7 @@ export default function UserApproverSection({
                 value={pendingSearch}
                 onChange={(e) => setPendingSearch(e.target.value)}
                 className="w-full pl-8.5 pr-3 py-1.5 text-xs bg-[#F7F9F7] border border-[#DDE5DF] rounded-xl focus:outline-none focus:border-[#16823B] text-[#17231B] font-medium"
+                suppressHydrationWarning
               />
             </div>
           )}

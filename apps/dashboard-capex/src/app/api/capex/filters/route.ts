@@ -22,7 +22,14 @@ export async function GET() {
       .map((r) => r.costCenter?.trim())
       .filter((cc): cc is string => Boolean(cc && cc.length > 0));
 
-    // 2. Get distinct status_capex from Total
+    // 2. Get distinct status_capex from Total (sorted in business flow)
+    const statusOrder = [
+      "belum_created",
+      "sudah_created",
+      "final_approve",
+      "sudah_po",
+      "sudah_close",
+    ];
     const statusCapexRaw = await prisma.total.findMany({
       where: {
         statusCapex: {
@@ -36,7 +43,14 @@ export async function GET() {
     });
     const statusCapexList = statusCapexRaw
       .map((r) => r.statusCapex)
-      .filter((s): s is NonNullable<typeof s> => Boolean(s));
+      .filter((s): s is NonNullable<typeof s> => Boolean(s))
+      .sort((a, b) => {
+        const normA = a.trim().toLowerCase().replace(/[\s-]+/g, "_");
+        const normB = b.trim().toLowerCase().replace(/[\s-]+/g, "_");
+        const idxA = statusOrder.indexOf(normA);
+        const idxB = statusOrder.indexOf(normB);
+        return (idxA === -1 ? 999 : idxA) - (idxB === -1 ? 999 : idxB);
+      });
 
     // 3. Get distinct kategori from Kategori master, Created, and Budget
     const kategoriMaster = await prisma.kategori.findMany({

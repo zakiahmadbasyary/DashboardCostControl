@@ -40,6 +40,40 @@ export default function CapexMainFilters({
     );
   }, [costCenters]);
 
+  // Urutkan status CAPEX sesuai alur bisnis yang diminta:
+  // 1. Belum Created
+  // 2. Sudah Created
+  // 3. Final Approve
+  // 4. Sudah PO
+  // 5. Sudah Close
+  const sortedStatusList = useMemo(() => {
+    const statusOrder = [
+      "belum_created",
+      "sudah_created",
+      "final_approve",
+      "sudah_po",
+      "sudah_close",
+    ];
+
+    if (statusList && statusList.length > 0) {
+      return [...statusList].sort((a, b) => {
+        const normA = a.trim().toLowerCase().replace(/[\s-]+/g, "_");
+        const normB = b.trim().toLowerCase().replace(/[\s-]+/g, "_");
+        const indexA = statusOrder.indexOf(normA);
+        const indexB = statusOrder.indexOf(normB);
+        return (indexA === -1 ? 999 : indexA) - (indexB === -1 ? 999 : indexB);
+      });
+    }
+
+    return [
+      "Belum_Created",
+      "Sudah_Created",
+      "Final_Approve",
+      "Sudah_PO",
+      "Sudah_Close",
+    ];
+  }, [statusList]);
+
   const handleOpenMobile = () => {
     setTempFilters(filters);
     setIsOpen(true);
@@ -75,7 +109,10 @@ export default function CapexMainFilters({
   return (
     <>
       {/* ================= DESKTOP INLINE FILTER BAR (sm: and larger) ================= */}
-      <div className="hidden sm:flex bg-white border border-[#DDE5DF] rounded-xl p-3 sm:p-3.5 shadow-sm shadow-[#16823B]/5 flex-col lg:flex-row lg:items-center gap-3 font-sans">
+      <div
+        className="hidden sm:flex bg-white border border-[#DDE5DF] rounded-xl p-3 sm:p-3.5 shadow-sm shadow-[#16823B]/5 flex-col lg:flex-row lg:items-center gap-3 font-sans"
+        suppressHydrationWarning
+      >
         {/* Title / Badge */}
         <div className="flex items-center gap-1.5 shrink-0 pr-1">
           <div className="p-1.5 rounded-lg bg-[#FCE27A] text-[#17231B] border border-[#E5C959] shadow-2xs">
@@ -97,6 +134,7 @@ export default function CapexMainFilters({
               value={filters.kategori}
               onChange={(e) => setFilters((prev) => ({ ...prev, kategori: e.target.value }))}
               className="w-full bg-[#F7F9F7] border border-[#DDE5DF] rounded-lg px-2.5 py-1.5 text-xs text-[#17231B] focus:outline-none focus:border-[#16823B] transition-colors truncate"
+              suppressHydrationWarning
             >
               <option value="Semua">Semua Kategori</option>
               {kategoris.map((k) => (
@@ -116,6 +154,7 @@ export default function CapexMainFilters({
               value={filters.costCenter}
               onChange={(e) => setFilters((prev) => ({ ...prev, costCenter: e.target.value }))}
               className="w-full bg-[#F7F9F7] border border-[#DDE5DF] rounded-lg px-2.5 py-1.5 text-xs text-[#17231B] focus:outline-none focus:border-[#16823B] transition-colors truncate"
+              suppressHydrationWarning
             >
               <option value="Semua">Semua Cost Center</option>
               {sortedCostCenters.map((cc) => (
@@ -135,11 +174,12 @@ export default function CapexMainFilters({
               value={filters.statusCapex}
               onChange={(e) => setFilters((prev) => ({ ...prev, statusCapex: e.target.value }))}
               className="w-full bg-[#F7F9F7] border border-[#DDE5DF] rounded-lg px-2.5 py-1.5 text-xs text-[#17231B] focus:outline-none focus:border-[#16823B] transition-colors truncate"
+              suppressHydrationWarning
             >
               <option value="Semua">Semua Status</option>
-              {statusList.map((st) => (
+              {sortedStatusList.map((st) => (
                 <option key={st} value={st}>
-                  {st}
+                  {st.replace(/_/g, " ")}
                 </option>
               ))}
             </select>
@@ -153,6 +193,7 @@ export default function CapexMainFilters({
             onClick={handleReset}
             title="Reset Filter"
             className="inline-flex items-center justify-center gap-1 px-2.5 py-1.5 rounded-lg border border-[#DDE5DF] text-[#5F6B63] hover:bg-[#F7F9F7] text-xs font-semibold transition-colors cursor-pointer"
+            suppressHydrationWarning
           >
             <RotateCcw className="w-3.5 h-3.5" />
             <span>Reset</span>
@@ -162,6 +203,7 @@ export default function CapexMainFilters({
             onClick={handleApply}
             disabled={loading}
             className="inline-flex items-center justify-center gap-1 px-3 py-1.5 rounded-lg bg-[#16823B] hover:bg-[#0B6B32] text-white text-xs font-bold transition-all shadow-xs active:scale-95 cursor-pointer shrink-0 disabled:opacity-50"
+            suppressHydrationWarning
           >
             <Check className="w-3.5 h-3.5" />
             <span>{loading ? "Memuat..." : "Terapkan"}</span>
@@ -170,11 +212,12 @@ export default function CapexMainFilters({
       </div>
 
       {/* ================= MOBILE COMPACT BUTTON TRIGGER (< sm) ================= */}
-      <div className="sm:hidden font-sans">
+      <div className="sm:hidden font-sans" suppressHydrationWarning>
         <button
           type="button"
           onClick={handleOpenMobile}
           className="w-full bg-white border border-[#DDE5DF] rounded-xl p-3 shadow-xs flex items-center justify-between text-xs text-[#17231B] font-bold cursor-pointer active:scale-98 transition-all"
+          suppressHydrationWarning
         >
           <div className="flex items-center gap-2">
             <div className="p-1.5 rounded-lg bg-[#16823B]/10 text-[#16823B]">
@@ -199,10 +242,12 @@ export default function CapexMainFilters({
         <div
           className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/60 backdrop-blur-xs animate-in fade-in duration-200 font-sans"
           onClick={() => setIsOpen(false)}
+          suppressHydrationWarning
         >
           <div
             className="bg-white w-full max-w-lg rounded-t-2xl sm:rounded-2xl p-5 shadow-2xl flex flex-col gap-4 border border-[#DDE5DF] max-h-[90vh] overflow-y-auto animate-in slide-in-from-bottom-4 duration-300"
             onClick={(e) => e.stopPropagation()}
+            suppressHydrationWarning
           >
             {/* Modal Header */}
             <div className="flex items-center justify-between pb-3 border-b border-[#DDE5DF]">
@@ -223,6 +268,7 @@ export default function CapexMainFilters({
                 type="button"
                 onClick={() => setIsOpen(false)}
                 className="p-1.5 rounded-lg text-[#5F6B63] hover:text-[#17231B] hover:bg-[#F7F9F7] transition-colors cursor-pointer"
+                suppressHydrationWarning
               >
                 <X className="w-5 h-5" />
               </button>
@@ -239,6 +285,7 @@ export default function CapexMainFilters({
                   value={tempFilters.kategori}
                   onChange={(e) => setTempFilters((prev) => ({ ...prev, kategori: e.target.value }))}
                   className="w-full bg-[#F7F9F7] border border-[#DDE5DF] rounded-xl px-3 py-2.5 text-xs text-[#17231B] focus:outline-none focus:border-[#16823B] transition-colors"
+                  suppressHydrationWarning
                 >
                   <option value="Semua">Semua Kategori</option>
                   {kategoris.map((k) => (
@@ -258,6 +305,7 @@ export default function CapexMainFilters({
                   value={tempFilters.costCenter}
                   onChange={(e) => setTempFilters((prev) => ({ ...prev, costCenter: e.target.value }))}
                   className="w-full bg-[#F7F9F7] border border-[#DDE5DF] rounded-xl px-3 py-2.5 text-xs text-[#17231B] focus:outline-none focus:border-[#16823B] transition-colors"
+                  suppressHydrationWarning
                 >
                   <option value="Semua">Semua Cost Center</option>
                   {sortedCostCenters.map((cc) => (
@@ -277,11 +325,12 @@ export default function CapexMainFilters({
                   value={tempFilters.statusCapex}
                   onChange={(e) => setTempFilters((prev) => ({ ...prev, statusCapex: e.target.value }))}
                   className="w-full bg-[#F7F9F7] border border-[#DDE5DF] rounded-xl px-3 py-2.5 text-xs text-[#17231B] focus:outline-none focus:border-[#16823B] transition-colors"
+                  suppressHydrationWarning
                 >
                   <option value="Semua">Semua Status</option>
-                  {statusList.map((st) => (
+                  {sortedStatusList.map((st) => (
                     <option key={st} value={st}>
-                      {st}
+                      {st.replace(/_/g, " ")}
                     </option>
                   ))}
                 </select>
@@ -297,6 +346,7 @@ export default function CapexMainFilters({
                   setIsOpen(false);
                 }}
                 className="inline-flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl border border-[#DDE5DF] text-[#5F6B63] hover:bg-[#F7F9F7] text-xs font-semibold transition-colors cursor-pointer w-1/3"
+                suppressHydrationWarning
               >
                 <RotateCcw className="w-3.5 h-3.5" />
                 <span>Reset</span>
@@ -305,6 +355,7 @@ export default function CapexMainFilters({
                 type="button"
                 onClick={handleApplyMobile}
                 className="inline-flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl bg-[#16823B] hover:bg-[#0B6B32] text-white text-xs font-bold transition-all shadow-xs active:scale-95 cursor-pointer w-2/3"
+                suppressHydrationWarning
               >
                 <Check className="w-3.5 h-3.5" />
                 <span>Terapkan Filter</span>
