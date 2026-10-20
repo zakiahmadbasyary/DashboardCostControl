@@ -16,6 +16,12 @@ import {
   X,
   SlidersHorizontal,
   ArrowRightLeft,
+  Plus,
+  Pencil,
+  AlertCircle,
+  CheckCircle2,
+  Save,
+  Trash2,
 } from "lucide-react";
 import { formatCurrencyRp, formatNumberId } from "@/lib/formatters";
 
@@ -59,6 +65,15 @@ function isIdColumn(col: string): boolean {
   return false;
 }
 
+// Helper to extract identifier key from record
+function getRowKey(tab: CapexTabType, row: Record<string, unknown>): string {
+  if (tab === "budget") return String(row.idBudget ?? row.id_budget ?? "");
+  if (tab === "kategori") return String(row.capexNo ?? row.capex_no ?? "");
+  if (tab === "approver") return String(row.kodeApprover ?? row.kode_approver ?? "");
+  if (tab === "cost_center") return String(row.kodeCostCenter ?? row.kode_cost_center ?? "");
+  return "";
+}
+
 export default function CapexAdminPreviewPage() {
   const [activeTab, setActiveTab] = useState<CapexTabType>("created");
   const [searchInput, setSearchInput] = useState<string>("");
@@ -72,6 +87,44 @@ export default function CapexAdminPreviewPage() {
   const [loading, setLoading] = useState<boolean>(true);
   const [refreshKey, setRefreshKey] = useState<number>(0);
 
+  // Modal State for Add & Edit
+  const [modalOpen, setModalOpen] = useState<boolean>(false);
+  const [modalMode, setModalMode] = useState<"add" | "edit">("add");
+  const [activeRowId, setActiveRowId] = useState<string>("");
+  const [formData, setFormData] = useState<Record<string, any>>({});
+  const [submitting, setSubmitting] = useState<boolean>(false);
+  const [formError, setFormError] = useState<string | null>(null);
+  const [toastMessage, setToastMessage] = useState<{ text: string; type: "success" | "error" } | null>(null);
+
+  // Modal State for Reset Data
+  const [resetModalOpen, setResetModalOpen] = useState<boolean>(false);
+  const [resetting, setResetting] = useState<boolean>(false);
+
+  // Handle Reset Data
+  const handleConfirmReset = async () => {
+    setResetting(true);
+    try {
+      const res = await fetch("/api/admin/reset", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ category: activeTab }),
+      });
+
+      const result = await res.json();
+      if (!result.success) {
+        throw new Error(result.message || "Gagal mengosongkan data tabel.");
+      }
+
+      setToastMessage({ text: result.message, type: "success" });
+      setResetModalOpen(false);
+      setRefreshKey((k) => k + 1);
+    } catch (err: any) {
+      setToastMessage({ text: err?.message || "Terjadi kesalahan saat reset data.", type: "error" });
+    } finally {
+      setResetting(false);
+    }
+  };
+
   const tableScrollRef = useRef<HTMLDivElement>(null);
 
   // Debounce search input (300ms) to ensure smooth input without lag
@@ -82,6 +135,16 @@ export default function CapexAdminPreviewPage() {
     }, 300);
     return () => clearTimeout(handler);
   }, [searchInput]);
+
+  // Auto-dismiss toast
+  useEffect(() => {
+    if (toastMessage) {
+      const timer = setTimeout(() => {
+        setToastMessage(null);
+      }, 4000);
+      return () => clearTimeout(timer);
+    }
+  }, [toastMessage]);
 
   // Reset page and search on tab change
   const handleTabChange = (tab: CapexTabType) => {
@@ -150,11 +213,184 @@ export default function CapexAdminPreviewPage() {
     return TABS.find((t) => t.key === activeTab) || TABS[0];
   }, [activeTab]);
 
-  // Extract column keys from first item, excluding all internal ID columns
+  // Check if current tab supports Edit & Add
+  const canEdit = useMemo(() => {
+    return ["budget", "kategori", "approver", "cost_center"].includes(activeTab);
+  }, [activeTab]);
+
+  const canAdd = useMemo(() => {
+    return ["kategori", "approver", "cost_center"].includes(activeTab);
+  }, [activeTab]);
+
+  // Extract column keys from first item, excluding internal IDs and created_at/updated_at for Cost Center
   const columnKeys = useMemo(() => {
     if (tableData.length === 0) return [];
-    return Object.keys(tableData[0]).filter((col) => !isIdColumn(col));
-  }, [tableData]);
+    return Object.keys(tableData[0]).filter((col) => {
+      if (isIdColumn(col)) return false;
+      // Master Cost Center: jangan tampilkan created_at dan updated_at
+      if (activeTab === "cost_center") {
+        const lower = col.toLowerCase();
+        if (
+          lower === "createdat" ||
+          lower === "created_at" ||
+          lower === "updatedat" ||
+          lower === "updated_at"
+        ) {
+          return false;
+        }
+      }
+      return true;
+    });
+  }, [tableData, activeTab]);
+
+  // Open Add Modal
+  const handleOpenAddModal = () => {
+    setModalMode("add");
+    setActiveRowId("");
+    setFormError(null);
+
+    if (activeTab === "kategori") {
+      setFormData({
+        capexNo: "",
+        description: "",
+        costCenter: "",
+        kategori: "",
+        komoditi: "",
+      });
+    } else if (activeTab === "approver") {
+      setFormData({
+        kodeApprover: "",
+        nama: "",
+      });
+    } else if (activeTab === "cost_center") {
+      setFormData({
+        kodeCostCenter: "",
+        keterangan: "",
+      });
+    }
+    setModalOpen(true);
+  };
+
+  // Open Edit Modal
+  const handleOpenEditModal = (row: Record<string, unknown>) => {
+    const rowId = getRowKey(activeTab, row);
+    if (!rowId) {
+      alert("Kunci baris data tidak ditemukan.");
+      return;
+    }
+
+    setModalMode("edit");
+    setActiveRowId(rowId);
+    setFormError(null);
+
+    if (activeTab === "budget") {
+      setFormData({
+        capexNo: row.capexNo ?? "",
+        description: row.description ?? "",
+        quantity: row.quantity ?? "",
+        amount: row.amount ?? "",
+        io: row.io ?? "",
+        mo: row.mo ?? "",
+        wbs: row.wbs ?? "",
+        costCenter: row.costCenter ?? "",
+        groupCapex: row.groupCapex ?? "",
+        kategori: row.kategori ?? "",
+        komoditi: row.komoditi ?? "",
+      });
+    } else if (activeTab === "kategori") {
+      setFormData({
+        capexNo: row.capexNo ?? "",
+        description: row.description ?? "",
+        costCenter: row.costCenter ?? "",
+        kategori: row.kategori ?? "",
+        komoditi: row.komoditi ?? "",
+      });
+    } else if (activeTab === "approver") {
+      setFormData({
+        kodeApprover: row.kodeApprover ?? "",
+        nama: row.nama ?? "",
+      });
+    } else if (activeTab === "cost_center") {
+      setFormData({
+        kodeCostCenter: row.kodeCostCenter ?? "",
+        keterangan: row.keterangan ?? "",
+      });
+    }
+
+    setModalOpen(true);
+  };
+
+  // Handle Modal Submit
+  const handleSubmitForm = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSubmitting(true);
+    setFormError(null);
+
+    try {
+      if (modalMode === "add") {
+        if (activeTab === "kategori" && !String(formData.capexNo || "").trim()) {
+          throw new Error("Nomor CAPEX wajib diisi.");
+        }
+        if (activeTab === "approver" && !String(formData.kodeApprover || "").trim()) {
+          throw new Error("Kode Approver wajib diisi.");
+        }
+        if (activeTab === "cost_center") {
+          if (!String(formData.kodeCostCenter || "").trim()) {
+            throw new Error("Kode Cost Center wajib diisi.");
+          }
+          if (!String(formData.keterangan || "").trim()) {
+            throw new Error("Keterangan Cost Center wajib diisi.");
+          }
+        }
+
+        const res = await fetch("/api/admin/preview", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            table: activeTab,
+            data: formData,
+          }),
+        });
+
+        const result = await res.json();
+        if (!result.success) {
+          throw new Error(result.message || "Gagal menambahkan data.");
+        }
+
+        setToastMessage({ text: result.message, type: "success" });
+        setModalOpen(false);
+        setRefreshKey((k) => k + 1);
+      } else {
+        // Edit mode
+        if (activeTab === "cost_center" && !String(formData.keterangan || "").trim()) {
+          throw new Error("Keterangan Cost Center wajib diisi.");
+        }
+
+        const res = await fetch("/api/admin/preview", {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            table: activeTab,
+            id: activeRowId,
+            data: formData,
+          }),
+        });
+
+        const result = await res.json();
+        if (!result.success) {
+          throw new Error(result.message || "Gagal memperbarui data.");
+        }
+
+        setToastMessage({ text: result.message, type: "success" });
+        setModalOpen(false);
+        setRefreshKey((k) => k + 1);
+      }
+    } catch (err: any) {
+      setFormError(err?.message || "Terjadi kesalahan saat memproses data.");
+    } finally {
+      setSubmitting(false);
+    }
+  };
 
   // Check if column is numeric or currency
   const isCurrencyOrNumber = (colName: string, val: unknown): boolean => {
@@ -166,9 +402,36 @@ export default function CapexAdminPreviewPage() {
   };
 
   // Format cell value intelligently
-  const formatCellValue = (colName: string, cellVal: unknown) => {
+  const formatCellValue = (colName: string, cellVal: unknown, row?: Record<string, unknown>) => {
     if (cellVal === null || cellVal === undefined || cellVal === "") {
+      if (
+        (activeTab === "kategori" && colName.toLowerCase() === "kategori") ||
+        (activeTab === "approver" && colName.toLowerCase() === "nama") ||
+        (activeTab === "cost_center" && colName.toLowerCase() === "keterangan")
+      ) {
+        return (
+          <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-amber-700 bg-amber-50 border border-amber-200/80 px-2 py-0.5 rounded-md">
+            Belum diisi
+          </span>
+        );
+      }
       return <span className="text-[#89938D] italic select-none">—</span>;
+    }
+
+    if (
+      activeTab === "cost_center" &&
+      colName.toLowerCase() === "keterangan" &&
+      row &&
+      String(cellVal).trim() === String(row.kodeCostCenter ?? row.kode_cost_center).trim()
+    ) {
+      return (
+        <span className="inline-flex items-center gap-1.5 text-xs text-[#17231B]">
+          <span>{String(cellVal)}</span>
+          <span className="text-[10px] font-semibold text-amber-700 bg-amber-50 border border-amber-200 px-1.5 py-0.5 rounded">
+            Perlu dilengkapi
+          </span>
+        </span>
+      );
     }
 
     if (typeof cellVal === "boolean") {
@@ -212,7 +475,7 @@ export default function CapexAdminPreviewPage() {
       return <span>{String(cellVal)}</span>;
     }
 
-    // Date: hanya kolom tanggal sebenarnya & format tanggal yang sesuai (ada pemisah - atau /)
+    // Date: hanya kolom tanggal sebenarnya & format tanggal yang sesuai
     const isDateCol =
       /date_approve|dateapprove|req_date|reqdate|tanggal_pr|tanggalpr|request_date|requestdate|created_at|updated_at/i.test(colName) ||
       (/(date|tanggal)/i.test(colName) && !/(kode|code|approver)/i.test(colName));
@@ -289,8 +552,31 @@ export default function CapexAdminPreviewPage() {
           </p>
         </div>
 
-        {/* Quick Refresh Button */}
-        <div className="flex items-center gap-2 shrink-0 self-start sm:self-center">
+        {/* Action Buttons: Add, Reset & Refresh */}
+        <div className="flex items-center gap-2 shrink-0 self-start sm:self-center flex-wrap">
+          {canAdd && (
+            <button
+              type="button"
+              onClick={handleOpenAddModal}
+              className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold text-white bg-[#16823B] hover:bg-[#126b30] shadow-xs transition-all cursor-pointer active:scale-95"
+              title={`Tambah ${activeTabMeta.shortLabel}`}
+            >
+              <Plus className="w-3.5 h-3.5" />
+              <span>Tambah {activeTabMeta.shortLabel}</span>
+            </button>
+          )}
+
+          <button
+            type="button"
+            onClick={() => setResetModalOpen(true)}
+            disabled={loading || totalRecords === 0}
+            className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold text-rose-700 bg-rose-50 hover:bg-rose-100 border border-rose-200 transition-all cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed active:scale-95 shadow-2xs"
+            title={`Kosongkan data pada tabel ${activeTabMeta.shortLabel}`}
+          >
+            <Trash2 className="w-3.5 h-3.5" />
+            <span>Reset Data</span>
+          </button>
+
           <button
             type="button"
             onClick={() => setRefreshKey((prev) => prev + 1)}
@@ -306,7 +592,7 @@ export default function CapexAdminPreviewPage() {
 
       {/* ── 2. CONTROLS CARD: TABS & SEARCH & LIMIT ── */}
       <div className="bg-white border border-[#DDE5DF] rounded-2xl p-3.5 sm:p-5 shadow-xs space-y-3.5 sm:space-y-4">
-        {/* Navigation Tabs (Adaptive: Dropdown on mobile, horizontal scroll pills on sm+) */}
+        {/* Navigation Tabs */}
         <div>
           {/* Mobile Select (sm:hidden) */}
           <div className="sm:hidden">
@@ -353,7 +639,7 @@ export default function CapexAdminPreviewPage() {
           </div>
         </div>
 
-        {/* Search Bar & Rows Selector (Full width, wraps smoothly) */}
+        {/* Search Bar & Rows Selector */}
         <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2.5">
           {/* Search Box */}
           <div className="relative flex-1 min-w-0">
@@ -406,7 +692,7 @@ export default function CapexAdminPreviewPage() {
           </span>
         </div>
 
-        {/* ── 3. DATA TABLE CARD (STICKY HEADER + STICKY ROW NO) ── */}
+        {/* ── 3. DATA TABLE CARD (STICKY HEADER + STICKY ROW NO + STICKY ACTION) ── */}
         <div className="border border-[#DDE5DF] rounded-xl overflow-hidden bg-white shadow-2xs">
           <div
             ref={tableScrollRef}
@@ -426,7 +712,7 @@ export default function CapexAdminPreviewPage() {
                 <p className="text-xs text-[#5F6B63] max-w-sm">
                   {debouncedSearch
                     ? `Tidak ada hasil pencarian untuk "${debouncedSearch}". Coba kata kunci lain.`
-                    : `Belum ada data pada tabel ${activeTabMeta.label}. Silakan upload file Excel terlebih dahulu.`}
+                    : `Belum ada data pada tabel ${activeTabMeta.label}. Silakan tambah data atau upload file Excel.`}
                 </p>
                 {debouncedSearch && (
                   <button
@@ -447,6 +733,12 @@ export default function CapexAdminPreviewPage() {
                     <th className="py-3 px-3 text-center whitespace-nowrap text-[11px] uppercase tracking-wider sticky left-0 z-30 bg-[#F7F9F7] border-r border-[#DDE5DF] w-12 min-w-[48px]">
                       #
                     </th>
+                    {/* Action Header Column (Left-positioned) */}
+                    {canEdit && (
+                      <th className="py-3 px-3 text-center whitespace-nowrap text-[11px] uppercase tracking-wider sticky left-12 z-30 bg-[#F7F9F7] border-r border-[#DDE5DF] w-20 min-w-[76px]">
+                        Aksi
+                      </th>
+                    )}
                     {columnKeys.map((col) => {
                       const isNum = isCurrencyOrNumber(col, tableData[0]?.[col]);
                       return (
@@ -470,9 +762,23 @@ export default function CapexAdminPreviewPage() {
                     return (
                       <tr key={idx} className="hover:bg-[#F7F9F7]/70 transition-colors group">
                         {/* Sticky Row Number */}
-                        <td className="py-2.5 px-3 text-center whitespace-nowrap font-mono text-[11px] text-[#89938D] sticky left-0 z-10 bg-white group-hover:bg-[#F7F9F7] border-r border-[#DDE5DF] select-none font-semibold">
+                        <td className="py-2.5 px-3 text-center whitespace-nowrap font-mono text-[11px] text-[#89938D] sticky left-0 z-10 bg-white group-hover:bg-[#F7F9F7] border-r border-[#DDE5DF] select-none font-semibold w-12 min-w-[48px]">
                           {rowNumber}
                         </td>
+                        {/* Action Body Column (Left-positioned) */}
+                        {canEdit && (
+                          <td className="py-2.5 px-3 text-center whitespace-nowrap sticky left-12 z-10 bg-white group-hover:bg-[#F7F9F7] border-r border-[#DDE5DF] w-20 min-w-[76px]">
+                            <button
+                              type="button"
+                              onClick={() => handleOpenEditModal(row)}
+                              className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-bold text-[#16823B] bg-[#EAF3EC] hover:bg-[#16823B] hover:text-white border border-[#D5E7DA] transition-all cursor-pointer active:scale-95 shadow-2xs"
+                              title="Edit Data"
+                            >
+                              <Pencil className="w-3 h-3" />
+                              <span>Edit</span>
+                            </button>
+                          </td>
+                        )}
                         {columnKeys.map((colName) => {
                           const cellVal = row[colName];
                           const isNum = isCurrencyOrNumber(colName, cellVal);
@@ -483,7 +789,7 @@ export default function CapexAdminPreviewPage() {
                                 isNum ? "text-right font-mono" : "text-left"
                               }`}
                             >
-                              {formatCellValue(colName, cellVal)}
+                              {formatCellValue(colName, cellVal, row)}
                             </td>
                           );
                         })}
@@ -496,7 +802,7 @@ export default function CapexAdminPreviewPage() {
           </div>
         </div>
 
-        {/* ── 4. PAGINATION FOOTER (RESPONSIVE STACK / ROW) ── */}
+        {/* ── 4. PAGINATION FOOTER ── */}
         <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-2 text-xs text-[#5F6B63]">
           {/* Records Counter */}
           <div className="text-center sm:text-left text-[11px] sm:text-xs">
@@ -558,6 +864,508 @@ export default function CapexAdminPreviewPage() {
           </div>
         </div>
       </div>
+
+      {/* ── 5. MODAL FORM: ADD / EDIT DATA ── */}
+      {modalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-xs animate-in fade-in duration-150">
+          <div className="bg-white border border-[#DDE5DF] rounded-2xl shadow-xl w-full max-w-xl max-h-[90vh] flex flex-col overflow-hidden animate-in zoom-in-95 duration-150">
+            {/* Modal Header */}
+            <div className="flex items-center justify-between px-5 py-4 border-b border-[#DDE5DF] bg-[#F7F9F7]">
+              <div className="flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-xl bg-[#EAF3EC] text-[#16823B] flex items-center justify-center border border-[#D5E7DA]">
+                  {modalMode === "add" ? <Plus className="w-4 h-4" /> : <Pencil className="w-4 h-4" />}
+                </div>
+                <div>
+                  <h3 className="text-sm font-bold text-[#17231B]">
+                    {modalMode === "add" ? "Tambah Data" : "Edit Data"} {activeTabMeta.shortLabel}
+                  </h3>
+                  <p className="text-[11px] text-[#5F6B63]">
+                    {modalMode === "add" ? "Lengkapi formulir untuk menambahkan data baru." : "Perbarui informasi data yang dipilih."}
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => !submitting && setModalOpen(false)}
+                disabled={submitting}
+                className="p-1.5 rounded-lg text-[#89938D] hover:text-[#17231B] hover:bg-neutral-200/60 transition-colors cursor-pointer"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            {/* Modal Body */}
+            <form onSubmit={handleSubmitForm} className="flex-1 overflow-y-auto p-5 space-y-4">
+              {formError && (
+                <div className="flex items-center gap-2 p-3 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-xs font-semibold">
+                  <AlertCircle className="w-4 h-4 shrink-0 text-rose-500" />
+                  <span>{formError}</span>
+                </div>
+              )}
+
+              {/* Form Tab: Cost Center */}
+              {activeTab === "cost_center" && (
+                <div className="space-y-3.5">
+                  <div>
+                    <label className="block text-[11px] font-bold uppercase tracking-wider text-[#5F6B63] mb-1">
+                      Kode Cost Center <span className="text-rose-500">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      disabled={modalMode === "edit" || submitting}
+                      value={formData.kodeCostCenter || ""}
+                      onChange={(e) => setFormData({ ...formData, kodeCostCenter: e.target.value })}
+                      placeholder="Contoh: 1101, CC_FINANCE"
+                      className="w-full bg-[#F7F9F7] border border-[#DDE5DF] rounded-xl px-3 py-2 text-xs font-semibold text-[#17231B] focus:outline-none focus:border-[#16823B] disabled:bg-neutral-100 disabled:text-neutral-500 disabled:cursor-not-allowed"
+                    />
+                    {modalMode === "edit" && (
+                      <span className="text-[10px] text-[#89938D] mt-1 block">
+                        Kode Cost Center adalah Primary Key dan tidak dapat diubah.
+                      </span>
+                    )}
+                  </div>
+
+                  <div>
+                    <label className="block text-[11px] font-bold uppercase tracking-wider text-[#5F6B63] mb-1">
+                      Keterangan / Nama Bagian <span className="text-rose-500">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      disabled={submitting}
+                      value={formData.keterangan || ""}
+                      onChange={(e) => setFormData({ ...formData, keterangan: e.target.value })}
+                      placeholder="Contoh: Bagian Keuangan & Akuntansi"
+                      className="w-full bg-[#F7F9F7] border border-[#DDE5DF] rounded-xl px-3 py-2 text-xs font-semibold text-[#17231B] focus:outline-none focus:border-[#16823B]"
+                    />
+                  </div>
+                </div>
+              )}
+
+              {/* Form Tab: Approver */}
+              {activeTab === "approver" && (
+                <div className="space-y-3.5">
+                  <div>
+                    <label className="block text-[11px] font-bold uppercase tracking-wider text-[#5F6B63] mb-1">
+                      Kode Approver <span className="text-rose-500">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      disabled={modalMode === "edit" || submitting}
+                      value={formData.kodeApprover || ""}
+                      onChange={(e) => setFormData({ ...formData, kodeApprover: e.target.value })}
+                      placeholder="Contoh: APV01, KADIV"
+                      className="w-full bg-[#F7F9F7] border border-[#DDE5DF] rounded-xl px-3 py-2 text-xs font-semibold text-[#17231B] focus:outline-none focus:border-[#16823B] disabled:bg-neutral-100 disabled:text-neutral-500 disabled:cursor-not-allowed"
+                    />
+                    {modalMode === "edit" && (
+                      <span className="text-[10px] text-[#89938D] mt-1 block">
+                        Kode Approver adalah Primary Key dan tidak dapat diubah.
+                      </span>
+                    )}
+                  </div>
+
+                  <div>
+                    <label className="block text-[11px] font-bold uppercase tracking-wider text-[#5F6B63] mb-1">
+                      Nama Lengkap / Jabatan Approver
+                    </label>
+                    <input
+                      type="text"
+                      disabled={submitting}
+                      value={formData.nama || ""}
+                      onChange={(e) => setFormData({ ...formData, nama: e.target.value })}
+                      placeholder="Contoh: Budi Santoso (Kadiv Teknik)"
+                      className="w-full bg-[#F7F9F7] border border-[#DDE5DF] rounded-xl px-3 py-2 text-xs font-semibold text-[#17231B] focus:outline-none focus:border-[#16823B]"
+                    />
+                  </div>
+                </div>
+              )}
+
+              {/* Form Tab: Kategori */}
+              {activeTab === "kategori" && (
+                <div className="space-y-3.5">
+                  <div>
+                    <label className="block text-[11px] font-bold uppercase tracking-wider text-[#5F6B63] mb-1">
+                      Nomor CAPEX <span className="text-rose-500">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      disabled={modalMode === "edit" || submitting}
+                      value={formData.capexNo || ""}
+                      onChange={(e) => setFormData({ ...formData, capexNo: e.target.value })}
+                      placeholder="Contoh: CPX-2024-001"
+                      className="w-full bg-[#F7F9F7] border border-[#DDE5DF] rounded-xl px-3 py-2 text-xs font-semibold text-[#17231B] focus:outline-none focus:border-[#16823B] disabled:bg-neutral-100 disabled:text-neutral-500 disabled:cursor-not-allowed"
+                    />
+                    {modalMode === "edit" && (
+                      <span className="text-[10px] text-[#89938D] mt-1 block">
+                        Nomor CAPEX adalah Primary Key dan tidak dapat diubah.
+                      </span>
+                    )}
+                  </div>
+
+                  <div>
+                    <label className="block text-[11px] font-bold uppercase tracking-wider text-[#5F6B63] mb-1">
+                      Deskripsi
+                    </label>
+                    <input
+                      type="text"
+                      disabled={submitting}
+                      value={formData.description || ""}
+                      onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                      placeholder="Contoh: Pengadaan Mesin Turbin"
+                      className="w-full bg-[#F7F9F7] border border-[#DDE5DF] rounded-xl px-3 py-2 text-xs font-semibold text-[#17231B] focus:outline-none focus:border-[#16823B]"
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    <div>
+                      <label className="block text-[11px] font-bold uppercase tracking-wider text-[#5F6B63] mb-1">
+                        Cost Center
+                      </label>
+                      <input
+                        type="text"
+                        disabled={submitting}
+                        value={formData.costCenter || ""}
+                        onChange={(e) => setFormData({ ...formData, costCenter: e.target.value })}
+                        placeholder="Contoh: 1102"
+                        className="w-full bg-[#F7F9F7] border border-[#DDE5DF] rounded-xl px-3 py-2 text-xs font-semibold text-[#17231B] focus:outline-none focus:border-[#16823B]"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-[11px] font-bold uppercase tracking-wider text-[#5F6B63] mb-1">
+                        Kategori
+                      </label>
+                      <input
+                        type="text"
+                        disabled={submitting}
+                        value={formData.kategori || ""}
+                        onChange={(e) => setFormData({ ...formData, kategori: e.target.value })}
+                        placeholder="Contoh: Mesin & Peralatan"
+                        className="w-full bg-[#F7F9F7] border border-[#DDE5DF] rounded-xl px-3 py-2 text-xs font-semibold text-[#17231B] focus:outline-none focus:border-[#16823B]"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-[11px] font-bold uppercase tracking-wider text-[#5F6B63] mb-1">
+                        Komoditi
+                      </label>
+                      <input
+                        type="text"
+                        disabled={submitting}
+                        value={formData.komoditi || ""}
+                        onChange={(e) => setFormData({ ...formData, komoditi: e.target.value })}
+                        placeholder="Contoh: Kelapa Sawit"
+                        className="w-full bg-[#F7F9F7] border border-[#DDE5DF] rounded-xl px-3 py-2 text-xs font-semibold text-[#17231B] focus:outline-none focus:border-[#16823B]"
+                      />
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Form Tab: Budget */}
+              {activeTab === "budget" && (
+                <div className="space-y-3.5">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                      <label className="block text-[11px] font-bold uppercase tracking-wider text-[#5F6B63] mb-1">
+                        Nomor CAPEX
+                      </label>
+                      <input
+                        type="text"
+                        disabled={submitting}
+                        value={formData.capexNo || ""}
+                        onChange={(e) => setFormData({ ...formData, capexNo: e.target.value })}
+                        placeholder="Contoh: CPX-2024-001"
+                        className="w-full bg-[#F7F9F7] border border-[#DDE5DF] rounded-xl px-3 py-2 text-xs font-semibold text-[#17231B] focus:outline-none focus:border-[#16823B]"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-[11px] font-bold uppercase tracking-wider text-[#5F6B63] mb-1">
+                        Cost Center
+                      </label>
+                      <input
+                        type="text"
+                        disabled={submitting}
+                        value={formData.costCenter || ""}
+                        onChange={(e) => setFormData({ ...formData, costCenter: e.target.value })}
+                        placeholder="Contoh: 1102"
+                        className="w-full bg-[#F7F9F7] border border-[#DDE5DF] rounded-xl px-3 py-2 text-xs font-semibold text-[#17231B] focus:outline-none focus:border-[#16823B]"
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-[11px] font-bold uppercase tracking-wider text-[#5F6B63] mb-1">
+                      Deskripsi
+                    </label>
+                    <textarea
+                      rows={2}
+                      disabled={submitting}
+                      value={formData.description || ""}
+                      onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                      placeholder="Deskripsi kegiatan atau pagu anggaran"
+                      className="w-full bg-[#F7F9F7] border border-[#DDE5DF] rounded-xl px-3 py-2 text-xs font-semibold text-[#17231B] focus:outline-none focus:border-[#16823B]"
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                      <label className="block text-[11px] font-bold uppercase tracking-wider text-[#5F6B63] mb-1">
+                        Pagu Anggaran (Amount)
+                      </label>
+                      <input
+                        type="number"
+                        step="any"
+                        disabled={submitting}
+                        value={formData.amount ?? ""}
+                        onChange={(e) => setFormData({ ...formData, amount: e.target.value })}
+                        placeholder="0"
+                        className="w-full bg-[#F7F9F7] border border-[#DDE5DF] rounded-xl px-3 py-2 text-xs font-mono font-semibold text-[#17231B] focus:outline-none focus:border-[#16823B]"
+                      />
+                      <span className="text-[11px] font-mono text-[#16823B] font-semibold mt-1 block">
+                        {formatCurrencyRp(Number(formData.amount) || 0)}
+                      </span>
+                    </div>
+                    <div>
+                      <label className="block text-[11px] font-bold uppercase tracking-wider text-[#5F6B63] mb-1">
+                        Quantity
+                      </label>
+                      <input
+                        type="number"
+                        step="any"
+                        disabled={submitting}
+                        value={formData.quantity ?? ""}
+                        onChange={(e) => setFormData({ ...formData, quantity: e.target.value })}
+                        placeholder="0"
+                        className="w-full bg-[#F7F9F7] border border-[#DDE5DF] rounded-xl px-3 py-2 text-xs font-mono font-semibold text-[#17231B] focus:outline-none focus:border-[#16823B]"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    <div>
+                      <label className="block text-[11px] font-bold uppercase tracking-wider text-[#5F6B63] mb-1">
+                        IO (Internal Order)
+                      </label>
+                      <input
+                        type="text"
+                        disabled={submitting}
+                        value={formData.io || ""}
+                        onChange={(e) => setFormData({ ...formData, io: e.target.value })}
+                        placeholder="IO..."
+                        className="w-full bg-[#F7F9F7] border border-[#DDE5DF] rounded-xl px-3 py-2 text-xs font-semibold text-[#17231B] focus:outline-none focus:border-[#16823B]"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-[11px] font-bold uppercase tracking-wider text-[#5F6B63] mb-1">
+                        MO (Maint. Order)
+                      </label>
+                      <input
+                        type="text"
+                        disabled={submitting}
+                        value={formData.mo || ""}
+                        onChange={(e) => setFormData({ ...formData, mo: e.target.value })}
+                        placeholder="MO..."
+                        className="w-full bg-[#F7F9F7] border border-[#DDE5DF] rounded-xl px-3 py-2 text-xs font-semibold text-[#17231B] focus:outline-none focus:border-[#16823B]"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-[11px] font-bold uppercase tracking-wider text-[#5F6B63] mb-1">
+                        WBS Element
+                      </label>
+                      <input
+                        type="text"
+                        disabled={submitting}
+                        value={formData.wbs || ""}
+                        onChange={(e) => setFormData({ ...formData, wbs: e.target.value })}
+                        placeholder="WBS..."
+                        className="w-full bg-[#F7F9F7] border border-[#DDE5DF] rounded-xl px-3 py-2 text-xs font-semibold text-[#17231B] focus:outline-none focus:border-[#16823B]"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    <div>
+                      <label className="block text-[11px] font-bold uppercase tracking-wider text-[#5F6B63] mb-1">
+                        Group CAPEX
+                      </label>
+                      <input
+                        type="text"
+                        disabled={submitting}
+                        value={formData.groupCapex || ""}
+                        onChange={(e) => setFormData({ ...formData, groupCapex: e.target.value })}
+                        placeholder="Group..."
+                        className="w-full bg-[#F7F9F7] border border-[#DDE5DF] rounded-xl px-3 py-2 text-xs font-semibold text-[#17231B] focus:outline-none focus:border-[#16823B]"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-[11px] font-bold uppercase tracking-wider text-[#5F6B63] mb-1">
+                        Kategori
+                      </label>
+                      <input
+                        type="text"
+                        disabled={submitting}
+                        value={formData.kategori || ""}
+                        onChange={(e) => setFormData({ ...formData, kategori: e.target.value })}
+                        placeholder="Kategori..."
+                        className="w-full bg-[#F7F9F7] border border-[#DDE5DF] rounded-xl px-3 py-2 text-xs font-semibold text-[#17231B] focus:outline-none focus:border-[#16823B]"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-[11px] font-bold uppercase tracking-wider text-[#5F6B63] mb-1">
+                        Komoditi
+                      </label>
+                      <input
+                        type="text"
+                        disabled={submitting}
+                        value={formData.komoditi || ""}
+                        onChange={(e) => setFormData({ ...formData, komoditi: e.target.value })}
+                        placeholder="Komoditi..."
+                        className="w-full bg-[#F7F9F7] border border-[#DDE5DF] rounded-xl px-3 py-2 text-xs font-semibold text-[#17231B] focus:outline-none focus:border-[#16823B]"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="p-2.5 rounded-xl bg-amber-50 border border-amber-200 text-amber-800 text-[11px] flex items-start gap-2">
+                    <AlertCircle className="w-4 h-4 shrink-0 text-amber-600 mt-0.5" />
+                    <span>
+                      Menyimpan perubahan data budget akan otomatis menjalankan rekonsiliasi tabel Total agar dashboard analitik tetap sinkron.
+                    </span>
+                  </div>
+                </div>
+              )}
+
+              {/* Modal Footer */}
+              <div className="flex items-center justify-end gap-2.5 pt-3 border-t border-[#DDE5DF]">
+                <button
+                  type="button"
+                  onClick={() => setModalOpen(false)}
+                  disabled={submitting}
+                  className="px-4 py-2 rounded-xl text-xs font-bold text-[#5F6B63] bg-[#F7F9F7] hover:bg-[#DDE5DF]/60 border border-[#DDE5DF] transition-colors cursor-pointer"
+                >
+                  Batal
+                </button>
+                <button
+                  type="submit"
+                  disabled={submitting}
+                  className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold text-white bg-[#16823B] hover:bg-[#126b30] transition-colors cursor-pointer disabled:opacity-50 shadow-xs"
+                >
+                  {submitting ? (
+                    <>
+                      <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                      <span>Menyimpan...</span>
+                    </>
+                  ) : (
+                    <>
+                      <Save className="w-3.5 h-3.5" />
+                      <span>Simpan Perubahan</span>
+                    </>
+                  )}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* ── 6. MODAL CONFIRMATION: RESET DATA ── */}
+      {resetModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-xs animate-in fade-in duration-150">
+          <div className="bg-white border border-[#DDE5DF] rounded-2xl shadow-xl w-full max-w-md overflow-hidden animate-in zoom-in-95 duration-150">
+            {/* Modal Header */}
+            <div className="flex items-center justify-between px-5 py-4 border-b border-rose-100 bg-rose-50/50">
+              <div className="flex items-center gap-2.5">
+                <div className="w-9 h-9 rounded-xl bg-rose-100 text-rose-600 flex items-center justify-center border border-rose-200">
+                  <Trash2 className="w-4 h-4" />
+                </div>
+                <div>
+                  <h3 className="text-sm font-bold text-[#17231B]">
+                    Reset Data {activeTabMeta.label}
+                  </h3>
+                  <p className="text-[11px] text-rose-600 font-semibold">
+                    Tindakan permanen & tidak dapat dibatalkan
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => !resetting && setResetModalOpen(false)}
+                disabled={resetting}
+                className="p-1.5 rounded-lg text-[#89938D] hover:text-[#17231B] hover:bg-neutral-200/60 transition-colors cursor-pointer"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            {/* Modal Body */}
+            <div className="p-5 space-y-3.5">
+              <p className="text-xs text-[#5F6B63] leading-relaxed">
+                Apakah Anda yakin ingin menghapus dan mengosongkan seluruh data pada tabel{" "}
+                <strong className="text-[#17231B]">{activeTabMeta.label}</strong> yang saat ini berjumlah{" "}
+                <strong className="text-rose-600">{formatNumberId(totalRecords)} data</strong>?
+              </p>
+
+              {["created", "po", "budget"].includes(activeTab) && (
+                <div className="p-3 rounded-xl bg-amber-50 border border-amber-200 text-amber-800 text-[11px] flex items-start gap-2">
+                  <AlertCircle className="w-4 h-4 shrink-0 text-amber-600 mt-0.5" />
+                  <span>
+                    Tabel <strong>Total</strong> akan otomatis direkonsiliasi ulang setelah pengosongan tabel ini.
+                  </span>
+                </div>
+              )}
+            </div>
+
+            {/* Modal Footer */}
+            <div className="flex items-center justify-end gap-2.5 px-5 py-3.5 border-t border-[#DDE5DF] bg-[#F7F9F7]">
+              <button
+                type="button"
+                onClick={() => setResetModalOpen(false)}
+                disabled={resetting}
+                className="px-4 py-2 rounded-xl text-xs font-bold text-[#5F6B63] bg-white hover:bg-neutral-100 border border-[#DDE5DF] transition-colors cursor-pointer"
+              >
+                Batal
+              </button>
+              <button
+                type="button"
+                onClick={handleConfirmReset}
+                disabled={resetting}
+                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold text-white bg-rose-600 hover:bg-rose-700 transition-colors cursor-pointer disabled:opacity-50 shadow-xs"
+              >
+                {resetting ? (
+                  <>
+                    <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                    <span>Mengosongkan...</span>
+                  </>
+                ) : (
+                  <>
+                    <Trash2 className="w-3.5 h-3.5" />
+                    <span>Ya, Kosongkan Data</span>
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Toast Notification */}
+      {toastMessage && (
+        <div
+          className={`fixed bottom-5 right-5 z-50 flex items-center gap-2.5 px-4 py-3 rounded-xl shadow-lg border text-xs font-semibold transition-all duration-200 ${
+            toastMessage.type === "success"
+              ? "bg-emerald-50 text-emerald-800 border-emerald-200"
+              : "bg-rose-50 text-rose-800 border-rose-200"
+          }`}
+        >
+          {toastMessage.type === "success" ? (
+            <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+          ) : (
+            <AlertCircle className="w-4 h-4 text-rose-600 shrink-0" />
+          )}
+          <span>{toastMessage.text}</span>
+        </div>
+      )}
     </div>
   );
 }

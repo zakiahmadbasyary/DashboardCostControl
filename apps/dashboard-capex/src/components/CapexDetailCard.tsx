@@ -82,7 +82,7 @@ export default function CapexDetailCard({
               <StatusBadge status={selectedItem.statusCapex} size="sm" />
             </div>
             <p className="text-[11px] text-[#5F6B63] truncate">
-              ID Total: #{selectedItem.idTotal} · Tahun {selectedItem.tahun || "—"}
+              Tahun {selectedItem.tahun || "—"}
               {ioDisplay.value !== "—" ? ` · ${ioDisplay.type}: ${ioDisplay.value}` : ""}
             </p>
           </div>
