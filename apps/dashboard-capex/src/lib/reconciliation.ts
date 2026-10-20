@@ -1,5 +1,5 @@
 import prisma from "@/lib/prisma";
-import { BudgetStatus, StatusCapex } from "@prisma/client";
+import { BudgetStatus, StatusCapex } from "@/generated/client";
 
 /**
  * Reconciles Budget, Created, and PO tables into the Total table

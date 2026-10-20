@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import * as XLSX from "xlsx";
 import * as path from "path";
-import { BudgetStatus, Prisma } from "@prisma/client";
+import { BudgetStatus, Prisma } from "@/generated/client";
 import { runCapexReconciliation } from "@/lib/reconciliation";
 import { COST_CENTER_MAP } from "@/lib/costCenters";
 

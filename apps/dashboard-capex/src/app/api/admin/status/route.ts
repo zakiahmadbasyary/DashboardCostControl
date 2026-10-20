@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
-import { BudgetStatus, Prisma, StatusCapex } from "@prisma/client";
+import { BudgetStatus, Prisma, StatusCapex } from "@/generated/client";
 
 // Safe serializer for BigInt and Decimal
 function serializeData<T>(obj: T): T {

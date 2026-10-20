@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
-import { Prisma } from "@prisma/client";
+import { Prisma } from "@/generated/client";
 import { runCapexReconciliation } from "@/lib/reconciliation";
 
 // Ensure a cost center code exists in the cost_center table
