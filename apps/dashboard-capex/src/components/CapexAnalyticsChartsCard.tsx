@@ -7,13 +7,20 @@ import {
   TrendingUp,
   FolderTree,
   Filter,
+  Lock,
+  SlidersHorizontal,
 } from "lucide-react";
+
+export type ChartFilterMode = "locked" | "responsive";
 
 interface CapexAnalyticsChartsCardProps {
   items: CapexItem[];
+  globalItems?: CapexItem[];
   loading?: boolean;
   activeFilters?: CapexMainFilterValues;
   statusList?: string[];
+  filterMode?: ChartFilterMode;
+  onToggleFilterMode?: (mode: ChartFilterMode) => void;
   onSelectStatus?: (status: string) => void;
   onSelectCategory?: (category: string) => void;
   onResetStatus?: () => void;
@@ -103,13 +110,20 @@ function getCategoryShortLabel(name: string): string {
 
 export default function CapexAnalyticsChartsCard({
   items,
+  globalItems,
   loading = false,
   activeFilters,
+  filterMode,
+  onToggleFilterMode,
   onSelectStatus,
   onSelectCategory,
   onResetStatus,
   onResetCategory,
 }: CapexAnalyticsChartsCardProps) {
+  const [internalMode, setInternalMode] = useState<ChartFilterMode>("locked");
+  const mode = filterMode ?? internalMode;
+  const setMode = onToggleFilterMode ?? setInternalMode;
+
   const [hoveredStatus, setHoveredStatus] = useState<string | null>(null);
   const [hoveredCategory, setHoveredCategory] = useState<string | null>(null);
 
@@ -119,6 +133,15 @@ export default function CapexAnalyticsChartsCard({
   const isAnyCategorySelected = Boolean(
     activeFilters?.kategori && activeFilters.kategori !== "Semua"
   );
+
+  // Active items for chart calculations:
+  // In locked mode, use globalItems (unfiltered); in responsive mode, use filtered items
+  const chartItems = useMemo(() => {
+    if (mode === "locked" && globalItems && globalItems.length > 0) {
+      return globalItems;
+    }
+    return items;
+  }, [mode, globalItems, items]);
 
   // ─── 1. DATA PROCESSING UNTUK GRAFIK KIRI (Amount per Status) ─────────────────
   const statusSummary = useMemo(() => {
@@ -130,7 +153,7 @@ export default function CapexAnalyticsChartsCard({
     let grandTotalAmount = 0;
     let grandTotalCount = 0;
 
-    items.forEach((item) => {
+    chartItems.forEach((item) => {
       const norm = normalizeStatus(item.statusCapex);
       const amount = Number(item.amount) || 0;
 
@@ -163,7 +186,7 @@ export default function CapexAnalyticsChartsCard({
       grandTotalAmount,
       grandTotalCount,
     };
-  }, [items]);
+  }, [chartItems]);
 
   // ─── 2. DATA PROCESSING UNTUK GRAFIK KANAN (Belum Created vs Sudah Created per Kategori) ─
   const categorySummary = useMemo(() => {
@@ -178,7 +201,7 @@ export default function CapexAnalyticsChartsCard({
       }
     > = {};
 
-    items.forEach((item) => {
+    chartItems.forEach((item) => {
       const cat = (item.kategori && item.kategori.trim()) || "Tanpa Kategori";
       const norm = normalizeStatus(item.statusCapex);
       const isBelumCreated = norm === "Belum Created";
@@ -224,7 +247,7 @@ export default function CapexAnalyticsChartsCard({
       totalSudahCreated,
       grandTotalCatCount,
     };
-  }, [items]);
+  }, [chartItems]);
 
   // Loading skeleton matching HPP Trend & Wilayah
   if (loading) {
@@ -237,7 +260,69 @@ export default function CapexAnalyticsChartsCard({
   }
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 font-sans">
+    <div className="space-y-3 sm:space-y-3.5 font-sans">
+      {/* ── TOP CONTROL BAR: TOGGLE FILTER MODE (TERKUNCI / RESPONSIF) ── */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white px-4 py-3 sm:px-5 sm:py-3.5 rounded-2xl border border-[#DDE5DF] shadow-xs">
+        <div className="flex items-center gap-2.5 min-w-0">
+          <div className="p-2 rounded-xl bg-[#16823B]/10 text-[#16823B] shrink-0">
+            <TrendingUp className="w-4 h-4" />
+          </div>
+          <div className="min-w-0">
+            <div className="flex items-center gap-2 flex-wrap">
+              <span className="font-bold text-xs sm:text-sm text-[#17231B]">
+                Summary CAPEX
+              </span>
+              <span
+                className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${
+                  mode === "locked"
+                    ? "bg-emerald-50 text-emerald-800 border-emerald-200"
+                    : "bg-blue-50 text-blue-800 border-blue-200"
+                }`}
+              >
+                {mode === "locked" ? "Mode Terkunci (Global)" : "Mode Responsif (Filter)"}
+              </span>
+            </div>
+            <p className="text-[11px] text-[#5F6B63] truncate">
+              {mode === "locked"
+                ? "Grafik menampilkan data total keseluruhan (tidak terpotong oleh dropdown filter)."
+                : "Grafik ikut menyaring dan menyesuaikan data sesuai filter yang dipilih di atas."}
+            </p>
+          </div>
+        </div>
+
+        {/* Toggle Buttons */}
+        <div className="flex items-center gap-1 p-1 bg-[#F7F9F7] rounded-xl border border-[#DDE5DF] shrink-0 self-start sm:self-center">
+          <button
+            type="button"
+            onClick={() => setMode("locked")}
+            className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+              mode === "locked"
+                ? "bg-[#16823B] text-white shadow-xs"
+                : "text-[#5F6B63] hover:text-[#17231B] hover:bg-neutral-200/50"
+            }`}
+            title="Grafik menampilkan total data CAPEX secara keseluruhan"
+          >
+            <Lock className="w-3.5 h-3.5" />
+            <span>Terkunci (Global)</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => setMode("responsive")}
+            className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+              mode === "responsive"
+                ? "bg-[#16823B] text-white shadow-xs"
+                : "text-[#5F6B63] hover:text-[#17231B] hover:bg-neutral-200/50"
+            }`}
+            title="Grafik ikut tersaring sesuai opsi Kategori & Cost Center di atas"
+          >
+            <SlidersHorizontal className="w-3.5 h-3.5" />
+            <span>Responsif (Filter)</span>
+          </button>
+        </div>
+      </div>
+
+      {/* ── TWO COLUMN CHARTS ── */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 font-sans">
       {/* ----------------------------------------------------------------- */}
       {/* CHART 1 (LEFT): Total Amount per Status CAPEX (Vertical Bar Chart)*/}
       {/* ----------------------------------------------------------------- */}
@@ -701,6 +786,7 @@ export default function CapexAnalyticsChartsCard({
           <span className="font-semibold text-[#16823B]">Distribusi Kategori</span>
         </div>
       </div>
+    </div>
     </div>
   );
 }

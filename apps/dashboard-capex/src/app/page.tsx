@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useCallback } from "react";
 import CapexDashboardHeader from "@/components/CapexDashboardHeader";
 import CapexMainFilters from "@/components/CapexMainFilters";
-import CapexAnalyticsChartsCard from "@/components/CapexAnalyticsChartsCard";
+import CapexAnalyticsChartsCard, { ChartFilterMode } from "@/components/CapexAnalyticsChartsCard";
 import CapexListCard from "@/components/CapexListCard";
 import CapexDetailCard from "@/components/CapexDetailCard";
 import UserApproverSection from "@/components/UserApproverSection";
@@ -28,6 +28,8 @@ export default function DashboardCapexPage() {
 
   // ─── DATA STATES ────────────────────────────────────────────────────────────
   const [capexList, setCapexList] = useState<CapexItem[]>([]);
+  const [allCapexList, setAllCapexList] = useState<CapexItem[]>([]);
+  const [chartFilterMode, setChartFilterMode] = useState<ChartFilterMode>("locked");
   const [selectedCapex, setSelectedCapex] = useState<CapexItem | null>(null);
 
   const [approvers, setApprovers] = useState<UserApproverItem[]>([]);
@@ -81,6 +83,15 @@ export default function DashboardCapexPage() {
       const list: CapexItem[] = json.data || [];
       setCapexList(list);
 
+      // Simpan data global jika filter dalam kondisi default/tanpa filter
+      if (
+        filters.kategori === "Semua" &&
+        filters.costCenter === "Semua" &&
+        filters.statusCapex === "Semua"
+      ) {
+        setAllCapexList(list);
+      }
+
       // Auto-selection rule (requirement #32):
       // Jika pilihan CAPEX aktif tidak lagi termasuk hasil filter, pilih baris pertama yang tersedia atau empty state
       setSelectedCapex((prevSelected) => {
@@ -119,11 +130,25 @@ export default function DashboardCapexPage() {
     }
   }, []);
 
+  // ─── 4. FETCH GLOBAL CAPEX (FOR LOCKED GLOBAL CHART VIEW) ───────────────────
+  const fetchAllCapex = useCallback(async () => {
+    try {
+      const res = await fetch("/api/capex/list");
+      const json = await res.json();
+      if (res.ok && json.success) {
+        setAllCapexList(json.data || []);
+      }
+    } catch (err) {
+      console.error("Gagal memuat data global CAPEX:", err);
+    }
+  }, []);
+
   // ─── LIFECYCLE ──────────────────────────────────────────────────────────────
   useEffect(() => {
     fetchFilters();
     fetchApprovers();
-  }, [fetchFilters, fetchApprovers]);
+    fetchAllCapex();
+  }, [fetchFilters, fetchApprovers, fetchAllCapex]);
 
   useEffect(() => {
     fetchCapexList(appliedFilters);
@@ -202,9 +227,12 @@ export default function DashboardCapexPage() {
         <section>
           <CapexAnalyticsChartsCard
             items={capexList}
+            globalItems={allCapexList.length > 0 ? allCapexList : capexList}
             loading={loadingCapex}
             activeFilters={appliedFilters}
             statusList={statusList}
+            filterMode={chartFilterMode}
+            onToggleFilterMode={setChartFilterMode}
             onSelectStatus={handleSelectStatusFromChart}
             onSelectCategory={handleSelectCategoryFromChart}
             onResetStatus={handleResetStatusFromChart}
