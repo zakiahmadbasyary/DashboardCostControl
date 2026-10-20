@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
+import { PendingCapexItem, UserApproverItem } from "@/types/capex";
 
 export async function GET() {
   try {
@@ -8,33 +9,60 @@ export async function GET() {
       orderBy: {
         kodeApprover: "asc",
       },
-      include: {
-        createdList: {
-          where: {
-            dateApprove: null,
-          },
-          orderBy: {
-            reqDate: "asc",
-          },
-        },
+    });
+
+    // 2. Fetch all Created records ordered by idCreated asc (preserving workflow sequence)
+    const allCreated = await prisma.created.findMany({
+      orderBy: {
+        idCreated: "asc",
       },
     });
 
-    // 2. Map approvers and their pending items safely
-    const data = approvers.map((app) => {
-      const pendingItems = app.createdList.map((item) => ({
-        idCreated: item.idCreated.toString(),
-        capexNo: item.capexNo,
-        description: item.description,
-        amount: item.amount ? Number(item.amount) : null,
-        io: item.io,
-        mo: item.mo,
-        wbs: item.wbs,
-        reqDate: item.reqDate ? item.reqDate.toISOString().split("T")[0] : null,
-        budgetStatus: item.budgetStatus,
-        notes: item.notes,
-        dateApprove: item.dateApprove ? item.dateApprove.toISOString().split("T")[0] : null,
-      }));
+    // 3. Group Created records by CAPEX / PR identity
+    // Grouping priority: capexNo -> noPr -> individual idCreated
+    const groupedCapex = new Map<string, typeof allCreated>();
+    for (const item of allCreated) {
+      const key = item.capexNo?.trim() || (item.noPr ? `PR_${item.noPr.trim()}` : `ID_${item.idCreated}`);
+      const list = groupedCapex.get(key) || [];
+      list.push(item);
+      groupedCapex.set(key, list);
+    }
+
+    // 4. Map for accumulating pending items per approver code
+    const pendingByApprover = new Map<string, PendingCapexItem[]>();
+
+    // 5. Evaluate sequential approval for each CAPEX group
+    // Sequential rule: only the FIRST approver in sequence whose dateApprove is null receives the pending status.
+    for (const [, items] of groupedCapex.entries()) {
+      // Find the first approver in the sequence that has NOT approved yet (dateApprove == null)
+      const activePendingItem = items.find((row) => row.dateApprove === null);
+
+      if (activePendingItem && activePendingItem.kodeApprover) {
+        const code = activePendingItem.kodeApprover.trim();
+        const currentList = pendingByApprover.get(code) || [];
+
+        currentList.push({
+          idCreated: activePendingItem.idCreated.toString(),
+          capexNo: activePendingItem.capexNo,
+          description: activePendingItem.description,
+          amount: activePendingItem.amount ? Number(activePendingItem.amount) : null,
+          io: activePendingItem.io,
+          mo: activePendingItem.mo,
+          wbs: activePendingItem.wbs,
+          reqDate: activePendingItem.reqDate ? activePendingItem.reqDate.toISOString().split("T")[0] : null,
+          budgetStatus: activePendingItem.budgetStatus,
+          notes: activePendingItem.notes,
+          dateApprove: activePendingItem.dateApprove ? activePendingItem.dateApprove.toISOString().split("T")[0] : null,
+        });
+
+        pendingByApprover.set(code, currentList);
+      }
+    }
+
+    // 6. Assemble response matching UserApproverItem structure
+    const data: UserApproverItem[] = approvers.map((app) => {
+      const code = app.kodeApprover.trim();
+      const pendingItems = pendingByApprover.get(code) || [];
 
       return {
         kodeApprover: app.kodeApprover,
