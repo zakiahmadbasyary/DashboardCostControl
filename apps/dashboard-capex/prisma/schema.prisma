@@ -168,8 +168,6 @@ model Created {
   orderNo       String?       @map("order_no")
   notes         String?       @map("notes")
   budgetStatus  BudgetStatus? @map("budget_status")
-  kategori      String?       @map("kategori")       // AUDIT HISTORIS — nilai saat input, tidak diupdate
-  komoditi      String?       @map("komoditi")       // AUDIT HISTORIS — nilai saat input, tidak diupdate
 
   // Relasi SOFT ke Total (diisi setelah rekonsiliasi)
   totalRecord   Total?        @relation(fields: [idTotal], references: [idTotal])

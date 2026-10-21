@@ -52,13 +52,8 @@ export async function GET() {
         return (idxA === -1 ? 999 : idxA) - (idxB === -1 ? 999 : idxB);
       });
 
-    // 3. Get distinct kategori from Kategori master, Created, and Budget
+    // 3. Get distinct kategori from Kategori master and Budget
     const kategoriMaster = await prisma.kategori.findMany({
-      where: { kategori: { not: null } },
-      select: { kategori: true },
-      distinct: ["kategori"],
-    });
-    const kategoriCreated = await prisma.created.findMany({
       where: { kategori: { not: null } },
       select: { kategori: true },
       distinct: ["kategori"],
@@ -70,7 +65,7 @@ export async function GET() {
     });
 
     const kategoriSet = new Set<string>();
-    [...kategoriMaster, ...kategoriCreated, ...kategoriBudget].forEach((item) => {
+    [...kategoriMaster, ...kategoriBudget].forEach((item) => {
       const trimmed = item.kategori?.trim();
       if (trimmed) kategoriSet.add(trimmed);
     });

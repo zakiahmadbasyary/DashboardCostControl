@@ -343,8 +343,6 @@ export async function POST(request: NextRequest) {
             orderNo,
             notes,
             budgetStatus,
-            kategori: kategoriVal,
-            komoditi: komoditiVal,
           };
         })
         .filter((item): item is NonNullable<typeof item> => item !== null);
@@ -394,42 +392,68 @@ export async function POST(request: NextRequest) {
         );
 
         // 3. Auto-insert Kategori jika capexNo belum ada di tabel kategori
-        const kategoriMap = new Map<
+        // Aturan:
+        // - Cek tabel kategori: jika belum ada:
+        //   - Cek tabel budget berdasarkan capex_no: jika ada, ambil kategori & komoditinya.
+        //   - Jika tidak ada di budget juga: simpan dengan kategori & komoditi NULL agar bisa diedit manual.
+        const distinctCapex = new Map<
           string,
           {
             description: string | null;
             costCenter: string | null;
-            kategori: string | null;
-            komoditi: string | null;
           }
         >();
 
         for (const row of parsedRows) {
           if (row.capexNo) {
-            if (!kategoriMap.has(row.capexNo)) {
-              kategoriMap.set(row.capexNo, {
+            if (!distinctCapex.has(row.capexNo)) {
+              distinctCapex.set(row.capexNo, {
                 description: row.description,
                 costCenter: row.costCenter,
-                kategori: row.kategori,
-                komoditi: row.komoditi,
               });
             }
           }
         }
 
-        for (const [capexNo, data] of kategoriMap.entries()) {
+        for (const [capexNo, meta] of distinctCapex.entries()) {
           const existingKategori = await tx.kategori.findUnique({
             where: { capexNo },
           });
 
           if (!existingKategori) {
+            // Cek di tabel budget berdasarkan capexNo
+            const budgetMatch = await tx.budget.findFirst({
+              where: {
+                capexNo,
+                OR: [
+                  { kategori: { not: null } },
+                  { komoditi: { not: null } },
+                ],
+              },
+              select: {
+                kategori: true,
+                komoditi: true,
+                description: true,
+                costCenter: true,
+              },
+            });
+
+            const kategori = budgetMatch?.kategori ? budgetMatch.kategori.trim() : null;
+            const komoditi = budgetMatch?.komoditi ? budgetMatch.komoditi.trim() : null;
+            const desc = meta.description || budgetMatch?.description?.trim() || null;
+            const cc = meta.costCenter || budgetMatch?.costCenter?.trim() || null;
+
+            if (cc) {
+              await ensureCostCentersExist(tx, [cc]);
+            }
+
             await tx.kategori.create({
               data: {
                 capexNo,
-                description: data.description,
-                costCenter: data.costCenter,
-                kategori: data.kategori,
-                komoditi: data.komoditi,
+                description: desc,
+                costCenter: cc,
+                kategori,
+                komoditi,
               },
             });
           }
@@ -578,7 +602,8 @@ export async function POST(request: NextRequest) {
           const kategoriVal = String(getVal(row, ["kategori", "category"]) || "").trim() || null;
           const komoditiVal = String(getVal(row, ["komoditi", "commodity"]) || "").trim() || null;
 
-          if (!io && !mo && !wbs && !description && !capexNo) return null;
+          // capexNo is optional: will be auto-derived from Created via WBS -> MO -> IO during reconciliation
+          if (!io && !mo && !wbs && !description) return null;
 
           return {
             io,

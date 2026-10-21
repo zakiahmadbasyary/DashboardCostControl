@@ -22,6 +22,7 @@ import {
   CheckCircle2,
   Save,
   Trash2,
+  Lock,
 } from "lucide-react";
 import { formatCurrencyRp, formatNumberId } from "@/lib/formatters";
 
@@ -44,6 +45,26 @@ const TABS: TabItem[] = [
   { key: "approver", label: "User Approver", shortLabel: "Approver", icon: Users, description: "Daftar approver & PIC persetujuan" },
   { key: "cost_center", label: "Master Cost Center", shortLabel: "Cost Center", icon: Building, description: "Master kamus kode cost center dan keterangannya" },
 ];
+
+const CAPEX_KATEGORI_OPTIONS = [
+  "Perlengkapan Irigasi",
+  "Peralatan Kebun",
+  "Unit Kebun",
+  "Bangunan",
+  "Komputer & Elektronik",
+  "Perlengkapan Boom",
+  "Lagoon",
+  "Saluran & Gorong2",
+  "Unit Motor",
+] as const;
+
+const CAPEX_KOMODITI_OPTIONS = [
+  "Pine",
+  "Banana",
+  "Guava",
+  "Pepaya",
+  "Kelapa Pandan",
+] as const;
 
 // Helper to filter out internal database ID columns
 function isIdColumn(col: string): boolean {
@@ -69,6 +90,7 @@ function isIdColumn(col: string): boolean {
 function getRowKey(tab: CapexTabType, row: Record<string, unknown>): string {
   if (tab === "budget") return String(row.idBudget ?? row.id_budget ?? "");
   if (tab === "kategori") return String(row.capexNo ?? row.capex_no ?? "");
+  if (tab === "purchasing") return String(row.pgr ?? "");
   if (tab === "approver") return String(row.kodeApprover ?? row.kode_approver ?? "");
   if (tab === "cost_center") return String(row.kodeCostCenter ?? row.kode_cost_center ?? "");
   return "";
@@ -161,7 +183,9 @@ export default function CapexAdminPreviewPage() {
 
   // Fetch data from API
   useEffect(() => {
+    const abortController = new AbortController();
     let isCancelled = false;
+
     const fetchData = async () => {
       setLoading(true);
       try {
@@ -172,8 +196,25 @@ export default function CapexAdminPreviewPage() {
           limit: String(limit),
         });
 
-        const res = await fetch(`/api/admin/preview?${queryParams.toString()}`);
-        const result = await res.json();
+        const res = await fetch(`/api/admin/preview?${queryParams.toString()}`, {
+          signal: abortController.signal,
+        });
+
+        const text = await res.text();
+        let result: any = null;
+        try {
+          result = text ? JSON.parse(text) : null;
+        } catch {
+          // not JSON
+        }
+
+        if (!res.ok) {
+          throw new Error(result?.message || `HTTP ${res.status}: Gagal memuat data preview`);
+        }
+
+        if (!result) {
+          throw new Error("Respons server kosong");
+        }
 
         if (!isCancelled) {
           if (result.success) {
@@ -186,10 +227,15 @@ export default function CapexAdminPreviewPage() {
             setTotalPages(1);
           }
         }
-      } catch (err) {
+      } catch (err: unknown) {
+        if (err instanceof Error && err.name === "AbortError") {
+          return;
+        }
         if (!isCancelled) {
           console.error("Error fetching preview data:", err);
           setTableData([]);
+          setTotalRecords(0);
+          setTotalPages(1);
         }
       } finally {
         if (!isCancelled) {
@@ -202,6 +248,7 @@ export default function CapexAdminPreviewPage() {
 
     return () => {
       isCancelled = true;
+      abortController.abort();
     };
   }, [activeTab, debouncedSearch, page, limit, refreshKey]);
 
@@ -215,11 +262,11 @@ export default function CapexAdminPreviewPage() {
 
   // Check if current tab supports Edit & Add
   const canEdit = useMemo(() => {
-    return ["budget", "kategori", "approver", "cost_center"].includes(activeTab);
+    return ["budget", "kategori", "purchasing", "approver", "cost_center"].includes(activeTab);
   }, [activeTab]);
 
   const canAdd = useMemo(() => {
-    return ["kategori", "approver", "cost_center"].includes(activeTab);
+    return ["kategori", "purchasing", "approver", "cost_center"].includes(activeTab);
   }, [activeTab]);
 
   // Extract column keys from first item, excluding internal IDs and created_at/updated_at for Cost Center
@@ -257,6 +304,13 @@ export default function CapexAdminPreviewPage() {
         kategori: "",
         komoditi: "",
       });
+    } else if (activeTab === "purchasing") {
+      setFormData({
+        pgr: "",
+        description: "",
+        telephone: "",
+        faxNumber: "",
+      });
     } else if (activeTab === "approver") {
       setFormData({
         kodeApprover: "",
@@ -276,6 +330,14 @@ export default function CapexAdminPreviewPage() {
     const rowId = getRowKey(activeTab, row);
     if (!rowId) {
       alert("Kunci baris data tidak ditemukan.");
+      return;
+    }
+
+    if (isRowLocked(activeTab, row)) {
+      setToastMessage({
+        text: "Data ini sudah lengkap sehingga tidak dapat diedit.",
+        type: "error",
+      });
       return;
     }
 
@@ -305,6 +367,13 @@ export default function CapexAdminPreviewPage() {
         kategori: row.kategori ?? "",
         komoditi: row.komoditi ?? "",
       });
+    } else if (activeTab === "purchasing") {
+      setFormData({
+        pgr: row.pgr ?? "",
+        description: row.description ?? "",
+        telephone: row.telephone ?? "",
+        faxNumber: row.faxNumber ?? row.fax_number ?? "",
+      });
     } else if (activeTab === "approver") {
       setFormData({
         kodeApprover: row.kodeApprover ?? "",
@@ -330,6 +399,9 @@ export default function CapexAdminPreviewPage() {
       if (modalMode === "add") {
         if (activeTab === "kategori" && !String(formData.capexNo || "").trim()) {
           throw new Error("Nomor CAPEX wajib diisi.");
+        }
+        if (activeTab === "purchasing" && !String(formData.pgr || "").trim()) {
+          throw new Error("Kode Purchasing Group (PGR) wajib diisi.");
         }
         if (activeTab === "approver" && !String(formData.kodeApprover || "").trim()) {
           throw new Error("Kode Approver wajib diisi.");
@@ -392,6 +464,40 @@ export default function CapexAdminPreviewPage() {
     }
   };
 
+  // Helpers to check if a row is completely paired/filled
+  const isKategoriComplete = (row: Record<string, unknown>): boolean => {
+    const hasCapexNo = Boolean((row.capexNo ?? row.capex_no) && String(row.capexNo ?? row.capex_no).trim());
+    const hasKategori = Boolean(row.kategori && String(row.kategori).trim());
+    const hasKomoditi = Boolean(row.komoditi && String(row.komoditi).trim());
+    return hasCapexNo && hasKategori && hasKomoditi;
+  };
+
+  const isPurchasingComplete = (row: Record<string, unknown>): boolean => {
+    const hasPgr = Boolean(row.pgr && String(row.pgr).trim());
+    const hasDesc = Boolean(row.description && String(row.description).trim());
+    return hasPgr && hasDesc;
+  };
+
+  const isApproverComplete = (row: Record<string, unknown>): boolean => {
+    const hasKode = Boolean((row.kodeApprover ?? row.kode_approver) && String(row.kodeApprover ?? row.kode_approver).trim());
+    const hasNama = Boolean(row.nama && String(row.nama).trim());
+    return hasKode && hasNama;
+  };
+
+  const isCostCenterComplete = (row: Record<string, unknown>): boolean => {
+    const kode = String(row.kodeCostCenter ?? row.kode_cost_center ?? "").trim();
+    const ket = String(row.keterangan ?? "").trim();
+    return Boolean(kode && ket && ket.toLowerCase() !== kode.toLowerCase());
+  };
+
+  const isRowLocked = (tab: CapexTabType, row: Record<string, unknown>): boolean => {
+    if (tab === "kategori") return isKategoriComplete(row);
+    if (tab === "purchasing") return isPurchasingComplete(row);
+    if (tab === "approver") return isApproverComplete(row);
+    if (tab === "cost_center") return isCostCenterComplete(row);
+    return false;
+  };
+
   // Check if column is numeric or currency
   const isCurrencyOrNumber = (colName: string, val: unknown): boolean => {
     if (typeof val === "number") {
@@ -405,7 +511,8 @@ export default function CapexAdminPreviewPage() {
   const formatCellValue = (colName: string, cellVal: unknown, row?: Record<string, unknown>) => {
     if (cellVal === null || cellVal === undefined || cellVal === "") {
       if (
-        (activeTab === "kategori" && colName.toLowerCase() === "kategori") ||
+        (activeTab === "kategori" && (colName.toLowerCase() === "kategori" || colName.toLowerCase() === "komoditi")) ||
+        (activeTab === "purchasing" && colName.toLowerCase() === "description") ||
         (activeTab === "approver" && colName.toLowerCase() === "nama") ||
         (activeTab === "cost_center" && colName.toLowerCase() === "keterangan")
       ) {
@@ -768,15 +875,25 @@ export default function CapexAdminPreviewPage() {
                         {/* Action Body Column (Left-positioned) */}
                         {canEdit && (
                           <td className="py-2.5 px-3 text-center whitespace-nowrap sticky left-12 z-10 bg-white group-hover:bg-[#F7F9F7] border-r border-[#DDE5DF] w-20 min-w-[76px]">
-                            <button
-                              type="button"
-                              onClick={() => handleOpenEditModal(row)}
-                              className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-bold text-[#16823B] bg-[#EAF3EC] hover:bg-[#16823B] hover:text-white border border-[#D5E7DA] transition-all cursor-pointer active:scale-95 shadow-2xs"
-                              title="Edit Data"
-                            >
-                              <Pencil className="w-3 h-3" />
-                              <span>Edit</span>
-                            </button>
+                            {isRowLocked(activeTab, row) ? (
+                              <span
+                                className="inline-flex items-center gap-1 px-2 py-1 rounded-lg text-[10px] font-semibold text-[#89938D] bg-[#F2F4F2] border border-[#DDE5DF] select-none opacity-80"
+                                title="Data sudah lengkap (Terkunci)"
+                              >
+                                <Lock className="w-3 h-3 text-[#5F6B63]" />
+                                <span>Terkunci</span>
+                              </span>
+                            ) : (
+                              <button
+                                type="button"
+                                onClick={() => handleOpenEditModal(row)}
+                                className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-bold text-[#16823B] bg-[#EAF3EC] hover:bg-[#16823B] hover:text-white border border-[#D5E7DA] transition-all cursor-pointer active:scale-95 shadow-2xs"
+                                title="Edit Data"
+                              >
+                                <Pencil className="w-3 h-3" />
+                                <span>Edit</span>
+                              </button>
+                            )}
                           </td>
                         )}
                         {columnKeys.map((colName) => {
@@ -900,6 +1017,75 @@ export default function CapexAdminPreviewPage() {
                 <div className="flex items-center gap-2 p-3 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-xs font-semibold">
                   <AlertCircle className="w-4 h-4 shrink-0 text-rose-500" />
                   <span>{formError}</span>
+                </div>
+              )}
+
+              {/* Form Tab: Purchasing */}
+              {activeTab === "purchasing" && (
+                <div className="space-y-3.5">
+                  <div>
+                    <label className="block text-[11px] font-bold uppercase tracking-wider text-[#5F6B63] mb-1">
+                      Kode Purchasing Group (PGR) <span className="text-rose-500">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      disabled={modalMode === "edit" || submitting}
+                      value={formData.pgr || ""}
+                      onChange={(e) => setFormData({ ...formData, pgr: e.target.value })}
+                      placeholder="Contoh: P01, 101"
+                      className="w-full bg-[#F7F9F7] border border-[#DDE5DF] rounded-xl px-3 py-2 text-xs font-semibold text-[#17231B] focus:outline-none focus:border-[#16823B] disabled:bg-neutral-100 disabled:text-neutral-500 disabled:cursor-not-allowed"
+                    />
+                    {modalMode === "edit" && (
+                      <span className="text-[10px] text-[#89938D] mt-1 block">
+                        Kode PGR adalah Primary Key dan tidak dapat diubah.
+                      </span>
+                    )}
+                  </div>
+
+                  <div>
+                    <label className="block text-[11px] font-bold uppercase tracking-wider text-[#5F6B63] mb-1">
+                      Deskripsi / Unit Pengadaan <span className="text-rose-500">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      disabled={submitting}
+                      value={formData.description || ""}
+                      onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                      placeholder="Contoh: Purchasing Pupuk & Kimia"
+                      className="w-full bg-[#F7F9F7] border border-[#DDE5DF] rounded-xl px-3 py-2 text-xs font-semibold text-[#17231B] focus:outline-none focus:border-[#16823B]"
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                      <label className="block text-[11px] font-bold uppercase tracking-wider text-[#5F6B63] mb-1">
+                        Nomor Telepon
+                      </label>
+                      <input
+                        type="text"
+                        disabled={submitting}
+                        value={formData.telephone || ""}
+                        onChange={(e) => setFormData({ ...formData, telephone: e.target.value })}
+                        placeholder="Contoh: 021-1234567"
+                        className="w-full bg-[#F7F9F7] border border-[#DDE5DF] rounded-xl px-3 py-2 text-xs font-semibold text-[#17231B] focus:outline-none focus:border-[#16823B]"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-[11px] font-bold uppercase tracking-wider text-[#5F6B63] mb-1">
+                        Nomor Fax
+                      </label>
+                      <input
+                        type="text"
+                        disabled={submitting}
+                        value={formData.faxNumber || ""}
+                        onChange={(e) => setFormData({ ...formData, faxNumber: e.target.value })}
+                        placeholder="Contoh: 021-7654321"
+                        className="w-full bg-[#F7F9F7] border border-[#DDE5DF] rounded-xl px-3 py-2 text-xs font-semibold text-[#17231B] focus:outline-none focus:border-[#16823B]"
+                      />
+                    </div>
+                  </div>
                 </div>
               )}
 
@@ -1037,27 +1223,43 @@ export default function CapexAdminPreviewPage() {
                       <label className="block text-[11px] font-bold uppercase tracking-wider text-[#5F6B63] mb-1">
                         Kategori
                       </label>
-                      <input
-                        type="text"
+                      <select
                         disabled={submitting}
                         value={formData.kategori || ""}
                         onChange={(e) => setFormData({ ...formData, kategori: e.target.value })}
-                        placeholder="Contoh: Mesin & Peralatan"
-                        className="w-full bg-[#F7F9F7] border border-[#DDE5DF] rounded-xl px-3 py-2 text-xs font-semibold text-[#17231B] focus:outline-none focus:border-[#16823B]"
-                      />
+                        className="w-full bg-[#F7F9F7] border border-[#DDE5DF] rounded-xl px-3 py-2 text-xs font-semibold text-[#17231B] focus:outline-none focus:border-[#16823B] cursor-pointer"
+                      >
+                        <option value="">-- Pilih Kategori --</option>
+                        {formData.kategori && !CAPEX_KATEGORI_OPTIONS.includes(formData.kategori) && (
+                          <option value={formData.kategori}>{formData.kategori} (Data lama)</option>
+                        )}
+                        {CAPEX_KATEGORI_OPTIONS.map((item) => (
+                          <option key={item} value={item}>
+                            {item}
+                          </option>
+                        ))}
+                      </select>
                     </div>
                     <div>
                       <label className="block text-[11px] font-bold uppercase tracking-wider text-[#5F6B63] mb-1">
                         Komoditi
                       </label>
-                      <input
-                        type="text"
+                      <select
                         disabled={submitting}
                         value={formData.komoditi || ""}
                         onChange={(e) => setFormData({ ...formData, komoditi: e.target.value })}
-                        placeholder="Contoh: Kelapa Sawit"
-                        className="w-full bg-[#F7F9F7] border border-[#DDE5DF] rounded-xl px-3 py-2 text-xs font-semibold text-[#17231B] focus:outline-none focus:border-[#16823B]"
-                      />
+                        className="w-full bg-[#F7F9F7] border border-[#DDE5DF] rounded-xl px-3 py-2 text-xs font-semibold text-[#17231B] focus:outline-none focus:border-[#16823B] cursor-pointer"
+                      >
+                        <option value="">-- Pilih Komoditi --</option>
+                        {formData.komoditi && !CAPEX_KOMODITI_OPTIONS.includes(formData.komoditi) && (
+                          <option value={formData.komoditi}>{formData.komoditi} (Data lama)</option>
+                        )}
+                        {CAPEX_KOMODITI_OPTIONS.map((item) => (
+                          <option key={item} value={item}>
+                            {item}
+                          </option>
+                        ))}
+                      </select>
                     </div>
                   </div>
                 </div>
@@ -1203,27 +1405,43 @@ export default function CapexAdminPreviewPage() {
                       <label className="block text-[11px] font-bold uppercase tracking-wider text-[#5F6B63] mb-1">
                         Kategori
                       </label>
-                      <input
-                        type="text"
+                      <select
                         disabled={submitting}
                         value={formData.kategori || ""}
                         onChange={(e) => setFormData({ ...formData, kategori: e.target.value })}
-                        placeholder="Kategori..."
-                        className="w-full bg-[#F7F9F7] border border-[#DDE5DF] rounded-xl px-3 py-2 text-xs font-semibold text-[#17231B] focus:outline-none focus:border-[#16823B]"
-                      />
+                        className="w-full bg-[#F7F9F7] border border-[#DDE5DF] rounded-xl px-3 py-2 text-xs font-semibold text-[#17231B] focus:outline-none focus:border-[#16823B] cursor-pointer"
+                      >
+                        <option value="">-- Pilih Kategori --</option>
+                        {formData.kategori && !CAPEX_KATEGORI_OPTIONS.includes(formData.kategori) && (
+                          <option value={formData.kategori}>{formData.kategori} (Data lama)</option>
+                        )}
+                        {CAPEX_KATEGORI_OPTIONS.map((item) => (
+                          <option key={item} value={item}>
+                            {item}
+                          </option>
+                        ))}
+                      </select>
                     </div>
                     <div>
                       <label className="block text-[11px] font-bold uppercase tracking-wider text-[#5F6B63] mb-1">
                         Komoditi
                       </label>
-                      <input
-                        type="text"
+                      <select
                         disabled={submitting}
                         value={formData.komoditi || ""}
                         onChange={(e) => setFormData({ ...formData, komoditi: e.target.value })}
-                        placeholder="Komoditi..."
-                        className="w-full bg-[#F7F9F7] border border-[#DDE5DF] rounded-xl px-3 py-2 text-xs font-semibold text-[#17231B] focus:outline-none focus:border-[#16823B]"
-                      />
+                        className="w-full bg-[#F7F9F7] border border-[#DDE5DF] rounded-xl px-3 py-2 text-xs font-semibold text-[#17231B] focus:outline-none focus:border-[#16823B] cursor-pointer"
+                      >
+                        <option value="">-- Pilih Komoditi --</option>
+                        {formData.komoditi && !CAPEX_KOMODITI_OPTIONS.includes(formData.komoditi) && (
+                          <option value={formData.komoditi}>{formData.komoditi} (Data lama)</option>
+                        )}
+                        {CAPEX_KOMODITI_OPTIONS.map((item) => (
+                          <option key={item} value={item}>
+                            {item}
+                          </option>
+                        ))}
+                      </select>
                     </div>
                   </div>
 

@@ -88,13 +88,10 @@ export async function GET(request: NextRequest) {
     });
 
     const serialized = rawTotals.map((item) => {
-      // Priority for kategori: Master Kategori -> Created -> Budget -> "—"
+      // Priority for kategori: Master Kategori -> Budget -> "—"
       let resolvedKategori: string | null = null;
       if (item.capexNo && kategoriMap.has(item.capexNo)) {
         resolvedKategori = kategoriMap.get(item.capexNo) || null;
-      }
-      if (!resolvedKategori && item.createdList.length > 0) {
-        resolvedKategori = item.createdList[0].kategori;
       }
       if (!resolvedKategori && item.budgetList.length > 0) {
         resolvedKategori = item.budgetList[0].kategori;

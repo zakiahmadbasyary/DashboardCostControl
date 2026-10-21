@@ -115,125 +115,128 @@ export async function GET(request: NextRequest) {
         prisma.budget.count({ where }),
       ]);
     } else if (table === "purchasing") {
-      const where = search
-        ? {
-            OR: [
-              { pgr: { contains: search, mode: "insensitive" as const } },
-              { description: { contains: search, mode: "insensitive" as const } },
-            ],
-          }
-        : {};
+      let whereClause = "";
+      const params: (string | number)[] = [];
+      if (search) {
+        whereClause = `WHERE ("pgr" ILIKE $1 OR "description" ILIKE $1)`;
+        params.push(`%${search}%`);
+      }
 
-      [data, total] = await Promise.all([
-        prisma.purchasing.findMany({
-          where,
-          skip,
-          take: limit,
-          orderBy: { pgr: "asc" },
-        }),
-        prisma.purchasing.count({ where }),
-      ]);
+      const countSql = `SELECT COUNT(*)::bigint AS count FROM "purchasing" ${whereClause}`;
+      const countResult = await prisma.$queryRawUnsafe<[{ count: bigint }]>(countSql, ...params);
+
+      const limitIdx = params.length + 1;
+      const skipIdx = params.length + 2;
+      const dataSql = `
+        SELECT 
+          "pgr",
+          "description",
+          "telephone",
+          "fax_number" AS "faxNumber"
+        FROM "purchasing"
+        ${whereClause}
+        ORDER BY 
+          CASE WHEN ("description" IS NULL OR TRIM("description") = '') THEN 0 ELSE 1 END ASC,
+          "pgr" ASC
+        LIMIT $${limitIdx} OFFSET $${skipIdx}
+      `;
+      const rows = await prisma.$queryRawUnsafe<Record<string, unknown>[]>(dataSql, ...params, limit, skip);
+
+      total = Number(countResult[0]?.count || 0);
+      data = rows;
     } else if (table === "kategori") {
-      const searchCondition = search
-        ? Prisma.sql`
-            AND (
-              "capex_no" ILIKE ${`%${search}%`} OR
-              "description" ILIKE ${`%${search}%`} OR
-              "cost_center" ILIKE ${`%${search}%`} OR
-              "kategori" ILIKE ${`%${search}%`} OR
-              "komoditi" ILIKE ${`%${search}%`}
-            )
-          `
-        : Prisma.empty;
+      let whereClause = "";
+      const params: (string | number)[] = [];
+      if (search) {
+        whereClause = `WHERE ("capex_no" ILIKE $1 OR "description" ILIKE $1 OR "cost_center" ILIKE $1 OR "kategori" ILIKE $1 OR "komoditi" ILIKE $1)`;
+        params.push(`%${search}%`);
+      }
 
-      const [countResult, rows] = await Promise.all([
-        prisma.$queryRaw<[{ count: bigint }]>`
-          SELECT COUNT(*)::bigint AS count
-          FROM "kategori"
-          WHERE 1=1 ${searchCondition}
-        `,
-        prisma.$queryRaw<Record<string, unknown>[]>`
-          SELECT 
-            "capex_no" AS "capexNo",
-            "description",
-            "cost_center" AS "costCenter",
-            "kategori",
-            "komoditi"
-          FROM "kategori"
-          WHERE 1=1 ${searchCondition}
-          ORDER BY 
-            CASE WHEN ("kategori" IS NULL OR TRIM("kategori") = '') THEN 0 ELSE 1 END ASC,
-            "capex_no" ASC
-          LIMIT ${limit} OFFSET ${skip}
-        `,
-      ]);
+      const countSql = `SELECT COUNT(*)::bigint AS count FROM "kategori" ${whereClause}`;
+      const countResult = await prisma.$queryRawUnsafe<[{ count: bigint }]>(countSql, ...params);
+
+      const limitIdx = params.length + 1;
+      const skipIdx = params.length + 2;
+      const dataSql = `
+        SELECT 
+          "capex_no" AS "capexNo",
+          "description",
+          "cost_center" AS "costCenter",
+          "kategori",
+          "komoditi"
+        FROM "kategori"
+        ${whereClause}
+        ORDER BY 
+          CASE 
+            WHEN ("kategori" IS NULL OR TRIM("kategori") = '') AND ("komoditi" IS NULL OR TRIM("komoditi") = '') THEN 0 
+            WHEN ("kategori" IS NULL OR TRIM("kategori") = '') OR ("komoditi" IS NULL OR TRIM("komoditi") = '') THEN 1 
+            ELSE 2 
+          END ASC,
+          "capex_no" ASC
+        LIMIT $${limitIdx} OFFSET $${skipIdx}
+      `;
+      const rows = await prisma.$queryRawUnsafe<Record<string, unknown>[]>(dataSql, ...params, limit, skip);
 
       total = Number(countResult[0]?.count || 0);
       data = rows;
     } else if (table === "approver" || table === "user_approver") {
-      const searchCondition = search
-        ? Prisma.sql`
-            AND (
-              "kode_approver" ILIKE ${`%${search}%`} OR
-              "nama" ILIKE ${`%${search}%`}
-            )
-          `
-        : Prisma.empty;
+      let whereClause = "";
+      const params: (string | number)[] = [];
+      if (search) {
+        whereClause = `WHERE ("kode_approver" ILIKE $1 OR "nama" ILIKE $1)`;
+        params.push(`%${search}%`);
+      }
 
-      const [countResult, rows] = await Promise.all([
-        prisma.$queryRaw<[{ count: bigint }]>`
-          SELECT COUNT(*)::bigint AS count
-          FROM "user_approver"
-          WHERE 1=1 ${searchCondition}
-        `,
-        prisma.$queryRaw<Record<string, unknown>[]>`
-          SELECT 
-            "kode_approver" AS "kodeApprover",
-            "nama"
-          FROM "user_approver"
-          WHERE 1=1 ${searchCondition}
-          ORDER BY 
-            CASE WHEN ("nama" IS NULL OR TRIM("nama") = '') THEN 0 ELSE 1 END ASC,
-            "kode_approver" ASC
-          LIMIT ${limit} OFFSET ${skip}
-        `,
-      ]);
+      const countSql = `SELECT COUNT(*)::bigint AS count FROM "user_approver" ${whereClause}`;
+      const countResult = await prisma.$queryRawUnsafe<[{ count: bigint }]>(countSql, ...params);
+
+      const limitIdx = params.length + 1;
+      const skipIdx = params.length + 2;
+      const dataSql = `
+        SELECT 
+          "kode_approver" AS "kodeApprover",
+          "nama"
+        FROM "user_approver"
+        ${whereClause}
+        ORDER BY 
+          CASE WHEN ("nama" IS NULL OR TRIM("nama") = '') THEN 0 ELSE 1 END ASC,
+          "kode_approver" ASC
+        LIMIT $${limitIdx} OFFSET $${skipIdx}
+      `;
+      const rows = await prisma.$queryRawUnsafe<Record<string, unknown>[]>(dataSql, ...params, limit, skip);
 
       total = Number(countResult[0]?.count || 0);
       data = rows;
     } else if (table === "cost_center" || table === "costcenter" || table === "cost center") {
-      const searchCondition = search
-        ? Prisma.sql`
-            AND (
-              "kode_cost_center" ILIKE ${`%${search}%`} OR
-              "keterangan" ILIKE ${`%${search}%`}
-            )
-          `
-        : Prisma.empty;
+      let whereClause = "";
+      const params: (string | number)[] = [];
+      if (search) {
+        whereClause = `WHERE ("kode_cost_center" ILIKE $1 OR "keterangan" ILIKE $1)`;
+        params.push(`%${search}%`);
+      }
 
-      const [countResult, rows] = await Promise.all([
-        prisma.$queryRaw<[{ count: bigint }]>`
-          SELECT COUNT(*)::bigint AS count
-          FROM "cost_center"
-          WHERE 1=1 ${searchCondition}
-        `,
-        prisma.$queryRaw<Record<string, unknown>[]>`
-          SELECT 
-            "kode_cost_center" AS "kodeCostCenter",
-            "keterangan",
-            "created_at" AS "createdAt",
-            "updated_at" AS "updatedAt"
-          FROM "cost_center"
-          WHERE 1=1 ${searchCondition}
-          ORDER BY 
-            CASE 
-              WHEN ("keterangan" IS NULL OR TRIM("keterangan") = '' OR TRIM("keterangan") = TRIM("kode_cost_center")) THEN 0 
-              ELSE 1 
-            END ASC,
-            "kode_cost_center" ASC
-          LIMIT ${limit} OFFSET ${skip}
-        `,
-      ]);
+      const countSql = `SELECT COUNT(*)::bigint AS count FROM "cost_center" ${whereClause}`;
+      const countResult = await prisma.$queryRawUnsafe<[{ count: bigint }]>(countSql, ...params);
+
+      const limitIdx = params.length + 1;
+      const skipIdx = params.length + 2;
+      const dataSql = `
+        SELECT 
+          "kode_cost_center" AS "kodeCostCenter",
+          "keterangan",
+          "created_at" AS "createdAt",
+          "updated_at" AS "updatedAt"
+        FROM "cost_center"
+        ${whereClause}
+        ORDER BY 
+          CASE 
+            WHEN ("keterangan" IS NULL OR TRIM("keterangan") = '' OR TRIM("keterangan") = TRIM("kode_cost_center")) THEN 0 
+            ELSE 1 
+          END ASC,
+          "kode_cost_center" ASC
+        LIMIT $${limitIdx} OFFSET $${skipIdx}
+      `;
+      const rows = await prisma.$queryRawUnsafe<Record<string, unknown>[]>(dataSql, ...params, limit, skip);
 
       total = Number(countResult[0]?.count || 0);
       data = rows;
@@ -275,10 +278,10 @@ export async function GET(request: NextRequest) {
         totalPages: Math.ceil(total / limit),
       },
     });
-  } catch (error) {
+  } catch (error: any) {
     console.error("Error previewing table data:", error);
     return NextResponse.json(
-      { success: false, message: "Gagal memuat preview data." },
+      { success: false, message: error?.message || "Gagal memuat preview data." },
       { status: 500 }
     );
   }
@@ -324,6 +327,37 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({
         success: true,
         message: "Data Kategori CAPEX berhasil ditambahkan.",
+      });
+    }
+
+    if (table === "purchasing") {
+      const pgr = String(data.pgr || "").trim();
+      if (!pgr) {
+        return NextResponse.json({ success: false, message: "Kode Purchasing Group (PGR) wajib diisi." }, { status: 400 });
+      }
+
+      const existing = await prisma.purchasing.findUnique({
+        where: { pgr },
+      });
+      if (existing) {
+        return NextResponse.json(
+          { success: false, message: `Purchasing Group "${pgr}" sudah terdaftar.` },
+          { status: 400 }
+        );
+      }
+
+      await prisma.purchasing.create({
+        data: {
+          pgr,
+          description: data.description ? String(data.description).trim() : null,
+          telephone: data.telephone ? String(data.telephone).trim() : null,
+          faxNumber: data.faxNumber ? String(data.faxNumber).trim() : null,
+        },
+      });
+
+      return NextResponse.json({
+        success: true,
+        message: "Data Purchasing Group berhasil ditambahkan.",
       });
     }
 
@@ -480,6 +514,24 @@ export async function PUT(request: NextRequest) {
         return NextResponse.json({ success: false, message: "Data Kategori tidak ditemukan." }, { status: 404 });
       }
 
+      // Validasi: Data yang sudah memiliki pasangan Kategori dan Komoditi lengkap tidak dapat diedit lagi
+      const isAlreadyComplete = Boolean(
+        existing.kategori &&
+        existing.kategori.trim() &&
+        existing.komoditi &&
+        existing.komoditi.trim()
+      );
+
+      if (isAlreadyComplete) {
+        return NextResponse.json(
+          {
+            success: false,
+            message: `Data CAPEX "${capexNo}" sudah memiliki pasangan Kategori dan Komoditi lengkap sehingga tidak dapat diedit lagi.`,
+          },
+          { status: 403 }
+        );
+      }
+
       const costCenter = data.costCenter !== undefined 
         ? (String(data.costCenter).trim() || null) 
         : existing.costCenter;
@@ -504,6 +556,42 @@ export async function PUT(request: NextRequest) {
       });
     }
 
+    if (table === "purchasing") {
+      const pgr = String(id).trim();
+      const existing = await prisma.purchasing.findUnique({
+        where: { pgr },
+      });
+      if (!existing) {
+        return NextResponse.json({ success: false, message: "Data Purchasing Group tidak ditemukan." }, { status: 404 });
+      }
+
+      // Validasi: Data yang sudah memiliki pasangan description tidak dapat diedit lagi
+      const isAlreadyComplete = Boolean(existing.description && existing.description.trim());
+      if (isAlreadyComplete) {
+        return NextResponse.json(
+          {
+            success: false,
+            message: `Data Purchasing Group "${pgr}" sudah lengkap sehingga tidak dapat diedit lagi.`,
+          },
+          { status: 403 }
+        );
+      }
+
+      await prisma.purchasing.update({
+        where: { pgr },
+        data: {
+          description: data.description !== undefined ? (String(data.description).trim() || null) : existing.description,
+          telephone: data.telephone !== undefined ? (String(data.telephone).trim() || null) : existing.telephone,
+          faxNumber: data.faxNumber !== undefined ? (String(data.faxNumber).trim() || null) : existing.faxNumber,
+        },
+      });
+
+      return NextResponse.json({
+        success: true,
+        message: "Data Purchasing Group berhasil diperbarui.",
+      });
+    }
+
     if (table === "approver" || table === "user_approver") {
       const kodeApprover = String(id).trim();
       const existing = await prisma.userApprover.findUnique({
@@ -511,6 +599,18 @@ export async function PUT(request: NextRequest) {
       });
       if (!existing) {
         return NextResponse.json({ success: false, message: "Data User Approver tidak ditemukan." }, { status: 404 });
+      }
+
+      // Validasi: Data yang sudah memiliki nama approver lengkap tidak dapat diedit lagi
+      const isAlreadyComplete = Boolean(existing.nama && existing.nama.trim());
+      if (isAlreadyComplete) {
+        return NextResponse.json(
+          {
+            success: false,
+            message: `Data User Approver "${kodeApprover}" sudah lengkap sehingga tidak dapat diedit lagi.`,
+          },
+          { status: 403 }
+        );
       }
 
       await prisma.userApprover.update({
@@ -533,6 +633,22 @@ export async function PUT(request: NextRequest) {
       });
       if (!existing) {
         return NextResponse.json({ success: false, message: "Data Cost Center tidak ditemukan." }, { status: 404 });
+      }
+
+      // Validasi: Data yang sudah memiliki keterangan valid (bukan sama dengan kode dan bukan kosong) tidak dapat diedit lagi
+      const isAlreadyComplete = Boolean(
+        existing.keterangan &&
+        existing.keterangan.trim() &&
+        existing.keterangan.trim().toLowerCase() !== existing.kodeCostCenter.trim().toLowerCase()
+      );
+      if (isAlreadyComplete) {
+        return NextResponse.json(
+          {
+            success: false,
+            message: `Data Cost Center "${kodeCostCenter}" sudah lengkap sehingga tidak dapat diedit lagi.`,
+          },
+          { status: 403 }
+        );
       }
 
       const keterangan = String(data.keterangan || "").trim();

@@ -33,6 +33,8 @@ export async function runCapexReconciliation() {
     });
     const allPo = await tx.po.findMany();
     const poSet = new Set(allPo.map((p) => p.nomorPr));
+    const allKategori = await tx.kategori.findMany();
+    const kategoriMap = new Map(allKategori.map((k) => [k.capexNo, k]));
 
     // 3. Clear non-manually closed Total records
     // Unlink foreign keys first to avoid constraint conflicts
@@ -70,7 +72,58 @@ export async function runCapexReconciliation() {
       }
     }
 
-    // b. Group Budget by capexNo
+    // b. Cross-Table Identifier Matching for Budget:
+    // Build lookup maps from Created using priority: 1. WBS, 2. MO, 3. IO
+    const wbsToCapex = new Map<string, string>();
+    const moToCapex = new Map<string, string>();
+    const ioToCapex = new Map<string, string>();
+
+    for (const c of allCreated) {
+      const cleanCapex = c.capexNo?.trim();
+      if (!cleanCapex) continue;
+
+      const cleanWbs = c.wbs?.trim().toLowerCase();
+      if (cleanWbs && !wbsToCapex.has(cleanWbs)) {
+        wbsToCapex.set(cleanWbs, cleanCapex);
+      }
+
+      const cleanMo = c.mo?.trim().toLowerCase();
+      if (cleanMo && !moToCapex.has(cleanMo)) {
+        moToCapex.set(cleanMo, cleanCapex);
+      }
+
+      const cleanIo = c.io?.trim().toLowerCase();
+      if (cleanIo && !ioToCapex.has(cleanIo)) {
+        ioToCapex.set(cleanIo, cleanCapex);
+      }
+    }
+
+    // Resolve capexNo for Budget rows based on matching WBS -> MO -> IO
+    for (const b of allBudgets) {
+      const cleanWbs = b.wbs?.trim().toLowerCase();
+      const cleanMo = b.mo?.trim().toLowerCase();
+      const cleanIo = b.io?.trim().toLowerCase();
+
+      let matchedCapex: string | null = null;
+      if (cleanWbs && wbsToCapex.has(cleanWbs)) {
+        matchedCapex = wbsToCapex.get(cleanWbs)!;
+      } else if (cleanMo && moToCapex.has(cleanMo)) {
+        matchedCapex = moToCapex.get(cleanMo)!;
+      } else if (cleanIo && ioToCapex.has(cleanIo)) {
+        matchedCapex = ioToCapex.get(cleanIo)!;
+      }
+
+      // If a match is found from Created and differs from current Budget capexNo, update it
+      if (matchedCapex && matchedCapex !== b.capexNo) {
+        b.capexNo = matchedCapex;
+        await tx.budget.update({
+          where: { idBudget: b.idBudget },
+          data: { capexNo: matchedCapex },
+        });
+      }
+    }
+
+    // c. Group Budget by capexNo
     const budgetByCapexNo = new Map<string, typeof allBudgets>();
     const budgetWithoutCapex: typeof allBudgets = [];
 
@@ -157,7 +210,8 @@ export async function runCapexReconciliation() {
       const io = cRep?.io || bRep?.io || null;
       const mo = cRep?.mo || bRep?.mo || null;
       const wbs = cRep?.wbs || bRep?.wbs || null;
-      const komoditi = cRep?.komoditi || bRep?.komoditi || null;
+      const kRep = capexNo ? kategoriMap.get(capexNo) : undefined;
+      const komoditi = kRep?.komoditi || bRep?.komoditi || null;
 
       // nomorPr from Created.noPr (must exist in PO and not duplicate)
       let nomorPr: string | null = null;
@@ -305,7 +359,7 @@ export async function runCapexReconciliation() {
           wbs: c.wbs,
           statusCapex,
           tahun,
-          komoditi: c.komoditi,
+          komoditi: null,
           isManuallyClose: false,
         },
       });
