@@ -366,6 +366,11 @@ export default function CapexAnalyticsChartsCard({
                     statusSummary.maxStatusAmount > 0
                       ? (val / statusSummary.maxStatusAmount) * 100
                       : 0;
+                  const percentOfTotal =
+                    statusSummary.grandTotalAmount > 0
+                      ? (val / statusSummary.grandTotalAmount) * 100
+                      : 0;
+                  const percentStr = `${percentOfTotal.toFixed(1)}%`;
                   const isHovered = hoveredStatus === item.status;
                   const isSelected = isStatusActive(item.status, activeFilters?.statusCapex);
 
@@ -380,25 +385,38 @@ export default function CapexAnalyticsChartsCard({
                           ? "opacity-45 hover:opacity-100"
                           : "opacity-100"
                       }`}
-                      title={`${item.status}: ${formatCurrencyRp(val)} (${formatValJuta(val)} Jt) — Klik untuk menyaring`}
+                      title={`${item.status}: ${formatCurrencyRp(val)} (${formatValJuta(val)} Jt • ${percentStr} dari total) — Klik untuk menyaring`}
                     >
-                      {/* Number value label on top of bar */}
-                      <span
-                        className={`text-[8px] min-[380px]:text-[9px] sm:text-[11px] font-mono mb-1 transition-all truncate tracking-tighter w-full text-center ${
-                          isSelected
-                            ? "text-[#16823B] font-bold scale-105"
-                            : isHovered
-                            ? "text-[#16823B] font-bold"
-                            : "text-[#17231B] font-semibold opacity-90 group-hover:opacity-100"
-                        }`}
-                      >
-                        {formatValJuta(val)}
-                      </span>
+                      {/* Number value & percentage label on top of bar */}
+                      <div className="flex flex-col items-center mb-1 w-full min-w-0">
+                        <span
+                          className={`text-[8px] min-[380px]:text-[9px] sm:text-[11px] font-mono leading-tight transition-all truncate tracking-tighter w-full text-center ${
+                            isSelected
+                              ? "text-[#16823B] font-bold scale-105"
+                              : isHovered
+                              ? "text-[#16823B] font-bold"
+                              : "text-[#17231B] font-semibold opacity-90 group-hover:opacity-100"
+                          }`}
+                        >
+                          {formatValJuta(val)}
+                        </span>
+                        <span
+                          className={`text-[7px] min-[380px]:text-[8px] sm:text-[9.5px] font-mono leading-tight transition-colors truncate w-full text-center ${
+                            isSelected
+                              ? "text-[#16823B] font-extrabold"
+                              : isHovered
+                              ? "text-[#16823B] font-bold"
+                              : "text-[#5F6B63] font-medium"
+                          }`}
+                        >
+                          {val > 0 ? percentStr : "-"}
+                        </span>
+                      </div>
 
                       {/* Bar Track Container (HPP style) */}
                       <div className="w-full bg-[#F2F6F3] rounded-t-md h-36 flex items-end overflow-hidden p-0.5">
                         <div
-                          className={`w-full rounded-t transition-all duration-300 hover:brightness-95 ${
+                          className={`w-full rounded-t transition-all duration-300 hover:brightness-95 flex items-center justify-center overflow-hidden ${
                             isSelected
                               ? "bg-[#FCE27A] ring-2 ring-[#E5C959] shadow-md scale-[1.02]"
                               : isHovered
@@ -413,7 +431,17 @@ export default function CapexAnalyticsChartsCard({
                               ? "#16823B"
                               : item.barColor,
                           }}
-                        ></div>
+                        >
+                          {heightPercent >= 24 && val > 0 && (
+                            <span
+                              className={`text-[7px] sm:text-[9px] font-mono font-bold select-none truncate px-0.5 ${
+                                isSelected ? "text-[#17231B]" : "text-white drop-shadow-xs"
+                              }`}
+                            >
+                              {percentStr}
+                            </span>
+                          )}
+                        </div>
                       </div>
                     </div>
                   );
@@ -423,19 +451,28 @@ export default function CapexAnalyticsChartsCard({
                 <div
                   onClick={() => onResetStatus?.()}
                   className="flex-1 flex flex-col items-center group cursor-pointer border-l border-dashed border-[#D5E1D8] pl-1 sm:pl-2 min-w-0"
-                  title={`Total Akumulasi: ${formatCurrencyRp(statusSummary.grandTotalAmount)} (${formatValJuta(statusSummary.grandTotalAmount)} Jt) — Klik untuk reset status`}
+                  title={`Total Akumulasi: ${formatCurrencyRp(statusSummary.grandTotalAmount)} (${formatValJuta(statusSummary.grandTotalAmount)} Jt • 100%) — Klik untuk reset status`}
                 >
-                  <span className="text-[8px] min-[380px]:text-[9px] sm:text-[11px] font-mono font-bold text-[#16823B] mb-1 truncate tracking-tighter w-full text-center">
-                    {formatValJuta(statusSummary.grandTotalAmount)}
-                  </span>
+                  <div className="flex flex-col items-center mb-1 w-full min-w-0">
+                    <span className="text-[8px] min-[380px]:text-[9px] sm:text-[11px] font-mono font-bold text-[#16823B] leading-tight truncate tracking-tighter w-full text-center">
+                      {formatValJuta(statusSummary.grandTotalAmount)}
+                    </span>
+                    <span className="text-[7px] min-[380px]:text-[8px] sm:text-[9.5px] font-mono font-bold text-[#16823B] leading-tight truncate w-full text-center">
+                      100%
+                    </span>
+                  </div>
 
                   <div className="w-full bg-emerald-50 rounded-t-md h-36 flex items-end overflow-hidden p-0.5 border border-emerald-200">
                     <div
-                      className="w-full bg-[#8CC63F] hover:bg-[#16823B] rounded-t transition-all duration-300 shadow-xs"
+                      className="w-full bg-[#8CC63F] hover:bg-[#16823B] rounded-t transition-all duration-300 shadow-xs flex items-center justify-center overflow-hidden"
                       style={{
                         height: "100%",
                       }}
-                    ></div>
+                    >
+                      <span className="text-[7px] sm:text-[9px] font-mono font-bold text-white select-none">
+                        100%
+                      </span>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -499,7 +536,7 @@ export default function CapexAnalyticsChartsCard({
           ) : (
             <span>Klik batang status untuk memfilter data CAPEX</span>
           )}
-          <span className="font-semibold text-[#16823B]">Status Nominal CAPEX</span>
+          <span className="font-semibold text-[#16823B]">Status Nominal CAPEX (% Total)</span>
         </div>
       </div>
 
