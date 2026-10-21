@@ -230,9 +230,9 @@ export default function CapexAnalyticsChartsCard({
     // Urutkan kategori berdasarkan total CAPEX terbanyak
     const sorted = Object.values(map).sort((a, b) => b.totalCount - a.totalCount);
 
-    // Nilai maksimum untuk skala batang berdampingan (kanan-kiri)
-    const maxSingleCount = Math.max(
-      ...sorted.flatMap((c) => [c.belumCreatedCount, c.sudahCreatedCount]),
+    // Nilai maksimum untuk skala stacked bar chart (total item per kategori)
+    const maxTotalCount = Math.max(
+      ...sorted.map((c) => c.totalCount),
       1
     );
 
@@ -242,7 +242,7 @@ export default function CapexAnalyticsChartsCard({
 
     return {
       categories: sorted,
-      maxSingleCount,
+      maxTotalCount,
       totalBelumCreated,
       totalSudahCreated,
       grandTotalCatCount,
@@ -504,7 +504,7 @@ export default function CapexAnalyticsChartsCard({
       </div>
 
       {/* ----------------------------------------------------------------- */}
-      {/* CHART 2 (RIGHT): CAPEX per Kategori (Grouped / Side-by-Side Bars) */}
+      {/* CHART 2 (RIGHT): CAPEX per Kategori (Stacked Bar Chart: Belum vs Sudah+) */}
       {/* ----------------------------------------------------------------- */}
       <div className="bg-white p-5 rounded-2xl border border-[#DDE5DF] shadow-sm shadow-[#16823B]/5 flex flex-col justify-between">
         <div>
@@ -524,59 +524,61 @@ export default function CapexAnalyticsChartsCard({
                   )}
                 </h3>
                 <p className="text-xs text-[#5F6B63]">
-                  Klik kategori untuk menyaring kategori yang dipilih
+                  Klik kategori atau segmen batang untuk menyaring data CAPEX
                 </p>
               </div>
             </div>
 
-            {/* Interactive Legend (Kiri - Kanan) */}
-            <div className="flex items-center gap-2.5 text-xs font-semibold">
+            {/* Interactive Legend (Stacked Segments) */}
+            <div className="flex items-center gap-2 text-xs font-semibold">
               <button
                 type="button"
                 onClick={() => onSelectStatus?.("Belum Created")}
-                className={`flex items-center gap-1.5 px-1.5 py-0.5 rounded transition-all cursor-pointer ${
+                className={`flex items-center gap-1.5 px-2 py-0.5 rounded transition-all cursor-pointer ${
                   isStatusActive("Belum Created", activeFilters?.statusCapex)
                     ? "bg-[#8CD16B]/20 text-[#15803D] ring-1 ring-[#8CD16B]"
                     : "text-[#5F6B63] hover:text-[#17231B]"
                 }`}
                 title="Klik untuk memfilter status Belum Created"
               >
-                <span className="w-2.5 h-2.5 rounded-sm bg-[#8CD16B] border border-[#60B647]" />
-                Belum
+                <span className="w-2.5 h-2.5 rounded-xs bg-[#8CD16B] border border-[#60B647]" />
+                <span>Belum<span className="hidden sm:inline"> Created</span></span>
               </button>
               <button
                 type="button"
                 onClick={() => onSelectStatus?.("Sudah Created")}
-                className={`flex items-center gap-1.5 px-1.5 py-0.5 rounded transition-all cursor-pointer ${
+                className={`flex items-center gap-1.5 px-2 py-0.5 rounded transition-all cursor-pointer ${
                   isStatusActive("Sudah Created", activeFilters?.statusCapex)
                     ? "bg-[#16823B]/20 text-[#16823B] ring-1 ring-[#16823B]"
                     : "text-[#16823B] hover:text-[#0E632A]"
                 }`}
                 title="Klik untuk memfilter status Sudah Created"
               >
-                <span className="w-2.5 h-2.5 rounded-sm bg-[#16823B] border border-[#0E632A]" />
-                Sudah+
+                <span className="w-2.5 h-2.5 rounded-xs bg-[#16823B] border border-[#0E632A]" />
+                <span>Sudah<span className="hidden sm:inline"> Created</span>+</span>
               </button>
             </div>
           </div>
 
-          {/* Vertical Bar Chart Container */}
+          {/* Vertical Stacked Bar Chart Container */}
           <div className="pt-2 w-full">
             <div className="w-full">
               {/* Bars Area */}
-              <div className="flex items-end justify-between gap-1 sm:gap-2 h-48 pb-1 w-full">
+              <div className="flex items-end justify-between gap-1.5 sm:gap-2.5 h-48 pb-1 w-full">
                 {categorySummary.categories.map((cat) => {
                   const isHovered = hoveredCategory === cat.kategori;
                   const isCatSelected = isCategoryActive(cat.kategori, activeFilters?.kategori);
 
-                  const belumHeightPercent =
-                    categorySummary.maxSingleCount > 0
-                      ? (cat.belumCreatedCount / categorySummary.maxSingleCount) * 100
+                  const totalVal = cat.totalCount;
+                  const barHeightPercent =
+                    categorySummary.maxTotalCount > 0
+                      ? (totalVal / categorySummary.maxTotalCount) * 100
                       : 0;
-                  const sudahHeightPercent =
-                    categorySummary.maxSingleCount > 0
-                      ? (cat.sudahCreatedCount / categorySummary.maxSingleCount) * 100
-                      : 0;
+
+                  const belumPercent =
+                    totalVal > 0 ? (cat.belumCreatedCount / totalVal) * 100 : 0;
+                  const sudahPercent =
+                    totalVal > 0 ? (cat.sudahCreatedCount / totalVal) * 100 : 0;
 
                   const isBelumStatusSelected = isStatusActive(
                     "Belum Created",
@@ -598,128 +600,142 @@ export default function CapexAnalyticsChartsCard({
                           ? "opacity-45 hover:opacity-100"
                           : "opacity-100"
                       }`}
-                      title={`${cat.kategori}: Total ${cat.totalCount} CAPEX\n• Belum Created: ${cat.belumCreatedCount}\n• Sudah Created+: ${cat.sudahCreatedCount}\n(Klik untuk filter kategori ini)`}
+                      title={`${cat.kategori}: Total ${totalVal} CAPEX\n• Belum Created: ${cat.belumCreatedCount} (${totalVal > 0 ? Math.round(belumPercent) : 0}%)\n• Sudah Created+: ${cat.sudahCreatedCount} (${totalVal > 0 ? Math.round(sudahPercent) : 0}%)\n(Klik kategori untuk filter)`}
                     >
-                      {/* Number value label on top of paired bars */}
-                      <div className="w-full flex items-center justify-center gap-0.5 sm:gap-1 mb-1">
-                        <span
-                          className={`flex-1 text-center font-mono text-[7px] sm:text-[10px] font-semibold truncate leading-none ${
-                            isBelumStatusSelected
-                              ? "text-[#16823B] font-extrabold"
-                              : isHovered
-                              ? "text-[#17231B] font-bold"
-                              : "text-[#5F6B63]"
-                          }`}
-                        >
-                          {cat.belumCreatedCount > 0 ? cat.belumCreatedCount : "-"}
-                        </span>
-                        <span
-                          className={`flex-1 text-center font-mono text-[7px] sm:text-[10px] font-semibold truncate leading-none ${
-                            isSudahStatusSelected
-                              ? "text-[#16823B] font-extrabold"
-                              : isHovered
-                              ? "text-[#16823B] font-bold"
-                              : "text-[#16823B]"
-                          }`}
-                        >
-                          {cat.sudahCreatedCount > 0 ? cat.sudahCreatedCount : "-"}
-                        </span>
-                      </div>
+                      {/* Total Number Value label on top of stacked bar */}
+                      <span
+                        className={`text-[8px] min-[380px]:text-[9px] sm:text-[11px] font-mono mb-1 transition-all truncate tracking-tighter w-full text-center ${
+                          isCatSelected
+                            ? "text-[#16823B] font-bold scale-105"
+                            : isHovered
+                            ? "text-[#16823B] font-bold"
+                            : "text-[#17231B] font-semibold opacity-90 group-hover:opacity-100"
+                        }`}
+                      >
+                        {totalVal > 0 ? totalVal : "-"}
+                      </span>
 
-                      {/* Bar Track Container dengan 2 Batang Berdampingan Kiri-Kanan */}
+                      {/* Bar Track Container */}
                       <div
-                        className={`w-full bg-[#F2F6F3] rounded-t-md h-36 flex items-end justify-center gap-0.5 sm:gap-1 overflow-hidden p-0.5 transition-all duration-200 ${
+                        className={`w-full bg-[#F2F6F3] rounded-t-md h-36 flex items-end overflow-hidden p-0.5 transition-all duration-200 ${
                           isCatSelected
                             ? "ring-2 ring-[#E5C959] shadow-md bg-[#FFFBEA]"
                             : isHovered
-                            ? "ring-1 ring-[#16823B]/50 bg-[#EBF3ED]"
+                            ? "ring-1 ring-[#16823B]/40 bg-[#EBF3ED]"
                             : ""
                         }`}
                       >
-                        {/* Batang Kiri: Belum Created (Klik langsung menyaring status Belum Created) */}
+                        {/* Single Stacked Bar Column */}
                         <div
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            onSelectStatus?.("Belum Created");
-                          }}
-                          className={`flex-1 rounded-t transition-all duration-300 hover:brightness-95 cursor-pointer ${
-                            isBelumStatusSelected
-                              ? "bg-[#FCE27A] ring-1 ring-[#E5C959]"
-                              : "bg-[#8CD16B]"
-                          }`}
+                          className="w-full rounded-t overflow-hidden flex flex-col justify-end transition-all duration-300"
                           style={{
-                            height: `${Math.max(
-                              belumHeightPercent,
-                              cat.belumCreatedCount > 0 ? 6 : 0
-                            )}%`,
+                            height: `${Math.max(barHeightPercent, totalVal > 0 ? 6 : 0)}%`,
                           }}
-                          title={`${cat.kategori} • Belum Created: ${cat.belumCreatedCount} (Klik untuk filter status Belum Created)`}
-                        />
+                        >
+                          {/* Segmen Atas: Belum Created */}
+                          {cat.belumCreatedCount > 0 && (
+                            <div
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                onSelectStatus?.("Belum Created");
+                              }}
+                              className={`w-full transition-all duration-300 hover:brightness-105 cursor-pointer flex items-center justify-center overflow-hidden ${
+                                isBelumStatusSelected
+                                  ? "bg-[#FCE27A] ring-1 ring-[#E5C959]"
+                                  : isSudahStatusSelected
+                                  ? "bg-[#8CD16B] opacity-35"
+                                  : "bg-[#8CD16B]"
+                              }`}
+                              style={{
+                                height: `${belumPercent}%`,
+                              }}
+                              title={`${cat.kategori} • Belum Created: ${cat.belumCreatedCount} (${Math.round(belumPercent)}%) — Klik untuk filter status Belum Created`}
+                            >
+                              {belumPercent >= 28 && barHeightPercent >= 24 && (
+                                <span className="text-[7px] sm:text-[9px] font-mono font-bold text-white/95 drop-shadow-xs select-none">
+                                  {cat.belumCreatedCount}
+                                </span>
+                              )}
+                            </div>
+                          )}
 
-                        {/* Batang Kanan: Sudah Created ke Atas (Klik langsung menyaring status Sudah Created) */}
-                        <div
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            onSelectStatus?.("Sudah Created");
-                          }}
-                          className={`flex-1 rounded-t transition-all duration-300 hover:brightness-95 cursor-pointer ${
-                            isSudahStatusSelected
-                              ? "bg-[#FCE27A] ring-1 ring-[#E5C959]"
-                              : "bg-[#16823B]"
-                          }`}
-                          style={{
-                            height: `${Math.max(
-                              sudahHeightPercent,
-                              cat.sudahCreatedCount > 0 ? 6 : 0
-                            )}%`,
-                          }}
-                          title={`${cat.kategori} • Sudah Created+: ${cat.sudahCreatedCount} (Klik untuk filter status Sudah Created)`}
-                        />
+                          {/* Segmen Bawah: Sudah Created+ */}
+                          {cat.sudahCreatedCount > 0 && (
+                            <div
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                onSelectStatus?.("Sudah Created");
+                              }}
+                              className={`w-full transition-all duration-300 hover:brightness-110 cursor-pointer flex items-center justify-center overflow-hidden ${
+                                isSudahStatusSelected
+                                  ? "bg-[#FCE27A] ring-1 ring-[#E5C959]"
+                                  : isBelumStatusSelected
+                                  ? "bg-[#16823B] opacity-35"
+                                  : "bg-[#16823B]"
+                              }`}
+                              style={{
+                                height: `${sudahPercent}%`,
+                              }}
+                              title={`${cat.kategori} • Sudah Created+: ${cat.sudahCreatedCount} (${Math.round(sudahPercent)}%) — Klik untuk filter status Sudah Created`}
+                            >
+                              {sudahPercent >= 28 && barHeightPercent >= 24 && (
+                                <span className="text-[7px] sm:text-[9px] font-mono font-bold text-white drop-shadow-xs select-none">
+                                  {cat.sudahCreatedCount}
+                                </span>
+                              )}
+                            </div>
+                          )}
+                        </div>
                       </div>
                     </div>
                   );
                 })}
 
-                {/* Total Accumulation Column (seperti YTD di HPP dengan dua batang berdampingan) */}
+                {/* Total Accumulation Column (Stacked Bar Total) */}
                 <div
                   onClick={() => onResetCategory?.()}
-                  className="flex-1 flex flex-col items-center group cursor-pointer border-l border-dashed border-[#D5E1D8] pl-1 sm:pl-1.5 min-w-0"
-                  title={`Total Seluruh Kategori:\n• Belum Created: ${categorySummary.totalBelumCreated}\n• Sudah Created+: ${categorySummary.totalSudahCreated}\n(Klik untuk reset filter kategori)`}
+                  className="flex-1 flex flex-col items-center group cursor-pointer border-l border-dashed border-[#D5E1D8] pl-1 sm:pl-2 min-w-0"
+                  title={`Total Seluruh Kategori: ${categorySummary.grandTotalCatCount} CAPEX\n• Belum Created: ${categorySummary.totalBelumCreated} (${categorySummary.grandTotalCatCount > 0 ? Math.round((categorySummary.totalBelumCreated / categorySummary.grandTotalCatCount) * 100) : 0}%)\n• Sudah Created+: ${categorySummary.totalSudahCreated} (${categorySummary.grandTotalCatCount > 0 ? Math.round((categorySummary.totalSudahCreated / categorySummary.grandTotalCatCount) * 100) : 0}%)\n(Klik untuk reset filter kategori)`}
                 >
-                  <div className="w-full flex items-center justify-center gap-0.5 sm:gap-1 mb-1">
-                    <span className="flex-1 text-center font-mono text-[7px] sm:text-[10px] font-bold text-[#5F6B63] truncate leading-none">
-                      {categorySummary.totalBelumCreated}
-                    </span>
-                    <span className="flex-1 text-center font-mono text-[7px] sm:text-[10px] font-bold text-[#16823B] truncate leading-none">
-                      {categorySummary.totalSudahCreated}
-                    </span>
-                  </div>
+                  <span className="text-[8px] min-[380px]:text-[9px] sm:text-[11px] font-mono font-bold text-[#16823B] mb-1 truncate tracking-tighter w-full text-center">
+                    {categorySummary.grandTotalCatCount}
+                  </span>
 
-                  <div className="w-full bg-emerald-50 rounded-t-md h-36 flex items-end justify-center gap-0.5 sm:gap-1 overflow-hidden p-0.5 border border-emerald-200">
-                    <div
-                      className="flex-1 bg-[#8CD16B] rounded-t shadow-xs transition-all duration-300"
-                      style={{
-                        height: `${
-                          Math.max(categorySummary.totalBelumCreated, categorySummary.totalSudahCreated) > 0
-                            ? (categorySummary.totalBelumCreated /
-                                Math.max(categorySummary.totalBelumCreated, categorySummary.totalSudahCreated)) *
-                              100
-                            : 0
-                        }%`,
-                      }}
-                    />
-                    <div
-                      className="flex-1 bg-[#16823B] rounded-t shadow-xs transition-all duration-300"
-                      style={{
-                        height: `${
-                          Math.max(categorySummary.totalBelumCreated, categorySummary.totalSudahCreated) > 0
-                            ? (categorySummary.totalSudahCreated /
-                                Math.max(categorySummary.totalBelumCreated, categorySummary.totalSudahCreated)) *
-                              100
-                            : 0
-                        }%`,
-                      }}
-                    />
+                  <div className="w-full bg-emerald-50 rounded-t-md h-36 flex items-end overflow-hidden p-0.5 border border-emerald-200">
+                    <div className="w-full h-full rounded-t overflow-hidden flex flex-col justify-end shadow-xs transition-all duration-300">
+                      {/* Total Belum Created (Atas) */}
+                      <div
+                        className="w-full bg-[#8CD16B] hover:brightness-105 transition-all duration-300 flex items-center justify-center overflow-hidden"
+                        style={{
+                          height: `${
+                            categorySummary.grandTotalCatCount > 0
+                              ? (categorySummary.totalBelumCreated / categorySummary.grandTotalCatCount) * 100
+                              : 0
+                          }%`,
+                        }}
+                        title={`Total Belum Created: ${categorySummary.totalBelumCreated}`}
+                      >
+                        <span className="text-[7px] sm:text-[9px] font-mono font-bold text-white/95 select-none">
+                          {categorySummary.totalBelumCreated}
+                        </span>
+                      </div>
+                      {/* Total Sudah Created+ (Bawah) */}
+                      <div
+                        className="w-full bg-[#16823B] hover:brightness-110 transition-all duration-300 flex items-center justify-center overflow-hidden"
+                        style={{
+                          height: `${
+                            categorySummary.grandTotalCatCount > 0
+                              ? (categorySummary.totalSudahCreated / categorySummary.grandTotalCatCount) * 100
+                              : 0
+                          }%`,
+                        }}
+                        title={`Total Sudah Created+: ${categorySummary.totalSudahCreated}`}
+                      >
+                        <span className="text-[7px] sm:text-[9px] font-mono font-bold text-white select-none">
+                          {categorySummary.totalSudahCreated}
+                        </span>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -728,7 +744,7 @@ export default function CapexAnalyticsChartsCard({
               <div className="w-full h-[2px] bg-[#17231B]/20 rounded-full"></div>
 
               {/* Category Labels Axis */}
-              <div className="flex justify-between gap-1 sm:gap-2 mt-2 w-full">
+              <div className="flex justify-between gap-1.5 sm:gap-2.5 mt-2 w-full">
                 {categorySummary.categories.map((cat) => {
                   const isHovered = hoveredCategory === cat.kategori;
                   const isCatSelected = isCategoryActive(cat.kategori, activeFilters?.kategori);
@@ -755,7 +771,7 @@ export default function CapexAnalyticsChartsCard({
                 {/* Total Column Label */}
                 <span
                   onClick={() => onResetCategory?.()}
-                  className="flex-1 text-center text-[9px] sm:text-[10px] font-bold text-[#16823B] uppercase pl-1 sm:pl-1.5 truncate cursor-pointer hover:underline"
+                  className="flex-1 text-center text-[9px] sm:text-[10px] font-bold text-[#16823B] uppercase pl-1 sm:pl-2 truncate cursor-pointer hover:underline"
                   title="Klik untuk reset filter kategori"
                 >
                   TOTAL
@@ -781,9 +797,9 @@ export default function CapexAnalyticsChartsCard({
               </button>
             </div>
           ) : (
-            <span>Klik kategori untuk menyaring tampilan</span>
+            <span>Klik kategori atau segmen untuk menyaring tampilan</span>
           )}
-          <span className="font-semibold text-[#16823B]">Distribusi Kategori</span>
+          <span className="font-semibold text-[#16823B]">Distribusi Kategori (Stacked)</span>
         </div>
       </div>
     </div>
