@@ -36,14 +36,16 @@ const MODULE_ICONS: Record<string, React.ElementType> = {
 
 export default function DashboardHeader() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const { portalUrl, adminUrl, navItems } = getDashboardNavConfig();
 
-  // Handle ESC key & lock body scroll when expanded sidebar is open
+  // Handle ESC key & lock body scroll when desktop expanded sidebar is open
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
         setSidebarOpen(false);
+        setMobileMenuOpen(false);
       }
     };
 
@@ -169,7 +171,7 @@ export default function DashboardHeader() {
       </aside>
 
       {/* ========================================================= */}
-      {/* 2. TOP NAVBAR (Intact brand, links, and mobile toggle)    */}
+      {/* 2. TOP NAVBAR                                             */}
       {/* ========================================================= */}
       <header className="sticky top-0 z-30 bg-white border-b border-[#DDE5DF] shadow-2xs w-full font-sans">
         <div className="w-full md:w-[calc(100%-4rem)] md:ml-16 px-4 sm:px-6 lg:px-8">
@@ -201,33 +203,138 @@ export default function DashboardHeader() {
             <div className="flex items-center gap-1.5 sm:gap-2.5 shrink-0">
               <a
                 href={portalUrl}
-                className="inline-flex items-center gap-2 px-3 sm:px-4 py-1.5 sm:py-2 rounded-xl border border-[#DDE5DF] bg-[#F8FAF9] hover:bg-[#EEF4F0] text-[#2C3830] font-semibold text-xs sm:text-sm transition-all shadow-xs"
+                className="hidden sm:inline-flex items-center gap-2 px-3 sm:px-4 py-1.5 sm:py-2 rounded-xl border border-[#DDE5DF] bg-[#F8FAF9] hover:bg-[#EEF4F0] text-[#2C3830] font-semibold text-xs sm:text-sm transition-all shadow-xs"
                 title="Buka Portal Utama"
               >
                 <LayoutGrid className="w-4 h-4 text-[#5F6B63]" />
-                <span className="hidden sm:inline">Portal Utama</span>
-                <span className="sm:hidden">Portal</span>
+                <span>Portal Utama</span>
               </a>
 
               <a
                 href={adminUrl}
-                className="inline-flex items-center gap-2 px-3.5 sm:px-4.5 py-1.5 sm:py-2 rounded-xl bg-[#16823B] hover:bg-[#126B30] text-white font-bold text-xs sm:text-sm transition-all shadow-xs"
+                className="hidden sm:inline-flex items-center gap-2 px-3.5 sm:px-4.5 py-1.5 sm:py-2 rounded-xl bg-[#16823B] hover:bg-[#126B30] text-white font-bold text-xs sm:text-sm transition-all shadow-xs"
                 title="Buka Admin Pusat"
               >
                 <ShieldCheck className="w-4 h-4 text-emerald-200" />
-                <span className="hidden sm:inline">Admin Pusat</span>
-                <span className="sm:hidden">Admin</span>
+                <span>Admin Pusat</span>
               </a>
+
+              {/* Hamburger Button for Mobile only (md:hidden) */}
+              <button
+                type="button"
+                onClick={() => setMobileMenuOpen((prev) => !prev)}
+                suppressHydrationWarning
+                className="md:hidden flex items-center justify-center w-10 h-10 rounded-xl border border-[#DDE5DF] bg-[#F8FAF9] hover:bg-[#EEF4F0] text-[#17231B] transition-all shadow-2xs cursor-pointer active:scale-95"
+                aria-label={mobileMenuOpen ? "Tutup Menu Dashboard" : "Buka Menu Dashboard"}
+                aria-expanded={mobileMenuOpen}
+              >
+                {mobileMenuOpen ? (
+                  <X className="w-5 h-5 text-[#16823B]" />
+                ) : (
+                  <Menu className="w-5 h-5 text-[#16823B]" />
+                )}
+              </button>
             </div>
           </div>
         </div>
+
+        {/* Mobile Dropdown Menu (Under Navbar, NOT a sidebar) */}
+        {mobileMenuOpen && (
+          <div className="md:hidden border-t border-[#DDE5DF] bg-white px-3 sm:px-4 py-3.5 space-y-3 shadow-lg max-h-[80vh] overflow-y-auto animate-in slide-in-from-top-2 duration-150">
+            <div className="w-full space-y-3">
+              <div className="flex items-center justify-between text-xs font-bold text-[#5F6B63] uppercase tracking-wider px-1">
+                <span>Navigasi Dashboard (9 Modul)</span>
+                <span className="text-[10px] text-[#16823B] font-semibold">GGF AgroMetric</span>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                {navItems.map((item) => {
+                  const isActive = item.key === "wip";
+                  const isHosted = item.isHosted !== false;
+                  const Icon = MODULE_ICONS[item.key] || LayoutGrid;
+
+                  if (!isHosted) {
+                    return (
+                      <div
+                        key={item.key}
+                        className="p-2.5 rounded-xl text-xs font-semibold text-gray-400 bg-gray-50/70 border border-gray-200/60 select-none cursor-not-allowed flex items-center justify-between gap-2"
+                      >
+                        <div className="flex items-center gap-2.5 min-w-0 opacity-60">
+                          <div className="w-7 h-7 rounded-lg bg-gray-100 flex items-center justify-center shrink-0 text-gray-400">
+                            <Icon className="w-3.5 h-3.5" />
+                          </div>
+                          <span className="truncate">{item.label}</span>
+                        </div>
+                        <span className="text-[9px] bg-amber-50 text-amber-700 border border-amber-200/60 px-1.5 py-0.5 rounded font-medium shrink-0 flex items-center gap-1">
+                          <Wrench className="w-2.5 h-2.5" />
+                          Pembuatan
+                        </span>
+                      </div>
+                    );
+                  }
+
+                  return (
+                    <a
+                      key={item.key}
+                      href={item.url}
+                      onClick={() => setMobileMenuOpen(false)}
+                      className={`p-2.5 rounded-xl text-xs font-semibold flex items-center justify-between transition-all border ${
+                        isActive
+                          ? "bg-[#EAF3EC] text-[#16823B] font-bold border-[#CBE0D1] shadow-2xs"
+                          : "text-[#2C3830] hover:bg-[#F8FAF9] active:bg-[#EEF4F0] border-[#EAEFEB]"
+                      }`}
+                    >
+                      <div className="flex items-center gap-2.5 min-w-0">
+                        <div
+                          className={`w-7 h-7 rounded-lg flex items-center justify-center shrink-0 ${
+                            isActive
+                              ? "bg-[#16823B] text-white"
+                              : "bg-[#F0F5F2] text-[#16823B]"
+                          }`}
+                        >
+                          <Icon className="w-3.5 h-3.5" />
+                        </div>
+                        <span className="truncate mr-1">{item.label}</span>
+                      </div>
+                      {isActive ? (
+                        <span className="text-[9px] bg-[#16823B] text-white px-2 py-0.5 rounded-full font-bold shrink-0">
+                          Aktif
+                        </span>
+                      ) : (
+                        <ChevronRight className="w-4 h-4 text-gray-400 shrink-0" />
+                      )}
+                    </a>
+                  );
+                })}
+              </div>
+
+              {/* Mobile Quick Links to Portal & Admin */}
+              <div className="pt-2 border-t border-[#EAEFEB] grid grid-cols-2 gap-2">
+                <a
+                  href={portalUrl}
+                  className="w-full text-center py-2.5 rounded-xl border border-[#DDE5DF] bg-[#F8FAF9] text-[#2C3830] font-semibold text-xs flex items-center justify-center gap-1.5"
+                >
+                  <LayoutGrid className="w-3.5 h-3.5 text-[#5F6B63]" />
+                  <span>Portal Utama</span>
+                </a>
+                <a
+                  href={adminUrl}
+                  className="w-full text-center py-2.5 rounded-xl bg-[#16823B] hover:bg-[#126B30] text-white font-bold text-xs flex items-center justify-center gap-1.5 shadow-xs"
+                >
+                  <ShieldCheck className="w-3.5 h-3.5 text-emerald-200" />
+                  <span>Admin Pusat</span>
+                </a>
+              </div>
+            </div>
+          </div>
+        )}
       </header>
 
       {/* ========================================================= */}
-      {/* 3. BACKDROP OVERLAY                                       */}
+      {/* 3. BACKDROP OVERLAY (Desktop only)                        */}
       {/* ========================================================= */}
       <div
-        className={`fixed inset-0 bg-[#0c1a10]/50 backdrop-blur-xs z-[60] transition-opacity duration-300 ${
+        className={`hidden md:block fixed inset-0 bg-[#0c1a10]/50 backdrop-blur-xs z-[60] transition-opacity duration-300 ${
           sidebarOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
         }`}
         onClick={() => setSidebarOpen(false)}
@@ -235,10 +342,10 @@ export default function DashboardHeader() {
       />
 
       {/* ========================================================= */}
-      {/* 4. EXPANDED LEFT SIDEBAR DRAWER (Slides from Left)        */}
+      {/* 4. EXPANDED LEFT SIDEBAR DRAWER (Desktop only)            */}
       {/* ========================================================= */}
       <aside
-        className={`fixed top-0 bottom-0 left-0 w-80 sm:w-[340px] max-w-[90vw] bg-white z-[70] shadow-2xl flex flex-col border-r border-[#DDE5DF] transition-transform duration-300 ease-in-out transform ${
+        className={`hidden md:flex fixed top-0 bottom-0 left-0 w-80 sm:w-[340px] max-w-[90vw] bg-white z-[70] shadow-2xl flex-col border-r border-[#DDE5DF] transition-transform duration-300 ease-in-out transform ${
           sidebarOpen ? "translate-x-0" : "-translate-x-full"
         }`}
         role="dialog"
