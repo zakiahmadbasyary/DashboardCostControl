@@ -210,7 +210,7 @@ export default function DashboardCapexPage() {
       <CapexDashboardHeader />
 
       {/* ── MAIN CONTENT ── */}
-      <main className="w-full max-w-[95%] mx-auto px-3 sm:px-6 lg:px-8 py-3.5 sm:py-4 flex flex-col gap-2.5 sm:gap-3 flex-1">
+      <main className="w-full md:w-[calc(100%-4rem)] md:ml-16 px-3 sm:px-6 lg:px-8 py-3.5 sm:py-4 flex flex-col gap-2.5 sm:gap-3 flex-1">
         {/* ── MAIN FILTER SECTION (Sticky / Freeze like WIP) ── */}
         <section className="sticky top-16 sm:top-20 z-20 bg-[#F7F9F7] py-1" suppressHydrationWarning>
           <CapexMainFilters
@@ -294,8 +294,8 @@ export default function DashboardCapexPage() {
       </main>
 
       {/* ── GLOBAL FOOTER ── */}
-      <footer className="mt-auto border-t border-[#DDE5DF] bg-white py-4 px-3 sm:px-6 lg:px-8">
-        <div className="w-full max-w-[95%] mx-auto flex flex-col sm:flex-row items-center justify-between gap-2 text-[11px] text-[#89938D]">
+      <footer className="mt-auto border-t border-[#DDE5DF] bg-white py-4 w-full md:w-[calc(100%-4rem)] md:ml-16 px-4 sm:px-6 lg:px-8">
+        <div className="w-full flex flex-col sm:flex-row items-center justify-between gap-2 text-[11px] text-[#89938D]">
           <span>
             © 2026 GGF AgroMetric · Dashboard CAPEX — Capital Expenditure Management
           </span>

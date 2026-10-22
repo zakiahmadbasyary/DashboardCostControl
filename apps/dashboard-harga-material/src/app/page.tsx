@@ -118,7 +118,7 @@ export default function DashboardHargaMaterialPage() {
       <HargaMaterialDashboardHeader />
 
       {/* 2. Content Body */}
-      <main className="flex-1 max-w-[95%] w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6" suppressHydrationWarning>
+      <main className="flex-1 w-full md:w-[calc(100%-4rem)] md:ml-16 px-4 sm:px-6 lg:px-8 py-8 space-y-6" suppressHydrationWarning>
         
         {/* MAIN FILTERS CARD (Frozen/Sticky Filter Bar) */}
         <MaterialMainFilters
@@ -156,8 +156,8 @@ export default function DashboardHargaMaterialPage() {
       </main>
 
       {/* 3. Footer */}
-      <footer className="border-t border-[#DDE5DF] bg-white py-6 px-4 text-center text-xs text-[#5F6B63]" suppressHydrationWarning>
-        <div className="max-w-[95%] mx-auto flex flex-col sm:flex-row items-center justify-between gap-2">
+      <footer className="border-t border-[#DDE5DF] bg-white py-6 w-full md:w-[calc(100%-4rem)] md:ml-16 px-4 sm:px-6 lg:px-8 text-center text-xs text-[#5F6B63]" suppressHydrationWarning>
+        <div className="w-full flex flex-col sm:flex-row items-center justify-between gap-2">
           <span>© 2026 Great Giant Foods (GGF).</span>
           <span className="font-semibold text-[#16823B]">
             Dashboard Harga Material • Master Data Logistik PG 1
