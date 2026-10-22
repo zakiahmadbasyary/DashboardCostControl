@@ -78,7 +78,7 @@ export default function HargaMaterialDashboardHeader() {
       {/* 1. LEFT MINI SIDEBAR (Default view on desktop, w-16 / 64px) */}
       {/* ========================================================= */}
       <aside
-        className="fixed top-0 bottom-0 left-0 w-16 bg-white border-r border-[#DDE5DF] z-40 hidden md:flex flex-col items-center py-4 shadow-xs select-none overflow-visible"
+        className="fixed top-0 bottom-0 left-0 w-16 bg-white border-r border-[#DDE5DF] z-50 hidden md:flex flex-col items-center py-4 shadow-xs select-none overflow-visible"
         aria-label="Mini Sidebar Menu Dashboard"
       >
         {/* Top: Hamburger Button */}

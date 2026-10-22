@@ -215,7 +215,7 @@ export default function MaterialMainFilters({
   }));
 
   return (
-    <div className="sticky top-[84px] z-40 font-sans" suppressHydrationWarning>
+    <div className="sticky top-[84px] z-20 font-sans" suppressHydrationWarning>
       {/* ================= DESKTOP INLINE FROZEN FILTER BAR (sm: and larger) ================= */}
       <div className="hidden sm:flex bg-white/95 backdrop-blur-md border border-[#DDE5DF] rounded-xl p-3 sm:p-3.5 shadow-md shadow-[#16823B]/5 flex-col lg:flex-row lg:items-center justify-between gap-3 transition-all">
         {/* Title / Badge */}
