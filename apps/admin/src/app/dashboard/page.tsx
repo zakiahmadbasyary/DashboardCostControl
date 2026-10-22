@@ -444,7 +444,7 @@ export default function AdminDashboardPage() {
                 Admin Pusat
               </h1>
               <span className="text-[10px] sm:text-xs text-[#5F6B63] font-medium hidden sm:block mt-0.5">
-                GGF AgroMetric Platform Governance
+                Cost Control Platform Governance
               </span>
             </div>
           </a>

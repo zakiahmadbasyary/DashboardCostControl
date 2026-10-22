@@ -16,14 +16,13 @@ import {
   ArrowRight,
   Settings,
   Clock,
+  Globe,
   Menu,
   X,
-  Globe,
-  Wrench,
 } from "lucide-react";
 
 export default function PortalHomePage() {
-  const [menuOpen, setMenuOpen] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const {
     portalUrl,
@@ -38,7 +37,6 @@ export default function PortalHomePage() {
     hargaMaterialUrl,
     pollPg1Url,
     adminUrl,
-    navItems,
   } = getDashboardNavConfig();
 
   const publicDashboards = [
@@ -180,16 +178,6 @@ export default function PortalHomePage() {
                 <span>Portal Utama Estate</span>
               </a>
 
-              {/* Toggle Dashboard Drawer (Matched 1:1 to WIP Header Style) */}
-              <button
-                onClick={() => setMenuOpen(!menuOpen)}
-                className="inline-flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 rounded-xl border border-[#DDE5DF] bg-[#F8FAF9] hover:bg-[#EEF4F0] text-[#2C3830] font-semibold text-xs sm:text-sm transition-all shadow-xs cursor-pointer"
-                aria-label="Toggle Navigation Menu"
-              >
-                {menuOpen ? <X className="w-4 h-4 text-[#16823B]" /> : <Menu className="w-4 h-4 text-[#16823B]" />}
-                <span>Menu Dashboard</span>
-              </button>
-
               <a
                 href={adminUrl}
                 className="inline-flex items-center gap-2 px-4.5 py-2 rounded-xl bg-[#16823B] hover:bg-[#126B30] text-white font-bold text-xs sm:text-sm transition-all shadow-xs"
@@ -200,85 +188,53 @@ export default function PortalHomePage() {
               </a>
             </div>
 
-            {/* Mobile Single Hamburger Menu Button (Visible ONLY on mobile < sm) */}
+            {/* Mobile Hamburger Button (Visible ONLY on mobile < sm) */}
             <div className="sm:hidden flex items-center shrink-0">
               <button
-                onClick={() => setMenuOpen(!menuOpen)}
-                className="px-2.5 py-1.5 sm:p-2.5 rounded-xl border border-[#DDE5DF] bg-[#F8FAF9] hover:bg-[#EEF4F0] text-[#17231B] transition-all shadow-xs focus:outline-none cursor-pointer flex items-center gap-1.5"
-                aria-label="Menu Navigasi Mobile"
+                type="button"
+                onClick={() => setMobileMenuOpen((prev) => !prev)}
+                suppressHydrationWarning
+                className="flex items-center justify-center w-10 h-10 rounded-xl border border-[#DDE5DF] bg-[#F8FAF9] hover:bg-[#EEF4F0] text-[#17231B] transition-all shadow-2xs cursor-pointer active:scale-95"
+                aria-label={mobileMenuOpen ? "Tutup Menu Navigasi" : "Buka Menu Navigasi"}
+                aria-expanded={mobileMenuOpen}
               >
-                {menuOpen ? <X className="w-4.5 h-4.5 text-[#16823B]" /> : <Menu className="w-4.5 h-4.5 text-[#16823B]" />}
-                <span className="text-xs font-bold text-[#17231B]">Menu</span>
+                {mobileMenuOpen ? (
+                  <X className="w-5 h-5 text-[#16823B]" />
+                ) : (
+                  <Menu className="w-5 h-5 text-[#16823B]" />
+                )}
               </button>
             </div>
           </div>
         </div>
 
-        {/* Navigation Dropdown Drawer (Matched 1:1 to WIP Dashboard Menu Drawer Style) */}
-        {menuOpen && (
-          <div className="border-t border-[#DDE5DF] bg-white px-3 sm:px-4 py-3.5 sm:py-4 space-y-3 shadow-lg max-h-[85vh] overflow-y-auto animate-in slide-in-from-top-2 duration-200">
-            <div className="w-full max-w-[95%] mx-auto space-y-3">
-              {/* Mobile Quick Links Section at Top of Drawer */}
-              <div className="flex sm:hidden flex-col gap-2 pb-3 border-b border-[#EAEFEB]">
-                <span className="text-[11px] font-extrabold text-[#17231B] uppercase tracking-wider">
-                  Navigasi Utama
-                </span>
-                <div className="grid grid-cols-2 gap-2">
-                  <a
-                    href={mainEstatePortalUrl}
-                    className="py-2 px-2.5 rounded-xl border border-[#DDE5DF] bg-[#F8FAF9] text-[#2C3830] font-bold text-[11px] flex items-center justify-center gap-1.5 shadow-2xs"
-                  >
-                    <Globe className="w-3.5 h-3.5 text-[#16823B]" />
-                    <span>Portal Estate</span>
-                  </a>
-                  <a
-                    href={adminUrl}
-                    className="py-2 px-2.5 rounded-xl bg-[#16823B] hover:bg-[#126B30] text-white font-bold text-[11px] flex items-center justify-center gap-1.5 shadow-2xs"
-                  >
-                    <ShieldCheck className="w-3.5 h-3.5 text-emerald-200" />
-                    <span>Admin Pusat</span>
-                  </a>
+        {/* Mobile Dropdown Menu (Under Navbar, only Portal Utama Estate & Admin Pusat) */}
+        {mobileMenuOpen && (
+          <div className="sm:hidden border-t border-[#DDE5DF] bg-white px-4 py-3.5 space-y-2 shadow-lg animate-in slide-in-from-top-2 duration-150">
+            <span className="text-[11px] font-extrabold text-[#5F6B63] uppercase tracking-wider px-1">
+              Navigasi Cepat
+            </span>
+            <div className="flex flex-col gap-2 pt-1">
+              <a
+                href={mainEstatePortalUrl}
+                onClick={() => setMobileMenuOpen(false)}
+                className="w-full py-2.5 px-3.5 rounded-xl border border-[#DDE5DF] bg-[#F8FAF9] hover:bg-[#EEF4F0] text-[#2C3830] font-semibold text-xs flex items-center gap-2.5 transition-all shadow-2xs"
+              >
+                <div className="w-7 h-7 rounded-lg bg-[#EAF3EC] text-[#16823B] flex items-center justify-center shrink-0">
+                  <Globe className="w-4 h-4" />
                 </div>
-              </div>
-
-              <div className="flex items-center justify-between text-xs font-bold text-[#5F6B63] uppercase tracking-wider px-1">
-                <span>Navigasi Dashboard Cost Control (9 Menu)</span>
-                <span className="text-[10px] text-[#16823B] font-semibold">GGF AgroMetric</span>
-              </div>
-              <div className="grid grid-cols-1 min-[360px]:grid-cols-2 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-3 gap-2 sm:gap-2.5">
-                {navItems.map((item) => {
-                  const isHosted = item.isHosted !== false;
-
-                  if (!isHosted) {
-                    return (
-                      <span
-                        key={item.key}
-                        className="px-3 py-2.5 sm:px-3.5 sm:py-3 rounded-xl text-xs font-semibold text-gray-400 bg-gray-50/70 border border-gray-200/60 select-none cursor-not-allowed flex items-center justify-between"
-                      >
-                        <div className="flex items-center gap-1.5 truncate">
-                          <span className="truncate">{item.label}</span>
-                          <Wrench className="w-3 h-3 text-amber-500 shrink-0" />
-                        </div>
-                        <span className="text-[9px] sm:text-[10px] bg-amber-50 text-amber-700 border border-amber-200/60 px-1.5 py-0.5 rounded font-medium shrink-0">
-                          Pembuatan
-                        </span>
-                      </span>
-                    );
-                  }
-
-                  return (
-                    <a
-                      key={item.key}
-                      href={item.url}
-                      onClick={() => setMenuOpen(false)}
-                      className="px-3 py-2.5 sm:px-3.5 sm:py-3 rounded-xl text-xs sm:text-sm font-semibold flex items-center justify-between transition-all border text-[#2C3830] hover:bg-[#F8FAF9] border-[#EAEFEB]"
-                      title={item.description}
-                    >
-                      <span className="truncate mr-1">{item.label}</span>
-                    </a>
-                  );
-                })}
-              </div>
+                <span>Portal Utama Estate</span>
+              </a>
+              <a
+                href={adminUrl}
+                onClick={() => setMobileMenuOpen(false)}
+                className="w-full py-2.5 px-3.5 rounded-xl bg-[#16823B] hover:bg-[#126B30] text-white font-bold text-xs flex items-center gap-2.5 transition-all shadow-2xs"
+              >
+                <div className="w-7 h-7 rounded-lg bg-emerald-600/40 text-emerald-100 flex items-center justify-center shrink-0">
+                  <ShieldCheck className="w-4 h-4" />
+                </div>
+                <span>Admin Pusat</span>
+              </a>
             </div>
           </div>
         )}
@@ -406,7 +362,7 @@ export default function PortalHomePage() {
       {/* Footer */}
       <footer className="border-t border-[#DDE5DF] bg-white py-6 text-center text-xs text-[#5F6B63]">
         <div className="w-full max-w-[95%] mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row items-center justify-between gap-4">
-          <p>© 2026 GGF AgroMetric Platform. Enterprise Cost Control Portal.</p>
+          <p>© 2026 Great Giant Foods. Enterprise Cost Control Portal.</p>
           <div className="flex flex-wrap justify-center gap-4 sm:gap-6 font-medium text-[#17231B]">
             {publicDashboards.map((dash) => (
               dash.isHosted ? (

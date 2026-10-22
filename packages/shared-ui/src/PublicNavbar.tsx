@@ -21,7 +21,7 @@ export interface PublicNavbarProps {
 
 export const PublicNavbar: React.FC<PublicNavbarProps> = ({
   currentDashboard = "portal",
-  brandTitle = "GGF AgroMetric",
+  brandTitle = "Cost Control",
   brandSubtitle = "Enterprise Cost Control Platform",
   logoElement,
   showPortalLink = true,

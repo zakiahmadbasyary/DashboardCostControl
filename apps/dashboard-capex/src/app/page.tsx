@@ -297,7 +297,7 @@ export default function DashboardCapexPage() {
       <footer className="mt-auto border-t border-[#DDE5DF] bg-white py-4 w-full md:w-[calc(100%-4rem)] md:ml-16 px-4 sm:px-6 lg:px-8">
         <div className="w-full flex flex-col sm:flex-row items-center justify-between gap-2 text-[11px] text-[#89938D]">
           <span>
-            © 2026 GGF AgroMetric · Dashboard CAPEX — Capital Expenditure Management
+            © 2026 Great Giant Foods · Dashboard CAPEX — Capital Expenditure Management
           </span>
           <span>
             Database schema: <code className="font-mono text-[#5F6B63]">capex</code> · Terintegrasi PostgreSQL Prisma

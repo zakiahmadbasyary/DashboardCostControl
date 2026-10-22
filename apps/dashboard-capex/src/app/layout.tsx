@@ -1,9 +1,9 @@
-﻿import type { Metadata } from "next";
+import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
   title: "Dashboard CAPEX | Capital Expenditure",
-  description: "Modul Manajemen & Pengawasan Belanja Modal (Capital Expenditure) - GGF AgroMetric",
+  description: "Modul Manajemen & Pengawasan Belanja Modal (Capital Expenditure)",
   icons: {
     icon: "/logo.png",
     shortcut: "/logo.png",

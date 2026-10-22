@@ -73,7 +73,7 @@ export default function AdminLoginPage() {
             </div>
           </div>
           <h1 className="text-2xl font-extrabold text-[#17231B] tracking-tight">Admin Pusat</h1>
-          <p className="text-xs text-[#5F6B63] mt-1 font-medium">GGF AgroMetric Platform Single Sign-On</p>
+          <p className="text-xs text-[#5F6B63] mt-1 font-medium">Cost Control Platform Single Sign-On</p>
         </div>
 
         {error && (
@@ -150,7 +150,7 @@ export default function AdminLoginPage() {
         </form>
 
         <p className="text-center text-[11px] text-[#89938D] mt-8">
-          © 2026 GGF AgroMetric Platform. Enterprise Cost Control.
+          © 2026 Great Giant Foods. Enterprise Cost Control.
         </p>
       </div>
     </div>

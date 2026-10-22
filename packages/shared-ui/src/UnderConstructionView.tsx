@@ -204,7 +204,7 @@ export const UnderConstructionView: React.FC<UnderConstructionViewProps> = ({
 
       {/* Footer */}
       <footer className="text-center text-xs text-[#5F6B63] border-t border-[#DDE5DF] bg-white py-6">
-        © 2026 GGF AgroMetric Platform — Dashboard {dashboardTitle} Workspace
+        © 2026 Great Giant Foods — Dashboard {dashboardTitle} Workspace
       </footer>
     </div>
   );

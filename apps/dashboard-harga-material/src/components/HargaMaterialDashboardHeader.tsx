@@ -244,7 +244,7 @@ export default function HargaMaterialDashboardHeader() {
             <div className="w-full space-y-3">
               <div className="flex items-center justify-between text-xs font-bold text-[#5F6B63] uppercase tracking-wider px-1">
                 <span>Navigasi Dashboard (9 Modul)</span>
-                <span className="text-[10px] text-[#16823B] font-semibold">GGF AgroMetric</span>
+                <span className="text-[10px] text-[#16823B] font-semibold">Cost Control</span>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
@@ -506,7 +506,7 @@ export default function HargaMaterialDashboardHeader() {
 
         {/* Sidebar Footer */}
         <div className="p-3.5 border-t border-[#DDE5DF] bg-[#F8FAF9] shrink-0 text-center text-[11px] text-[#89938D] font-medium">
-          © 2026 Great Giant Foods • GGF AgroMetric
+          © 2026 Great Giant Foods • Cost Control System
         </div>
       </aside>
     </>
