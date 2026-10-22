@@ -55,6 +55,7 @@ export default function GlobalFilters({ initialFilters, onApplyFilters }: Global
             <select
               value={filters.status}
               onChange={(e) => handleChange("status", e.target.value)}
+              suppressHydrationWarning
               className="w-full bg-[#F7F9F7] border border-[#DDE5DF] rounded-lg px-2.5 py-1.5 text-xs text-[#17231B] focus:outline-none focus:border-[#16823B] transition-colors"
             >
               <option value="all">Semua Status</option>
@@ -70,6 +71,7 @@ export default function GlobalFilters({ initialFilters, onApplyFilters }: Global
             <select
               value={filters.jenisBibit}
               onChange={(e) => handleChange("jenisBibit", e.target.value)}
+              suppressHydrationWarning
               className="w-full bg-[#F7F9F7] border border-[#DDE5DF] rounded-lg px-2.5 py-1.5 text-xs text-[#17231B] focus:outline-none focus:border-[#16823B] transition-colors"
             >
               <option value="all">Semua Jenis</option>
@@ -85,6 +87,7 @@ export default function GlobalFilters({ initialFilters, onApplyFilters }: Global
             <select
               value={filters.kelasBibit}
               onChange={(e) => handleChange("kelasBibit", e.target.value)}
+              suppressHydrationWarning
               className="w-full bg-[#F7F9F7] border border-[#DDE5DF] rounded-lg px-2.5 py-1.5 text-xs text-[#17231B] focus:outline-none focus:border-[#16823B] transition-colors"
             >
               <option value="all">Semua Kelas</option>
@@ -100,6 +103,7 @@ export default function GlobalFilters({ initialFilters, onApplyFilters }: Global
             <select
               value={filters.groupCost}
               onChange={(e) => handleChange("groupCost", e.target.value)}
+              suppressHydrationWarning
               className="w-full bg-[#F7F9F7] border border-[#DDE5DF] rounded-lg px-2.5 py-1.5 text-xs text-[#17231B] focus:outline-none focus:border-[#16823B] transition-colors truncate"
             >
               <option value="all">Total Cost (Semua)</option>
@@ -133,6 +137,7 @@ export default function GlobalFilters({ initialFilters, onApplyFilters }: Global
           <button
             onClick={handleReset}
             title="Reset Filter"
+            suppressHydrationWarning
             className="inline-flex items-center justify-center gap-1 px-2.5 py-1.5 rounded-lg border border-[#DDE5DF] text-[#5F6B63] hover:bg-[#F7F9F7] text-xs font-semibold transition-colors cursor-pointer"
           >
             <RotateCcw className="w-3.5 h-3.5" />
@@ -140,6 +145,7 @@ export default function GlobalFilters({ initialFilters, onApplyFilters }: Global
           </button>
           <button
             onClick={handleApply}
+            suppressHydrationWarning
             className="inline-flex items-center justify-center gap-1 px-3 py-1.5 rounded-lg bg-[#16823B] hover:bg-[#0B6B32] text-white text-xs font-bold transition-all shadow-xs active:scale-95 cursor-pointer shrink-0"
           >
             <Check className="w-3.5 h-3.5" />

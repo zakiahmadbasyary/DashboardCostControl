@@ -232,6 +232,7 @@ export default function LocationAnalysis({
                 setIsUmurPopoverOpen(!isUmurPopoverOpen);
                 setIsWilayahPopoverOpen(false);
               }}
+              suppressHydrationWarning
               className="bg-[#F7F9F7] border border-[#DDE5DF] hover:border-[#16823B] rounded-lg px-3 py-1.5 text-xs font-semibold text-[#17231B] flex items-center gap-2 transition-colors cursor-pointer"
             >
               <Filter className="w-3.5 h-3.5 text-[#16823B]" />
@@ -282,6 +283,7 @@ export default function LocationAnalysis({
                 setIsWilayahPopoverOpen(!isWilayahPopoverOpen);
                 setIsUmurPopoverOpen(false);
               }}
+              suppressHydrationWarning
               className="bg-[#F7F9F7] border border-[#DDE5DF] hover:border-[#16823B] rounded-lg px-3 py-1.5 text-xs font-semibold text-[#17231B] flex items-center gap-2 transition-colors cursor-pointer"
             >
               <Filter className="w-3.5 h-3.5 text-[#16823B]" />
@@ -296,6 +298,7 @@ export default function LocationAnalysis({
                   <span className="text-xs font-bold text-[#17231B] uppercase tracking-wider">Pilih Wilayah</span>
                   <button
                     onClick={handleToggleSelectAllWilayah}
+                    suppressHydrationWarning
                     className="text-[11px] font-bold text-[#16823B] hover:underline cursor-pointer"
                   >
                     {tempWilayah.length === ALL_WILAYAH.length ? "Hapus Semua" : "Pilih Semua"}
@@ -330,6 +333,7 @@ export default function LocationAnalysis({
           {/* Terapkan Filter Button */}
           <button
             onClick={handleApply}
+            suppressHydrationWarning
             className="inline-flex items-center justify-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-[#16823B] hover:bg-[#0B6B32] text-white text-xs font-bold transition-all shadow-xs active:scale-95 cursor-pointer shrink-0"
           >
             <Check className="w-3.5 h-3.5" />
@@ -340,6 +344,7 @@ export default function LocationAnalysis({
           <button
             onClick={handleDownloadExcel}
             disabled={!locations || locations.length === 0}
+            suppressHydrationWarning
             title="Download data tabel lokasi ke file Excel"
             className="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-700 hover:bg-emerald-800 disabled:opacity-40 disabled:cursor-not-allowed text-white text-xs font-bold transition-all shadow-xs active:scale-95 cursor-pointer shrink-0 ml-1"
           >

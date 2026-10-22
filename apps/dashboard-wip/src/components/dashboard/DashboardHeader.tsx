@@ -76,130 +76,95 @@ export default function DashboardHeader() {
       {/* 1. LEFT MINI SIDEBAR (Default view on desktop, w-16 / 64px) */}
       {/* ========================================================= */}
       <aside
-        className="fixed top-0 bottom-0 left-0 w-16 bg-white border-r border-[#DDE5DF] z-40 hidden md:flex flex-col items-center justify-between py-3 shadow-xs select-none"
+        className="fixed top-0 bottom-0 left-0 w-16 bg-white border-r border-[#DDE5DF] z-40 hidden md:flex flex-col items-center py-4 shadow-xs select-none overflow-visible"
         aria-label="Mini Sidebar Menu Dashboard"
       >
-        {/* Top: Hamburger Button & Module Icons */}
-        <div className="w-full flex flex-col items-center">
-          {/* Hamburger Button (Toggle to expand) */}
-          <div className="relative group w-full flex justify-center">
-            <button
-              onClick={() => setSidebarOpen((prev) => !prev)}
-              className="w-10 h-10 rounded-xl bg-[#F8FAF9] hover:bg-[#EEF4F0] border border-[#DDE5DF] text-[#16823B] flex items-center justify-center transition-all cursor-pointer shadow-2xs hover:scale-105 active:scale-95"
-              aria-label={sidebarOpen ? "Tutup Menu Dashboard" : "Buka Menu Dashboard"}
-              title="Menu Dashboard"
-            >
-              <Menu className="w-5 h-5" />
-            </button>
+        {/* Top: Hamburger Button */}
+        <div className="relative group w-full flex justify-center">
+          <button
+            onClick={() => setSidebarOpen((prev) => !prev)}
+            suppressHydrationWarning
+            className="w-10 h-10 rounded-xl bg-[#F8FAF9] hover:bg-[#EEF4F0] border border-[#DDE5DF] text-[#16823B] flex items-center justify-center transition-all cursor-pointer shadow-2xs hover:scale-105 active:scale-95"
+            aria-label={sidebarOpen ? "Tutup Menu Dashboard" : "Buka Menu Dashboard"}
+            title="Menu Dashboard"
+          >
+            <Menu className="w-5 h-5" />
+          </button>
 
-            {/* Tooltip on hover */}
-            <div className="absolute left-full ml-3 top-1/2 -translate-y-1/2 px-2.5 py-1.5 bg-[#17231B] text-white text-xs font-semibold rounded-lg shadow-xl whitespace-nowrap opacity-0 group-hover:opacity-100 pointer-events-none transition-all duration-150 z-[80] flex items-center gap-1.5">
-              <span>Menu Dashboard</span>
-              <span className="text-[10px] text-emerald-300 font-normal">(Buka)</span>
-              <div className="absolute right-full top-1/2 -translate-y-1/2 border-4 border-transparent border-r-[#17231B]" />
-            </div>
-          </div>
-
-          {/* Divider */}
-          <div className="w-8 h-px bg-[#EAEFEB] my-3" />
-
-          {/* Vertical Module Icons List */}
-          <div className="w-full flex flex-col items-center gap-1.5 overflow-y-auto max-h-[calc(100vh-220px)] py-1 px-2">
-            {navItems.map((item) => {
-              const isActive = item.key === "wip";
-              const isHosted = item.isHosted !== false;
-              const IconComponent = MODULE_ICONS[item.key] || LayoutGrid;
-
-              return (
-                <div key={item.key} className="relative group w-full flex justify-center">
-                  <a
-                    href={isHosted ? item.url : undefined}
-                    onClick={(e) => {
-                      if (!isHosted) {
-                        e.preventDefault();
-                      }
-                    }}
-                    className={`w-10 h-10 rounded-xl flex items-center justify-center relative transition-all duration-150 ${
-                      isActive
-                        ? "bg-[#16823B] text-white shadow-xs font-bold ring-2 ring-[#16823B]/30"
-                        : isHosted
-                        ? "text-[#5F6B63] hover:text-[#16823B] hover:bg-[#EAF3EC]"
-                        : "text-gray-300 hover:text-amber-700 hover:bg-amber-50 cursor-not-allowed"
-                    }`}
-                    aria-label={item.label}
-                  >
-                    <IconComponent className="w-4.5 h-4.5 shrink-0" />
-
-                    {/* Active left indicator pill */}
-                    {isActive && (
-                      <span className="absolute -left-2 w-1 h-5 bg-[#16823B] rounded-r-full" />
-                    )}
-                  </a>
-
-                  {/* Floating Rich Tooltip */}
-                  <div className="absolute left-full ml-3 top-1/2 -translate-y-1/2 px-3 py-2 bg-[#17231B] text-white rounded-xl shadow-2xl opacity-0 group-hover:opacity-100 pointer-events-none transition-all duration-150 z-[80] min-w-[190px] max-w-[240px] flex flex-col gap-1 border border-gray-700/50">
-                    <div className="flex items-center justify-between gap-2">
-                      <span className="font-bold text-xs text-white">
-                        {item.label}
-                      </span>
-                      {isActive ? (
-                        <span className="text-[9px] bg-emerald-500/30 text-emerald-300 border border-emerald-400/40 px-1.5 py-0.2 rounded font-semibold">
-                          Aktif
-                        </span>
-                      ) : !isHosted ? (
-                        <span className="text-[9px] bg-amber-500/30 text-amber-300 border border-amber-400/40 px-1.5 py-0.2 rounded font-semibold flex items-center gap-1">
-                          <Wrench className="w-2.5 h-2.5" />
-                          Pembuatan
-                        </span>
-                      ) : (
-                        <span className="text-[9px] text-gray-400 font-medium">
-                          Buka
-                        </span>
-                      )}
-                    </div>
-                    <p className="text-[11px] text-gray-300 leading-snug line-clamp-2">
-                      {item.description}
-                    </p>
-                    {/* Tooltip triangle arrow */}
-                    <div className="absolute right-full top-1/2 -translate-y-1/2 border-4 border-transparent border-r-[#17231B]" />
-                  </div>
-                </div>
-              );
-            })}
+          {/* Tooltip for Hamburger */}
+          <div className="absolute left-full ml-3 top-1/2 -translate-y-1/2 px-3 py-2 bg-[#17231B] text-white rounded-xl shadow-2xl opacity-0 group-hover:opacity-100 pointer-events-none transition-all duration-150 z-[90] whitespace-nowrap border border-gray-700/60 flex items-center gap-2">
+            <span className="font-bold text-xs text-white">Menu Dashboard</span>
+            <span className="text-[10px] text-emerald-300 bg-emerald-500/20 px-1.5 py-0.5 rounded font-medium">Buka Semua</span>
+            <div className="absolute right-full top-1/2 -translate-y-1/2 border-y-4 border-y-transparent border-r-4 border-r-[#17231B]" />
           </div>
         </div>
 
-        {/* Bottom: Quick Links (Portal & Admin) */}
-        <div className="w-full flex flex-col items-center gap-1.5 pt-2 border-t border-[#EAEFEB]">
-          {/* Portal Utama Icon Button */}
-          <div className="relative group w-full flex justify-center">
-            <a
-              href={portalUrl}
-              className="w-10 h-10 rounded-xl text-[#5F6B63] hover:text-[#16823B] hover:bg-[#EEF4F0] flex items-center justify-center transition-all shadow-2xs"
-              aria-label="Portal Utama"
-            >
-              <LayoutGrid className="w-4.5 h-4.5" />
-            </a>
-            <div className="absolute left-full ml-3 top-1/2 -translate-y-1/2 px-2.5 py-1.5 bg-[#17231B] text-white text-xs font-semibold rounded-lg shadow-xl whitespace-nowrap opacity-0 group-hover:opacity-100 pointer-events-none transition-all duration-150 z-[80]">
-              Portal Utama
-              <div className="absolute right-full top-1/2 -translate-y-1/2 border-4 border-transparent border-r-[#17231B]" />
-            </div>
-          </div>
+        {/* Divider */}
+        <div className="w-8 h-px bg-[#EAEFEB] my-3" />
 
-          {/* Admin Pusat Icon Button */}
-          <div className="relative group w-full flex justify-center">
-            <a
-              href={adminUrl}
-              className="w-10 h-10 rounded-xl text-[#5F6B63] hover:text-[#16823B] hover:bg-[#EEF4F0] flex items-center justify-center transition-all shadow-2xs"
-              aria-label="Admin Pusat"
-            >
-              <ShieldCheck className="w-4.5 h-4.5" />
-            </a>
-            <div className="absolute left-full ml-3 top-1/2 -translate-y-1/2 px-2.5 py-1.5 bg-[#17231B] text-white text-xs font-semibold rounded-lg shadow-xl whitespace-nowrap opacity-0 group-hover:opacity-100 pointer-events-none transition-all duration-150 z-[80]">
-              Admin Pusat
-              <div className="absolute right-full top-1/2 -translate-y-1/2 border-4 border-transparent border-r-[#17231B]" />
-            </div>
-          </div>
+        {/* Vertical Module Icons List (NO SCROLL, ALL 9 DISPLAYED) */}
+        <div className="w-full flex flex-col items-center gap-2 py-1 px-2 overflow-visible">
+          {navItems.map((item) => {
+            const isActive = item.key === "wip";
+            const isHosted = item.isHosted !== false;
+            const IconComponent = MODULE_ICONS[item.key] || LayoutGrid;
+
+            return (
+              <div key={item.key} className="relative group w-full flex justify-center">
+                <a
+                  href={isHosted ? item.url : undefined}
+                  onClick={(e) => {
+                    if (!isHosted) {
+                      e.preventDefault();
+                    }
+                  }}
+                  className={`w-10 h-10 rounded-xl flex items-center justify-center relative transition-all duration-150 ${
+                    isActive
+                      ? "bg-[#16823B] text-white shadow-xs font-bold ring-2 ring-[#16823B]/30"
+                      : isHosted
+                      ? "text-[#5F6B63] hover:text-[#16823B] hover:bg-[#EAF3EC]"
+                      : "text-gray-300 hover:text-amber-700 hover:bg-amber-50 cursor-not-allowed"
+                  }`}
+                  aria-label={item.label}
+                >
+                  <IconComponent className="w-5 h-5 shrink-0" />
+
+                  {/* Active left indicator pill */}
+                  {isActive && (
+                    <span className="absolute -left-2 w-1 h-5 bg-[#16823B] rounded-r-full" />
+                  )}
+                </a>
+
+                {/* Floating Rich Tooltip */}
+                <div className="absolute left-full ml-3 top-1/2 -translate-y-1/2 px-3 py-2 bg-[#17231B] text-white rounded-xl shadow-2xl opacity-0 group-hover:opacity-100 pointer-events-none transition-all duration-150 z-[90] min-w-[210px] max-w-[260px] flex flex-col gap-1 border border-gray-700/60 drop-shadow-xl">
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="font-bold text-xs text-white">
+                      {item.label}
+                    </span>
+                    {isActive ? (
+                      <span className="text-[9px] bg-emerald-500/30 text-emerald-300 border border-emerald-400/40 px-1.5 py-0.5 rounded font-semibold">
+                        Aktif
+                      </span>
+                    ) : !isHosted ? (
+                      <span className="text-[9px] bg-amber-500/30 text-amber-300 border border-amber-400/40 px-1.5 py-0.5 rounded font-semibold flex items-center gap-1">
+                        <Wrench className="w-2.5 h-2.5" />
+                        Pembuatan
+                      </span>
+                    ) : (
+                      <span className="text-[9px] text-gray-400 font-medium">
+                        Tersedia
+                      </span>
+                    )}
+                  </div>
+                  <p className="text-[11px] text-gray-300 leading-snug">
+                    {item.description}
+                  </p>
+                  {/* Tooltip triangle arrow */}
+                  <div className="absolute right-full top-1/2 -translate-y-1/2 border-y-4 border-y-transparent border-r-4 border-r-[#17231B]" />
+                </div>
+              </div>
+            );
+          })}
         </div>
       </aside>
 
@@ -207,7 +172,7 @@ export default function DashboardHeader() {
       {/* 2. TOP NAVBAR (Intact brand, links, and mobile toggle)    */}
       {/* ========================================================= */}
       <header className="sticky top-0 z-30 bg-white border-b border-[#DDE5DF] shadow-2xs w-full font-sans">
-        <div className="w-full max-w-[96%] mx-auto px-3 sm:px-6 lg:px-8">
+        <div className="w-full md:w-[calc(100%-4rem)] md:ml-16 px-4 sm:px-6 lg:px-8">
           <div className="h-16 sm:h-20 flex items-center justify-between gap-2 sm:gap-4">
             
             {/* Brand Logo & Title */}
@@ -232,37 +197,27 @@ export default function DashboardHeader() {
               </div>
             </a>
 
-            {/* Right Action Buttons & Menu Trigger */}
+            {/* Right Action Buttons */}
             <div className="flex items-center gap-1.5 sm:gap-2.5 shrink-0">
               <a
                 href={portalUrl}
-                className="hidden sm:inline-flex items-center gap-2 px-4 py-2 rounded-xl border border-[#DDE5DF] bg-[#F8FAF9] hover:bg-[#EEF4F0] text-[#2C3830] font-semibold text-xs sm:text-sm transition-all shadow-xs"
+                className="inline-flex items-center gap-2 px-3 sm:px-4 py-1.5 sm:py-2 rounded-xl border border-[#DDE5DF] bg-[#F8FAF9] hover:bg-[#EEF4F0] text-[#2C3830] font-semibold text-xs sm:text-sm transition-all shadow-xs"
                 title="Buka Portal Utama"
               >
                 <LayoutGrid className="w-4 h-4 text-[#5F6B63]" />
-                <span>Portal Utama</span>
+                <span className="hidden sm:inline">Portal Utama</span>
+                <span className="sm:hidden">Portal</span>
               </a>
 
               <a
                 href={adminUrl}
-                className="hidden sm:inline-flex items-center gap-2 px-4.5 py-2 rounded-xl bg-[#16823B] hover:bg-[#126B30] text-white font-bold text-xs sm:text-sm transition-all shadow-xs"
+                className="inline-flex items-center gap-2 px-3.5 sm:px-4.5 py-1.5 sm:py-2 rounded-xl bg-[#16823B] hover:bg-[#126B30] text-white font-bold text-xs sm:text-sm transition-all shadow-xs"
                 title="Buka Admin Pusat"
               >
                 <ShieldCheck className="w-4 h-4 text-emerald-200" />
-                <span>Admin Pusat</span>
+                <span className="hidden sm:inline">Admin Pusat</span>
+                <span className="sm:hidden">Admin</span>
               </a>
-
-              {/* Menu Dashboard Button (Opens Left Sidebar) */}
-              <button
-                onClick={() => setSidebarOpen((prev) => !prev)}
-                className="inline-flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 rounded-xl border border-[#DDE5DF] bg-[#F8FAF9] hover:bg-[#EEF4F0] text-[#2C3830] font-semibold text-xs sm:text-sm transition-all shadow-xs cursor-pointer active:scale-95"
-                aria-label="Toggle Menu Dashboard"
-                aria-expanded={sidebarOpen}
-              >
-                <Menu className="w-4 h-4 text-[#16823B]" />
-                <span className="hidden sm:inline">Menu Dashboard</span>
-                <span className="sm:hidden text-xs">Menu</span>
-              </button>
             </div>
           </div>
         </div>
@@ -313,6 +268,7 @@ export default function DashboardHeader() {
 
           <button
             onClick={() => setSidebarOpen(false)}
+            suppressHydrationWarning
             className="p-2 text-[#5F6B63] hover:text-[#17231B] hover:bg-[#EAEFEB] rounded-xl transition-all cursor-pointer"
             aria-label="Tutup Menu"
           >
@@ -328,12 +284,14 @@ export default function DashboardHeader() {
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
+              suppressHydrationWarning
               placeholder="Cari modul dashboard..."
               className="w-full pl-9.5 pr-8 py-2 text-xs sm:text-sm bg-[#F8FAF9] border border-[#DDE5DF] rounded-xl text-[#17231B] placeholder-[#89938D] focus:outline-none focus:ring-2 focus:ring-[#16823B]/30 focus:border-[#16823B] transition-all"
             />
             {searchQuery && (
               <button
                 onClick={() => setSearchQuery("")}
+                suppressHydrationWarning
                 className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[#89938D] hover:text-[#17231B] p-0.5"
                 aria-label="Clear Search"
               >
@@ -439,32 +397,9 @@ export default function DashboardHeader() {
           )}
         </div>
 
-        {/* Sidebar Footer / Quick Ecosystem Navigation */}
-        <div className="p-4 border-t border-[#DDE5DF] bg-[#F8FAF9] shrink-0 space-y-2">
-          <p className="text-[10px] font-extrabold text-[#89938D] uppercase tracking-wider px-1">
-            Akses Ekosistem
-          </p>
-          <div className="grid grid-cols-2 gap-2">
-            <a
-              href={portalUrl}
-              className="px-3 py-2 rounded-xl border border-[#DDE5DF] bg-white hover:bg-[#EEF4F0] text-[#2C3830] font-semibold text-xs flex items-center justify-center gap-1.5 transition-all shadow-2xs"
-            >
-              <LayoutGrid className="w-3.5 h-3.5 text-[#5F6B63]" />
-              <span>Portal Utama</span>
-            </a>
-
-            <a
-              href={adminUrl}
-              className="px-3 py-2 rounded-xl bg-[#16823B] hover:bg-[#126B30] text-white font-bold text-xs flex items-center justify-center gap-1.5 transition-all shadow-2xs"
-            >
-              <ShieldCheck className="w-3.5 h-3.5 text-emerald-200" />
-              <span>Admin Pusat</span>
-            </a>
-          </div>
-
-          <div className="pt-2 text-center text-[10px] text-[#89938D]">
-            © 2026 Great Giant Foods • GGF AgroMetric
-          </div>
+        {/* Sidebar Footer */}
+        <div className="p-3.5 border-t border-[#DDE5DF] bg-[#F8FAF9] shrink-0 text-center text-[11px] text-[#89938D] font-medium">
+          © 2026 Great Giant Foods • GGF AgroMetric
         </div>
       </aside>
     </>
