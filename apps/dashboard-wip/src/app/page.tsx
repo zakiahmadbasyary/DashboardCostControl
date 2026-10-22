@@ -147,7 +147,7 @@ export default function PublicDashboardPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#F7F9F7] text-[#17231B] flex flex-col font-sans">
+    <div className="min-h-screen bg-[#F7F9F7] text-[#17231B] flex flex-col font-sans md:pl-16">
       {/* Header */}
       <DashboardHeader />
 
