@@ -53,13 +53,13 @@ model MastersheetCe2 {
 // 2. TABEL TRANSAKSI (DATA SOURCE)
 // ─────────────────────────────────────────────────────────────────────────────
 
-/// Data realisasi/aktual biaya OPEX dari file Excel sumber
+/// Data realisasi/aktual biaya OPEX dari file Excel sumber (memiliki kolom PG)
 model DataActual {
   idActual            BigInt    @id @default(autoincrement()) @map("id_actual")
-  kode                String    @map("kode") // Kode gabungan: periode + cost_control + ce2
+  kode                String    @map("kode") // Kode gabungan: periode + costcenter + ce2 + pg
   costcenter          String?   @map("costcenter")
   deskripsiCostcenter String?   @map("deskripsi_costcenter")
-  costElement         String?   @map("cost_element")
+  costControl         String?   @map("cost_control") // Kolom cost_control / cost_element
   costDescription     String?   @map("cost_description")
   idrAct              Decimal?  @map("idr_act") @db.Decimal(18, 2) // Kolom IDR-Act pada Excel
   objectCurrency      String?   @map("object_currency") @db.VarChar(10)
@@ -73,7 +73,7 @@ model DataActual {
   documentDate        DateTime? @map("document_date") @db.Date
   postingDate         DateTime? @map("posting_date") @db.Date
   period              Int?      @map("period") @db.SmallInt // Dinormalisasi angka bulan 1–12
-  pg                  String?   @map("pg") @db.VarChar(20)
+  pg                  String?   @map("pg") @db.VarChar(50) // Plantation Group / Purchasing Group
   groupingDepartement String?   @map("grouping_departement") @db.VarChar(100)
   subgrup             String?   @map("subgrup") @db.VarChar(100)
   grupExp             String?   @map("grup_exp") @db.VarChar(100)
@@ -98,10 +98,10 @@ model DataActual {
   @@map("data_actual")
 }
 
-/// Data anggaran biaya OPEX dari file Excel sumber
+/// Data anggaran biaya OPEX dari file Excel sumber (tanpa kolom PG, berlaku untuk semua PG)
 model DataBudget {
   idBudget            BigInt    @id @default(autoincrement()) @map("id_budget")
-  kode                String    @map("kode") // Kode gabungan: periode + costcenter + ce2 + pg
+  kode                String    @map("kode") // Kode gabungan: periode + costcenter + ce2
   costcenter          String?   @map("costcenter")
   deskripsiCostcenter String?   @map("deskripsi_costcenter")
   ce2                 String?   @map("ce2")
@@ -110,7 +110,6 @@ model DataBudget {
   amountUsd           Decimal?  @map("amount_usd") @db.Decimal(18, 2)
   month               DateTime? @map("month") @db.Date // Periode sumber dalam format tanggal
   period              Int?      @map("period") @db.SmallInt // Angka bulan 1–12 untuk penyusunan kode & summary
-  pg                  String?   @map("pg") @db.VarChar(50) // Plantation Group / Purchasing Group (pertanyaan terbuka sumber mapping)
   bbp                 String?   @map("bbp") @db.VarChar(50)
   groupExp            String?   @map("group_exp") @db.VarChar(100)
 
@@ -126,25 +125,24 @@ model DataBudget {
   @@index([period])
   @@index([costcenter])
   @@index([ce2])
-  @@index([pg])
   @@map("data_budget")
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// 3. TABEL SUMMARY (HASIL AGREGASI ACTUAL & BUDGET)
+// 3. TABEL SUMMARY (HASIL AGREGASI ACTUAL & BUDGET PER PG)
 // ─────────────────────────────────────────────────────────────────────────────
 
-/// Ringkasan hasil agregasi Actual & Budget per kode unik (kode = periode + costcenter + ce2 + pg)
+/// Ringkasan hasil agregasi Actual & Budget per PG (kode = periode + costcenter + ce2 + pg)
 model Summary {
   kode                String    @id @map("kode") // Primary key unik gabungan (periode + costcenter + ce2 + pg)
   periode             Int       @map("periode") @db.SmallInt // Angka bulan 1–12
   costcenter          String?   @map("costcenter")
   deskripsiCostcenter String?   @map("deskripsi_costcenter")
-  pg                  String?   @map("pg") @db.VarChar(50) // Plantation Group / Purchasing Group
   ce2                 String?   @map("ce2")
   deskripsiCe2        String?   @map("deskripsi_ce2")
-  nilaiActual         Decimal?  @map("nilai_actual") @db.Decimal(18, 2) // NULL jika tidak ada transaksi actual
-  nilaiBudget         Decimal?  @map("nilai_budget") @db.Decimal(18, 2) // NULL jika tidak ada transaksi budget
+  pg                  String    @map("pg") @db.VarChar(50) // Plantation Group (kunci filter utama dashboard)
+  nilaiActual         Decimal?  @map("nilai_actual") @db.Decimal(18, 2) // NULL jika tidak ada transaksi actual pada PG tersebut
+  nilaiBudget         Decimal?  @map("nilai_budget") @db.Decimal(18, 2) // Nilai budget yang berlaku sama untuk kombinasi CC & CE2
   variance            Decimal?  @map("variance") @db.Decimal(10, 2) // Persentase varians: ((nilai_actual - nilai_budget) / nilai_budget) * 100
 
   createdAt           DateTime  @default(now()) @map("created_at")
@@ -154,10 +152,12 @@ model Summary {
   costcenterRef       MastersheetCostcenter? @relation(fields: [costcenter], references: [costcenter], onDelete: Restrict, onUpdate: Cascade)
   ce2Ref              MastersheetCe2?        @relation(fields: [ce2], references: [ce2], onDelete: Restrict, onUpdate: Cascade)
 
-  // Indeks pendukung query filtering dashboard
+  // Constraint Unik & Indeks Performa Dashboard
+  @@unique([periode, costcenter, ce2, pg])
+  @@index([pg])
   @@index([periode])
   @@index([costcenter])
   @@index([ce2])
-  @@index([pg])
+  @@index([pg, periode, costcenter, ce2])
   @@map("summary")
 }
