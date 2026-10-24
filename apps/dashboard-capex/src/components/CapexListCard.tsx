@@ -3,7 +3,11 @@
 import React, { useState } from "react";
 import { CapexItem } from "@/types/capex";
 import StatusBadge from "./StatusBadge";
-import { getIoWbsMoDisplay, formatNumberId } from "@/lib/formatters";
+import {
+  getIoWbsMoDisplay,
+  formatNumberId,
+  calculateUnitPrice,
+} from "@/lib/formatters";
 import {
   FileSpreadsheet,
   AlertCircle,
@@ -12,6 +16,7 @@ import {
   ChevronRight,
   Inbox,
   RefreshCw,
+  Download,
 } from "lucide-react";
 
 interface CapexListCardProps {
@@ -35,6 +40,7 @@ export default function CapexListCard({
 }: CapexListCardProps) {
   const [currentPage, setCurrentPage] = useState(1);
   const [tableSearch, setTableSearch] = useState("");
+  const [isExporting, setIsExporting] = useState(false);
 
   // Quick table-level filter (filtering the current main filtered list further)
   const filteredItems = items.filter((item) => {
@@ -56,6 +62,79 @@ export default function CapexListCard({
   const effectivePage = Math.min(currentPage, totalPages);
   const startIndex = (effectivePage - 1) * ITEMS_PER_PAGE;
   const paginatedItems = filteredItems.slice(startIndex, startIndex + ITEMS_PER_PAGE);
+
+  // Export filtered items to Excel (.xlsx)
+  const handleExportExcel = async () => {
+    if (filteredItems.length === 0 || isExporting) return;
+
+    try {
+      setIsExporting(true);
+      const XLSX = await import("xlsx");
+
+      const exportData = filteredItems.map((item) => {
+        const ioDisplay = getIoWbsMoDisplay(item);
+        const unitPrice = calculateUnitPrice(item.amount, item.quantity);
+
+        return {
+          "No CAPEX": item.capexNo || "—",
+          "IO - WBS - MO": ioDisplay.value,
+          "Deskripsi": item.description || "—",
+          "Status": item.statusCapex || "—",
+          "Unit Price": unitPrice.raw != null ? unitPrice.raw : 0,
+          "Qty": item.quantity != null ? item.quantity : 0,
+          "Total Price": item.amount != null ? item.amount : 0,
+          "Kategori": item.kategori || "—",
+          "Komoditi": item.komoditi || "—",
+        };
+      });
+
+      const worksheet = XLSX.utils.json_to_sheet(exportData);
+      const workbook = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(workbook, worksheet, "Daftar CAPEX");
+
+      // Auto column widths
+      worksheet["!cols"] = [
+        { wch: 18 }, // No CAPEX
+        { wch: 18 }, // IO - WBS - MO
+        { wch: 42 }, // Deskripsi
+        { wch: 18 }, // Status
+        { wch: 18 }, // Unit Price
+        { wch: 10 }, // Qty
+        { wch: 20 }, // Total Price
+        { wch: 22 }, // Kategori
+        { wch: 20 }, // Komoditi
+      ];
+
+      // Format numeric cells with standard thousand separator format
+      if (worksheet["!ref"]) {
+        const range = XLSX.utils.decode_range(worksheet["!ref"]);
+        for (let R = range.s.r + 1; R <= range.e.r; ++R) {
+          // Col 4: Unit Price (0-indexed: A=0, B=1, C=2, D=3, E=4)
+          const cellUnitPrice = worksheet[XLSX.utils.encode_cell({ r: R, c: 4 })];
+          if (cellUnitPrice && typeof cellUnitPrice.v === "number") {
+            cellUnitPrice.z = "#,##0";
+          }
+          // Col 5: Qty
+          const cellQty = worksheet[XLSX.utils.encode_cell({ r: R, c: 5 })];
+          if (cellQty && typeof cellQty.v === "number") {
+            cellQty.z = "#,##0";
+          }
+          // Col 6: Total Price
+          const cellTotalPrice = worksheet[XLSX.utils.encode_cell({ r: R, c: 6 })];
+          if (cellTotalPrice && typeof cellTotalPrice.v === "number") {
+            cellTotalPrice.z = "#,##0";
+          }
+        }
+      }
+
+      const todayStr = new Date().toISOString().split("T")[0];
+      XLSX.writeFile(workbook, `Daftar_CAPEX_${todayStr}.xlsx`);
+    } catch (err) {
+      console.error("Gagal mendownload excel:", err);
+    } finally {
+      setIsExporting(false);
+    }
+  };
 
   return (
     <div
@@ -83,20 +162,48 @@ export default function CapexListCard({
           </div>
         </div>
 
-        {/* Quick Search in List */}
-        <div className="relative min-w-[200px] w-full sm:w-auto">
-          <Search className="w-3.5 h-3.5 text-[#89938D] absolute left-3 top-1/2 -translate-y-1/2" />
-          <input
-            type="text"
-            placeholder="Cari dalam daftar..."
-            value={tableSearch}
-            onChange={(e) => {
-              setTableSearch(e.target.value);
-              setCurrentPage(1);
-            }}
-            className="w-full pl-8.5 pr-3 py-1.5 text-xs bg-[#F7F9F7] border border-[#DDE5DF] rounded-xl focus:outline-none focus:border-[#16823B] text-[#17231B] font-medium"
-            suppressHydrationWarning
-          />
+        {/* Action Controls: Search & Download Excel */}
+        <div className="flex items-center gap-2 w-full sm:w-auto">
+          {/* Quick Search in List */}
+          <div className="relative flex-1 sm:w-44 md:w-52">
+            <Search className="w-3.5 h-3.5 text-[#89938D] absolute left-3 top-1/2 -translate-y-1/2" />
+            <input
+              type="text"
+              placeholder="Cari dalam daftar..."
+              value={tableSearch}
+              onChange={(e) => {
+                setTableSearch(e.target.value);
+                setCurrentPage(1);
+              }}
+              className="w-full pl-8.5 pr-3 py-1.5 text-xs bg-[#F7F9F7] border border-[#DDE5DF] rounded-xl focus:outline-none focus:border-[#16823B] text-[#17231B] font-medium"
+              suppressHydrationWarning
+            />
+          </div>
+
+          {/* Download Excel Button */}
+          <button
+            type="button"
+            onClick={handleExportExcel}
+            disabled={loading || filteredItems.length === 0 || isExporting}
+            className="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-xl bg-[#16823B] hover:bg-[#126B30] text-white transition-all shadow-xs disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer shrink-0 active:scale-[0.98]"
+            title={
+              filteredItems.length === 0
+                ? "Tidak ada data untuk diunduh"
+                : `Unduh ${filteredItems.length} baris data CAPEX ke Excel`
+            }
+          >
+            {isExporting ? (
+              <>
+                <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                <span className="text-xs">Mengunduh...</span>
+              </>
+            ) : (
+              <>
+                <Download className="w-3.5 h-3.5" />
+                <span className="text-xs">Download Excel</span>
+              </>
+            )}
+          </button>
         </div>
       </div>
 
