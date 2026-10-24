@@ -1,0 +1,163 @@
+// Prisma Schema for Dashboard OPEX (Operating Expenditure) - Great Giant Foods (GGP)
+// Sesuai panduan perancangan terpadu: doc/skema_database_opex_ggp.md
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/client"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// 1. TABEL MASTER
+// ─────────────────────────────────────────────────────────────────────────────
+
+/// Master daftar Cost Center unik dari kolom Summary file Excel sumber
+model MastersheetCostcenter {
+  costcenter          String   @id @map("costcenter")
+  deskripsiCostcenter String?  @map("deskripsi_costcenter")
+  isview              Boolean  @default(true) @map("isview") // Mengatur visibilitas dashboard tanpa menghapus data
+
+  createdAt           DateTime @default(now()) @map("created_at")
+  updatedAt           DateTime @updatedAt @map("updated_at")
+
+  // Relasi 1:N ke Data Transaksi & Summary
+  dataActualList      DataActual[]
+  dataBudgetList      DataBudget[]
+  summaryList         Summary[]
+
+  @@map("mastersheet_costcenter")
+}
+
+/// Master daftar Cost Element 2 (CE2) unik dari kolom Summary file Excel sumber
+model MastersheetCe2 {
+  ce2          String   @id @map("ce2")
+  deskripsiCe2 String?  @map("deskripsi_ce2")
+  isview       Boolean  @default(true) @map("isview") // Mengatur visibilitas dashboard tanpa menghapus data
+
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  // Relasi 1:N ke Data Transaksi & Summary
+  dataActualList DataActual[]
+  dataBudgetList DataBudget[]
+  summaryList    Summary[]
+
+  @@map("mastersheet_ce2")
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// 2. TABEL TRANSAKSI (DATA SOURCE)
+// ─────────────────────────────────────────────────────────────────────────────
+
+/// Data realisasi/aktual biaya OPEX dari file Excel sumber
+model DataActual {
+  idActual            BigInt    @id @default(autoincrement()) @map("id_actual")
+  kode                String    @map("kode") // Kode gabungan: periode + cost_control + ce2
+  costcenter          String?   @map("costcenter")
+  deskripsiCostcenter String?   @map("deskripsi_costcenter")
+  costElement         String?   @map("cost_element")
+  costDescription     String?   @map("cost_description")
+  idrAct              Decimal?  @map("idr_act") @db.Decimal(18, 2) // Kolom IDR-Act pada Excel
+  objectCurrency      String?   @map("object_currency") @db.VarChar(10)
+  usdAct              Decimal?  @map("usd_act") @db.Decimal(18, 2) // Kolom USD-Act pada Excel
+  notes               String?   @map("notes")
+  ce2                 String?   @map("ce2")
+  deskripsiCe2        String?   @map("deskripsi_ce2")
+  totalQuantity       Decimal?  @map("total_quantity") @db.Decimal(15, 4)
+  postedUnitOfMeas    String?   @map("posted_unit_of_meas") @db.VarChar(20)
+  documentNumber      String?   @map("document_number") @db.VarChar(50)
+  documentDate        DateTime? @map("document_date") @db.Date
+  postingDate         DateTime? @map("posting_date") @db.Date
+  period              Int?      @map("period") @db.SmallInt // Dinormalisasi angka bulan 1–12
+  pg                  String?   @map("pg") @db.VarChar(20)
+  groupingDepartement String?   @map("grouping_departement") @db.VarChar(100)
+  subgrup             String?   @map("subgrup") @db.VarChar(100)
+  grupExp             String?   @map("grup_exp") @db.VarChar(100)
+  jenisBiaya          String?   @map("jenis_biaya") @db.VarChar(100)
+  ceGrup              String?   @map("ce_grup") @db.VarChar(100)
+  grupAktivitas       String?   @map("grup_aktivitas") @db.VarChar(100)
+  mappingBiaya        String?   @map("mapping_biaya") @db.VarChar(100)
+
+  createdAt           DateTime  @default(now()) @map("created_at")
+  updatedAt           DateTime  @updatedAt @map("updated_at")
+
+  // Relasi ke Master (N:1)
+  costcenterRef       MastersheetCostcenter? @relation(fields: [costcenter], references: [costcenter], onDelete: Restrict, onUpdate: Cascade)
+  ce2Ref              MastersheetCe2?        @relation(fields: [ce2], references: [ce2], onDelete: Restrict, onUpdate: Cascade)
+
+  // Indeks untuk query agregasi dan filtering
+  @@index([kode])
+  @@index([period])
+  @@index([costcenter])
+  @@index([ce2])
+  @@index([pg])
+  @@map("data_actual")
+}
+
+/// Data anggaran biaya OPEX dari file Excel sumber
+model DataBudget {
+  idBudget            BigInt    @id @default(autoincrement()) @map("id_budget")
+  kode                String    @map("kode") // Kode gabungan: periode + costcenter + ce2 + pg
+  costcenter          String?   @map("costcenter")
+  deskripsiCostcenter String?   @map("deskripsi_costcenter")
+  ce2                 String?   @map("ce2")
+  deskripsiCe2        String?   @map("deskripsi_ce2")
+  amountIdr           Decimal?  @map("amount_idr") @db.Decimal(18, 2)
+  amountUsd           Decimal?  @map("amount_usd") @db.Decimal(18, 2)
+  month               DateTime? @map("month") @db.Date // Periode sumber dalam format tanggal
+  period              Int?      @map("period") @db.SmallInt // Angka bulan 1–12 untuk penyusunan kode & summary
+  pg                  String?   @map("pg") @db.VarChar(50) // Plantation Group / Purchasing Group (pertanyaan terbuka sumber mapping)
+  bbp                 String?   @map("bbp") @db.VarChar(50)
+  groupExp            String?   @map("group_exp") @db.VarChar(100)
+
+  createdAt           DateTime  @default(now()) @map("created_at")
+  updatedAt           DateTime  @updatedAt @map("updated_at")
+
+  // Relasi ke Master (N:1)
+  costcenterRef       MastersheetCostcenter? @relation(fields: [costcenter], references: [costcenter], onDelete: Restrict, onUpdate: Cascade)
+  ce2Ref              MastersheetCe2?        @relation(fields: [ce2], references: [ce2], onDelete: Restrict, onUpdate: Cascade)
+
+  // Indeks untuk query agregasi dan filtering
+  @@index([kode])
+  @@index([period])
+  @@index([costcenter])
+  @@index([ce2])
+  @@index([pg])
+  @@map("data_budget")
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// 3. TABEL SUMMARY (HASIL AGREGASI ACTUAL & BUDGET)
+// ─────────────────────────────────────────────────────────────────────────────
+
+/// Ringkasan hasil agregasi Actual & Budget per kode unik (kode = periode + costcenter + ce2 + pg)
+model Summary {
+  kode                String    @id @map("kode") // Primary key unik gabungan (periode + costcenter + ce2 + pg)
+  periode             Int       @map("periode") @db.SmallInt // Angka bulan 1–12
+  costcenter          String?   @map("costcenter")
+  deskripsiCostcenter String?   @map("deskripsi_costcenter")
+  pg                  String?   @map("pg") @db.VarChar(50) // Plantation Group / Purchasing Group
+  ce2                 String?   @map("ce2")
+  deskripsiCe2        String?   @map("deskripsi_ce2")
+  nilaiActual         Decimal?  @map("nilai_actual") @db.Decimal(18, 2) // NULL jika tidak ada transaksi actual
+  nilaiBudget         Decimal?  @map("nilai_budget") @db.Decimal(18, 2) // NULL jika tidak ada transaksi budget
+  variance            Decimal?  @map("variance") @db.Decimal(10, 2) // Persentase varians: ((nilai_actual - nilai_budget) / nilai_budget) * 100
+
+  createdAt           DateTime  @default(now()) @map("created_at")
+  updatedAt           DateTime  @updatedAt @map("updated_at")
+
+  // Relasi ke Master (N:1)
+  costcenterRef       MastersheetCostcenter? @relation(fields: [costcenter], references: [costcenter], onDelete: Restrict, onUpdate: Cascade)
+  ce2Ref              MastersheetCe2?        @relation(fields: [ce2], references: [ce2], onDelete: Restrict, onUpdate: Cascade)
+
+  // Indeks pendukung query filtering dashboard
+  @@index([periode])
+  @@index([costcenter])
+  @@index([ce2])
+  @@index([pg])
+  @@map("summary")
+}
