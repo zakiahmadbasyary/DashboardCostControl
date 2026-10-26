@@ -139,173 +139,170 @@ export default function AdminUploadPage() {
         </div>
       </div>
 
-      {/* Grid of 2 Upload Cards (2 Kolom Berdampingan) */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      {/* Grid of 2 Upload Cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 max-w-2xl gap-5">
         {uploadCards.map((card) => {
           const currentProgress = progressState[card.title];
           const isUploading =
             currentProgress?.status === "uploading" || currentProgress?.status === "validating";
+          const isSuccess = currentProgress?.status === "success";
+          const isError = currentProgress?.status === "error";
 
           return (
             <div
               key={card.title}
-              className="bg-white border border-[#DDE5DF] rounded-2xl p-5 sm:p-6 shadow-xs flex flex-col justify-between relative hover:border-[#16823B]/50 transition-all group"
+              className="bg-white border border-[#DDE5DF] rounded-2xl p-5 shadow-xs flex flex-col justify-between"
             >
-              {/* Top Details & Step */}
-              <div className="space-y-3">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <span className="w-6 h-6 rounded-full bg-[#16823B] text-white flex items-center justify-center text-xs font-bold">
-                      {card.step}
-                    </span>
-                    <h3 className="font-bold text-base text-[#17231B]">{card.title}</h3>
+              <div>
+                {/* Card Title & Step */}
+                <div className="flex items-center justify-between mb-3">
+                  <div className="flex items-center gap-2.5">
+                    <div className="p-2 rounded-xl bg-[#16823B]/10 text-[#16823B]">
+                      <FileSpreadsheet className="w-4 h-4" />
+                    </div>
+                    <div>
+                      <h3 className="font-bold text-xs text-[#17231B]">{card.title}</h3>
+                      <span className="text-[10px] text-[#89938D]">Format .xlsx, .xls, .csv</span>
+                    </div>
                   </div>
-
-                  {/* Template & Reset buttons */}
-                  <div className="flex items-center gap-1.5">
-                    <button
-                      type="button"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleDownloadTemplate(card.title);
-                      }}
-                      className="inline-flex items-center gap-1 text-[11px] font-semibold text-[#16823B] bg-[#EAF3EC] hover:bg-[#D5E7DA] px-2.5 py-1 rounded-lg border border-[#CBE0D1] transition-colors cursor-pointer"
-                      title={`Unduh format contoh template ${card.sampleFile}`}
-                    >
-                      <Download className="w-3.5 h-3.5" />
-                      <span>Template</span>
-                    </button>
-                    <button
-                      type="button"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setResetModalCategory(card.title);
-                      }}
-                      className="inline-flex items-center gap-1 text-[11px] font-semibold text-rose-600 bg-rose-50 hover:bg-rose-100 px-2 py-1 rounded-lg border border-rose-200 transition-colors cursor-pointer"
-                      title={`Reset / Kosongkan data tabel ${card.title}`}
-                    >
-                      <RotateCcw className="w-3.5 h-3.5" />
-                      <span className="hidden sm:inline">Reset</span>
-                    </button>
-                  </div>
+                  <span className="px-2 py-0.5 rounded-full bg-[#F7F9F7] border border-[#DDE5DF] text-[10px] font-extrabold text-[#16823B]">
+                    Langkah {card.step}
+                  </span>
                 </div>
 
-                <p className="text-xs text-[#5F6B63] leading-relaxed">{card.desc}</p>
+                <p className="text-[11px] text-[#5F6B63] mb-4 min-h-[32px]">{card.desc}</p>
 
-                {/* Hidden input */}
+                {/* Hidden File Input */}
                 <input
-                  ref={fileInputRefs[card.title]}
                   type="file"
-                  accept=".xlsx, .xls, .csv"
-                  className="hidden"
+                  ref={fileInputRefs[card.title]}
+                  accept=".xlsx,.xls,.csv"
                   onChange={(e) => handleFileChange(card.title, e)}
+                  className="hidden"
                 />
 
-                {/* Dropzone Area */}
+                {/* Dropzone Container */}
                 <div
                   onClick={() => handleCardClick(card.title)}
-                  className={`mt-4 border-2 border-dashed rounded-2xl p-6 flex flex-col items-center justify-center text-center transition-all cursor-pointer ${
+                  className={`border-2 border-dashed rounded-xl p-5 text-center cursor-pointer transition-all ${
                     isUploading
-                      ? "border-[#16823B] bg-[#F7F9F7] cursor-wait"
-                      : "border-[#DDE5DF] bg-[#F8FAF9]/50 hover:bg-[#EAF3EC]/40 hover:border-[#16823B]"
+                      ? "border-amber-400 bg-amber-50/50 cursor-wait"
+                      : isSuccess
+                      ? "border-emerald-400 bg-emerald-50/40"
+                      : isError
+                      ? "border-rose-400 bg-rose-50/40"
+                      : "border-[#DDE5DF] hover:border-[#16823B] bg-[#F7F9F7] hover:bg-[#16823B]/5"
                   }`}
                 >
-                  <div className="p-3 bg-white rounded-2xl border border-[#DDE5DF] text-[#16823B] mb-2 shadow-2xs group-hover:scale-105 transition-transform">
-                    {isUploading ? (
-                      <RefreshCw className="w-6 h-6 animate-spin text-[#16823B]" />
-                    ) : (
-                      <UploadCloud className="w-6 h-6 text-[#16823B]" />
-                    )}
-                  </div>
-                  <span className="text-xs font-bold text-[#17231B]">
-                    {isUploading ? "Memproses Data..." : "Klik untuk Pilih File Excel"}
-                  </span>
-                  <span className="text-[11px] text-[#89938D] mt-0.5">
-                    Format .xlsx, .xls, .csv (Maks 25 MB)
-                  </span>
+                  <UploadCloud className="w-7 h-7 text-[#16823B] mx-auto mb-1.5" />
+                  <p className="text-xs font-bold text-[#17231B]">Pilih File Excel</p>
+                  <p className="text-[10px] text-[#89938D] mt-0.5">Contoh: {card.sampleFile}</p>
                 </div>
               </div>
 
-              {/* Upload Status / Progress Result */}
-              {currentProgress && (
-                <div className="mt-4 pt-3 border-t border-[#DDE5DF] space-y-2 text-xs">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-1.5 truncate max-w-[200px]">
-                      <FileSpreadsheet className="w-4 h-4 text-[#5F6B63] shrink-0" />
-                      <span className="font-semibold text-[#17231B] truncate" title={currentProgress.fileName}>
+              {/* Progress, Actions & Reset Button */}
+              <div className="mt-4 pt-3 border-t border-[#DDE5DF] space-y-3">
+                {currentProgress ? (
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between text-xs font-semibold">
+                      <span className="text-[#17231B] truncate max-w-[140px]" title={currentProgress.fileName}>
                         {currentProgress.fileName}
                       </span>
+                      <span className="text-[#16823B]">{currentProgress.progressPercentage}%</span>
                     </div>
 
-                    {currentProgress.status === "success" && (
-                      <span className="inline-flex items-center gap-1 text-[11px] font-bold text-[#16823B] bg-[#EAF3EC] px-2 py-0.5 rounded-full border border-[#CBE0D1]">
-                        <CheckCircle2 className="w-3.5 h-3.5" />
-                        Selesai
-                      </span>
-                    )}
+                    <div className="w-full bg-[#EAEFEF] h-1.5 rounded-full overflow-hidden">
+                      <div
+                        className={`h-full transition-all duration-300 ${
+                          isError ? "bg-rose-600" : isSuccess ? "bg-emerald-600" : "bg-[#16823B]"
+                        }`}
+                        style={{ width: `${currentProgress.progressPercentage}%` }}
+                      />
+                    </div>
 
-                    {currentProgress.status === "error" && (
-                      <span className="inline-flex items-center gap-1 text-[11px] font-bold text-rose-600 bg-rose-50 px-2 py-0.5 rounded-full border border-rose-200">
-                        <AlertCircle className="w-3.5 h-3.5" />
-                        Gagal
-                      </span>
-                    )}
-
-                    {isUploading && (
-                      <span className="text-[11px] font-bold text-[#16823B]">
-                        {currentProgress.progressPercentage}%
-                      </span>
-                    )}
+                    <div className="text-[11px] text-[#5F6B63] flex items-start gap-1.5">
+                      {isSuccess ? (
+                        <>
+                          <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0 mt-0.5" />
+                          <span className="text-emerald-700 font-medium">{currentProgress.message}</span>
+                        </>
+                      ) : isError ? (
+                        <>
+                          <AlertCircle className="w-3.5 h-3.5 text-rose-600 shrink-0 mt-0.5" />
+                          <span className="text-rose-700 font-medium">{currentProgress.message}</span>
+                        </>
+                      ) : (
+                        <>
+                          <RefreshCw className="w-3.5 h-3.5 text-[#16823B] animate-spin shrink-0 mt-0.5" />
+                          <span>{currentProgress.message}</span>
+                        </>
+                      )}
+                    </div>
                   </div>
-
-                  {/* Progress bar */}
-                  <div className="w-full bg-[#EAEFEF] h-1.5 rounded-full overflow-hidden">
-                    <div
-                      className={`h-full transition-all duration-300 ${
-                        currentProgress.status === "error"
-                          ? "bg-rose-500"
-                          : currentProgress.status === "success"
-                          ? "bg-[#16823B]"
-                          : "bg-[#8CD16B]"
-                      }`}
-                      style={{ width: `${currentProgress.progressPercentage}%` }}
-                    />
+                ) : (
+                  <div className="flex items-center gap-1.5 text-[11px] text-[#89938D]">
+                    <AlertCircle className="w-3.5 h-3.5" />
+                    <span>Belum ada file yang diunggah</span>
                   </div>
+                )}
 
-                  {/* Message */}
-                  {currentProgress.message && (
-                    <p
-                      className={`text-[11px] ${
-                        currentProgress.status === "error"
-                          ? "text-rose-600 font-medium"
-                          : currentProgress.status === "success"
-                          ? "text-[#16823B] font-medium"
-                          : "text-[#5F6B63]"
-                      }`}
-                    >
-                      {currentProgress.message}
-                    </p>
-                  )}
+                {/* Download Template Button */}
+                <button
+                  type="button"
+                  onClick={() => handleDownloadTemplate(card.title)}
+                  className="w-full py-1.5 px-3 rounded-xl border border-[#16823B]/30 bg-[#16823B]/5 hover:bg-[#16823B]/10 text-[#16823B] text-xs font-bold flex items-center justify-center gap-1.5 transition-all cursor-pointer"
+                >
+                  <Download className="w-3.5 h-3.5" />
+                  <span>Unduh Template Excel</span>
+                </button>
+
+                {/* Card Bottom Actions: Upload & Reset Buttons */}
+                <div className="flex items-center justify-between gap-2 pt-1 border-t border-[#DDE5DF]/60">
+                  <button
+                    type="button"
+                    onClick={() => handleCardClick(card.title)}
+                    disabled={isUploading}
+                    className="inline-flex items-center gap-1 text-[11px] font-bold text-[#16823B] hover:underline disabled:opacity-50 cursor-pointer"
+                  >
+                    <UploadCloud className="w-3.5 h-3.5" />
+                    <span>Unggah File</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setResetModalCategory(card.title)}
+                    disabled={isUploading}
+                    className="inline-flex items-center gap-1 text-[11px] font-semibold text-rose-600 hover:text-rose-800 hover:bg-rose-50 px-2 py-1 rounded-lg transition-colors cursor-pointer"
+                    title="Kosongkan isi tabel di database"
+                  >
+                    <RotateCcw className="w-3 h-3" />
+                    <span>Reset Data</span>
+                  </button>
                 </div>
-              )}
+              </div>
             </div>
           );
         })}
       </div>
 
-      {/* Confirmation Modal for Reset */}
+      {/* Confirmation Modal for Reset Data */}
       {resetModalCategory && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-xs">
-          <div className="bg-white border border-[#DDE5DF] rounded-2xl p-6 shadow-2xl max-w-sm w-full space-y-4">
+          <div className="bg-white rounded-2xl p-6 max-w-md w-full shadow-2xl border border-[#DDE5DF] space-y-4">
             <div className="flex items-center gap-3 text-rose-600">
-              <div className="p-2.5 rounded-xl bg-rose-50 border border-rose-200">
-                <Trash2 className="w-5 h-5" />
+              <div className="p-2.5 rounded-xl bg-rose-100">
+                <Trash2 className="w-6 h-6" />
               </div>
-              <h3 className="font-bold text-base text-[#17231B]">Konfirmasi Reset Data</h3>
+              <div>
+                <h3 className="font-extrabold text-base text-[#17231B]">Konfirmasi Reset Data</h3>
+                <p className="text-xs text-[#5F6B63]">Tabel {resetModalCategory}</p>
+              </div>
             </div>
+
             <p className="text-xs text-[#5F6B63] leading-relaxed">
-              Apakah Anda yakin ingin mengosongkan seluruh data tabel <strong>{resetModalCategory}</strong>? Tindakan ini tidak dapat dibatalkan.
+              Apakah Anda yakin ingin mengosongkan seluruh data tabel <strong>{resetModalCategory}</strong>? Tindakan ini akan menghapus semua rekaman di database dan tidak dapat dibatalkan.
             </p>
+
             <div className="flex items-center justify-end gap-2 pt-2">
               <button
                 type="button"

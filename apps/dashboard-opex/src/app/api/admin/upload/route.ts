@@ -178,21 +178,27 @@ export async function POST(request: NextRequest) {
         });
       }
 
-      // Insert actual records dalam chunk
-      const CHUNK_SIZE = 1000;
-      for (let i = 0; i < actualRecords.length; i += CHUNK_SIZE) {
-        await prisma.dataActual.createMany({
-          data: actualRecords.slice(i, i + CHUNK_SIZE),
-        });
-      }
+      // Ganti seluruh data actual lama (Replace) dalam transaksi database
+      await prisma.$transaction(
+        async (tx) => {
+          await tx.dataActual.deleteMany();
+          const CHUNK_SIZE = 1000;
+          for (let i = 0; i < actualRecords.length; i += CHUNK_SIZE) {
+            await tx.dataActual.createMany({
+              data: actualRecords.slice(i, i + CHUNK_SIZE),
+            });
+          }
+        },
+        { maxWait: 15000, timeout: 60000 }
+      );
       importedCount = actualRecords.length;
 
-      // Sinkronisasi Tabel Summary
-      await syncSummaryTable(Array.from(periodsSet));
+      // Sinkronisasi ulang seluruh Tabel Summary
+      await rebuildSummaryTable();
 
       return NextResponse.json({
         success: true,
-        message: `Berhasil mengimpor ${importedCount.toLocaleString("id-ID")} baris Data Actual & menyinkronkan Summary OPEX.`,
+        message: `Berhasil mengganti data: ${importedCount.toLocaleString("id-ID")} baris Data Actual disimpan & tabel Summary disinkronkan.`,
       });
     }
 
@@ -271,21 +277,27 @@ export async function POST(request: NextRequest) {
         });
       }
 
-      // Insert budget records dalam chunk
-      const CHUNK_SIZE = 1000;
-      for (let i = 0; i < budgetRecords.length; i += CHUNK_SIZE) {
-        await prisma.dataBudget.createMany({
-          data: budgetRecords.slice(i, i + CHUNK_SIZE),
-        });
-      }
+      // Ganti seluruh data budget lama (Replace) dalam transaksi database
+      await prisma.$transaction(
+        async (tx) => {
+          await tx.dataBudget.deleteMany();
+          const CHUNK_SIZE = 1000;
+          for (let i = 0; i < budgetRecords.length; i += CHUNK_SIZE) {
+            await tx.dataBudget.createMany({
+              data: budgetRecords.slice(i, i + CHUNK_SIZE),
+            });
+          }
+        },
+        { maxWait: 15000, timeout: 60000 }
+      );
       importedCount = budgetRecords.length;
 
-      // Sinkronisasi Tabel Summary
-      await syncSummaryTable(Array.from(periodsSet));
+      // Sinkronisasi ulang seluruh Tabel Summary
+      await rebuildSummaryTable();
 
       return NextResponse.json({
         success: true,
-        message: `Berhasil mengimpor ${importedCount.toLocaleString("id-ID")} baris Data Budget & menyinkronkan Summary OPEX.`,
+        message: `Berhasil mengganti data: ${importedCount.toLocaleString("id-ID")} baris Data Budget disimpan & tabel Summary disinkronkan.`,
       });
     } else {
       return NextResponse.json(
@@ -301,66 +313,105 @@ export async function POST(request: NextRequest) {
 }
 
 /**
- * Helper untuk menyinkronkan tabel `Summary` dari gabungan `data_actual` & `data_budget`
+ * Helper untuk menyinkronkan ulang seluruh tabel `Summary` dari gabungan `data_actual` & `data_budget`
  */
-async function syncSummaryTable(periods: number[]) {
-  if (periods.length === 0) return;
-
+async function rebuildSummaryTable() {
   // 1. Ambil agregat actual per (period, costcenter, ce2, pg)
   const actualAggregates = await prisma.dataActual.groupBy({
     by: ["period", "costcenter", "ce2", "pg"],
-    where: { period: { in: periods } },
     _sum: { idrAct: true },
   });
 
   // 2. Ambil agregat budget per (period, costcenter, ce2)
   const budgetAggregates = await prisma.dataBudget.groupBy({
     by: ["period", "costcenter", "ce2"],
-    where: { period: { in: periods } },
     _sum: { amountIdr: true },
   });
 
-  // Buat lookup budget: key `${period}-${cc}-${ce2}`
+  // 3. Ambil deskripsi master dari tabel mastersheet
+  const [ccList, ceList] = await Promise.all([
+    prisma.mastersheetCostcenter.findMany({ select: { costcenter: true, deskripsiCostcenter: true } }),
+    prisma.mastersheetCe2.findMany({ select: { ce2: true, deskripsiCe2: true } }),
+  ]);
+  const ccDescMap = new Map(ccList.map((c) => [c.costcenter, c.deskripsiCostcenter || c.costcenter]));
+  const ceDescMap = new Map(ceList.map((c) => [c.ce2, c.deskripsiCe2 || c.ce2]));
+
+  // Buat map budget: key `${period}-${cc}-${ce2}`
   const budgetMap = new Map<string, number>();
   for (const b of budgetAggregates) {
     if (b.period && b.costcenter && b.ce2) {
-      const key = `${b.period}-${b.costcenter}-${b.ce2}`;
-      budgetMap.set(key, Number(b._sum.amountIdr || 0));
+      budgetMap.set(`${b.period}-${b.costcenter}-${b.ce2}`, Number(b._sum.amountIdr || 0));
     }
   }
 
-  // 3. Upsert Summary records
+  // Buat map actual dan kumpulkan seluruh kombinasi unique
+  const actualMap = new Map<string, number>();
+  const allCombos = new Map<string, { period: number; costcenter: string; ce2: string; pg: string }>();
+
   for (const a of actualAggregates) {
     if (!a.period || !a.costcenter || !a.ce2) continue;
     const pg = a.pg || "PG1";
-    const actualVal = Number(a._sum.idrAct || 0);
-    const budgetKey = `${a.period}-${a.costcenter}-${a.ce2}`;
+    const key = `${a.period}|${a.costcenter}|${a.ce2}|${pg}`;
+    actualMap.set(key, Number(a._sum.idrAct || 0));
+    allCombos.set(key, { period: a.period, costcenter: a.costcenter, ce2: a.ce2, pg });
+  }
+
+  // Masukkan juga budget yang belum ada di allCombos
+  for (const b of budgetAggregates) {
+    if (!b.period || !b.costcenter || !b.ce2) continue;
+    const cc = b.costcenter;
+    const defaultPg = cc.startsWith("CC2") ? "PG2" : cc.startsWith("CC3") ? "PG3" : "PG1";
+    const key = `${b.period}|${cc}|${b.ce2}|${defaultPg}`;
+    if (!allCombos.has(key)) {
+      allCombos.set(key, { period: b.period, costcenter: cc, ce2: b.ce2, pg: defaultPg });
+    }
+  }
+
+  // Susun data summary baru
+  const summaryRecords: Prisma.SummaryCreateManyInput[] = [];
+  for (const combo of allCombos.values()) {
+    const { period, costcenter, ce2, pg } = combo;
+    const actualKey = `${period}|${costcenter}|${ce2}|${pg}`;
+    const budgetKey = `${period}-${costcenter}-${ce2}`;
+
+    const hasActual = actualMap.has(actualKey);
+    const actualVal = hasActual ? actualMap.get(actualKey)! : null;
     const budgetVal = budgetMap.get(budgetKey) || 0;
 
     const variance =
-      budgetVal > 0
+      actualVal !== null && budgetVal > 0
         ? Number((((actualVal - budgetVal) / budgetVal) * 100).toFixed(2))
         : null;
 
-    const kode = `${a.period}${a.costcenter}${a.ce2}${pg}`;
+    const kode = `${period}${costcenter}${ce2}${pg}`;
+    const deskripsiCostcenter = ccDescMap.get(costcenter) || costcenter;
+    const deskripsiCe2 = ceDescMap.get(ce2) || ce2;
 
-    await prisma.summary.upsert({
-      where: { kode },
-      create: {
-        kode,
-        periode: a.period,
-        costcenter: a.costcenter,
-        ce2: a.ce2,
-        pg,
-        nilaiActual: new Prisma.Decimal(actualVal),
-        nilaiBudget: new Prisma.Decimal(budgetVal),
-        variance: variance !== null ? new Prisma.Decimal(variance) : null,
-      },
-      update: {
-        nilaiActual: new Prisma.Decimal(actualVal),
-        nilaiBudget: new Prisma.Decimal(budgetVal),
-        variance: variance !== null ? new Prisma.Decimal(variance) : null,
-      },
+    summaryRecords.push({
+      kode,
+      periode: period,
+      costcenter,
+      deskripsiCostcenter,
+      ce2,
+      deskripsiCe2,
+      pg,
+      nilaiActual: actualVal !== null ? new Prisma.Decimal(actualVal) : null,
+      nilaiBudget: budgetVal > 0 ? new Prisma.Decimal(budgetVal) : null,
+      variance: variance !== null ? new Prisma.Decimal(variance) : null,
     });
   }
+
+  // Ganti seluruh tabel summary dengan hasil agregasi terbaru
+  await prisma.$transaction(
+    async (tx) => {
+      await tx.summary.deleteMany();
+      const chunkSize = 1000;
+      for (let i = 0; i < summaryRecords.length; i += chunkSize) {
+        await tx.summary.createMany({
+          data: summaryRecords.slice(i, i + chunkSize),
+        });
+      }
+    },
+    { maxWait: 15000, timeout: 60000 }
+  );
 }

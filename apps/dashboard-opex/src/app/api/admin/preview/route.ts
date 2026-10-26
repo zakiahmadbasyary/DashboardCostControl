@@ -4,7 +4,7 @@ import prisma from "@/lib/prisma";
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
-    const table = (searchParams.get("table") || "actual").toLowerCase().trim();
+    const table = (searchParams.get("table") || searchParams.get("category") || "actual").toLowerCase().trim();
     const search = searchParams.get("search")?.trim() || "";
     const page = Math.max(1, parseInt(searchParams.get("page") || "1", 10));
     const limit = Math.max(1, parseInt(searchParams.get("limit") || "50", 10));
