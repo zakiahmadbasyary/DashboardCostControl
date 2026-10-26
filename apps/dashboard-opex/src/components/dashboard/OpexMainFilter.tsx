@@ -27,7 +27,7 @@ export default function OpexMainFilter({
           <Filter className="w-3.5 h-3.5" />
         </div>
         <span className="font-bold text-xs text-[#17231B] uppercase tracking-wider">
-          Filter Periode
+          Filter Utama
         </span>
       </div>
 

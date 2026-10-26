@@ -198,6 +198,89 @@ export default function DashboardOpexPage() {
     setSelectedPeriod(p);
   }, []);
 
+  // ── PENDING SCROLL TARGET STATE (DIRECT SETELAH LOAD DATA SELESAI) ──
+  const [pendingScrollTarget, setPendingScrollTarget] = useState<
+    "cost-center" | "cost-element" | "trend-pg" | null
+  >(null);
+
+  const scrollToElement = useCallback((id: string) => {
+    const el = document.getElementById(id);
+    if (el) {
+      el.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  }, []);
+
+  // 1. Direct dari Summary Monthly Chart ke Card Daftar Cost Center
+  const handleSummaryMonthClick = useCallback(
+    (period: number) => {
+      if (period === selectedPeriod && !loadingCostCenters) {
+        scrollToElement("section-cost-center-table");
+      } else {
+        setLoadingCostCenters(true);
+        setPendingScrollTarget("cost-center");
+        setSelectedPeriod(period);
+      }
+    },
+    [selectedPeriod, loadingCostCenters, scrollToElement]
+  );
+
+  // 2. Direct dari Daftar Cost Center ke Card Detail Cost Element & Aktivitas Riil
+  const handleCostCenterSelect = useCallback(
+    (costcenter: string) => {
+      if (costcenter === selectedCostCenter && !loadingCostElements) {
+        scrollToElement("section-cost-element-activity");
+      } else {
+        setLoadingCostElements(true);
+        setPendingScrollTarget("cost-element");
+        setSelectedCostCenter(costcenter);
+      }
+    },
+    [selectedCostCenter, loadingCostElements, scrollToElement]
+  );
+
+  // 3. Direct dari Trend PG Chart ke Tabel Komparasi Cost Center Antar PG
+  const handleTrendPgMonthClick = useCallback(
+    (period: number) => {
+      if (period === selectedPeriod && !loadingTrendPg) {
+        scrollToElement("section-trend-pg-tables");
+      } else {
+        setLoadingTrendPg(true);
+        setPendingScrollTarget("trend-pg");
+        setSelectedPeriod(period);
+      }
+    },
+    [selectedPeriod, loadingTrendPg, scrollToElement]
+  );
+
+  // Effect: Menjalankan Smooth Scroll tepat ketika proses load data target telah selesai
+  useEffect(() => {
+    if (!pendingScrollTarget) return;
+
+    if (pendingScrollTarget === "cost-center" && !loadingCostCenters) {
+      const timer = setTimeout(() => {
+        scrollToElement("section-cost-center-table");
+        setPendingScrollTarget(null);
+      }, 60);
+      return () => clearTimeout(timer);
+    }
+
+    if (pendingScrollTarget === "cost-element" && !loadingCostElements) {
+      const timer = setTimeout(() => {
+        scrollToElement("section-cost-element-activity");
+        setPendingScrollTarget(null);
+      }, 60);
+      return () => clearTimeout(timer);
+    }
+
+    if (pendingScrollTarget === "trend-pg" && !loadingTrendPg) {
+      const timer = setTimeout(() => {
+        scrollToElement("section-trend-pg-tables");
+        setPendingScrollTarget(null);
+      }, 60);
+      return () => clearTimeout(timer);
+    }
+  }, [pendingScrollTarget, loadingCostCenters, loadingCostElements, loadingTrendPg, scrollToElement]);
+
   const selectedPeriodObj = periods.find((p) => p.periode === selectedPeriod);
   const selectedPeriodLabel = selectedPeriodObj ? selectedPeriodObj.label : `Bulan ${selectedPeriod}`;
 
@@ -225,21 +308,23 @@ export default function DashboardOpexPage() {
           totalBudget={totalBudget}
           totalVariance={totalVariance}
           selectedPeriod={selectedPeriod}
-          onSelectPeriod={handleSelectPeriod}
+          onSelectPeriod={handleSummaryMonthClick}
           loading={loadingMonthlyChart}
         />
 
         {/* Section 5.2: Dua Tabel Cost Center PG1 Berdampingan */}
-        <CostCenterTables
-          data={costCenters}
-          selectedCostCenter={selectedCostCenter}
-          onSelectCostCenter={setSelectedCostCenter}
-          selectedPeriodLabel={selectedPeriodLabel}
-          loading={loadingCostCenters}
-        />
+        <div id="section-cost-center-table" className="scroll-mt-24 sm:scroll-mt-28">
+          <CostCenterTables
+            data={costCenters}
+            selectedCostCenter={selectedCostCenter}
+            onSelectCostCenter={handleCostCenterSelect}
+            selectedPeriodLabel={selectedPeriodLabel}
+            loading={loadingCostCenters}
+          />
+        </div>
 
         {/* Section 6: Detail Cost Element (Dua Card Berdampingan: CE2 di Kiri, Aktivitas di Kanan) */}
-        <section className="space-y-3">
+        <section id="section-cost-element-activity" className="space-y-3 scroll-mt-24 sm:scroll-mt-28">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
             <div>
               <h3 className="text-sm font-extrabold text-[#17231B] uppercase tracking-wider flex items-center gap-2">
@@ -284,17 +369,19 @@ export default function DashboardOpexPage() {
             selectedCe2={trendCe2}
             onSelectCe2={setTrendCe2}
             selectedPeriod={selectedPeriod}
-            onSelectPeriod={handleSelectPeriod}
+            onSelectPeriod={handleTrendPgMonthClick}
             loading={loadingTrendPg}
           />
 
-          {/* Card Bawah: Dua Tabel Cost Center Antar PG (7.3) */}
-          <TrendPgTables
-            data={trendCostCenters}
-            selectedPeriodLabel={selectedPeriodLabel}
-            selectedCe2={trendCe2}
-            loading={loadingTrendPg}
-          />
+          {/* Card Bawah: Tabel Cost Center Antar PG (7.3) */}
+          <div id="section-trend-pg-tables" className="scroll-mt-24 sm:scroll-mt-28">
+            <TrendPgTables
+              data={trendCostCenters}
+              selectedPeriodLabel={selectedPeriodLabel}
+              selectedCe2={trendCe2}
+              loading={loadingTrendPg}
+            />
+          </div>
         </section>
       </main>
 
