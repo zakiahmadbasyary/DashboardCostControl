@@ -1,19 +1,8 @@
 "use client";
 
-import React from "react";
-import {
-  ResponsiveContainer,
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  Legend,
-  Cell,
-} from "recharts";
+import React, { useState, useRef } from "react";
 import { MonthlyChartDataPoint } from "@/types/opex";
-import { BarChart3, TrendingUp, TrendingDown, Wallet, Activity } from "lucide-react";
+import { BarChart3, Calendar } from "lucide-react";
 
 interface SummaryMonthlyChartProps {
   data: MonthlyChartDataPoint[];
@@ -25,73 +14,36 @@ interface SummaryMonthlyChartProps {
   loading?: boolean;
 }
 
-const formatIdrCompact = (num: number) => {
-  if (Math.abs(num) >= 1_000_000_000) {
-    return `${(num / 1_000_000_000).toFixed(1)} M`;
-  }
-  if (Math.abs(num) >= 1_000_000) {
-    return `${(num / 1_000_000).toFixed(0)} Jt`;
-  }
-  return num.toLocaleString("id-ID");
+interface TooltipState {
+  monthName: string;
+  actual: number;
+  budget: number;
+  variance: number | null;
+  periodNum?: number;
+  isSelected?: boolean;
+  isTotal?: boolean;
+  x: number;
+  y: number;
+}
+
+// Helper untuk memformat angka dalam jutaan rupiah (Per 1 Juta)
+const formatInMillions = (val: number): string => {
+  if (!val || val <= 0) return "";
+  const inJt = Math.round(val / 1_000_000);
+  return inJt.toLocaleString("id-ID");
 };
 
-const CustomTooltip = ({ active, payload, label }: any) => {
-  if (!active || !payload || !payload.length) return null;
+// Helper untuk memformat persentase variansi pada badge kuning
+const formatVariancePill = (actual: number, budget: number, rawVariance: number | null): string => {
+  if (!actual || actual <= 0) return "-";
+  if (!budget || budget <= 0) return "-";
 
-  const actualEntry = payload.find((p: any) => p.dataKey === "actual");
-  const budgetEntry = payload.find((p: any) => p.dataKey === "budget");
+  const v = rawVariance !== null ? rawVariance : ((actual - budget) / budget) * 100;
 
-  const actualVal = actualEntry ? Number(actualEntry.value) : 0;
-  const budgetVal = budgetEntry ? Number(budgetEntry.value) : 0;
-  const diff = actualVal - budgetVal;
-  const variancePct = budgetVal > 0 ? (diff / budgetVal) * 100 : null;
-
-  return (
-    <div className="bg-white border border-[#DDE5DF] rounded-xl p-3 shadow-lg text-xs min-w-[220px]">
-      <div className="font-bold text-[#17231B] pb-2 mb-2 border-b border-[#DDE5DF] flex items-center justify-between">
-        <span>Periode: <strong className="text-[#16823B] font-extrabold">{label}</strong></span>
-      </div>
-
-      <div className="space-y-1.5">
-        <div className="flex items-center justify-between gap-3">
-          <div className="flex items-center gap-1.5">
-            <span className="w-2.5 h-2.5 rounded-full bg-[#16823B] shrink-0" />
-            <span className="text-[#5F6B63] font-medium">Actual:</span>
-          </div>
-          <span className="font-mono font-bold text-[#17231B]">
-            Rp {actualVal.toLocaleString("id-ID")}
-          </span>
-        </div>
-
-        <div className="flex items-center justify-between gap-3">
-          <div className="flex items-center gap-1.5">
-            <span className="w-2.5 h-2.5 rounded-full bg-[#A8D437] shrink-0" />
-            <span className="text-[#5F6B63] font-medium">Budget:</span>
-          </div>
-          <span className="font-mono font-bold text-[#17231B]">
-            Rp {budgetVal.toLocaleString("id-ID")}
-          </span>
-        </div>
-
-        <div className="pt-2 mt-1 border-t border-[#DDE5DF] flex items-center justify-between gap-3">
-          <span className="text-[#5F6B63] font-semibold">Variance:</span>
-          {variancePct !== null ? (
-            <span
-              className={`font-mono font-bold text-[11px] px-1.5 py-0.5 rounded ${
-                variancePct > 0
-                  ? "bg-rose-50 text-rose-600 border border-rose-200"
-                  : "bg-emerald-50 text-emerald-700 border border-emerald-200"
-              }`}
-            >
-              {variancePct > 0 ? `+${variancePct.toFixed(2)}%` : `${variancePct.toFixed(2)}%`}
-            </span>
-          ) : (
-            <span className="text-[#89938D] font-mono">-</span>
-          )}
-        </div>
-      </div>
-    </div>
-  );
+  if (Math.abs(v) >= 10) {
+    return `${Math.round(v)}%`;
+  }
+  return `${v.toFixed(1).replace(".", ",")}%`;
 };
 
 export default function SummaryMonthlyChart({
@@ -103,175 +55,443 @@ export default function SummaryMonthlyChart({
   onSelectPeriod,
   loading,
 }: SummaryMonthlyChartProps) {
+  const [hoveredMonth, setHoveredMonth] = useState<number | null>(null);
+  const [tooltip, setTooltip] = useState<TooltipState | null>(null);
+  const cardRef = useRef<HTMLDivElement>(null);
+
+  const showMonthTooltip = (item: MonthlyChartDataPoint, e: React.MouseEvent<HTMLDivElement>) => {
+    setHoveredMonth(item.month);
+    if (!cardRef.current) return;
+    const cardRect = cardRef.current.getBoundingClientRect();
+    const targetRect = e.currentTarget.getBoundingClientRect();
+    const centerX = targetRect.left - cardRect.left + targetRect.width / 2;
+    const topY = targetRect.top - cardRect.top;
+
+    setTooltip({
+      monthName: item.monthName,
+      actual: item.actual,
+      budget: item.budget,
+      variance: item.variance,
+      periodNum: item.month,
+      isSelected: item.month === selectedPeriod,
+      isTotal: false,
+      x: centerX,
+      y: topY,
+    });
+  };
+
+  const showTotalTooltip = (e: React.MouseEvent<HTMLDivElement>) => {
+    setHoveredMonth(null);
+    if (!cardRef.current) return;
+    const cardRect = cardRef.current.getBoundingClientRect();
+    const targetRect = e.currentTarget.getBoundingClientRect();
+    const centerX = targetRect.left - cardRect.left + targetRect.width / 2;
+    const topY = targetRect.top - cardRect.top;
+
+    setTooltip({
+      monthName: "Total YTD PG1",
+      actual: totalActual,
+      budget: totalBudget,
+      variance: totalVariance,
+      isSelected: false,
+      isTotal: true,
+      x: centerX,
+      y: topY,
+    });
+  };
+
+  const hideTooltip = () => {
+    setHoveredMonth(null);
+    setTooltip(null);
+  };
+
+  const getTooltipStyle = (x: number, y: number) => {
+    const cardWidth = cardRef.current?.clientWidth || 800;
+    const tooltipWidth = 270;
+    const halfWidth = tooltipWidth / 2;
+    const padding = 16;
+
+    let clampedX = x;
+    let arrowOffset = 0;
+
+    if (x - halfWidth < padding) {
+      clampedX = halfWidth + padding;
+      arrowOffset = x - clampedX;
+    } else if (x + halfWidth > cardWidth - padding) {
+      clampedX = cardWidth - halfWidth - padding;
+      arrowOffset = x - clampedX;
+    }
+
+    return {
+      left: `${clampedX}px`,
+      top: `${Math.max(y - 12, 10)}px`,
+      arrowOffset,
+    };
+  };
+
   if (loading) {
     return (
-      <div className="bg-white border border-[#DDE5DF] rounded-2xl p-6 shadow-xs h-[420px] flex flex-col justify-center items-center">
+      <div className="bg-white border border-[#DDE5DF] rounded-2xl p-6 shadow-sm shadow-[#16823B]/5 h-96 flex flex-col justify-center items-center">
         <div className="w-8 h-8 border-3 border-[#16823B] border-t-transparent rounded-full animate-spin mb-3" />
         <p className="text-xs font-semibold text-[#5F6B63]">
-          Memuat grafik ringkasan Actual vs Budget bulanan...
+          Memuat data ringkasan Actual vs Budget bulanan...
         </p>
       </div>
     );
   }
 
-  const isOverBudget = totalVariance !== null && totalVariance > 0;
+  // Hitung nilai maksimum bulanan untuk skala batang (dengan 20% ruang di atas untuk angka label)
+  const maxMonthlyVal =
+    Math.max(...data.map((d) => Math.max(d.actual, d.budget)), 1) * 1.2;
+
+  // Hitung nilai maksimum kolom Total (dengan 20% ruang di atas untuk angka label)
+  const maxTotalVal = Math.max(totalActual, totalBudget, 1) * 1.2;
+
+  // Cek apakah Total Actual dan Total Budget tingginya hampir sama (selisih < 12%)
+  const totalActHeight = (totalActual / maxTotalVal) * 100;
+  const totalBgtHeight = (totalBudget / maxTotalVal) * 100;
+  const isTotalVeryClose = Math.abs(totalActHeight - totalBgtHeight) < 12;
 
   return (
-    <div className="bg-white border border-[#DDE5DF] rounded-2xl p-5 sm:p-6 shadow-xs space-y-5">
-      {/* ── Header Card & KPI Summary ── */}
-      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-4 border-b border-[#DDE5DF]">
-        <div className="space-y-1">
-          <div className="flex items-center gap-2">
-            <div className="p-2 rounded-lg bg-[#16823B]/10 text-[#16823B]">
-              <BarChart3 className="w-4 h-4" />
-            </div>
-            <h3 className="font-extrabold text-base text-[#17231B] tracking-tight">
+    <div
+      ref={cardRef}
+      onMouseLeave={hideTooltip}
+      className="relative bg-white border border-[#DDE5DF] rounded-2xl p-5 sm:p-6 shadow-sm shadow-[#16823B]/5 flex flex-col gap-6 font-sans"
+    >
+      {/* ── Unified Card Header (Sama persis dengan Trend Card Dashboard WIP) ── */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-[#DDE5DF]">
+        <div className="flex items-center gap-3">
+          <div className="p-2.5 rounded-xl bg-[#16823B]/10 text-[#16823B] shrink-0">
+            <BarChart3 className="w-5 h-5" />
+          </div>
+          <div>
+            <h3 className="font-bold text-base text-[#17231B]">
               Ringkasan OPEX PG1 — Actual vs Budget per Bulan
             </h3>
+            <p className="text-xs text-[#5F6B63]">
+              Perbandingan diagram batang akumulasi biaya operasional Actual dan Budget per bulan untuk Plantation Group 1.
+            </p>
           </div>
-          <p className="text-xs text-[#5F6B63]">
-            Grafik komparasi pengeluaran riil terhadap pagu anggaran untuk Plantation Group 1 (Klik batang untuk memilih bulan)
-          </p>
         </div>
 
-        {/* 3 Metric Summary Boxes */}
-        <div className="grid grid-cols-3 gap-2 sm:gap-3 shrink-0">
-          {/* Total Budget */}
-          <div className="bg-[#F8FAF9] border border-[#DDE5DF] rounded-xl px-3 py-2">
-            <div className="flex items-center justify-between gap-1 text-[10px] font-bold text-[#5F6B63] uppercase tracking-wider">
-              <span>Budget (YTD)</span>
-              <Wallet className="w-3 h-3 text-[#5F6B63]" />
+        {/* Legend & Unit Badge */}
+        <div className="flex items-center gap-3 self-start sm:self-center shrink-0">
+          <div className="flex items-center gap-3 text-xs text-[#5F6B63]">
+            <div className="flex items-center gap-1.5">
+              <span className="w-2.5 h-2.5 rounded-full bg-[#16823B] shrink-0" />
+              <span className="font-semibold text-[#5F6B63]">Actual</span>
             </div>
-            <div className="mt-1 font-mono font-extrabold text-xs sm:text-sm text-[#17231B]">
-              Rp {formatIdrCompact(totalBudget)}
-            </div>
-          </div>
-
-          {/* Total Actual */}
-          <div className="bg-[#EAF3EC] border border-[#CBE0D1] rounded-xl px-3 py-2">
-            <div className="flex items-center justify-between gap-1 text-[10px] font-bold text-[#16823B] uppercase tracking-wider">
-              <span>Actual (YTD)</span>
-              <Activity className="w-3 h-3 text-[#16823B]" />
-            </div>
-            <div className="mt-1 font-mono font-extrabold text-xs sm:text-sm text-[#16823B]">
-              Rp {formatIdrCompact(totalActual)}
+            <div className="flex items-center gap-1.5">
+              <span className="w-2.5 h-2.5 rounded-full bg-[#8CD16B] shrink-0" />
+              <span className="font-semibold text-[#5F6B63]">Budget</span>
             </div>
           </div>
 
-          {/* Variance */}
+          <div className="px-2.5 py-1 bg-[#F8FAF9] border border-[#DDE5DF] rounded-xl text-xs font-semibold text-[#2C3830]">
+            Per 1 Juta
+          </div>
+        </div>
+      </div>
+
+      {/* ── Chart Area Container (Scrollable di Mobile, Fixed di Desktop) ── */}
+      <div
+        onScroll={hideTooltip}
+        className="w-full overflow-x-auto sm:overflow-x-visible pb-2 sm:pb-0 scrollbar-thin"
+      >
+        <div className="min-w-[640px] sm:min-w-0 w-full flex items-stretch gap-1 sm:gap-2">
+          {/* 1. SEKSI 12 BULAN (Januari s.d. Desember) */}
+          <div className="flex-1 relative">
+            {/* Background Dashed Grid Lines (Horizontal) */}
+            <div className="absolute inset-0 top-6 bottom-10 pointer-events-none flex flex-col justify-between">
+              <div className="border-b border-dashed border-[#EAEFEF] w-full" />
+              <div className="border-b border-dashed border-[#EAEFEF] w-full" />
+              <div className="border-b border-dashed border-[#EAEFEF] w-full" />
+              <div className="border-b border-dashed border-[#EAEFEF] w-full" />
+            </div>
+
+            {/* Columns Grid 12 Bulan */}
+            <div className="grid grid-cols-12 gap-0.5 sm:gap-1 relative z-10 w-full">
+              {data.map((item) => {
+                const isSelected = item.month === selectedPeriod;
+                const isHovered = item.month === hoveredMonth;
+
+                const actHeightPct =
+                  item.actual > 0 ? (item.actual / maxMonthlyVal) * 100 : 0;
+                const bgtHeightPct =
+                  item.budget > 0 ? (item.budget / maxMonthlyVal) * 100 : 0;
+
+                const actLabel = formatInMillions(item.actual);
+                const bgtLabel = formatInMillions(item.budget);
+                const varianceLabel = formatVariancePill(
+                  item.actual,
+                  item.budget,
+                  item.variance
+                );
+
+                // Anti-Tabrakan: Cek selisih ketinggian antara Actual dan Budget
+                // Jika selisih < 12%, lakukan vertical staggering agar tidak saling tumpang tindih
+                const heightDiffPct = Math.abs(actHeightPct - bgtHeightPct);
+                const isVeryClose =
+                  item.actual > 0 && item.budget > 0 && heightDiffPct < 12;
+
+                const actExtraLift =
+                  isVeryClose && item.actual >= item.budget ? "mb-3.5" : "mb-0.5";
+                const bgtExtraLift =
+                  isVeryClose && item.budget > item.actual ? "mb-3.5" : "mb-0.5";
+
+                return (
+                  <div
+                    key={item.month}
+                    onClick={() => onSelectPeriod(item.month)}
+                    onMouseEnter={(e) => showMonthTooltip(item, e)}
+                    onMouseLeave={hideTooltip}
+                    className={`flex flex-col items-center cursor-pointer transition-all rounded-t-lg pt-1 ${
+                      isSelected
+                        ? "bg-[#EAF3EC]/60 ring-2 ring-[#16823B]/30"
+                        : isHovered
+                        ? "bg-[#F8FAF9]"
+                        : ""
+                    }`}
+                  >
+                    {/* Area Batang & Angka di Atas (Tinggi Tetap 230px) */}
+                    <div className="h-[230px] w-full flex items-end justify-center gap-1 sm:gap-1.5 relative px-0.5">
+                      {/* Batang 1: Actual (Hijau Tua #16823B Capex) */}
+                      <div className="flex flex-col items-center justify-end h-full w-3.5 sm:w-5 md:w-6 shrink-0 relative">
+                        {actLabel && (
+                          <span
+                            className={`font-mono text-[9px] sm:text-[10px] md:text-[11px] font-normal text-[#17231B] tracking-tighter select-none -translate-x-0.5 ${actExtraLift}`}
+                          >
+                            {actLabel}
+                          </span>
+                        )}
+                        <div
+                          style={{ height: `${actHeightPct}%` }}
+                          className="w-full bg-[#16823B] transition-all duration-300"
+                        />
+                      </div>
+
+                      {/* Batang 2: Budget (Hijau Muda #8CD16B Capex) */}
+                      <div className="flex flex-col items-center justify-end h-full w-3.5 sm:w-5 md:w-6 shrink-0 relative">
+                        {bgtLabel && (
+                          <span
+                            className={`font-mono text-[9px] sm:text-[10px] md:text-[11px] font-normal text-[#17231B] tracking-tighter select-none translate-x-0.5 ${bgtExtraLift}`}
+                          >
+                            {bgtLabel}
+                          </span>
+                        )}
+                        <div
+                          style={{ height: `${bgtHeightPct}%` }}
+                          className="w-full bg-[#8CD16B] transition-all duration-300"
+                        />
+                      </div>
+
+                      {/* Badge Variansi Kuning (Melekat di dasar kedua batang) */}
+                      <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[32px] sm:w-[40px] md:w-[46px] bg-[#FFE600] text-black font-mono font-bold text-[9px] sm:text-[10px] md:text-[11px] py-0.5 text-center shadow-xs z-10 pointer-events-none select-none">
+                        {varianceLabel}
+                      </div>
+                    </div>
+
+                    {/* Garis Dasar Bawah Solid Hitam */}
+                    <div className="w-full border-b-2 border-[#17231B]" />
+
+                    {/* Label Nama Bulan di Bawah Garis */}
+                    <div className="pt-2 pb-1 text-center w-full px-0.5">
+                      <span
+                        className={`text-[9px] sm:text-[10px] md:text-xs block select-none truncate ${
+                          isSelected
+                            ? "font-bold text-[#16823B]"
+                            : "font-semibold text-[#5F6B63]"
+                        }`}
+                      >
+                        {item.monthName}
+                      </span>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* 2. PEMISAH VERTIKAL (GAP ANTARA DESEMBER & TOTAL) */}
+          <div className="w-3 sm:w-5 shrink-0 flex flex-col justify-end">
+            <div className="w-full" />
+          </div>
+
+          {/* 3. SEKSI TOTAL (DI SEBELAH KANAN) */}
           <div
-            className={`border rounded-xl px-3 py-2 ${
-              isOverBudget
-                ? "bg-rose-50 border-rose-200 text-rose-700"
-                : "bg-emerald-50 border-emerald-200 text-emerald-800"
-            }`}
+            onMouseEnter={showTotalTooltip}
+            onMouseLeave={hideTooltip}
+            className="w-24 sm:w-28 shrink-0 relative flex flex-col cursor-pointer hover:bg-[#F8FAF9]/80 rounded-t-lg transition-colors"
           >
-            <div className="flex items-center justify-between gap-1 text-[10px] font-bold uppercase tracking-wider">
-              <span>Variance Total</span>
-              {isOverBudget ? (
-                <TrendingUp className="w-3 h-3 text-rose-600" />
-              ) : (
-                <TrendingDown className="w-3 h-3 text-emerald-700" />
-              )}
+            {/* Background Dashed Grid Lines (Horizontal khusus Total) */}
+            <div className="absolute inset-0 top-6 bottom-10 pointer-events-none flex flex-col justify-between">
+              <div className="border-b border-dashed border-[#EAEFEF] w-full" />
+              <div className="border-b border-dashed border-[#EAEFEF] w-full" />
+              <div className="border-b border-dashed border-[#EAEFEF] w-full" />
+              <div className="border-b border-dashed border-[#EAEFEF] w-full" />
             </div>
-            <div className="mt-1 font-mono font-black text-xs sm:text-sm">
-              {totalVariance !== null
-                ? `${totalVariance > 0 ? "+" : ""}${totalVariance.toFixed(2)}%`
-                : "-"}
+
+            {/* Area Batang Total (Tinggi Tetap 230px, leluasa dengan gap-2) */}
+            <div className="h-[230px] w-full flex items-end justify-center gap-2 sm:gap-2.5 relative px-1 z-10 pt-1">
+              {/* Batang Total Actual (Hijau Tua #16823B Capex) */}
+              <div className="flex flex-col items-center justify-end h-full w-5 sm:w-6 md:w-7 shrink-0 relative">
+                <span
+                  className={`font-mono text-[9px] sm:text-[10px] md:text-[11px] font-normal text-[#17231B] tracking-tighter select-none -translate-x-1 ${
+                    isTotalVeryClose && totalActual >= totalBudget ? "mb-3.5" : "mb-0.5"
+                  }`}
+                >
+                  {formatInMillions(totalActual)}
+                </span>
+                <div
+                  style={{
+                    height: `${totalActHeight}%`,
+                  }}
+                  className="w-full bg-[#16823B] transition-all duration-300"
+                />
+              </div>
+
+              {/* Batang Total Budget (Hijau Muda #8CD16B Capex) */}
+              <div className="flex flex-col items-center justify-end h-full w-5 sm:w-6 md:w-7 shrink-0 relative">
+                <span
+                  className={`font-mono text-[9px] sm:text-[10px] md:text-[11px] font-normal text-[#17231B] tracking-tighter select-none translate-x-1 ${
+                    isTotalVeryClose && totalBudget > totalActual ? "mb-3.5" : "mb-0.5"
+                  }`}
+                >
+                  {formatInMillions(totalBudget)}
+                </span>
+                <div
+                  style={{
+                    height: `${totalBgtHeight}%`,
+                  }}
+                  className="w-full bg-[#8CD16B] transition-all duration-300"
+                />
+              </div>
+
+              {/* Badge Variansi Kuning Total */}
+              <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[44px] sm:w-[50px] bg-[#FFE600] text-black font-mono font-bold text-[9px] sm:text-[10px] md:text-[11px] py-0.5 text-center shadow-xs z-10 select-none">
+                {totalVariance !== null
+                  ? `${totalVariance.toFixed(1).replace(".", ",")}%`
+                  : "-"}
+              </div>
+            </div>
+
+            {/* Garis Dasar Bawah Solid Hitam Total */}
+            <div className="w-full border-b-2 border-[#17231B]" />
+
+            {/* Label "Total" di Bawah Garis */}
+            <div className="pt-2 pb-1 text-center">
+              <span className="text-[10px] sm:text-[11px] md:text-xs font-bold text-[#17231B] block select-none">
+                Total
+              </span>
             </div>
           </div>
         </div>
       </div>
 
-      {/* ── Chart Container ── */}
-      <div className="h-72 w-full pt-1">
-        <ResponsiveContainer width="100%" height="100%">
-          <BarChart
-            data={data}
-            margin={{ top: 10, right: 10, left: 0, bottom: 0 }}
-            onClick={(state: any) => {
-              const idx = state?.activeTooltipIndex;
-              if (typeof idx === "number" && data[idx]) {
-                const month = data[idx].month;
-                if (month) onSelectPeriod(month);
-              }
-            }}
-          >
-            <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E5EAE7" />
-            <XAxis
-              dataKey="monthName"
-              stroke="#89938D"
-              fontSize={11}
-              tickLine={false}
-              axisLine={{ stroke: "#DDE5DF" }}
-            />
-            <YAxis
-              stroke="#89938D"
-              fontSize={10}
-              tickLine={false}
-              axisLine={false}
-              tickFormatter={(v) => formatIdrCompact(v)}
-            />
-            <Tooltip content={<CustomTooltip />} />
-            <Legend
-              verticalAlign="top"
-              align="right"
-              iconType="circle"
-              wrapperStyle={{ paddingBottom: "12px", fontSize: "11px" }}
-              formatter={(value) => (
-                <span className="text-xs font-semibold text-[#17231B] capitalize">
-                  {value === "actual" ? "Nilai Actual" : "Nilai Budget"}
-                </span>
-              )}
-            />
-            <Bar
-              dataKey="actual"
-              name="actual"
-              fill="#16823B"
-              radius={[4, 4, 0, 0]}
-              maxBarSize={28}
-              cursor="pointer"
-            >
-              {data.map((entry) => (
-                <Cell
-                  key={`cell-act-${entry.month}`}
-                  fill={entry.month === selectedPeriod ? "#16823B" : "#16823B"}
-                  opacity={entry.month === selectedPeriod ? 1 : 0.75}
-                  stroke={entry.month === selectedPeriod ? "#0F5A28" : "none"}
-                  strokeWidth={entry.month === selectedPeriod ? 2 : 0}
-                />
-              ))}
-            </Bar>
-            <Bar
-              dataKey="budget"
-              name="budget"
-              fill="#A8D437"
-              radius={[4, 4, 0, 0]}
-              maxBarSize={28}
-              cursor="pointer"
-            >
-              {data.map((entry) => (
-                <Cell
-                  key={`cell-bgt-${entry.month}`}
-                  fill="#A8D437"
-                  opacity={entry.month === selectedPeriod ? 1 : 0.65}
-                  stroke={entry.month === selectedPeriod ? "#7EA822" : "none"}
-                  strokeWidth={entry.month === selectedPeriod ? 2 : 0}
-                />
-              ))}
-            </Bar>
-          </BarChart>
-        </ResponsiveContainer>
-      </div>
+      {/* ── Floating Rich Tooltip (Selaras dengan Desain Dashboard WIP) ── */}
+      {tooltip &&
+        (() => {
+          const { left, top, arrowOffset } = getTooltipStyle(tooltip.x, tooltip.y);
+          const diffNominal = tooltip.actual - tooltip.budget;
+          const isOverBudget = diffNominal > 0;
 
-      <div className="flex items-center justify-between text-[11px] text-[#5F6B63] bg-[#F8FAF9] border border-[#DDE5DF] px-3.5 py-2 rounded-xl">
-        <span>
-          Bulan aktif: <strong className="text-[#16823B] font-bold">{data.find((d) => d.month === selectedPeriod)?.monthName || selectedPeriod}</strong> (Diberi aksen batas tegas pada grafik)
-        </span>
-        <span className="text-[#89938D]">
-          Variance Total = ((Total Actual − Total Budget) ÷ Total Budget) × 100
-        </span>
-      </div>
+          return (
+            <div
+              style={{ left, top }}
+              className="absolute -translate-x-1/2 -translate-y-full z-50 pointer-events-none transition-all duration-150 animate-in fade-in zoom-in-95 w-64 sm:w-72 bg-white border border-[#DDE5DF] rounded-xl p-3.5 shadow-2xl text-xs font-sans filter drop-shadow-lg"
+            >
+              {/* Tooltip Header */}
+              <div className="flex items-center justify-between pb-2 mb-2.5 border-b border-[#DDE5DF]">
+                <div className="flex items-center gap-1.5">
+                  <Calendar className="w-3.5 h-3.5 text-[#16823B]" />
+                  <span className="font-bold text-sm text-[#17231B]">
+                    {tooltip.isTotal ? tooltip.monthName : `Bulan ${tooltip.monthName}`}
+                  </span>
+                </div>
+                {tooltip.isTotal ? (
+                  <span className="text-[10px] bg-[#16823B]/10 text-[#16823B] px-2 py-0.5 rounded-full font-bold">
+                    YTD PG1
+                  </span>
+                ) : tooltip.isSelected ? (
+                  <span className="text-[10px] bg-[#16823B] text-white px-2 py-0.5 rounded-full font-bold">
+                    Terpilih
+                  </span>
+                ) : (
+                  <span className="text-[10px] bg-[#F7F9F7] text-[#5F6B63] border border-[#DDE5DF] px-1.5 py-0.5 rounded-full font-semibold">
+                    Klik untuk pilih
+                  </span>
+                )}
+              </div>
+
+              {/* Rows: Actual & Budget */}
+              <div className="flex flex-col gap-1.5">
+                {/* Actual Row */}
+                <div className="flex items-center justify-between gap-2 p-1.5 rounded-lg bg-[#F8FAF9]">
+                  <div className="flex items-center gap-1.5">
+                    <span className="w-2.5 h-2.5 rounded-full bg-[#16823B] shrink-0" />
+                    <span className="text-[#5F6B63] font-semibold text-xs">Actual:</span>
+                  </div>
+                  <div className="text-right">
+                    <span className="font-mono font-bold text-[#17231B] text-xs">
+                      Rp {tooltip.actual.toLocaleString("id-ID")}
+                    </span>
+                    {tooltip.actual > 0 && (
+                      <span className="text-[10px] text-[#5F6B63] block font-mono">
+                        ({formatInMillions(tooltip.actual)} Jt)
+                      </span>
+                    )}
+                  </div>
+                </div>
+
+                {/* Budget Row */}
+                <div className="flex items-center justify-between gap-2 p-1.5 rounded-lg hover:bg-[#F8FAF9]">
+                  <div className="flex items-center gap-1.5">
+                    <span className="w-2.5 h-2.5 rounded-full bg-[#8CD16B] shrink-0" />
+                    <span className="text-[#5F6B63] font-semibold text-xs">Budget:</span>
+                  </div>
+                  <div className="text-right">
+                    <span className="font-mono font-semibold text-[#17231B] text-xs">
+                      Rp {tooltip.budget.toLocaleString("id-ID")}
+                    </span>
+                    {tooltip.budget > 0 && (
+                      <span className="text-[10px] text-[#5F6B63] block font-mono">
+                        ({formatInMillions(tooltip.budget)} Jt)
+                      </span>
+                    )}
+                  </div>
+                </div>
+
+                {/* Variansi & Status Row */}
+                <div className="mt-1 pt-2 border-t border-[#DDE5DF] flex items-center justify-between">
+                  <span className="text-[11px] text-[#5F6B63] font-semibold">
+                    Variansi Biaya:
+                  </span>
+                  <div className="flex items-center gap-1.5">
+                    <span
+                      className={`font-mono font-bold text-xs px-2 py-0.5 rounded-md ${
+                        tooltip.variance === null
+                          ? "bg-gray-100 text-[#5F6B63]"
+                          : isOverBudget
+                          ? "bg-rose-50 text-rose-700 border border-rose-200"
+                          : "bg-emerald-50 text-emerald-700 border border-emerald-200"
+                      }`}
+                    >
+                      {tooltip.variance !== null
+                        ? `${tooltip.variance > 0 ? "+" : ""}${tooltip.variance.toFixed(1).replace(".", ",")}%`
+                        : "-"}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Tooltip triangle arrow at bottom pointing to bar */}
+              <div
+                style={{ left: `calc(50% + ${arrowOffset}px)` }}
+                className="absolute top-full -mt-1 -translate-x-1/2 w-2.5 h-2.5 bg-white border-b border-r border-[#DDE5DF] rotate-45"
+              />
+            </div>
+          );
+        })()}
     </div>
   );
 }

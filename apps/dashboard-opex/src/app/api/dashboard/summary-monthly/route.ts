@@ -2,8 +2,8 @@ import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 
 const MONTH_NAMES = [
-  "Jan", "Feb", "Mar", "Apr", "Mei", "Jun",
-  "Jul", "Agu", "Sep", "Okt", "Nov", "Des"
+  "Januari", "Februari", "Maret", "April", "Mei", "Juni",
+  "Juli", "Agustus", "September", "Oktober", "November", "Desember"
 ];
 
 export async function GET() {
@@ -25,9 +25,6 @@ export async function GET() {
       monthlyMap[m] = { actual: 0, budget: 0 };
     }
 
-    let grandTotalActual = 0;
-    let grandTotalBudget = 0;
-
     // Agregasikan per bulan
     for (const row of rawData) {
       const p = row.periode;
@@ -37,9 +34,6 @@ export async function GET() {
 
         monthlyMap[p].actual += act;
         monthlyMap[p].budget += bgt;
-
-        grandTotalActual += act;
-        grandTotalBudget += bgt;
       }
     }
 
@@ -47,7 +41,7 @@ export async function GET() {
       const monthNum = i + 1;
       const data = monthlyMap[monthNum];
       const variance =
-        data.budget > 0
+        data.actual > 0 && data.budget > 0
           ? Number((((data.actual - data.budget) / data.budget) * 100).toFixed(2))
           : null;
 
@@ -60,15 +54,32 @@ export async function GET() {
       };
     });
 
+    // Hitung Total YTD (Year To Date): Akumulasi bulan yang sudah memiliki transaksi Actual
+    let ytdActual = 0;
+    let ytdBudget = 0;
+
+    for (let m = 1; m <= 12; m++) {
+      const data = monthlyMap[m];
+      if (data.actual > 0) {
+        ytdActual += data.actual;
+        ytdBudget += data.budget;
+      }
+    }
+
+    // Fallback jika belum ada actual sama sekali
+    if (ytdActual === 0) {
+      ytdBudget = Object.values(monthlyMap).reduce((acc, curr) => acc + curr.budget, 0);
+    }
+
     const totalVariance =
-      grandTotalBudget > 0
-        ? Number((((grandTotalActual - grandTotalBudget) / grandTotalBudget) * 100).toFixed(2))
+      ytdBudget > 0
+        ? Number((((ytdActual - ytdBudget) / ytdBudget) * 100).toFixed(2))
         : null;
 
     return NextResponse.json({
       months,
-      totalActual: Math.round(grandTotalActual),
-      totalBudget: Math.round(grandTotalBudget),
+      totalActual: Math.round(ytdActual),
+      totalBudget: Math.round(ytdBudget),
       totalVariance,
     });
   } catch (error) {

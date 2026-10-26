@@ -26,7 +26,26 @@ const COST_ELEMENTS = [
   { ce2: "CE06", deskripsiCe2: "Biaya Umum & Operasional Lainnya", isview: true },
 ];
 
-// Template aktivitas per CE2
+// Target Bulanan Sesuai Referensi Visual Dashboard OPEX GGP:
+// Jan: Act 2.488 M, Bgt 1.594 M (+56%)
+// Feb: Act 1.394 M, Bgt 1.600 M (-13%)
+// Mar: Act 1.678 M, Bgt 2.438 M (-31%)
+// Apr-Des: Budget berjalan, Actual belum ada (0)
+const MONTHLY_TARGETS: Record<number, { actual: number; budget: number }> = {
+  1: { actual: 2488000000, budget: 1594000000 },
+  2: { actual: 1394000000, budget: 1600000000 },
+  3: { actual: 1678000000, budget: 2438000000 },
+  4: { actual: 0, budget: 3570000000 },
+  5: { actual: 0, budget: 3573000000 },
+  6: { actual: 0, budget: 4661000000 },
+  7: { actual: 0, budget: 3993000000 },
+  8: { actual: 0, budget: 4614000000 },
+  9: { actual: 0, budget: 3789000000 },
+  10: { actual: 0, budget: 4049000000 },
+  11: { actual: 0, budget: 1310000000 },
+  12: { actual: 0, budget: 1715000000 },
+};
+
 const SAMPLE_ACTIVITIES: Record<string, string[]> = {
   CE01: [
     "Upah Tenaga Kerja Borongan Penyiangan Gulma",
@@ -69,54 +88,47 @@ const SAMPLE_ACTIVITIES: Record<string, string[]> = {
 const PGS = ["PG1", "PG2", "PG3"];
 const CURRENT_YEAR = 2026;
 
-// Deterministic Pseudo-Random Generator (agar data selalu stabil & realistis)
-let seed = 42;
-function pseudoRandom(): number {
-  seed = (seed * 9301 + 49297) % 233280;
-  return seed / 233280;
-}
-
 async function main() {
-  console.log("🌱 Memulai seeding data dummy Dashboard OPEX...");
+  console.log("🌱 Memulai seeding data terkalibrasi Dashboard OPEX GGP...");
 
-  // 1. Bersihkan data sebelumnya (urutan child -> parent)
-  console.log("🧹 Membersihkan tabel opex...");
   await prisma.summary.deleteMany();
   await prisma.dataActual.deleteMany();
   await prisma.dataBudget.deleteMany();
   await prisma.mastersheetCe2.deleteMany();
   await prisma.mastersheetCostcenter.deleteMany();
 
-  // 2. Insert Mastersheet Cost Centers
-  console.log("📁 Menambahkan Master Cost Center...");
-  await prisma.mastersheetCostcenter.createMany({
-    data: COST_CENTERS,
-  });
-
-  // 3. Insert Mastersheet CE2
-  console.log("📁 Menambahkan Master CE2...");
-  await prisma.mastersheetCe2.createMany({
-    data: COST_ELEMENTS,
-  });
-
-  // 4. Generate Budget & Actual Data
-  console.log("📊 Menghasilkan data transaksi Budget, Actual, dan Summary...");
+  console.log("📁 Menambahkan Master Cost Center & CE2...");
+  await prisma.mastersheetCostcenter.createMany({ data: COST_CENTERS });
+  await prisma.mastersheetCe2.createMany({ data: COST_ELEMENTS });
 
   const dataBudgetRecords: Prisma.DataBudgetCreateManyInput[] = [];
   const dataActualRecords: Prisma.DataActualCreateManyInput[] = [];
   const summaryRecords: Prisma.SummaryCreateManyInput[] = [];
 
+  const totalCombos = COST_CENTERS.length * COST_ELEMENTS.length; // 60 kombinasi
   let docCounter = 1000;
 
-  // Loop untuk 12 Bulan (Periode 1 s.d. 12)
   for (let periode = 1; periode <= 12; periode++) {
+    const target = MONTHLY_TARGETS[periode];
     const monthDate = new Date(CURRENT_YEAR, periode - 1, 1);
+
+    // Distribusi budget per kombinasi (CC & CE2)
+    const baseBudgetUnit = Math.floor(target.budget / totalCombos);
+    let budgetRemainder = target.budget - baseBudgetUnit * totalCombos;
+
+    // Distribusi actual PG1 per kombinasi
+    const baseActualUnit = target.actual > 0 ? Math.floor(target.actual / totalCombos) : 0;
+    let actualRemainder = target.actual > 0 ? target.actual - baseActualUnit * totalCombos : 0;
+
+    let comboIdx = 0;
 
     for (const cc of COST_CENTERS) {
       for (const ce of COST_ELEMENTS) {
-        // Base Budget per (periode, costcenter, ce2) — berlaku untuk semua PG
-        // Variasi budget antara 25 Juta s.d. 120 Juta per kombinasi
-        const baseBudget = Math.round((30000000 + pseudoRandom() * 85000000) / 100000) * 100000;
+        comboIdx++;
+        const isLastCombo = comboIdx === totalCombos;
+
+        // Hitung budget pasti agar total bulanan tepat sama dengan target
+        const comboBudget = baseBudgetUnit + (isLastCombo ? budgetRemainder : 0);
         const budgetKode = `${periode}${cc.costcenter}${ce.ce2}`;
 
         dataBudgetRecords.push({
@@ -125,59 +137,67 @@ async function main() {
           deskripsiCostcenter: cc.deskripsiCostcenter,
           ce2: ce.ce2,
           deskripsiCe2: ce.deskripsiCe2,
-          amountIdr: new Prisma.Decimal(baseBudget),
+          amountIdr: new Prisma.Decimal(comboBudget),
           month: monthDate,
           period: periode,
           groupExp: "OPERATING_EXPENSES",
         });
 
-        // Untuk setiap PG, generate Actual data
+        // Generate untuk setiap PG
         for (const pg of PGS) {
-          // Rasio actual terhadap budget (PG1 memiliki data penuh, PG2 & PG3 memiliki variasi)
-          // Bulan 1..12 disimulasikan: bulan 1-4 realisasi riil, bulan 5-12 proyeksi/aktual bertahap
-          const pgMultiplier = pg === "PG1" ? 1.0 : pg === "PG2" ? 0.85 : 0.75;
-          const varianceRatio = 0.82 + pseudoRandom() * 0.35; // 82% - 117% dari budget
-          const totalActualForCombo = Math.round((baseBudget * pgMultiplier * varianceRatio) / 100000) * 100000;
+          let pgActual = 0;
 
-          // Buat 2-3 rincian transaksi data_actual
-          const activities = SAMPLE_ACTIVITIES[ce.ce2] || ["Aktivitas Operasional Rutin"];
-          const numTransactions = 2 + Math.floor(pseudoRandom() * 2); // 2 atau 3 transaksi
-          let allocatedActual = 0;
-
-          const actualKode = `${periode}${cc.costcenter}${ce.ce2}${pg}`;
-
-          for (let i = 0; i < numTransactions; i++) {
-            docCounter++;
-            const isLast = i === numTransactions - 1;
-            const portion = isLast ? totalActualForCombo - allocatedActual : Math.round((totalActualForCombo / numTransactions) / 50000) * 50000;
-            allocatedActual += portion;
-
-            const activityNote = activities[i % activities.length];
-            const transDate = new Date(CURRENT_YEAR, periode - 1, 5 + i * 8);
-
-            dataActualRecords.push({
-              kode: actualKode,
-              costcenter: cc.costcenter,
-              deskripsiCostcenter: cc.deskripsiCostcenter,
-              costControl: ce.ce2,
-              costDescription: ce.deskripsiCe2,
-              idrAct: new Prisma.Decimal(portion),
-              objectCurrency: "IDR",
-              notes: activityNote,
-              ce2: ce.ce2,
-              deskripsiCe2: ce.deskripsiCe2,
-              documentNumber: `DOC-${CURRENT_YEAR}-${String(docCounter).padStart(5, "0")}`,
-              documentDate: transDate,
-              postingDate: transDate,
-              period: periode,
-              pg: pg,
-              groupingDepartement: "PLANTATION_OPS",
-            });
+          if (pg === "PG1") {
+            pgActual = target.actual > 0 ? baseActualUnit + (isLastCombo ? actualRemainder : 0) : 0;
+          } else if (pg === "PG2") {
+            // PG2 proporsional 0.88x dari PG1
+            pgActual = target.actual > 0 ? Math.round((baseActualUnit * 0.88) / 1000) * 1000 : 0;
+          } else if (pg === "PG3") {
+            // PG3 proporsional 0.76x dari PG1
+            pgActual = target.actual > 0 ? Math.round((baseActualUnit * 0.76) / 1000) * 1000 : 0;
           }
 
-          // Hitung variance untuk tabel Summary: ((actual - budget) / budget) * 100
-          const variance = Number((((totalActualForCombo - baseBudget) / baseBudget) * 100).toFixed(2));
+          // Generate data_actual transactions jika actual > 0
+          if (pgActual > 0) {
+            const activities = SAMPLE_ACTIVITIES[ce.ce2] || ["Aktivitas Operasional Rutin"];
+            const numTrans = 2;
+            const halfPortion = Math.floor(pgActual / numTrans);
+            const remainderPortion = pgActual - halfPortion;
+
+            for (let t = 0; t < numTrans; t++) {
+              docCounter++;
+              const portion = t === 0 ? halfPortion : remainderPortion;
+              const note = activities[t % activities.length];
+              const transDate = new Date(CURRENT_YEAR, periode - 1, 8 + t * 10);
+              const actualKode = `${periode}${cc.costcenter}${ce.ce2}${pg}`;
+
+              dataActualRecords.push({
+                kode: actualKode,
+                costcenter: cc.costcenter,
+                deskripsiCostcenter: cc.deskripsiCostcenter,
+                costControl: ce.ce2,
+                costDescription: ce.deskripsiCe2,
+                idrAct: new Prisma.Decimal(portion),
+                objectCurrency: "IDR",
+                notes: note,
+                ce2: ce.ce2,
+                deskripsiCe2: ce.deskripsiCe2,
+                documentNumber: `DOC-${CURRENT_YEAR}-${String(docCounter).padStart(5, "0")}`,
+                documentDate: transDate,
+                postingDate: transDate,
+                period: periode,
+                pg: pg,
+                groupingDepartement: "PLANTATION_OPS",
+              });
+            }
+          }
+
+          // Summary per kombinasi
           const summaryKode = `${periode}${cc.costcenter}${ce.ce2}${pg}`;
+          const variance =
+            pgActual > 0 && comboBudget > 0
+              ? Number((((pgActual - comboBudget) / comboBudget) * 100).toFixed(2))
+              : null;
 
           summaryRecords.push({
             kode: summaryKode,
@@ -187,44 +207,35 @@ async function main() {
             ce2: ce.ce2,
             deskripsiCe2: ce.deskripsiCe2,
             pg: pg,
-            nilaiActual: new Prisma.Decimal(totalActualForCombo),
-            nilaiBudget: new Prisma.Decimal(baseBudget),
-            variance: new Prisma.Decimal(variance),
+            nilaiActual: pgActual > 0 ? new Prisma.Decimal(pgActual) : null,
+            nilaiBudget: new Prisma.Decimal(comboBudget),
+            variance: variance !== null ? new Prisma.Decimal(variance) : null,
           });
         }
       }
     }
   }
 
-  // Insert data dalam batch
-  console.log(`📥 Memasukkan ${dataBudgetRecords.length} baris data_budget...`);
+  console.log(`📥 Menyimpan ${dataBudgetRecords.length} budget records...`);
   await prisma.dataBudget.createMany({ data: dataBudgetRecords });
 
-  console.log(`📥 Memasukkan ${dataActualRecords.length} baris data_actual...`);
-  // Prisma batching untuk menghindari batas parameter database
+  console.log(`📥 Menyimpan ${dataActualRecords.length} actual records...`);
   const CHUNK_SIZE = 1000;
   for (let i = 0; i < dataActualRecords.length; i += CHUNK_SIZE) {
-    const chunk = dataActualRecords.slice(i, i + CHUNK_SIZE);
-    await prisma.dataActual.createMany({ data: chunk });
+    await prisma.dataActual.createMany({ data: dataActualRecords.slice(i, i + CHUNK_SIZE) });
   }
 
-  console.log(`📥 Memasukkan ${summaryRecords.length} baris summary...`);
+  console.log(`📥 Menyimpan ${summaryRecords.length} summary records...`);
   for (let i = 0; i < summaryRecords.length; i += CHUNK_SIZE) {
-    const chunk = summaryRecords.slice(i, i + CHUNK_SIZE);
-    await prisma.summary.createMany({ data: chunk });
+    await prisma.summary.createMany({ data: summaryRecords.slice(i, i + CHUNK_SIZE) });
   }
 
-  console.log("✅ Seeding database OPEX berhasil diselesaikan!");
-  console.log(`- Master Cost Center : ${COST_CENTERS.length}`);
-  console.log(`- Master CE2         : ${COST_ELEMENTS.length}`);
-  console.log(`- Data Budget        : ${dataBudgetRecords.length}`);
-  console.log(`- Data Actual        : ${dataActualRecords.length}`);
-  console.log(`- Summary Records    : ${summaryRecords.length}`);
+  console.log("✅ Seeding terkalibrasi berhasil!");
 }
 
 main()
   .catch((e) => {
-    console.error("❌ Gagal melakukan seeding:", e);
+    console.error(e);
     process.exit(1);
   })
   .finally(async () => {
