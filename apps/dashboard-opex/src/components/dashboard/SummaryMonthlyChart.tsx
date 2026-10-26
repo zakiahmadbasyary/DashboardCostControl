@@ -107,7 +107,7 @@ export default function SummaryMonthlyChart({
 
   const getTooltipStyle = (x: number, y: number) => {
     const cardWidth = cardRef.current?.clientWidth || 800;
-    const tooltipWidth = 270;
+    const tooltipWidth = 220;
     const halfWidth = tooltipWidth / 2;
     const padding = 16;
 
@@ -388,99 +388,63 @@ export default function SummaryMonthlyChart({
         </div>
       </div>
 
-      {/* ── Floating Rich Tooltip (Selaras dengan Desain Dashboard WIP) ── */}
+      {/* ── Floating Tooltip (Sama persis dengan Tooltip Grafik Trend Cost Element Antar PG) ── */}
       {tooltip &&
         (() => {
           const { left, top, arrowOffset } = getTooltipStyle(tooltip.x, tooltip.y);
-          const diffNominal = tooltip.actual - tooltip.budget;
-          const isOverBudget = diffNominal > 0;
 
           return (
             <div
               style={{ left, top }}
-              className="absolute -translate-x-1/2 -translate-y-full z-50 pointer-events-none transition-all duration-150 animate-in fade-in zoom-in-95 w-64 sm:w-72 bg-white border border-[#DDE5DF] rounded-xl p-3.5 shadow-2xl text-xs font-sans filter drop-shadow-lg"
+              className="absolute -translate-x-1/2 -translate-y-full z-50 pointer-events-none transition-all duration-150 animate-in fade-in zoom-in-95 bg-white border border-[#DDE5DF] rounded-xl p-3 shadow-lg text-xs min-w-[210px] sm:min-w-[220px]"
             >
               {/* Tooltip Header */}
-              <div className="flex items-center justify-between pb-2 mb-2.5 border-b border-[#DDE5DF]">
-                <div className="flex items-center gap-1.5">
-                  <Calendar className="w-3.5 h-3.5 text-[#16823B]" />
-                  <span className="font-bold text-sm text-[#17231B]">
-                    {tooltip.isTotal ? tooltip.monthName : `Bulan ${tooltip.monthName}`}
-                  </span>
-                </div>
-                {tooltip.isTotal ? (
-                  <span className="text-[10px] bg-[#16823B]/10 text-[#16823B] px-2 py-0.5 rounded-full font-bold">
-                    YTD PG1
-                  </span>
-                ) : tooltip.isSelected ? (
-                  <span className="text-[10px] bg-[#16823B] text-white px-2 py-0.5 rounded-full font-bold">
-                    Terpilih
-                  </span>
-                ) : (
-                  <span className="text-[10px] bg-[#F7F9F7] text-[#5F6B63] border border-[#DDE5DF] px-1.5 py-0.5 rounded-full font-semibold">
-                    Klik untuk pilih
-                  </span>
-                )}
+              <div className="font-bold text-[#17231B] pb-2 mb-2 border-b border-[#DDE5DF]">
+                Periode: <strong className="text-[#16823B]">{tooltip.isTotal ? tooltip.monthName : tooltip.monthName}</strong>
               </div>
 
-              {/* Rows: Actual & Budget */}
-              <div className="flex flex-col gap-1.5">
+              {/* Rows: Actual, Budget & Variance */}
+              <div className="space-y-1.5">
                 {/* Actual Row */}
-                <div className="flex items-center justify-between gap-2 p-1.5 rounded-lg bg-[#F8FAF9]">
+                <div className="flex items-center justify-between gap-3">
                   <div className="flex items-center gap-1.5">
                     <span className="w-2.5 h-2.5 rounded-full bg-[#16823B] shrink-0" />
-                    <span className="text-[#5F6B63] font-semibold text-xs">Actual:</span>
+                    <span className="text-[#5F6B63]">Actual:</span>
                   </div>
-                  <div className="text-right">
-                    <span className="font-mono font-bold text-[#17231B] text-xs">
-                      Rp {tooltip.actual.toLocaleString("id-ID")}
-                    </span>
-                    {tooltip.actual > 0 && (
-                      <span className="text-[10px] text-[#5F6B63] block font-mono">
-                        ({formatInMillions(tooltip.actual)} Jt)
-                      </span>
-                    )}
-                  </div>
+                  <span className="font-mono font-bold text-[#17231B]">
+                    Rp {tooltip.actual.toLocaleString("id-ID")}
+                  </span>
                 </div>
 
                 {/* Budget Row */}
-                <div className="flex items-center justify-between gap-2 p-1.5 rounded-lg hover:bg-[#F8FAF9]">
+                <div className="flex items-center justify-between gap-3">
                   <div className="flex items-center gap-1.5">
                     <span className="w-2.5 h-2.5 rounded-full bg-[#8CD16B] shrink-0" />
-                    <span className="text-[#5F6B63] font-semibold text-xs">Budget:</span>
+                    <span className="text-[#5F6B63]">Budget:</span>
                   </div>
-                  <div className="text-right">
-                    <span className="font-mono font-semibold text-[#17231B] text-xs">
-                      Rp {tooltip.budget.toLocaleString("id-ID")}
-                    </span>
-                    {tooltip.budget > 0 && (
-                      <span className="text-[10px] text-[#5F6B63] block font-mono">
-                        ({formatInMillions(tooltip.budget)} Jt)
-                      </span>
-                    )}
-                  </div>
+                  <span className="font-mono font-bold text-[#17231B]">
+                    Rp {tooltip.budget.toLocaleString("id-ID")}
+                  </span>
                 </div>
 
-                {/* Variansi & Status Row */}
-                <div className="mt-1 pt-2 border-t border-[#DDE5DF] flex items-center justify-between">
-                  <span className="text-[11px] text-[#5F6B63] font-semibold">
-                    Variansi Biaya:
-                  </span>
+                {/* Variance Row */}
+                <div className="flex items-center justify-between gap-3 pt-1.5 border-t border-[#DDE5DF]">
                   <div className="flex items-center gap-1.5">
-                    <span
-                      className={`font-mono font-bold text-xs px-2 py-0.5 rounded-md ${
-                        tooltip.variance === null
-                          ? "bg-gray-100 text-[#5F6B63]"
-                          : isOverBudget
-                          ? "bg-rose-50 text-rose-700 border border-rose-200"
-                          : "bg-emerald-50 text-emerald-700 border border-emerald-200"
-                      }`}
-                    >
-                      {tooltip.variance !== null
-                        ? `${tooltip.variance > 0 ? "+" : ""}${tooltip.variance.toFixed(1).replace(".", ",")}%`
-                        : "-"}
-                    </span>
+                    <span className="text-[#5F6B63]">Variance:</span>
                   </div>
+                  <span
+                    className={`font-mono font-bold ${
+                      tooltip.variance === null
+                        ? "text-[#5F6B63]"
+                        : tooltip.variance > 0
+                        ? "text-rose-600"
+                        : "text-[#16823B]"
+                    }`}
+                  >
+                    {tooltip.variance !== null
+                      ? `${tooltip.variance > 0 ? "+" : ""}${tooltip.variance.toFixed(1).replace(".", ",")}%`
+                      : "-"}
+                  </span>
                 </div>
               </div>
 

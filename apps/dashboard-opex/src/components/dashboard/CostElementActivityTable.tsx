@@ -1,8 +1,8 @@
 "use client";
 
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { ActivityGroupItem } from "@/types/opex";
-import { ListChecks, AlertCircle, Receipt } from "lucide-react";
+import { ListChecks, AlertCircle, Receipt, ChevronLeft, ChevronRight } from "lucide-react";
 
 interface CostElementActivityTableProps {
   selectedCostCenter: string | null;
@@ -21,6 +21,17 @@ export default function CostElementActivityTable({
   transactionCount,
   loading,
 }: CostElementActivityTableProps) {
+  const [currentPage, setCurrentPage] = useState(1);
+  const PAGE_SIZE = 10;
+
+  // Reset page when cost center or ce2 changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [selectedCostCenter, selectedCe2]);
+
+  const totalPages = Math.max(1, Math.ceil(activities.length / PAGE_SIZE));
+  const startIndex = (currentPage - 1) * PAGE_SIZE;
+  const paginatedActivities = activities.slice(startIndex, startIndex + PAGE_SIZE);
   if (!selectedCostCenter) {
     return (
       <div className="bg-white border border-[#DDE5DF] rounded-2xl p-6 shadow-xs h-full min-h-[340px] flex flex-col items-center justify-center text-center">
@@ -88,21 +99,15 @@ export default function CostElementActivityTable({
               <thead className="bg-[#F7F9F7] text-[#17231B] uppercase text-[10px] font-bold border-b border-[#DDE5DF]">
                 <tr>
                   <th className="py-2.5 px-3">Uraian Pekerjaan / Catatan Aktivitas</th>
-                  <th className="py-2.5 px-3 text-center">Transaksi</th>
                   <th className="py-2.5 px-3 text-right">Biaya (Rp)</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-[#DDE5DF]">
-                {activities.map((act, idx) => (
+                {paginatedActivities.map((act, idx) => (
                   <tr key={idx} className="hover:bg-[#F8FAF9] transition-colors">
                     <td className="py-2.5 px-3">
                       <span className="font-semibold text-[#17231B]">
                         {act.activity}
-                      </span>
-                    </td>
-                    <td className="py-2.5 px-3 text-center font-mono text-[#5F6B63]">
-                      <span className="px-2 py-0.5 rounded-full bg-[#F8FAF9] border border-[#DDE5DF] text-[10px] font-bold">
-                        {act.count}×
                       </span>
                     </td>
                     <td className="py-2.5 px-3 text-right font-mono font-bold text-[#17231B]">
@@ -112,6 +117,56 @@ export default function CostElementActivityTable({
                 ))}
               </tbody>
             </table>
+          </div>
+        )}
+
+        {/* Pagination Controls (Maks 10 Data per Halaman) */}
+        {!loading && totalPages > 1 && (
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 mt-3 pt-3 border-t border-[#DDE5DF]">
+            <div className="text-[11px] text-[#5F6B63]">
+              Menampilkan <strong className="text-[#17231B]">{startIndex + 1}</strong>–
+              <strong className="text-[#17231B]">{Math.min(startIndex + PAGE_SIZE, activities.length)}</strong> dari{" "}
+              <strong className="text-[#17231B]">{activities.length}</strong> Aktivitas
+            </div>
+
+            <div className="flex items-center gap-1.5 self-end sm:self-center">
+              <button
+                type="button"
+                onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
+                disabled={currentPage === 1}
+                className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg border border-[#DDE5DF] bg-white text-xs font-semibold text-[#17231B] hover:bg-[#F8FAF9] disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer transition-all shadow-2xs"
+              >
+                <ChevronLeft className="w-3.5 h-3.5" />
+                <span className="hidden sm:inline">Sebelumnya</span>
+              </button>
+
+              <div className="flex items-center gap-1">
+                {Array.from({ length: totalPages }, (_, i) => i + 1).map((pgNum) => (
+                  <button
+                    key={pgNum}
+                    type="button"
+                    onClick={() => setCurrentPage(pgNum)}
+                    className={`w-6 h-6 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                      currentPage === pgNum
+                        ? "bg-[#16823B] text-white shadow-xs"
+                        : "bg-white border border-[#DDE5DF] text-[#5F6B63] hover:bg-[#F8FAF9]"
+                    }`}
+                  >
+                    {pgNum}
+                  </button>
+                ))}
+              </div>
+
+              <button
+                type="button"
+                onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))}
+                disabled={currentPage === totalPages}
+                className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg border border-[#DDE5DF] bg-white text-xs font-semibold text-[#17231B] hover:bg-[#F8FAF9] disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer transition-all shadow-2xs"
+              >
+                <span className="hidden sm:inline">Berikutnya</span>
+                <ChevronRight className="w-3.5 h-3.5" />
+              </button>
+            </div>
           </div>
         )}
       </div>

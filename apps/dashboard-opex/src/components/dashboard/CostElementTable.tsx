@@ -1,8 +1,8 @@
 "use client";
 
-import React from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { CostElementSummaryItem } from "@/types/opex";
-import { Layers, CheckCircle2, AlertCircle } from "lucide-react";
+import { Layers, CheckCircle2, AlertCircle, ChevronLeft, ChevronRight } from "lucide-react";
 
 interface CostElementTableProps {
   selectedCostCenter: string | null;
@@ -19,6 +19,25 @@ export default function CostElementTable({
   onSelectCe2,
   loading,
 }: CostElementTableProps) {
+  const [currentPage, setCurrentPage] = useState(1);
+  const PAGE_SIZE = 8;
+
+  // Reset page when selectedCostCenter changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [selectedCostCenter]);
+
+  const sortedData = useMemo(() => {
+    return [...data].sort((a, b) => {
+      const vA = a.variance !== null ? a.variance : -Infinity;
+      const vB = b.variance !== null ? b.variance : -Infinity;
+      return vB - vA;
+    });
+  }, [data]);
+
+  const totalPages = Math.max(1, Math.ceil(sortedData.length / PAGE_SIZE));
+  const startIndex = (currentPage - 1) * PAGE_SIZE;
+  const paginatedData = sortedData.slice(startIndex, startIndex + PAGE_SIZE);
   if (!selectedCostCenter) {
     return (
       <div className="bg-white border border-[#DDE5DF] rounded-2xl p-6 shadow-xs h-full min-h-[340px] flex flex-col items-center justify-center text-center">
@@ -85,7 +104,7 @@ export default function CostElementTable({
                 </tr>
               </thead>
               <tbody className="divide-y divide-[#DDE5DF]">
-                {data.map((row) => {
+                {paginatedData.map((row) => {
                   const isSelected = row.ce2 === selectedCe2;
                   const isOver = row.variance !== null && row.variance > 0;
 
@@ -114,10 +133,16 @@ export default function CostElementTable({
                           </div>
                         </div>
                       </td>
-                      <td className="py-2.5 px-3 text-right font-mono text-[#17231B]">
-                        {row.actual.toLocaleString("id-ID")}
+                      <td
+                        className={`py-2.5 px-3 text-right font-mono whitespace-nowrap ${
+                          isOver ? "bg-[#FCE27A]/35 text-[#17231B]" : "text-[#17231B]"
+                        }`}
+                      >
+                        <span className={isSelected ? "font-semibold" : "font-normal"}>
+                          {row.actual.toLocaleString("id-ID")}
+                        </span>
                       </td>
-                      <td className="py-2.5 px-3 text-right font-mono text-[#5F6B63]">
+                      <td className="py-2.5 px-3 text-right font-mono text-[#5F6B63] whitespace-nowrap">
                         {row.budget.toLocaleString("id-ID")}
                       </td>
                       <td className="py-2.5 px-3 text-right font-mono">
@@ -140,6 +165,56 @@ export default function CostElementTable({
                 })}
               </tbody>
             </table>
+          </div>
+        )}
+
+        {/* Pagination Controls (Maks 8 Data per Halaman) */}
+        {!loading && totalPages > 1 && (
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 mt-3 pt-3 border-t border-[#DDE5DF]">
+            <div className="text-[11px] text-[#5F6B63]">
+              Menampilkan <strong className="text-[#17231B]">{startIndex + 1}</strong>–
+              <strong className="text-[#17231B]">{Math.min(startIndex + PAGE_SIZE, sortedData.length)}</strong> dari{" "}
+              <strong className="text-[#17231B]">{sortedData.length}</strong> Akun
+            </div>
+
+            <div className="flex items-center gap-1.5 self-end sm:self-center">
+              <button
+                type="button"
+                onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
+                disabled={currentPage === 1}
+                className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg border border-[#DDE5DF] bg-white text-xs font-semibold text-[#17231B] hover:bg-[#F8FAF9] disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer transition-all shadow-2xs"
+              >
+                <ChevronLeft className="w-3.5 h-3.5" />
+                <span className="hidden sm:inline">Sebelumnya</span>
+              </button>
+
+              <div className="flex items-center gap-1">
+                {Array.from({ length: totalPages }, (_, i) => i + 1).map((pgNum) => (
+                  <button
+                    key={pgNum}
+                    type="button"
+                    onClick={() => setCurrentPage(pgNum)}
+                    className={`w-6 h-6 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                      currentPage === pgNum
+                        ? "bg-[#16823B] text-white shadow-xs"
+                        : "bg-white border border-[#DDE5DF] text-[#5F6B63] hover:bg-[#F8FAF9]"
+                    }`}
+                  >
+                    {pgNum}
+                  </button>
+                ))}
+              </div>
+
+              <button
+                type="button"
+                onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))}
+                disabled={currentPage === totalPages}
+                className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg border border-[#DDE5DF] bg-white text-xs font-semibold text-[#17231B] hover:bg-[#F8FAF9] disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer transition-all shadow-2xs"
+              >
+                <span className="hidden sm:inline">Berikutnya</span>
+                <ChevronRight className="w-3.5 h-3.5" />
+              </button>
+            </div>
           </div>
         )}
       </div>
