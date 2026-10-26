@@ -67,6 +67,12 @@ export async function GET(request: NextRequest) {
         variance,
       };
     });
+    // Urutkan dari variance paling besar ke kecil (Descending)
+    result.sort((a, b) => {
+      const vA = a.variance ?? -Infinity;
+      const vB = b.variance ?? -Infinity;
+      return vB - vA;
+    });
 
     return NextResponse.json(result);
   } catch (error) {

@@ -4,13 +4,25 @@ const prisma = new PrismaClient();
 
 // ── 1. MASTER COST CENTERS ───────────────────────────────────────────────────
 const COST_CENTERS = [
-  // PG1 Cost Centers
-  { costcenter: "CC101", deskripsiCostcenter: "Pengolahan Tanah & Persiapan Lahan PG1", isview: true, pg: "PG1", weight: 0.17 },
-  { costcenter: "CC102", deskripsiCostcenter: "Irigasi & Tata Air Perkebunan PG1", isview: true, pg: "PG1", weight: 0.12 },
-  { costcenter: "CC103", deskripsiCostcenter: "Pemupukan & Pemeliharaan Tanaman PG1", isview: true, pg: "PG1", weight: 0.24 },
-  { costcenter: "CC104", deskripsiCostcenter: "Panen & Pengangkutan Hasil PG1", isview: true, pg: "PG1", weight: 0.21 },
-  { costcenter: "CC105", deskripsiCostcenter: "Armada Traktor & Alat Berat PG1", isview: true, pg: "PG1", weight: 0.15 },
-  { costcenter: "CC106", deskripsiCostcenter: "Bengkel & Workshop Lapangan PG1", isview: true, pg: "PG1", weight: 0.11 },
+  // PG1 Cost Centers (18 Cost Centers agar memenuhi 16 data [8 kiri + 8 kanan] & ada halaman berikutnya)
+  { costcenter: "CC101", deskripsiCostcenter: "Pengolahan Tanah & Persiapan Lahan PG1", isview: true, pg: "PG1", weight: 0.08 },
+  { costcenter: "CC102", deskripsiCostcenter: "Irigasi & Tata Air Perkebunan PG1", isview: true, pg: "PG1", weight: 0.06 },
+  { costcenter: "CC103", deskripsiCostcenter: "Pemupukan & Pemeliharaan Tanaman PG1", isview: true, pg: "PG1", weight: 0.11 },
+  { costcenter: "CC104", deskripsiCostcenter: "Panen & Pengangkutan Hasil PG1", isview: true, pg: "PG1", weight: 0.09 },
+  { costcenter: "CC105", deskripsiCostcenter: "Armada Traktor & Alat Berat PG1", isview: true, pg: "PG1", weight: 0.07 },
+  { costcenter: "CC106", deskripsiCostcenter: "Bengkel & Workshop Lapangan PG1", isview: true, pg: "PG1", weight: 0.05 },
+  { costcenter: "CC107", deskripsiCostcenter: "Pembibitan & Nursery Nanas PG1", isview: true, pg: "PG1", weight: 0.06 },
+  { costcenter: "CC108", deskripsiCostcenter: "Pengendalian Hama & Penyakit PG1", isview: true, pg: "PG1", weight: 0.07 },
+  { costcenter: "CC109", deskripsiCostcenter: "Penyiangan Gulma & Herbisida PG1", isview: true, pg: "PG1", weight: 0.05 },
+  { costcenter: "CC110", deskripsiCostcenter: "Pemeliharaan Jalan Kebun & Jembatan PG1", isview: true, pg: "PG1", weight: 0.05 },
+  { costcenter: "CC111", deskripsiCostcenter: "Konservasi Lahan & Drainase Utama PG1", isview: true, pg: "PG1", weight: 0.05 },
+  { costcenter: "CC112", deskripsiCostcenter: "Aplikasi Hormon & Forcing PG1", isview: true, pg: "PG1", weight: 0.06 },
+  { costcenter: "CC113", deskripsiCostcenter: "Pengawasan Agronomi & Mutu Buah PG1", isview: true, pg: "PG1", weight: 0.04 },
+  { costcenter: "CC114", deskripsiCostcenter: "Sarana & Prasarana Lapangan PG1", isview: true, pg: "PG1", weight: 0.04 },
+  { costcenter: "CC115", deskripsiCostcenter: "Gudang Saprotan & Logistik Kebun PG1", isview: true, pg: "PG1", weight: 0.04 },
+  { costcenter: "CC116", deskripsiCostcenter: "Keamanan & Perlindungan Kebun PG1", isview: true, pg: "PG1", weight: 0.03 },
+  { costcenter: "CC117", deskripsiCostcenter: "Pompa Air & Sumur Dalam PG1", isview: true, pg: "PG1", weight: 0.03 },
+  { costcenter: "CC118", deskripsiCostcenter: "Manajemen Limbah Organik & Kompos PG1", isview: true, pg: "PG1", weight: 0.02 },
 
   // PG2 Cost Centers
   { costcenter: "CC201", deskripsiCostcenter: "Operasional Lapangan & Kebun PG2", isview: true, pg: "PG2", weight: 0.58 },

@@ -44,7 +44,7 @@ export default function OpexMainFilter({
             onChange={(e) => onSelectPeriod(parseInt(e.target.value, 10))}
             disabled={loading}
             suppressHydrationWarning
-            className="w-full appearance-none bg-[#F7F9F7] border border-[#DDE5DF] rounded-lg pl-3 pr-8 py-1.5 text-xs font-bold text-[#17231B] focus:outline-none focus:border-[#16823B] transition-colors cursor-pointer truncate"
+            className="w-full appearance-none bg-[#F7F9F7] border border-[#DDE5DF] rounded-lg pl-3 pr-8 py-1.5 text-xs font-semibold text-[#17231B] focus:outline-none focus:border-[#16823B] transition-colors cursor-pointer truncate"
           >
             {periods.map((p) => (
               <option key={p.periode} value={p.periode}>
