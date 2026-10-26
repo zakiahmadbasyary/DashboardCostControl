@@ -19,6 +19,7 @@ import {
   Truck,
   Boxes,
   Gauge,
+  UploadCloud,
 } from "lucide-react";
 
 // Icon mapping for each dashboard module
@@ -212,6 +213,15 @@ export default function DashboardHeader() {
               </a>
 
               <a
+                href="/admin/upload"
+                className="hidden sm:inline-flex items-center gap-2 px-3 sm:px-3.5 py-1.5 sm:py-2 rounded-xl border border-[#CBE0D1] bg-[#EAF3EC] hover:bg-[#D5E7DA] text-[#16823B] font-bold text-xs sm:text-sm transition-all shadow-xs"
+                title="Buka Admin OPEX"
+              >
+                <UploadCloud className="w-4 h-4 text-[#16823B]" />
+                <span>Admin OPEX</span>
+              </a>
+
+              <a
                 href={adminUrl}
                 className="hidden sm:inline-flex items-center gap-2 px-3.5 sm:px-4.5 py-1.5 sm:py-2 rounded-xl bg-[#16823B] hover:bg-[#126B30] text-white font-bold text-xs sm:text-sm transition-all shadow-xs"
                 title="Buka Admin Pusat"
@@ -310,20 +320,27 @@ export default function DashboardHeader() {
               </div>
 
               {/* Mobile Quick Links to Portal & Admin */}
-              <div className="pt-2 border-t border-[#EAEFEB] grid grid-cols-2 gap-2">
+              <div className="pt-2 border-t border-[#EAEFEB] grid grid-cols-3 gap-1.5">
                 <a
                   href={portalUrl}
-                  className="w-full text-center py-2.5 rounded-xl border border-[#DDE5DF] bg-[#F8FAF9] text-[#2C3830] font-semibold text-xs flex items-center justify-center gap-1.5"
+                  className="w-full text-center py-2 rounded-xl border border-[#DDE5DF] bg-[#F8FAF9] text-[#2C3830] font-semibold text-[11px] flex items-center justify-center gap-1"
                 >
                   <LayoutGrid className="w-3.5 h-3.5 text-[#5F6B63]" />
-                  <span>Portal Utama</span>
+                  <span>Portal</span>
+                </a>
+                <a
+                  href="/admin/upload"
+                  className="w-full text-center py-2 rounded-xl border border-[#CBE0D1] bg-[#EAF3EC] text-[#16823B] font-bold text-[11px] flex items-center justify-center gap-1"
+                >
+                  <UploadCloud className="w-3.5 h-3.5 text-[#16823B]" />
+                  <span>Admin</span>
                 </a>
                 <a
                   href={adminUrl}
-                  className="w-full text-center py-2.5 rounded-xl bg-[#16823B] hover:bg-[#126B30] text-white font-bold text-xs flex items-center justify-center gap-1.5 shadow-xs"
+                  className="w-full text-center py-2 rounded-xl bg-[#16823B] hover:bg-[#126B30] text-white font-bold text-[11px] flex items-center justify-center gap-1 shadow-xs"
                 >
                   <ShieldCheck className="w-3.5 h-3.5 text-emerald-200" />
-                  <span>Admin Pusat</span>
+                  <span>Pusat</span>
                 </a>
               </div>
             </div>
