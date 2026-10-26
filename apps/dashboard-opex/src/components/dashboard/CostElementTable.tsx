@@ -40,7 +40,7 @@ export default function CostElementTable({
   const paginatedData = sortedData.slice(startIndex, startIndex + PAGE_SIZE);
   if (!selectedCostCenter) {
     return (
-      <div className="bg-white border border-[#DDE5DF] rounded-2xl p-6 shadow-xs h-full min-h-[340px] flex flex-col items-center justify-center text-center">
+      <div className="bg-white border border-[#DDE5DF] rounded-2xl p-6 shadow-xs h-full min-h-[580px] flex flex-col items-center justify-center text-center">
         <div className="p-3 rounded-2xl bg-[#F7F9F7] border border-[#DDE5DF] text-[#89938D] mb-3">
           <AlertCircle className="w-6 h-6" />
         </div>
@@ -84,16 +84,16 @@ export default function CostElementTable({
 
         {/* Content */}
         {loading ? (
-          <div className="py-12 text-center">
-            <div className="w-5 h-5 border-2 border-[#16823B] border-t-transparent rounded-full animate-spin mx-auto mb-2" />
+          <div className="h-[420px] flex flex-col justify-center items-center rounded-xl border border-[#DDE5DF] bg-[#F8FAF9]/50">
+            <div className="w-6 h-6 border-2 border-[#16823B] border-t-transparent rounded-full animate-spin mx-auto mb-2" />
             <p className="text-xs text-[#5F6B63]">Memuat Cost Element...</p>
           </div>
         ) : data.length === 0 ? (
-          <div className="p-6 text-center bg-[#F7F9F7] rounded-xl border border-dashed border-[#DDE5DF] text-xs text-[#5F6B63]">
+          <div className="h-[420px] flex flex-col justify-center items-center p-6 text-center bg-[#F7F9F7] rounded-xl border border-dashed border-[#DDE5DF] text-xs text-[#5F6B63]">
             Tidak ada Cost Element yang terdata pada Cost Center ini.
           </div>
         ) : (
-          <div className="overflow-x-auto rounded-xl border border-[#DDE5DF]">
+          <div className="overflow-x-auto rounded-xl border border-[#DDE5DF] min-h-[420px]">
             <table className="w-full text-xs text-left">
               <thead className="bg-[#F7F9F7] text-[#17231B] uppercase text-[10px] font-bold border-b border-[#DDE5DF]">
                 <tr>
@@ -112,13 +112,13 @@ export default function CostElementTable({
                     <tr
                       key={row.ce2}
                       onClick={() => onSelectCe2(row.ce2)}
-                      className={`cursor-pointer transition-colors ${
+                      className={`h-[48px] cursor-pointer transition-colors ${
                         isSelected
                           ? "bg-[#EAF3EC] border-l-4 border-l-[#16823B] font-semibold"
                           : "hover:bg-[#F8FAF9]"
                       }`}
                     >
-                      <td className="py-2.5 px-3">
+                      <td className="py-2 px-3">
                         <div className="flex items-center gap-1.5">
                           {isSelected && (
                             <CheckCircle2 className="w-3.5 h-3.5 text-[#16823B] shrink-0" />
@@ -134,7 +134,7 @@ export default function CostElementTable({
                         </div>
                       </td>
                       <td
-                        className={`py-2.5 px-3 text-right font-mono whitespace-nowrap ${
+                        className={`py-2 px-3 text-right font-mono whitespace-nowrap ${
                           isOver ? "bg-[#FCE27A]/35 text-[#17231B]" : "text-[#17231B]"
                         }`}
                       >
@@ -142,10 +142,10 @@ export default function CostElementTable({
                           {row.actual.toLocaleString("id-ID")}
                         </span>
                       </td>
-                      <td className="py-2.5 px-3 text-right font-mono text-[#5F6B63] whitespace-nowrap">
+                      <td className="py-2 px-3 text-right font-mono text-[#5F6B63] whitespace-nowrap">
                         {row.budget.toLocaleString("id-ID")}
                       </td>
-                      <td className="py-2.5 px-3 text-right font-mono">
+                      <td className="py-2 px-3 text-right font-mono">
                         {row.variance !== null ? (
                           <span
                             className={`px-1.5 py-0.5 rounded text-[10px] font-bold ${
@@ -163,58 +163,70 @@ export default function CostElementTable({
                     </tr>
                   );
                 })}
+
+                {/* Filler Rows agar tinggi tabel selalu fix setara 8 data */}
+                {Array.from({ length: Math.max(0, PAGE_SIZE - paginatedData.length) }).map((_, idx) => (
+                  <tr key={`empty-${idx}`} className="h-[48px] pointer-events-none select-none border-b border-[#DDE5DF]/20">
+                    <td className="py-2 px-3">&nbsp;</td>
+                    <td className="py-2 px-3">&nbsp;</td>
+                    <td className="py-2 px-3">&nbsp;</td>
+                    <td className="py-2 px-3">&nbsp;</td>
+                  </tr>
+                ))}
               </tbody>
             </table>
           </div>
         )}
 
-        {/* Pagination Controls (Maks 8 Data per Halaman) */}
-        {!loading && totalPages > 1 && (
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 mt-3 pt-3 border-t border-[#DDE5DF]">
+        {/* Pagination Controls (Tinggi Tetap & Konsisten) */}
+        {!loading && (
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 mt-3 pt-3 border-t border-[#DDE5DF] min-h-[44px]">
             <div className="text-[11px] text-[#5F6B63]">
-              Menampilkan <strong className="text-[#17231B]">{startIndex + 1}</strong>–
+              Menampilkan <strong className="text-[#17231B]">{sortedData.length > 0 ? startIndex + 1 : 0}</strong>–
               <strong className="text-[#17231B]">{Math.min(startIndex + PAGE_SIZE, sortedData.length)}</strong> dari{" "}
               <strong className="text-[#17231B]">{sortedData.length}</strong> Akun
             </div>
 
-            <div className="flex items-center gap-1.5 self-end sm:self-center">
-              <button
-                type="button"
-                onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
-                disabled={currentPage === 1}
-                className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg border border-[#DDE5DF] bg-white text-xs font-semibold text-[#17231B] hover:bg-[#F8FAF9] disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer transition-all shadow-2xs"
-              >
-                <ChevronLeft className="w-3.5 h-3.5" />
-                <span className="hidden sm:inline">Sebelumnya</span>
-              </button>
+            {totalPages > 1 && (
+              <div className="flex items-center gap-1.5 self-end sm:self-center">
+                <button
+                  type="button"
+                  onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
+                  disabled={currentPage === 1}
+                  className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg border border-[#DDE5DF] bg-white text-xs font-semibold text-[#17231B] hover:bg-[#F8FAF9] disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer transition-all shadow-2xs"
+                >
+                  <ChevronLeft className="w-3.5 h-3.5" />
+                  <span className="hidden sm:inline">Sebelumnya</span>
+                </button>
 
-              <div className="flex items-center gap-1">
-                {Array.from({ length: totalPages }, (_, i) => i + 1).map((pgNum) => (
-                  <button
-                    key={pgNum}
-                    type="button"
-                    onClick={() => setCurrentPage(pgNum)}
-                    className={`w-6 h-6 rounded-lg text-xs font-bold transition-all cursor-pointer ${
-                      currentPage === pgNum
-                        ? "bg-[#16823B] text-white shadow-xs"
-                        : "bg-white border border-[#DDE5DF] text-[#5F6B63] hover:bg-[#F8FAF9]"
-                    }`}
-                  >
-                    {pgNum}
-                  </button>
-                ))}
+                <div className="flex items-center gap-1">
+                  {Array.from({ length: totalPages }, (_, i) => i + 1).map((pgNum) => (
+                    <button
+                      key={pgNum}
+                      type="button"
+                      onClick={() => setCurrentPage(pgNum)}
+                      className={`w-6 h-6 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                        currentPage === pgNum
+                          ? "bg-[#16823B] text-white shadow-xs"
+                          : "bg-white border border-[#DDE5DF] text-[#5F6B63] hover:bg-[#F8FAF9]"
+                      }`}
+                    >
+                      {pgNum}
+                    </button>
+                  ))}
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))}
+                  disabled={currentPage === totalPages}
+                  className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg border border-[#DDE5DF] bg-white text-xs font-semibold text-[#17231B] hover:bg-[#F8FAF9] disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer transition-all shadow-2xs"
+                >
+                  <span className="hidden sm:inline">Berikutnya</span>
+                  <ChevronRight className="w-3.5 h-3.5" />
+                </button>
               </div>
-
-              <button
-                type="button"
-                onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))}
-                disabled={currentPage === totalPages}
-                className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg border border-[#DDE5DF] bg-white text-xs font-semibold text-[#17231B] hover:bg-[#F8FAF9] disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer transition-all shadow-2xs"
-              >
-                <span className="hidden sm:inline">Berikutnya</span>
-                <ChevronRight className="w-3.5 h-3.5" />
-              </button>
-            </div>
+            )}
           </div>
         )}
       </div>

@@ -34,7 +34,7 @@ export default function CostElementActivityTable({
   const paginatedActivities = activities.slice(startIndex, startIndex + PAGE_SIZE);
   if (!selectedCostCenter) {
     return (
-      <div className="bg-white border border-[#DDE5DF] rounded-2xl p-6 shadow-xs h-full min-h-[340px] flex flex-col items-center justify-center text-center">
+      <div className="bg-white border border-[#DDE5DF] rounded-2xl p-6 shadow-xs h-full min-h-[580px] flex flex-col items-center justify-center text-center">
         <div className="p-3 rounded-2xl bg-[#F7F9F7] border border-[#DDE5DF] text-[#89938D] mb-3">
           <AlertCircle className="w-6 h-6" />
         </div>
@@ -48,7 +48,7 @@ export default function CostElementActivityTable({
 
   if (!selectedCe2) {
     return (
-      <div className="bg-white border border-[#DDE5DF] rounded-2xl p-6 shadow-xs h-full min-h-[340px] flex flex-col items-center justify-center text-center">
+      <div className="bg-white border border-[#DDE5DF] rounded-2xl p-6 shadow-xs h-full min-h-[580px] flex flex-col items-center justify-center text-center">
         <div className="p-3 rounded-2xl bg-[#EAF3EC] border border-[#CBE0D1] text-[#16823B] mb-3">
           <Receipt className="w-6 h-6" />
         </div>
@@ -85,34 +85,42 @@ export default function CostElementActivityTable({
 
         {/* Content */}
         {loading ? (
-          <div className="py-12 text-center">
-            <div className="w-5 h-5 border-2 border-[#16823B] border-t-transparent rounded-full animate-spin mx-auto mb-2" />
+          <div className="h-[436px] flex flex-col justify-center items-center rounded-xl border border-[#DDE5DF] bg-[#F8FAF9]/50">
+            <div className="w-6 h-6 border-2 border-[#16823B] border-t-transparent rounded-full animate-spin mx-auto mb-2" />
             <p className="text-xs text-[#5F6B63]">Memuat transaksi aktivitas...</p>
           </div>
         ) : activities.length === 0 ? (
-          <div className="p-6 text-center bg-[#F7F9F7] rounded-xl border border-dashed border-[#DDE5DF] text-xs text-[#5F6B63]">
+          <div className="h-[436px] flex flex-col justify-center items-center p-6 text-center bg-[#F7F9F7] rounded-xl border border-dashed border-[#DDE5DF] text-xs text-[#5F6B63]">
             Tidak ada transaksi aktivitas untuk kombinasi Cost Center dan Cost Element ini.
           </div>
         ) : (
-          <div className="overflow-x-auto rounded-xl border border-[#DDE5DF]">
+          <div className="overflow-x-auto rounded-xl border border-[#DDE5DF] min-h-[436px]">
             <table className="w-full text-xs text-left">
               <thead className="bg-[#F7F9F7] text-[#17231B] uppercase text-[10px] font-bold border-b border-[#DDE5DF]">
-                <tr>
+                <tr className="h-[36px]">
                   <th className="py-2.5 px-3">Uraian Pekerjaan / Catatan Aktivitas</th>
                   <th className="py-2.5 px-3 text-right">Biaya (Rp)</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-[#DDE5DF]">
                 {paginatedActivities.map((act, idx) => (
-                  <tr key={idx} className="hover:bg-[#F8FAF9] transition-colors">
-                    <td className="py-2.5 px-3">
-                      <span className="font-semibold text-[#17231B]">
+                  <tr key={idx} className="h-[40px] hover:bg-[#F8FAF9] transition-colors">
+                    <td className="py-2 px-3">
+                      <span className="font-semibold text-[#17231B] line-clamp-1" title={act.activity}>
                         {act.activity}
                       </span>
                     </td>
-                    <td className="py-2.5 px-3 text-right font-mono font-bold text-[#17231B]">
+                    <td className="py-2 px-3 text-right font-mono font-bold text-[#17231B] whitespace-nowrap">
                       {act.totalCost.toLocaleString("id-ID")}
                     </td>
+                  </tr>
+                ))}
+
+                {/* Filler Rows agar tinggi tabel selalu fix setara 10 data */}
+                {Array.from({ length: Math.max(0, PAGE_SIZE - paginatedActivities.length) }).map((_, idx) => (
+                  <tr key={`empty-${idx}`} className="h-[40px] pointer-events-none select-none border-b border-[#DDE5DF]/20">
+                    <td className="py-2 px-3">&nbsp;</td>
+                    <td className="py-2 px-3">&nbsp;</td>
                   </tr>
                 ))}
               </tbody>
@@ -120,60 +128,62 @@ export default function CostElementActivityTable({
           </div>
         )}
 
-        {/* Pagination Controls (Maks 10 Data per Halaman) */}
-        {!loading && totalPages > 1 && (
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 mt-3 pt-3 border-t border-[#DDE5DF]">
+        {/* Pagination Controls (Maks 10 Data per Halaman, Tinggi Tetap) */}
+        {!loading && (
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 mt-3 pt-3 border-t border-[#DDE5DF] min-h-[44px]">
             <div className="text-[11px] text-[#5F6B63]">
-              Menampilkan <strong className="text-[#17231B]">{startIndex + 1}</strong>–
+              Menampilkan <strong className="text-[#17231B]">{activities.length > 0 ? startIndex + 1 : 0}</strong>–
               <strong className="text-[#17231B]">{Math.min(startIndex + PAGE_SIZE, activities.length)}</strong> dari{" "}
               <strong className="text-[#17231B]">{activities.length}</strong> Aktivitas
             </div>
 
-            <div className="flex items-center gap-1.5 self-end sm:self-center">
-              <button
-                type="button"
-                onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
-                disabled={currentPage === 1}
-                className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg border border-[#DDE5DF] bg-white text-xs font-semibold text-[#17231B] hover:bg-[#F8FAF9] disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer transition-all shadow-2xs"
-              >
-                <ChevronLeft className="w-3.5 h-3.5" />
-                <span className="hidden sm:inline">Sebelumnya</span>
-              </button>
+            {totalPages > 1 && (
+              <div className="flex items-center gap-1.5 self-end sm:self-center">
+                <button
+                  type="button"
+                  onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
+                  disabled={currentPage === 1}
+                  className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg border border-[#DDE5DF] bg-white text-xs font-semibold text-[#17231B] hover:bg-[#F8FAF9] disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer transition-all shadow-2xs"
+                >
+                  <ChevronLeft className="w-3.5 h-3.5" />
+                  <span className="hidden sm:inline">Sebelumnya</span>
+                </button>
 
-              <div className="flex items-center gap-1">
-                {Array.from({ length: totalPages }, (_, i) => i + 1).map((pgNum) => (
-                  <button
-                    key={pgNum}
-                    type="button"
-                    onClick={() => setCurrentPage(pgNum)}
-                    className={`w-6 h-6 rounded-lg text-xs font-bold transition-all cursor-pointer ${
-                      currentPage === pgNum
-                        ? "bg-[#16823B] text-white shadow-xs"
-                        : "bg-white border border-[#DDE5DF] text-[#5F6B63] hover:bg-[#F8FAF9]"
-                    }`}
-                  >
-                    {pgNum}
-                  </button>
-                ))}
+                <div className="flex items-center gap-1">
+                  {Array.from({ length: totalPages }, (_, i) => i + 1).map((pgNum) => (
+                    <button
+                      key={pgNum}
+                      type="button"
+                      onClick={() => setCurrentPage(pgNum)}
+                      className={`w-6 h-6 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                        currentPage === pgNum
+                          ? "bg-[#16823B] text-white shadow-xs"
+                          : "bg-white border border-[#DDE5DF] text-[#5F6B63] hover:bg-[#F8FAF9]"
+                      }`}
+                    >
+                      {pgNum}
+                    </button>
+                  ))}
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))}
+                  disabled={currentPage === totalPages}
+                  className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg border border-[#DDE5DF] bg-white text-xs font-semibold text-[#17231B] hover:bg-[#F8FAF9] disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer transition-all shadow-2xs"
+                >
+                  <span className="hidden sm:inline">Berikutnya</span>
+                  <ChevronRight className="w-3.5 h-3.5" />
+                </button>
               </div>
-
-              <button
-                type="button"
-                onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))}
-                disabled={currentPage === totalPages}
-                className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg border border-[#DDE5DF] bg-white text-xs font-semibold text-[#17231B] hover:bg-[#F8FAF9] disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer transition-all shadow-2xs"
-              >
-                <span className="hidden sm:inline">Berikutnya</span>
-                <ChevronRight className="w-3.5 h-3.5" />
-              </button>
-            </div>
+            )}
           </div>
         )}
       </div>
 
       {/* Footer Total Summary */}
       {!loading && activities.length > 0 && (
-        <div className="pt-2 border-t border-[#DDE5DF] flex items-center justify-between text-xs">
+        <div className="pt-2 border-t border-[#DDE5DF] flex items-center justify-between text-xs min-h-[35px]">
           <span className="font-bold text-[#5F6B63]">Total Biaya Aktivitas:</span>
           <span className="font-mono font-extrabold text-sm text-[#16823B]">
             Rp {totalCost.toLocaleString("id-ID")}

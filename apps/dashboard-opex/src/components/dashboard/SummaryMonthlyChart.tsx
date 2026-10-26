@@ -259,7 +259,7 @@ export default function SummaryMonthlyChart({
                       <div className="flex flex-col items-center justify-end h-full w-3.5 sm:w-5 md:w-6 shrink-0 relative">
                         {actLabel && (
                           <span
-                            className={`font-mono text-[9px] sm:text-[10px] md:text-[11px] font-normal text-[#17231B] tracking-tighter select-none -translate-x-0.5 ${actExtraLift}`}
+                            className={`hidden sm:block font-mono text-[9px] sm:text-[10px] md:text-[11px] font-normal text-[#17231B] tracking-tighter select-none -translate-x-0.5 ${actExtraLift}`}
                           >
                             {actLabel}
                           </span>
@@ -274,7 +274,7 @@ export default function SummaryMonthlyChart({
                       <div className="flex flex-col items-center justify-end h-full w-3.5 sm:w-5 md:w-6 shrink-0 relative">
                         {bgtLabel && (
                           <span
-                            className={`font-mono text-[9px] sm:text-[10px] md:text-[11px] font-normal text-[#17231B] tracking-tighter select-none translate-x-0.5 ${bgtExtraLift}`}
+                            className={`hidden sm:block font-mono text-[9px] sm:text-[10px] md:text-[11px] font-normal text-[#17231B] tracking-tighter select-none translate-x-0.5 ${bgtExtraLift}`}
                           >
                             {bgtLabel}
                           </span>
@@ -336,7 +336,7 @@ export default function SummaryMonthlyChart({
               {/* Batang Total Actual (Hijau Tua #16823B Capex) */}
               <div className="flex flex-col items-center justify-end h-full w-5 sm:w-6 md:w-7 shrink-0 relative">
                 <span
-                  className={`font-mono text-[9px] sm:text-[10px] md:text-[11px] font-normal text-[#17231B] tracking-tighter select-none -translate-x-1 ${
+                  className={`hidden sm:block font-mono text-[9px] sm:text-[10px] md:text-[11px] font-normal text-[#17231B] tracking-tighter select-none -translate-x-1 ${
                     isTotalVeryClose && totalActual >= totalBudget ? "mb-3.5" : "mb-0.5"
                   }`}
                 >
@@ -353,7 +353,7 @@ export default function SummaryMonthlyChart({
               {/* Batang Total Budget (Hijau Muda #8CD16B Capex) */}
               <div className="flex flex-col items-center justify-end h-full w-5 sm:w-6 md:w-7 shrink-0 relative">
                 <span
-                  className={`font-mono text-[9px] sm:text-[10px] md:text-[11px] font-normal text-[#17231B] tracking-tighter select-none translate-x-1 ${
+                  className={`hidden sm:block font-mono text-[9px] sm:text-[10px] md:text-[11px] font-normal text-[#17231B] tracking-tighter select-none translate-x-1 ${
                     isTotalVeryClose && totalBudget > totalActual ? "mb-3.5" : "mb-0.5"
                   }`}
                 >

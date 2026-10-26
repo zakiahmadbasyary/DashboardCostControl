@@ -284,6 +284,7 @@ export default function DashboardOpexPage() {
             selectedCe2={trendCe2}
             onSelectCe2={setTrendCe2}
             selectedPeriod={selectedPeriod}
+            onSelectPeriod={handleSelectPeriod}
             loading={loadingTrendPg}
           />
 
