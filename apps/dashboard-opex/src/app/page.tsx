@@ -2,7 +2,6 @@
 
 import React, { useState, useEffect, useCallback } from "react";
 import DashboardHeader from "@/components/dashboard/DashboardHeader";
-import OpexHeaderBanner from "@/components/dashboard/OpexHeaderBanner";
 import OpexMainFilter from "@/components/dashboard/OpexMainFilter";
 import SummaryMonthlyChart from "@/components/dashboard/SummaryMonthlyChart";
 import CostCenterTables from "@/components/dashboard/CostCenterTables";
@@ -23,9 +22,24 @@ import {
 } from "@/types/opex";
 import { opexService } from "@/services/opexService";
 
+const DEFAULT_PERIODS: PeriodOption[] = [
+  { periode: 1, label: "Januari" },
+  { periode: 2, label: "Februari" },
+  { periode: 3, label: "Maret" },
+  { periode: 4, label: "April" },
+  { periode: 5, label: "Mei" },
+  { periode: 6, label: "Juni" },
+  { periode: 7, label: "Juli" },
+  { periode: 8, label: "Agustus" },
+  { periode: 9, label: "September" },
+  { periode: 10, label: "Oktober" },
+  { periode: 11, label: "November" },
+  { periode: 12, label: "Desember" },
+];
+
 export default function DashboardOpexPage() {
   // ── 1. GLOBAL FILTER STATE ──
-  const [periods, setPeriods] = useState<PeriodOption[]>([]);
+  const [periods, setPeriods] = useState<PeriodOption[]>(DEFAULT_PERIODS);
   const [selectedPeriod, setSelectedPeriod] = useState<number>(1);
   const [ce2MasterList, setCe2MasterList] = useState<Ce2Option[]>([]);
 
@@ -194,16 +208,15 @@ export default function DashboardOpexPage() {
 
       {/* ── 2. MAIN DASHBOARD CONTENT ── */}
       <main className="flex-1 w-full md:w-[calc(100%-4rem)] md:ml-16 px-4 sm:px-6 lg:px-8 py-5 sm:py-6 space-y-6">
-        {/* Banner Header Modul OPEX */}
-        <OpexHeaderBanner selectedPeriodLabel={selectedPeriodLabel} />
-
-        {/* Section 4: Main Filter (Periode Bulan) */}
-        <OpexMainFilter
-          periods={periods}
-          selectedPeriod={selectedPeriod}
-          onSelectPeriod={handleSelectPeriod}
-          loading={loadingFilters}
-        />
+        {/* Section 4: Main Filter (Periode Bulan) - Freeze / Sticky */}
+        <section className="sticky top-16 sm:top-20 z-20 bg-[#F7F9F7]/95 backdrop-blur-xs ">
+          <OpexMainFilter
+            periods={periods}
+            selectedPeriod={selectedPeriod}
+            onSelectPeriod={handleSelectPeriod}
+            loading={loadingFilters}
+          />
+        </section>
 
         {/* Section 5.1: Summary Overhead PG1 — Grafik Actual vs Budget per Bulan */}
         <SummaryMonthlyChart

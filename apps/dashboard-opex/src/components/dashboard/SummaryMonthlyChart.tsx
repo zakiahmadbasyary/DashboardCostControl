@@ -266,7 +266,7 @@ export default function SummaryMonthlyChart({
 
       <div className="flex items-center justify-between text-[11px] text-[#5F6B63] bg-[#F8FAF9] border border-[#DDE5DF] px-3.5 py-2 rounded-xl">
         <span>
-          Bulan aktif saat ini: <strong className="text-[#16823B] font-bold">Bulan {selectedPeriod}</strong> (Diberi aksen batas tegas pada grafik)
+          Bulan aktif: <strong className="text-[#16823B] font-bold">{data.find((d) => d.month === selectedPeriod)?.monthName || selectedPeriod}</strong> (Diberi aksen batas tegas pada grafik)
         </span>
         <span className="text-[#89938D]">
           Variance Total = ((Total Actual − Total Budget) ÷ Total Budget) × 100

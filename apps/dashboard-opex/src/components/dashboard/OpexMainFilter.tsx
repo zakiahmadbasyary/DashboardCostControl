@@ -28,10 +28,7 @@ export default function OpexMainFilter({
         </div>
         <div>
           <span className="font-bold text-xs text-[#17231B] uppercase tracking-wider block">
-            Main Filter
-          </span>
-          <span className="text-[11px] text-[#5F6B63]">
-            Menyelaraskan periode analisis seluruh bagian dashboard
+            FILTER UTAMA
           </span>
         </div>
       </div>
@@ -52,7 +49,7 @@ export default function OpexMainFilter({
           >
             {periods.map((p) => (
               <option key={p.periode} value={p.periode}>
-                Bulan {p.periode} — {p.label}
+                {p.label}
               </option>
             ))}
           </select>

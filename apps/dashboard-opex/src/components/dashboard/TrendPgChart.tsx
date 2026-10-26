@@ -225,7 +225,7 @@ export default function TrendPgChart({
           Filter Cost Element aktif: <strong className="text-[#16823B]">{selectedCe2} ({currentCe2?.deskripsiCe2 || selectedCe2})</strong>
         </span>
         <span className="text-[#89938D]">
-          Bulan aktif: Bulan {selectedPeriod} (Diberi aksen batas pada batang)
+          Bulan aktif: {data.find((d) => d.month === selectedPeriod)?.monthName || selectedPeriod} (Diberi aksen batas pada batang)
         </span>
       </div>
     </div>
