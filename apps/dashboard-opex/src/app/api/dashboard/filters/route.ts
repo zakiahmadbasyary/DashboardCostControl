@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
+import { OPEX_VISIBILITY_FILTER } from "@/lib/filters";
 
 const MONTH_NAMES = [
   "Januari",
@@ -18,8 +19,9 @@ const MONTH_NAMES = [
 
 export async function GET() {
   try {
-    // 1. Ambil periode unik dari summary
+    // 1. Ambil periode unik dari summary (hanya data dengan isview: true)
     const periodsRaw = await prisma.summary.findMany({
+      where: OPEX_VISIBILITY_FILTER,
       select: { periode: true },
       distinct: ["periode"],
       orderBy: { periode: "asc" },

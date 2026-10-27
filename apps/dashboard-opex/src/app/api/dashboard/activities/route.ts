@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
+import { OPEX_VISIBILITY_FILTER } from "@/lib/filters";
 
 export async function GET(request: NextRequest) {
   try {
@@ -14,7 +15,7 @@ export async function GET(request: NextRequest) {
 
     const period = periodParam ? parseInt(periodParam, 10) : 1;
 
-    // Filter transaksi data_actual sesuai aturan PRD:
+    // Filter transaksi data_actual sesuai aturan PRD (hanya jika isview: true):
     // period, pg = 'PG1', costcenter, ce2
     const records = await prisma.dataActual.findMany({
       where: {
@@ -22,6 +23,7 @@ export async function GET(request: NextRequest) {
         period: period,
         costcenter: costcenter,
         ce2: ce2,
+        ...OPEX_VISIBILITY_FILTER,
       },
       select: {
         idActual: true,

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
+import { OPEX_VISIBILITY_FILTER } from "@/lib/filters";
 
 export async function GET(request: NextRequest) {
   try {
@@ -7,11 +8,12 @@ export async function GET(request: NextRequest) {
     const periodParam = searchParams.get("period");
     const period = periodParam ? parseInt(periodParam, 10) : 1;
 
-    // Ambil data summary untuk PG1 dan periode terpilih
+    // Ambil data summary untuk PG1 dan periode terpilih (hanya yang isview: true)
     const rows = await prisma.summary.findMany({
       where: {
         pg: "PG1",
         periode: period,
+        ...OPEX_VISIBILITY_FILTER,
       },
       select: {
         costcenter: true,

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
+import { OPEX_VISIBILITY_FILTER } from "@/lib/filters";
 
 const MONTH_NAMES = [
   "Jan", "Feb", "Mar", "Apr", "Mei", "Jun",
@@ -20,11 +21,12 @@ export async function GET(request: NextRequest) {
       });
     }
 
-    // 1. Ambil data bulanan 1-12 untuk PG1, PG2, PG3 khusus CE2 terpilih
+    // 1. Ambil data bulanan 1-12 untuk PG1, PG2, PG3 khusus CE2 terpilih (dengan filter isview: true)
     const monthlyRaw = await prisma.summary.findMany({
       where: {
         ce2: ce2,
         pg: { in: ["PG1", "PG2", "PG3"] },
+        ...OPEX_VISIBILITY_FILTER,
       },
       select: {
         periode: true,
@@ -64,12 +66,13 @@ export async function GET(request: NextRequest) {
       };
     });
 
-    // 2. Ambil data Cost Center per PG untuk periode dan CE2 terpilih
+    // 2. Ambil data Cost Center per PG untuk periode dan CE2 terpilih (dengan filter isview: true)
     const tableRaw = await prisma.summary.findMany({
       where: {
         ce2: ce2,
         periode: period,
         pg: { in: ["PG1", "PG2", "PG3"] },
+        ...OPEX_VISIBILITY_FILTER,
       },
       select: {
         costcenter: true,

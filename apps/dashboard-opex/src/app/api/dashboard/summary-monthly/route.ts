@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
+import { OPEX_VISIBILITY_FILTER } from "@/lib/filters";
 
 const MONTH_NAMES = [
   "Januari", "Februari", "Maret", "April", "Mei", "Juni",
@@ -8,9 +9,12 @@ const MONTH_NAMES = [
 
 export async function GET() {
   try {
-    // Ambil data summary khusus PG1 untuk 12 bulan
+    // Ambil data summary khusus PG1 untuk 12 bulan (hanya CC & CE2 yang isview: true)
     const rawData = await prisma.summary.findMany({
-      where: { pg: "PG1" },
+      where: {
+        pg: "PG1",
+        ...OPEX_VISIBILITY_FILTER,
+      },
       select: {
         periode: true,
         nilaiActual: true,
