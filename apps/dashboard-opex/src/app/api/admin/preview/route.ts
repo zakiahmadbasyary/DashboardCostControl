@@ -333,6 +333,30 @@ export async function PATCH(request: NextRequest) {
       );
     }
 
+    // A. Bulk update: Tampilkan Semua / Sembunyikan Semua
+    if (id === "all" || body.all === true) {
+      if (type === "cc" || type === "costcenter") {
+        const result = await prisma.mastersheetCostcenter.updateMany({
+          data: { isview },
+        });
+        return NextResponse.json({
+          success: true,
+          message: `Seluruh Cost Center (${result.count} data) berhasil diatur ke ${isview ? "Tampil (View)" : "Sembunyi (Tidak View)"}.`,
+        });
+      } else if (type === "ce2" || type === "costelement") {
+        const result = await prisma.mastersheetCe2.updateMany({
+          data: { isview },
+        });
+        return NextResponse.json({
+          success: true,
+          message: `Seluruh Cost Element CE2 (${result.count} data) berhasil diatur ke ${isview ? "Tampil (View)" : "Sembunyi (Tidak View)"}.`,
+        });
+      } else {
+        return NextResponse.json({ success: false, message: "Tipe master tidak valid." }, { status: 400 });
+      }
+    }
+
+    // B. Single update per record
     if (type === "cc" || type === "costcenter") {
       const updated = await prisma.mastersheetCostcenter.update({
         where: { costcenter: id },

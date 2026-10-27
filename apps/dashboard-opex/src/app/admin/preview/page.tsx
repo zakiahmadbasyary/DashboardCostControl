@@ -84,6 +84,7 @@ export default function AdminPreviewPage() {
   const [totalPages, setTotalPages] = useState<number>(1);
   const [loading, setLoading] = useState<boolean>(true);
   const [togglingId, setTogglingId] = useState<string | null>(null);
+  const [bulkToggling, setBulkToggling] = useState<boolean>(false);
   const [statusMessage, setStatusMessage] = useState<{ text: string; type: "success" | "error" } | null>(null);
 
   const tableScrollRef = useRef<HTMLDivElement>(null);
@@ -173,6 +174,41 @@ export default function AdminPreviewPage() {
       setTimeout(() => setStatusMessage(null), 4000);
     } finally {
       setTogglingId(null);
+    }
+  };
+
+  // Handle Bulk Toggle IsView (Tampilkan Semua / Sembunyikan Semua)
+  const handleToggleViewAll = async (type: "cc" | "ce2", targetState: boolean) => {
+    setBulkToggling(true);
+    try {
+      const res = await previewService.toggleViewAll(type, targetState);
+      if (res.success) {
+        // Optimistic UI update untuk seluruh baris
+        setTableData((prev) =>
+          prev.map((row) => ({
+            ...row,
+            isview: targetState,
+          }))
+        );
+        setStatusMessage({
+          text:
+            res.message ||
+            `Seluruh ${type === "cc" ? "Cost Center" : "Cost Element CE2"} berhasil ${
+              targetState ? "ditampilkan" : "disembunyikan"
+            }.`,
+          type: "success",
+        });
+        setTimeout(() => setStatusMessage(null), 4000);
+      }
+    } catch (err) {
+      console.error("Error bulk toggling view:", err);
+      setStatusMessage({
+        text: "Gagal memperbarui status seluruh data. Silakan coba lagi.",
+        type: "error",
+      });
+      setTimeout(() => setStatusMessage(null), 4000);
+    } finally {
+      setBulkToggling(false);
     }
   };
 
@@ -329,6 +365,50 @@ export default function AdminPreviewPage() {
                 }`}
               >
                 Per Cost Element (CE2) Saja
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Khusus Tab Mastersheet: Aksi Masal Visibilitas (Tampilkan Semua & Sembunyikan Semua) */}
+        {(activeTab === "master_cc" || activeTab === "master_ce2") && (
+          <div className="bg-[#F8FAF9] border border-[#DDE5DF] rounded-xl p-3 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
+            <div className="flex items-center gap-2 text-xs text-[#17231B] font-bold">
+              <SlidersHorizontal className="w-4 h-4 text-[#16823B] shrink-0" />
+              <span>
+                Kontrol Visibilitas Masal ({activeTab === "master_cc" ? "Cost Center" : "Cost Element CE2"}):
+              </span>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                disabled={bulkToggling || tableData.length === 0}
+                onClick={() => handleToggleViewAll(activeTab === "master_cc" ? "cc" : "ce2", true)}
+                className="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold bg-[#EAF3EC] hover:bg-[#D5E7DA] text-[#16823B] border border-[#D5E7DA] transition-all cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed shadow-2xs active:scale-95"
+                title="Tampilkan semua data di dashboard"
+              >
+                {bulkToggling ? (
+                  <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                ) : (
+                  <Eye className="w-3.5 h-3.5 text-[#16823B]" />
+                )}
+                <span>Tampilkan Semua</span>
+              </button>
+
+              <button
+                type="button"
+                disabled={bulkToggling || tableData.length === 0}
+                onClick={() => handleToggleViewAll(activeTab === "master_cc" ? "cc" : "ce2", false)}
+                className="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 transition-all cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed shadow-2xs active:scale-95"
+                title="Sembunyikan semua data dari dashboard"
+              >
+                {bulkToggling ? (
+                  <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                ) : (
+                  <EyeOff className="w-3.5 h-3.5 text-rose-600" />
+                )}
+                <span>Sembunyikan Semua</span>
               </button>
             </div>
           </div>

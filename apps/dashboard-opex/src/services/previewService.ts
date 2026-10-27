@@ -41,4 +41,21 @@ export const previewService = {
 
     return res.json();
   },
+
+  async toggleViewAll(
+    type: "cc" | "ce2",
+    isview: boolean
+  ): Promise<{ success: boolean; message?: string }> {
+    const res = await fetch("/api/admin/preview", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ type, id: "all", isview }),
+    });
+
+    if (!res.ok) {
+      throw new Error(`Gagal mengubah status semua visibilitas (${res.status})`);
+    }
+
+    return res.json();
+  },
 };
