@@ -16,4 +16,5 @@ export interface PreviewTableResponse {
   page: number;
   limit: number;
   totalPages: number;
+  maxActualPeriod?: number;
 }

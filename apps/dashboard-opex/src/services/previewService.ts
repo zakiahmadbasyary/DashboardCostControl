@@ -6,7 +6,8 @@ export const previewService = {
     search: string = "",
     page: number = 1,
     limit: number = 50,
-    summaryMode: string = "both"
+    summaryMode: string = "both",
+    pg: string = "ALL"
   ): Promise<PreviewTableResponse> {
     const params = new URLSearchParams({
       table,
@@ -14,6 +15,7 @@ export const previewService = {
       page: String(page),
       limit: String(limit),
       summary_mode: summaryMode,
+      ...(pg && pg !== "ALL" ? { pg } : {}),
     });
 
     const res = await fetch(`/api/admin/preview?${params.toString()}`);

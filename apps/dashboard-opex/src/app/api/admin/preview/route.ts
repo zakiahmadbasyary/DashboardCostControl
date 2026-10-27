@@ -10,6 +10,7 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const table = (searchParams.get("table") || searchParams.get("category") || "summary").toLowerCase().trim();
     const summaryMode = (searchParams.get("summary_mode") || "both").toLowerCase().trim();
+    const pgParam = searchParams.get("pg")?.trim() || "ALL";
     const search = searchParams.get("search")?.trim() || "";
     const page = Math.max(1, parseInt(searchParams.get("page") || "1", 10));
     const limit = Math.max(1, parseInt(searchParams.get("limit") || "50", 10));
@@ -18,121 +19,240 @@ export async function GET(request: NextRequest) {
 
     let data: unknown[] = [];
     let total = 0;
+    let maxActualPeriod: number | undefined;
 
     // ─────────────────────────────────────────────────────────────────────────
     // 1. PREVIEW SUMMARY (DENGAN 3 PILIHAN MODE AGREGASI)
     // ─────────────────────────────────────────────────────────────────────────
     if (table === "summary") {
+      // Hanya tampilkan Cost Center dan Cost Element yang berstatus isview: true
+      const whereSummary = {
+        costcenterRef: { isview: true },
+        ce2Ref: { isview: true },
+        ...(pgParam && pgParam !== "ALL" ? { pg: pgParam } : {}),
+      };
+
+      const allSummary = await prisma.summary.findMany({
+        where: whereSummary,
+        orderBy: [{ costcenter: "asc" }, { ce2: "asc" }, { periode: "asc" }],
+      });
+
+      // Cari periode data aktual terakhir yang ada (misal: Bln 1..3)
+      const actualPeriods = allSummary
+        .filter((s) => s.nilaiActual && Number(s.nilaiActual) > 0)
+        .map((s) => s.periode);
+      maxActualPeriod = actualPeriods.length > 0 ? Math.max(...actualPeriods) : 12;
+
+      const q = search.toLowerCase();
+
       // Mode A: Per Cost Center Saja
       if (summaryMode === "cc") {
-        const where = search
-          ? {
-              OR: [
-                { costcenter: { contains: search, mode: "insensitive" as const } },
-                { deskripsiCostcenter: { contains: search, mode: "insensitive" as const } },
-              ],
+        const ccMap = new Map<
+          string,
+          {
+            costcenter: string;
+            deskripsiCostcenter: string;
+            months: Record<number, { actual: number; budget: number }>;
+          }
+        >();
+
+        for (const s of allSummary) {
+          const cc = s.costcenter || "UNKNOWN";
+          const desc = s.deskripsiCostcenter || cc;
+
+          if (q && !cc.toLowerCase().includes(q) && !desc.toLowerCase().includes(q)) {
+            continue;
+          }
+
+          if (!ccMap.has(cc)) {
+            const months: Record<number, { actual: number; budget: number }> = {};
+            for (let m = 1; m <= 12; m++) months[m] = { actual: 0, budget: 0 };
+            ccMap.set(cc, {
+              costcenter: cc,
+              deskripsiCostcenter: desc,
+              months,
+            });
+          }
+
+          const cur = ccMap.get(cc)!;
+          const act = s.nilaiActual ? Number(s.nilaiActual) : 0;
+          const bgt = s.nilaiBudget ? Number(s.nilaiBudget) : 0;
+          if (cur.months[s.periode]) {
+            cur.months[s.periode].actual += act;
+            cur.months[s.periode].budget += bgt;
+          }
+        }
+
+        const rows = Array.from(ccMap.values()).map((r) => {
+          let totalActual = 0;
+          let totalBudget = 0;
+          for (let m = 1; m <= 12; m++) {
+            totalActual += r.months[m].actual;
+            // YTD Budget hanya dijumlahkan sampai periode data actual terakhir yang tersedia
+            if (m <= maxActualPeriod!) {
+              totalBudget += r.months[m].budget;
             }
-          : {};
+          }
+          const variance =
+            totalBudget > 0
+              ? Number((((totalActual - totalBudget) / totalBudget) * 100).toFixed(2))
+              : null;
 
-        const grouped = await prisma.summary.groupBy({
-          by: ["costcenter", "deskripsiCostcenter"],
-          where,
-          _sum: {
-            nilaiActual: true,
-            nilaiBudget: true,
-          },
-          orderBy: { costcenter: "asc" },
-        });
-
-        total = grouped.length;
-        const paged = grouped.slice(skip, skip + limit);
-
-        data = paged.map((g) => {
-          const act = g._sum.nilaiActual ? Number(g._sum.nilaiActual) : 0;
-          const bgt = g._sum.nilaiBudget ? Number(g._sum.nilaiBudget) : 0;
-          const variance = bgt > 0 ? Number((((act - bgt) / bgt) * 100).toFixed(2)) : null;
           return {
-            costcenter: g.costcenter,
-            deskripsiCostcenter: g.deskripsiCostcenter,
-            nilaiActual: act,
-            nilaiBudget: bgt,
+            ...r,
+            totalActual,
+            totalBudget,
             variance,
           };
         });
+
+        total = rows.length;
+        data = rows.slice(skip, skip + limit);
       }
       // Mode B: Per Cost Element (CE2) Saja
       else if (summaryMode === "ce2") {
-        const where = search
-          ? {
-              OR: [
-                { ce2: { contains: search, mode: "insensitive" as const } },
-                { deskripsiCe2: { contains: search, mode: "insensitive" as const } },
-              ],
+        const ceMap = new Map<
+          string,
+          {
+            ce2: string;
+            deskripsiCe2: string;
+            months: Record<number, { actual: number; budget: number }>;
+          }
+        >();
+
+        for (const s of allSummary) {
+          const ce = s.ce2 || "UNKNOWN";
+          const desc = s.deskripsiCe2 || ce;
+
+          if (q && !ce.toLowerCase().includes(q) && !desc.toLowerCase().includes(q)) {
+            continue;
+          }
+
+          if (!ceMap.has(ce)) {
+            const months: Record<number, { actual: number; budget: number }> = {};
+            for (let m = 1; m <= 12; m++) months[m] = { actual: 0, budget: 0 };
+            ceMap.set(ce, {
+              ce2: ce,
+              deskripsiCe2: desc,
+              months,
+            });
+          }
+
+          const cur = ceMap.get(ce)!;
+          const act = s.nilaiActual ? Number(s.nilaiActual) : 0;
+          const bgt = s.nilaiBudget ? Number(s.nilaiBudget) : 0;
+          if (cur.months[s.periode]) {
+            cur.months[s.periode].actual += act;
+            cur.months[s.periode].budget += bgt;
+          }
+        }
+
+        const rows = Array.from(ceMap.values()).map((r) => {
+          let totalActual = 0;
+          let totalBudget = 0;
+          for (let m = 1; m <= 12; m++) {
+            totalActual += r.months[m].actual;
+            // YTD Budget hanya dijumlahkan sampai periode data actual terakhir yang tersedia
+            if (m <= maxActualPeriod!) {
+              totalBudget += r.months[m].budget;
             }
-          : {};
+          }
+          const variance =
+            totalBudget > 0
+              ? Number((((totalActual - totalBudget) / totalBudget) * 100).toFixed(2))
+              : null;
 
-        const grouped = await prisma.summary.groupBy({
-          by: ["ce2", "deskripsiCe2"],
-          where,
-          _sum: {
-            nilaiActual: true,
-            nilaiBudget: true,
-          },
-          orderBy: { ce2: "asc" },
-        });
-
-        total = grouped.length;
-        const paged = grouped.slice(skip, skip + limit);
-
-        data = paged.map((g) => {
-          const act = g._sum.nilaiActual ? Number(g._sum.nilaiActual) : 0;
-          const bgt = g._sum.nilaiBudget ? Number(g._sum.nilaiBudget) : 0;
-          const variance = bgt > 0 ? Number((((act - bgt) / bgt) * 100).toFixed(2)) : null;
           return {
-            ce2: g.ce2,
-            deskripsiCe2: g.deskripsiCe2,
-            nilaiActual: act,
-            nilaiBudget: bgt,
+            ...r,
+            totalActual,
+            totalBudget,
             variance,
           };
         });
+
+        total = rows.length;
+        data = rows.slice(skip, skip + limit);
       }
-      // Mode C: Per Cost Center & Cost Element (Detail Penuh)
+      // Mode C: Per Cost Center & Cost Element (Both)
       else {
-        const where = search
-          ? {
-              OR: [
-                { costcenter: { contains: search, mode: "insensitive" as const } },
-                { deskripsiCostcenter: { contains: search, mode: "insensitive" as const } },
-                { ce2: { contains: search, mode: "insensitive" as const } },
-                { deskripsiCe2: { contains: search, mode: "insensitive" as const } },
-                { pg: { contains: search, mode: "insensitive" as const } },
-              ],
+        const comboMap = new Map<
+          string,
+          {
+            pg: string;
+            costcenter: string;
+            deskripsiCostcenter: string;
+            ce2: string;
+            deskripsiCe2: string;
+            months: Record<number, { actual: number; budget: number }>;
+          }
+        >();
+
+        for (const s of allSummary) {
+          const cc = s.costcenter || "UNKNOWN";
+          const ccDesc = s.deskripsiCostcenter || cc;
+          const ce = s.ce2 || "UNKNOWN";
+          const ceDesc = s.deskripsiCe2 || ce;
+          const pg = s.pg || "-";
+          const key = `${cc}|${ce}|${pg}`;
+
+          if (
+            q &&
+            !cc.toLowerCase().includes(q) &&
+            !ccDesc.toLowerCase().includes(q) &&
+            !ce.toLowerCase().includes(q) &&
+            !ceDesc.toLowerCase().includes(q) &&
+            !pg.toLowerCase().includes(q)
+          ) {
+            continue;
+          }
+
+          if (!comboMap.has(key)) {
+            const months: Record<number, { actual: number; budget: number }> = {};
+            for (let m = 1; m <= 12; m++) months[m] = { actual: 0, budget: 0 };
+            comboMap.set(key, {
+              pg,
+              costcenter: cc,
+              deskripsiCostcenter: ccDesc,
+              ce2: ce,
+              deskripsiCe2: ceDesc,
+              months,
+            });
+          }
+
+          const cur = comboMap.get(key)!;
+          const act = s.nilaiActual ? Number(s.nilaiActual) : 0;
+          const bgt = s.nilaiBudget ? Number(s.nilaiBudget) : 0;
+          if (cur.months[s.periode]) {
+            cur.months[s.periode].actual += act;
+            cur.months[s.periode].budget += bgt;
+          }
+        }
+
+        const rows = Array.from(comboMap.values()).map((r) => {
+          let totalActual = 0;
+          let totalBudget = 0;
+          for (let m = 1; m <= 12; m++) {
+            totalActual += r.months[m].actual;
+            // YTD Budget hanya dijumlahkan sampai periode data actual terakhir yang tersedia
+            if (m <= maxActualPeriod!) {
+              totalBudget += r.months[m].budget;
             }
-          : {};
+          }
+          const variance =
+            totalBudget > 0
+              ? Number((((totalActual - totalBudget) / totalBudget) * 100).toFixed(2))
+              : null;
 
-        const [records, count] = await Promise.all([
-          prisma.summary.findMany({
-            where,
-            skip,
-            take: limit,
-            orderBy: [{ periode: "asc" }, { costcenter: "asc" }, { ce2: "asc" }],
-          }),
-          prisma.summary.count({ where }),
-        ]);
+          return {
+            ...r,
+            totalActual,
+            totalBudget,
+            variance,
+          };
+        });
 
-        data = records.map((r) => ({
-          periode: r.periode,
-          pg: r.pg,
-          costcenter: r.costcenter,
-          deskripsiCostcenter: r.deskripsiCostcenter,
-          ce2: r.ce2,
-          deskripsiCe2: r.deskripsiCe2,
-          nilaiActual: r.nilaiActual ? Number(r.nilaiActual) : null,
-          nilaiBudget: r.nilaiBudget ? Number(r.nilaiBudget) : null,
-          variance: r.variance ? Number(r.variance) : null,
-        }));
-        total = count;
+        total = rows.length;
+        data = rows.slice(skip, skip + limit);
       }
     }
 
@@ -364,6 +484,7 @@ export async function GET(request: NextRequest) {
       page,
       limit,
       totalPages,
+      ...(maxActualPeriod !== undefined ? { maxActualPeriod } : {}),
     });
   } catch (error) {
     console.error("Error in admin preview API:", error);

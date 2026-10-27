@@ -1,7 +1,22 @@
 "use client";
 
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useCallback, useRef, Fragment } from "react";
 import { previewService } from "@/services/previewService";
+
+const MONTHS_CONFIG = [
+  { m: 1, label: "Bln 1 (Jan)" },
+  { m: 2, label: "Bln 2 (Feb)" },
+  { m: 3, label: "Bln 3 (Mar)" },
+  { m: 4, label: "Bln 4 (Apr)" },
+  { m: 5, label: "Bln 5 (Mei)" },
+  { m: 6, label: "Bln 6 (Jun)" },
+  { m: 7, label: "Bln 7 (Jul)" },
+  { m: 8, label: "Bln 8 (Ags)" },
+  { m: 9, label: "Bln 9 (Sep)" },
+  { m: 10, label: "Bln 10 (Okt)" },
+  { m: 11, label: "Bln 11 (Nov)" },
+  { m: 12, label: "Bln 12 (Des)" },
+];
 import {
   Search,
   X,
@@ -39,7 +54,7 @@ const TABS: TabMeta[] = [
     label: "Preview Summary",
     shortLabel: "Summary",
     icon: Layers,
-    description: "Ringkasan perbandingan Realisasi vs Budget dengan filter mode agregasi.",
+    description: "Ringkasan Realisasi vs Budget (hanya Cost Center & CE2 aktif isview = true). YTD Budget dihitung dari Bln 1 s.d. periode data actual terakhir.",
   },
   {
     key: "actual",
@@ -74,6 +89,7 @@ const TABS: TabMeta[] = [
 export default function AdminPreviewPage() {
   const [activeTab, setActiveTab] = useState<TabType>("summary");
   const [summaryMode, setSummaryMode] = useState<SummaryMode>("both");
+  const [selectedPg, setSelectedPg] = useState<string>("ALL");
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [page, setPage] = useState<number>(1);
   const [limit, setLimit] = useState<number>(50);
@@ -82,6 +98,7 @@ export default function AdminPreviewPage() {
   const [tableData, setTableData] = useState<Record<string, unknown>[]>([]);
   const [totalRecords, setTotalRecords] = useState<number>(0);
   const [totalPages, setTotalPages] = useState<number>(1);
+  const [maxActualPeriod, setMaxActualPeriod] = useState<number>(3);
   const [loading, setLoading] = useState<boolean>(true);
   const [togglingId, setTogglingId] = useState<string | null>(null);
   const [bulkToggling, setBulkToggling] = useState<boolean>(false);
@@ -112,6 +129,15 @@ export default function AdminPreviewPage() {
     }
   };
 
+  const handlePgChange = (pg: string) => {
+    setSelectedPg(pg);
+    setPage(1);
+    if (tableScrollRef.current) {
+      tableScrollRef.current.scrollTop = 0;
+      tableScrollRef.current.scrollLeft = 0;
+    }
+  };
+
   const handleSearchChange = (value: string) => {
     setSearchQuery(value);
     setPage(1);
@@ -125,17 +151,21 @@ export default function AdminPreviewPage() {
         searchQuery,
         page,
         limit,
-        summaryMode
+        summaryMode,
+        selectedPg
       );
       setTableData(res.data);
       setTotalRecords(res.total);
       setTotalPages(res.totalPages);
+      if (res.maxActualPeriod !== undefined) {
+        setMaxActualPeriod(res.maxActualPeriod);
+      }
     } catch (err) {
       console.error("Error fetching preview data:", err);
     } finally {
       setLoading(false);
     }
-  }, [activeTab, searchQuery, page, limit, summaryMode]);
+  }, [activeTab, searchQuery, page, limit, summaryMode, selectedPg]);
 
   useEffect(() => {
     fetchData();
@@ -215,7 +245,7 @@ export default function AdminPreviewPage() {
   // Hitung jumlah kolom untuk petunjuk mobile
   const getColumnCount = () => {
     if (activeTab === "summary") {
-      return summaryMode === "both" ? 9 : 5;
+      return summaryMode === "both" ? 33 : 30;
     }
     if (activeTab === "actual") return 24;
     if (activeTab === "budget") return 10;
@@ -322,50 +352,78 @@ export default function AdminPreviewPage() {
           </div>
         </div>
 
-        {/* Khusus Tab Preview Summary: Pilihan Mode Agregasi (Responsive) */}
+        {/* Khusus Tab Preview Summary: Filter PG & Mode Tampilan */}
         {activeTab === "summary" && (
-          <div className="bg-[#F8FAF9] border border-[#DDE5DF] rounded-xl p-3 flex flex-col md:flex-row md:items-center justify-between gap-2.5">
-            <div className="flex items-center gap-2 text-xs text-[#17231B] font-bold">
-              <SlidersHorizontal className="w-4 h-4 text-[#16823B] shrink-0" />
-              <span>Mode Tampilan Summary:</span>
+          <div className="bg-[#F8FAF9] border border-[#DDE5DF] rounded-xl p-3 flex flex-col lg:flex-row lg:items-center justify-between gap-3">
+            {/* Filter PG */}
+            <div className="flex flex-col sm:flex-row sm:items-center gap-2">
+              <div className="flex items-center gap-1.5 text-xs text-[#17231B] font-bold shrink-0">
+                <SlidersHorizontal className="w-3.5 h-3.5 text-[#16823B] shrink-0" />
+                <span>Filter PG:</span>
+              </div>
+              <div className="inline-flex p-1 bg-white border border-[#DDE5DF] rounded-xl gap-1 text-xs font-semibold">
+                {[
+                  { key: "ALL", label: "Semua PG" },
+                  { key: "PG1", label: "PG1" },
+                  { key: "PG2", label: "PG2" },
+                  { key: "PG3", label: "PG3" },
+                ].map((item) => (
+                  <button
+                    key={item.key}
+                    type="button"
+                    onClick={() => handlePgChange(item.key)}
+                    className={`px-3 py-1.5 rounded-lg transition-all cursor-pointer text-center whitespace-nowrap ${
+                      selectedPg === item.key
+                        ? "bg-[#16823B] text-white shadow-2xs font-bold"
+                        : "text-[#5F6B63] hover:text-[#17231B] hover:bg-[#F8FAF9]"
+                    }`}
+                  >
+                    {item.label}
+                  </button>
+                ))}
+              </div>
             </div>
 
-            <div className="grid grid-cols-1 xs:grid-cols-3 sm:inline-flex p-1 bg-white border border-[#DDE5DF] rounded-xl gap-1 text-xs font-semibold">
-              <button
-                type="button"
-                onClick={() => handleSummaryModeChange("both")}
-                className={`px-3 py-1.5 rounded-lg transition-all cursor-pointer text-center whitespace-nowrap ${
-                  summaryMode === "both"
-                    ? "bg-[#16823B] text-white shadow-2xs font-bold"
-                    : "text-[#5F6B63] hover:text-[#17231B] hover:bg-[#F8FAF9]"
-                }`}
-              >
-                Cost Center & Cost Element
-              </button>
+            {/* Mode Tampilan Summary */}
+            <div className="flex flex-col sm:flex-row sm:items-center gap-2">
+              <span className="text-xs text-[#5F6B63] font-bold shrink-0">Mode Agregasi:</span>
+              <div className="grid grid-cols-1 xs:grid-cols-3 sm:inline-flex p-1 bg-white border border-[#DDE5DF] rounded-xl gap-1 text-xs font-semibold">
+                <button
+                  type="button"
+                  onClick={() => handleSummaryModeChange("both")}
+                  className={`px-3 py-1.5 rounded-lg transition-all cursor-pointer text-center whitespace-nowrap ${
+                    summaryMode === "both"
+                      ? "bg-[#16823B] text-white shadow-2xs font-bold"
+                      : "text-[#5F6B63] hover:text-[#17231B] hover:bg-[#F8FAF9]"
+                  }`}
+                >
+                  Cost Center & CE2
+                </button>
 
-              <button
-                type="button"
-                onClick={() => handleSummaryModeChange("cc")}
-                className={`px-3 py-1.5 rounded-lg transition-all cursor-pointer text-center whitespace-nowrap ${
-                  summaryMode === "cc"
-                    ? "bg-[#16823B] text-white shadow-2xs font-bold"
-                    : "text-[#5F6B63] hover:text-[#17231B] hover:bg-[#F8FAF9]"
-                }`}
-              >
-                Per Cost Center Saja
-              </button>
+                <button
+                  type="button"
+                  onClick={() => handleSummaryModeChange("cc")}
+                  className={`px-3 py-1.5 rounded-lg transition-all cursor-pointer text-center whitespace-nowrap ${
+                    summaryMode === "cc"
+                      ? "bg-[#16823B] text-white shadow-2xs font-bold"
+                      : "text-[#5F6B63] hover:text-[#17231B] hover:bg-[#F8FAF9]"
+                  }`}
+                >
+                  Per Cost Center
+                </button>
 
-              <button
-                type="button"
-                onClick={() => handleSummaryModeChange("ce2")}
-                className={`px-3 py-1.5 rounded-lg transition-all cursor-pointer text-center whitespace-nowrap ${
-                  summaryMode === "ce2"
-                    ? "bg-[#16823B] text-white shadow-2xs font-bold"
-                    : "text-[#5F6B63] hover:text-[#17231B] hover:bg-[#F8FAF9]"
-                }`}
-              >
-                Per Cost Element (CE2) Saja
-              </button>
+                <button
+                  type="button"
+                  onClick={() => handleSummaryModeChange("ce2")}
+                  className={`px-3 py-1.5 rounded-lg transition-all cursor-pointer text-center whitespace-nowrap ${
+                    summaryMode === "ce2"
+                      ? "bg-[#16823B] text-white shadow-2xs font-bold"
+                      : "text-[#5F6B63] hover:text-[#17231B] hover:bg-[#F8FAF9]"
+                  }`}
+                >
+                  Per CE2
+                </button>
+              </div>
             </div>
           </div>
         )}
@@ -512,45 +570,88 @@ export default function AdminPreviewPage() {
                   {/* ─────────────────────────────────────────────────────────────
                       A. HEADER SUMMARY (3 MODE)
                   ────────────────────────────────────────────────────────────── */}
-                  {activeTab === "summary" && summaryMode === "both" && (
-                    <tr className="text-[#5F6B63] font-bold whitespace-nowrap">
-                      <th className="py-3 px-3 text-center whitespace-nowrap text-[11px] uppercase tracking-wider sticky left-0 z-30 bg-[#F7F9F7] border-r border-[#DDE5DF] w-12 min-w-[48px]">
-                        #
-                      </th>
-                      <th className="py-3 px-3">Periode</th>
-                      <th className="py-3 px-3">PG</th>
-                      <th className="py-3 px-3">Cost Center</th>
-                      <th className="py-3 px-3">Deskripsi Cost Center</th>
-                      <th className="py-3 px-3">Cost Element (CE2)</th>
-                      <th className="py-3 px-3">Deskripsi CE2</th>
-                      <th className="py-3 px-3 text-right">Actual (Rp)</th>
-                      <th className="py-3 px-3 text-right">Budget (Rp)</th>
-                      <th className="py-3 px-3 text-right">Variance (%)</th>
-                    </tr>
-                  )}
-                  {activeTab === "summary" && summaryMode === "cc" && (
-                    <tr className="text-[#5F6B63] font-bold whitespace-nowrap">
-                      <th className="py-3 px-3 text-center whitespace-nowrap text-[11px] uppercase tracking-wider sticky left-0 z-30 bg-[#F7F9F7] border-r border-[#DDE5DF] w-12 min-w-[48px]">
-                        #
-                      </th>
-                      <th className="py-3 px-3">Cost Center</th>
-                      <th className="py-3 px-3">Deskripsi Cost Center</th>
-                      <th className="py-3 px-3 text-right">Total Actual (Rp)</th>
-                      <th className="py-3 px-3 text-right">Total Budget (Rp)</th>
-                      <th className="py-3 px-3 text-right">Variance (%)</th>
-                    </tr>
-                  )}
-                  {activeTab === "summary" && summaryMode === "ce2" && (
-                    <tr className="text-[#5F6B63] font-bold whitespace-nowrap">
-                      <th className="py-3 px-3 text-center whitespace-nowrap text-[11px] uppercase tracking-wider sticky left-0 z-30 bg-[#F7F9F7] border-r border-[#DDE5DF] w-12 min-w-[48px]">
-                        #
-                      </th>
-                      <th className="py-3 px-3">Cost Element (CE2)</th>
-                      <th className="py-3 px-3">Deskripsi Cost Element 2</th>
-                      <th className="py-3 px-3 text-right">Total Actual (Rp)</th>
-                      <th className="py-3 px-3 text-right">Total Budget (Rp)</th>
-                      <th className="py-3 px-3 text-right">Variance (%)</th>
-                    </tr>
+                  {activeTab === "summary" && (
+                    <>
+                      {/* Baris 1: Header Kelompok Identitas + Periode 1..12 + Total YTD */}
+                      <tr className="text-[#5F6B63] font-bold whitespace-nowrap">
+                        <th
+                          rowSpan={2}
+                          className="py-3 px-3 text-center whitespace-nowrap text-[11px] uppercase tracking-wider sticky left-0 z-30 bg-[#F7F9F7] border-r border-[#DDE5DF] w-12 min-w-[48px]"
+                        >
+                          #
+                        </th>
+
+                        {summaryMode === "both" && (
+                          <>
+                            <th rowSpan={2} className="py-3 px-3 border-r border-[#DDE5DF] min-w-[60px]">PG</th>
+                            <th rowSpan={2} className="py-3 px-3 border-r border-[#DDE5DF] min-w-[110px]">Cost Center</th>
+                            <th rowSpan={2} className="py-3 px-3 border-r border-[#DDE5DF] min-w-[180px]">Deskripsi Cost Center</th>
+                            <th rowSpan={2} className="py-3 px-3 border-r border-[#DDE5DF] min-w-[90px]">Cost Element (CE2)</th>
+                            <th rowSpan={2} className="py-3 px-3 border-r border-[#DDE5DF] min-w-[180px]">Deskripsi CE2</th>
+                          </>
+                        )}
+                        {summaryMode === "cc" && (
+                          <>
+                            <th rowSpan={2} className="py-3 px-3 border-r border-[#DDE5DF] min-w-[120px]">Cost Center</th>
+                            <th rowSpan={2} className="py-3 px-3 border-r border-[#DDE5DF] min-w-[220px]">Deskripsi Cost Center</th>
+                          </>
+                        )}
+                        {summaryMode === "ce2" && (
+                          <>
+                            <th rowSpan={2} className="py-3 px-3 border-r border-[#DDE5DF] min-w-[110px]">Cost Element (CE2)</th>
+                            <th rowSpan={2} className="py-3 px-3 border-r border-[#DDE5DF] min-w-[220px]">Deskripsi Cost Element 2</th>
+                          </>
+                        )}
+
+                        {/* 12 Bulan (Periode) */}
+                        {MONTHS_CONFIG.map((b) => (
+                          <th
+                            key={b.m}
+                            colSpan={2}
+                            className="py-2 px-2 text-center border-r border-b border-[#DDE5DF] bg-[#F0F5F1] text-[#16823B] font-bold text-[11px]"
+                          >
+                            {b.label}
+                          </th>
+                        ))}
+
+                        {/* Total YTD */}
+                        <th
+                          colSpan={3}
+                          className="py-2 px-3 text-center border-b border-[#DDE5DF] bg-[#EAF3EC] text-[#17231B] font-bold text-[11px]"
+                        >
+                          Total YTD (Bln 1 - {maxActualPeriod})
+                        </th>
+                      </tr>
+
+                      {/* Baris 2: Sub-Header Budget & Actual per Periode */}
+                      <tr className="text-[#5F6B63] font-bold whitespace-nowrap bg-[#F7F9F7]">
+                        {MONTHS_CONFIG.map((b) => (
+                          <Fragment key={b.m}>
+                            <th className="py-1.5 px-2 text-right text-[10px] text-[#5F6B63] font-semibold min-w-[85px] border-b border-[#DDE5DF]">
+                              Budget (Rp)
+                            </th>
+                            <th className="py-1.5 px-2 text-right text-[10px] text-[#17231B] font-bold min-w-[85px] border-r border-b border-[#DDE5DF]">
+                              Actual (Rp)
+                            </th>
+                          </Fragment>
+                        ))}
+                        <th
+                          className="py-1.5 px-2 text-right text-[10px] text-[#5F6B63] font-semibold min-w-[95px] bg-[#EAF3EC]/60 border-b border-[#DDE5DF]"
+                          title={`Kumulatif Budget Bln 1 s.d. Bln ${maxActualPeriod} (sesuai periode data actual terakhir yang tersedia)`}
+                        >
+                          Total Bgt (Rp)
+                        </th>
+                        <th
+                          className="py-1.5 px-2 text-right text-[10px] text-[#17231B] font-bold min-w-[95px] bg-[#EAF3EC]/60 border-b border-[#DDE5DF]"
+                          title={`Kumulatif Actual Bln 1 s.d. Bln ${maxActualPeriod}`}
+                        >
+                          Total Act (Rp)
+                        </th>
+                        <th className="py-1.5 px-2 text-right text-[10px] text-[#5F6B63] font-semibold min-w-[65px] bg-[#EAF3EC]/60 border-b border-[#DDE5DF]">
+                          Var (%)
+                        </th>
+                      </tr>
+                    </>
                   )}
 
                   {/* ─────────────────────────────────────────────────────────────
@@ -654,88 +755,66 @@ export default function AdminPreviewPage() {
                         {/* ─────────────────────────────────────────────────────────
                             BODY SUMMARY (3 MODE)
                         ────────────────────────────────────────────────────────── */}
-                        {activeTab === "summary" && summaryMode === "both" && (
+                        {/* ─────────────────────────────────────────────────────────
+                            BODY SUMMARY (MATRIX BULAN 1..12 & TOTAL YTD)
+                        ────────────────────────────────────────────────────────── */}
+                        {activeTab === "summary" && (
                           <>
-                            <td className="py-2.5 px-3 font-semibold text-[#16823B]">
-                              Bln {String(row.periode || "-")}
-                            </td>
-                            <td className="py-2.5 px-3 font-bold text-[#17231B]">{String(row.pg || "-")}</td>
-                            <td className="py-2.5 px-3 font-mono font-bold text-[#17231B]">{String(row.costcenter)}</td>
-                            <td className="py-2.5 px-3 text-[#5F6B63] max-w-xs truncate" title={String(row.deskripsiCostcenter || "")}>
-                              {String(row.deskripsiCostcenter || "-")}
-                            </td>
-                            <td className="py-2.5 px-3 font-mono font-bold text-[#17231B]">{String(row.ce2)}</td>
-                            <td className="py-2.5 px-3 text-[#5F6B63] max-w-xs truncate" title={String(row.deskripsiCe2 || "")}>
-                              {String(row.deskripsiCe2 || "-")}
-                            </td>
-                            <td className="py-2.5 px-3 text-right font-mono text-[#17231B]">
-                              {row.nilaiActual !== null ? Number(row.nilaiActual).toLocaleString("id-ID") : "-"}
-                            </td>
-                            <td className="py-2.5 px-3 text-right font-mono text-[#5F6B63]">
-                              {row.nilaiBudget !== null ? Number(row.nilaiBudget).toLocaleString("id-ID") : "-"}
-                            </td>
-                            <td className="py-2.5 px-3 text-right font-mono">
-                              {row.variance !== null ? (
-                                <span
-                                  className={`px-1.5 py-0.5 rounded text-[10px] font-bold ${
-                                    Number(row.variance) > 0
-                                      ? "bg-rose-50 text-rose-600 border border-rose-200"
-                                      : "bg-emerald-50 text-emerald-700 border border-emerald-200"
-                                  }`}
-                                >
-                                  {Number(row.variance) > 0 ? `+${row.variance}%` : `${row.variance}%`}
-                                </span>
-                              ) : (
-                                "-"
-                              )}
-                            </td>
-                          </>
-                        )}
+                            {summaryMode === "both" && (
+                              <>
+                                <td className="py-2.5 px-3 font-bold text-[#17231B] border-r border-[#EBEFEA]">{String(row.pg || "-")}</td>
+                                <td className="py-2.5 px-3 font-mono font-bold text-[#17231B] border-r border-[#EBEFEA]">{String(row.costcenter)}</td>
+                                <td className="py-2.5 px-3 text-[#5F6B63] max-w-xs truncate border-r border-[#EBEFEA]" title={String(row.deskripsiCostcenter || "")}>
+                                  {String(row.deskripsiCostcenter || "-")}
+                                </td>
+                                <td className="py-2.5 px-3 font-mono font-bold text-[#17231B] border-r border-[#EBEFEA]">{String(row.ce2)}</td>
+                                <td className="py-2.5 px-3 text-[#5F6B63] max-w-xs truncate border-r border-[#EBEFEA]" title={String(row.deskripsiCe2 || "")}>
+                                  {String(row.deskripsiCe2 || "-")}
+                                </td>
+                              </>
+                            )}
+                            {summaryMode === "cc" && (
+                              <>
+                                <td className="py-2.5 px-3 font-mono font-bold text-[#17231B] border-r border-[#EBEFEA]">{String(row.costcenter)}</td>
+                                <td className="py-2.5 px-3 text-[#17231B] font-medium max-w-sm truncate border-r border-[#EBEFEA]" title={String(row.deskripsiCostcenter || "")}>
+                                  {String(row.deskripsiCostcenter || "-")}
+                                </td>
+                              </>
+                            )}
+                            {summaryMode === "ce2" && (
+                              <>
+                                <td className="py-2.5 px-3 font-mono font-bold text-[#17231B] border-r border-[#EBEFEA]">{String(row.ce2)}</td>
+                                <td className="py-2.5 px-3 text-[#17231B] font-medium max-w-sm truncate border-r border-[#EBEFEA]" title={String(row.deskripsiCe2 || "")}>
+                                  {String(row.deskripsiCe2 || "-")}
+                                </td>
+                              </>
+                            )}
 
-                        {activeTab === "summary" && summaryMode === "cc" && (
-                          <>
-                            <td className="py-2.5 px-3 font-mono font-bold text-[#17231B]">{String(row.costcenter)}</td>
-                            <td className="py-2.5 px-3 text-[#17231B] font-medium max-w-sm truncate" title={String(row.deskripsiCostcenter || "")}>
-                              {String(row.deskripsiCostcenter || "-")}
-                            </td>
-                            <td className="py-2.5 px-3 text-right font-mono font-bold text-[#17231B]">
-                              {Number(row.nilaiActual || 0).toLocaleString("id-ID")}
-                            </td>
-                            <td className="py-2.5 px-3 text-right font-mono text-[#5F6B63]">
-                              {Number(row.nilaiBudget || 0).toLocaleString("id-ID")}
-                            </td>
-                            <td className="py-2.5 px-3 text-right font-mono">
-                              {row.variance !== null ? (
-                                <span
-                                  className={`px-1.5 py-0.5 rounded text-[10px] font-bold ${
-                                    Number(row.variance) > 0
-                                      ? "bg-rose-50 text-rose-600 border border-rose-200"
-                                      : "bg-emerald-50 text-emerald-700 border border-emerald-200"
-                                  }`}
-                                >
-                                  {Number(row.variance) > 0 ? `+${row.variance}%` : `${row.variance}%`}
-                                </span>
-                              ) : (
-                                "-"
-                              )}
-                            </td>
-                          </>
-                        )}
+                            {/* 12 Bulan: Kolom Budget & Actual */}
+                            {MONTHS_CONFIG.map((b) => {
+                              const monthsObj = (row.months || {}) as Record<number, { actual: number; budget: number }>;
+                              const mData = monthsObj[b.m] || { actual: 0, budget: 0 };
+                              return (
+                                <Fragment key={b.m}>
+                                  <td className="py-2.5 px-2 text-right font-mono text-[#5F6B63] whitespace-nowrap">
+                                    {mData.budget ? Number(mData.budget).toLocaleString("id-ID") : "-"}
+                                  </td>
+                                  <td className="py-2.5 px-2 text-right font-mono font-bold text-[#17231B] border-r border-[#EBEFEA] whitespace-nowrap">
+                                    {mData.actual ? Number(mData.actual).toLocaleString("id-ID") : "-"}
+                                  </td>
+                                </Fragment>
+                              );
+                            })}
 
-                        {activeTab === "summary" && summaryMode === "ce2" && (
-                          <>
-                            <td className="py-2.5 px-3 font-mono font-bold text-[#17231B]">{String(row.ce2)}</td>
-                            <td className="py-2.5 px-3 text-[#17231B] font-medium max-w-sm truncate" title={String(row.deskripsiCe2 || "")}>
-                              {String(row.deskripsiCe2 || "-")}
+                            {/* Total YTD */}
+                            <td className="py-2.5 px-2 text-right font-mono text-[#5F6B63] bg-[#F7F9F7] whitespace-nowrap">
+                              {Number(row.totalBudget || 0) > 0 ? Number(row.totalBudget).toLocaleString("id-ID") : "-"}
                             </td>
-                            <td className="py-2.5 px-3 text-right font-mono font-bold text-[#17231B]">
-                              {Number(row.nilaiActual || 0).toLocaleString("id-ID")}
+                            <td className="py-2.5 px-2 text-right font-mono font-bold text-[#17231B] bg-[#F7F9F7] whitespace-nowrap">
+                              {Number(row.totalActual || 0) > 0 ? Number(row.totalActual).toLocaleString("id-ID") : "-"}
                             </td>
-                            <td className="py-2.5 px-3 text-right font-mono text-[#5F6B63]">
-                              {Number(row.nilaiBudget || 0).toLocaleString("id-ID")}
-                            </td>
-                            <td className="py-2.5 px-3 text-right font-mono">
-                              {row.variance !== null ? (
+                            <td className="py-2.5 px-2 text-right font-mono bg-[#F7F9F7] whitespace-nowrap">
+                              {row.variance !== null && row.variance !== undefined ? (
                                 <span
                                   className={`px-1.5 py-0.5 rounded text-[10px] font-bold ${
                                     Number(row.variance) > 0
