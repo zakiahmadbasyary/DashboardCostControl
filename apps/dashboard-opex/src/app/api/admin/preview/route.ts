@@ -1,5 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
+import { toGenericCostCenter } from "@/lib/filters";
+
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
 
 export async function GET(request: NextRequest) {
   try {
@@ -238,36 +242,85 @@ export async function GET(request: NextRequest) {
     }
 
     // ─────────────────────────────────────────────────────────────────────────
-    // 4. MASTERSHEET COST CENTER (DENGAN STATUS VISIBILITAS)
+    // 4. MASTERSHEET COST CENTER (SOLUSI C: PENGATURAN BERBASIS FUNGSI GENERIK)
     // ─────────────────────────────────────────────────────────────────────────
     else if (table === "master_cc" || table === "costcenter") {
-      const where = search
-        ? {
-            OR: [
-              { costcenter: { contains: search, mode: "insensitive" as const } },
-              { deskripsiCostcenter: { contains: search, mode: "insensitive" as const } },
-            ],
-          }
-        : {};
+      const allCc = await prisma.mastersheetCostcenter.findMany({
+        orderBy: { costcenter: "asc" },
+      });
 
-      const [records, count] = await Promise.all([
-        prisma.mastersheetCostcenter.findMany({
-          where,
-          skip,
-          take: limit,
-          orderBy: { costcenter: "asc" },
-        }),
-        prisma.mastersheetCostcenter.count({ where }),
-      ]);
+      // Kelompokkan 77 Cost Center menjadi 28 Kelompok Fungsi Generik (Solusi C)
+      const groupMap = new Map<
+        string,
+        {
+          costcenter: string;
+          deskripsiCostcenter: string;
+          units: string[];
+          isview: boolean;
+          codes: string[];
+          updatedAt: string | null;
+        }
+      >();
 
-      data = records.map((c) => ({
-        costcenter: c.costcenter,
-        deskripsiCostcenter: c.deskripsiCostcenter,
-        isview: c.isview,
-        createdAt: c.createdAt ? c.createdAt.toISOString() : null,
-        updatedAt: c.updatedAt ? c.updatedAt.toISOString() : null,
+      for (const c of allCc) {
+        const { genericCode, genericDesc } = toGenericCostCenter(c.costcenter, c.deskripsiCostcenter);
+
+        let unit = "PG1";
+        if (
+          c.costcenter.includes("PG2") ||
+          c.costcenter.includes("SS2") ||
+          c.costcenter.startsWith("10PPG2") ||
+          c.costcenter.startsWith("10PSS2")
+        ) {
+          unit = "PG2";
+        } else if (
+          c.costcenter.includes("PG3") ||
+          c.costcenter.includes("SS3") ||
+          c.costcenter.startsWith("10PPG3") ||
+          c.costcenter.startsWith("10PSS3")
+        ) {
+          unit = "PG3";
+        }
+
+        if (!groupMap.has(genericCode)) {
+          groupMap.set(genericCode, {
+            costcenter: genericCode,
+            deskripsiCostcenter: genericDesc,
+            units: [unit],
+            isview: c.isview,
+            codes: [c.costcenter],
+            updatedAt: c.updatedAt ? c.updatedAt.toISOString() : null,
+          });
+        } else {
+          const g = groupMap.get(genericCode)!;
+          if (!g.units.includes(unit)) g.units.push(unit);
+          g.codes.push(c.costcenter);
+          // Jika salah satu unit aktif, switch fungsi generik aktif
+          if (c.isview) g.isview = true;
+        }
+      }
+
+      let groups = Array.from(groupMap.values()).map((g) => ({
+        costcenter: g.costcenter,
+        deskripsiCostcenter: g.deskripsiCostcenter,
+        units: g.units.sort().join(", "),
+        codes: g.codes,
+        isview: g.isview,
+        updatedAt: g.updatedAt,
       }));
-      total = count;
+
+      if (search) {
+        const q = search.toLowerCase();
+        groups = groups.filter(
+          (g) =>
+            g.costcenter.toLowerCase().includes(q) ||
+            g.deskripsiCostcenter.toLowerCase().includes(q) ||
+            g.units.toLowerCase().includes(q)
+        );
+      }
+
+      total = groups.length;
+      data = groups.slice(skip, skip + limit);
     }
 
     // ─────────────────────────────────────────────────────────────────────────
@@ -356,17 +409,31 @@ export async function PATCH(request: NextRequest) {
       }
     }
 
-    // B. Single update per record
+    // B. Single update per record (atau per Kelompok Fungsi Generik)
     if (type === "cc" || type === "costcenter") {
-      const updated = await prisma.mastersheetCostcenter.update({
-        where: { costcenter: id },
-        data: { isview },
-      });
-      return NextResponse.json({
-        success: true,
-        message: `Cost Center ${id} berhasil diatur ke ${isview ? "Tampil (View)" : "Sembunyi (Tidak View)"}.`,
-        item: updated,
-      });
+      if (id.startsWith("10PPGx") || id.startsWith("10PSSx")) {
+        const prefix = id.substring(0, 5); // 10PPG atau 10PSS
+        const suffix = id.substring(6);    // e.g. CO99
+        const targets = [`${prefix}1${suffix}`, `${prefix}2${suffix}`, `${prefix}3${suffix}`, id];
+        const updated = await prisma.mastersheetCostcenter.updateMany({
+          where: { costcenter: { in: targets } },
+          data: { isview },
+        });
+        return NextResponse.json({
+          success: true,
+          message: `Fungsi Cost Center ${id} (${updated.count} unit PG) berhasil diatur ke ${isview ? "Tampil (View)" : "Sembunyi (Tidak View)"}.`,
+        });
+      } else {
+        const updated = await prisma.mastersheetCostcenter.update({
+          where: { costcenter: id },
+          data: { isview },
+        });
+        return NextResponse.json({
+          success: true,
+          message: `Cost Center ${id} berhasil diatur ke ${isview ? "Tampil (View)" : "Sembunyi (Tidak View)"}.`,
+          item: updated,
+        });
+      }
     } else if (type === "ce2" || type === "costelement") {
       const updated = await prisma.mastersheetCe2.update({
         where: { ce2: id },

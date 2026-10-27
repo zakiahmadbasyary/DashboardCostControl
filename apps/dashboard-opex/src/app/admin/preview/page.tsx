@@ -60,7 +60,7 @@ const TABS: TabMeta[] = [
     label: "Mastersheet Cost Center",
     shortLabel: "Master CC",
     icon: Building2,
-    description: "Daftar master Cost Center dengan tombol kontrol visibilitas (isview).",
+    description: "Daftar kelompok fungsi Cost Center (antar PG) dengan tombol kontrol visibilitas serentak (Solusi C).",
   },
   {
     key: "master_ce2",
@@ -610,15 +610,16 @@ export default function AdminPreviewPage() {
                   )}
 
                   {/* ─────────────────────────────────────────────────────────────
-                      D. HEADER MASTERSHEET COST CENTER
+                      D. HEADER MASTERSHEET COST CENTER (KELOMPOK FUNGSI GENERIK)
                   ────────────────────────────────────────────────────────────── */}
                   {activeTab === "master_cc" && (
                     <tr className="text-[#5F6B63] font-bold whitespace-nowrap">
                       <th className="py-3 px-3 text-center whitespace-nowrap text-[11px] uppercase tracking-wider sticky left-0 z-30 bg-[#F7F9F7] border-r border-[#DDE5DF] w-12 min-w-[48px]">
                         #
                       </th>
-                      <th className="py-3 px-3">Kode Cost Center</th>
-                      <th className="py-3 px-3">Deskripsi Cost Center</th>
+                      <th className="py-3 px-3">Kode Fungsi Generik</th>
+                      <th className="py-3 px-3">Fungsi / Deskripsi Cost Center</th>
+                      <th className="py-3 px-3">Unit Tercakup</th>
                       <th className="py-3 px-3">Status Visibilitas</th>
                       <th className="py-3 px-3 text-center w-36">Aksi (View / Sembunyi)</th>
                     </tr>
@@ -829,7 +830,12 @@ export default function AdminPreviewPage() {
                         {activeTab === "master_cc" && (
                           <>
                             <td className="py-2.5 px-3 font-mono font-bold text-[#17231B]">{String(row.costcenter)}</td>
-                            <td className="py-2.5 px-3 text-[#17231B] font-medium">{String(row.deskripsiCostcenter || "-")}</td>
+                            <td className="py-2.5 px-3 text-[#17231B] font-semibold">{String(row.deskripsiCostcenter || "-")}</td>
+                            <td className="py-2.5 px-3">
+                              <span className="inline-flex items-center px-2 py-0.5 text-[10px] font-bold rounded-md bg-[#EAF3EC] text-[#16823B] border border-[#CDE0D3]">
+                                {String(row.units || "Semua PG")}
+                              </span>
+                            </td>
                             <td className="py-2.5 px-3">
                               {row.isview ? (
                                 <span className="inline-flex items-center gap-1 px-2.5 py-0.5 text-[11px] font-bold rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">

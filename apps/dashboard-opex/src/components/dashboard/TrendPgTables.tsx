@@ -84,11 +84,11 @@ export default function TrendPgTables({
 
                 return (
                   <tr key={row.costcenter} className="h-[48px] hover:bg-[#F8FAF9] transition-colors">
-                    <td className="py-2 px-3">
-                      <span className="font-bold text-[#17231B] block">
-                        {row.costcenter}
-                      </span>
-                      <span className="text-[11px] text-[#5F6B63] line-clamp-1" title={row.deskripsiCostcenter}>
+                    <td className="py-2.5 px-3">
+                      <span
+                        className="font-bold text-xs text-[#17231B] block line-clamp-1"
+                        title={row.deskripsiCostcenter}
+                      >
                         {row.deskripsiCostcenter}
                       </span>
                     </td>

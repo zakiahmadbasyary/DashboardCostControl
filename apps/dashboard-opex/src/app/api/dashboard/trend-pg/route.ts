@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
-import { OPEX_VISIBILITY_FILTER } from "@/lib/filters";
+import { OPEX_VISIBILITY_FILTER, toGenericCostCenter } from "@/lib/filters";
+
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
 
 const MONTH_NAMES = [
   "Jan", "Feb", "Mar", "Apr", "Mei", "Jun",
@@ -99,34 +102,51 @@ export async function GET(request: NextRequest) {
       const desc = r.deskripsiCostcenter || cc;
       const act = r.nilaiActual !== null && r.nilaiActual !== undefined ? Number(r.nilaiActual) : null;
 
-      if (!ccMap.has(cc)) {
-        ccMap.set(cc, {
-          costcenter: cc,
-          deskripsiCostcenter: desc,
+      // Kelompokkan kode Cost Center antar PG (misal: 10PPG1CO99, 10PPG2CO99, 10PPG3CO99 -> 10PPGxCO99)
+      const { genericCode, genericDesc } = toGenericCostCenter(cc, desc);
+
+      if (!ccMap.has(genericCode)) {
+        ccMap.set(genericCode, {
+          costcenter: genericCode,
+          deskripsiCostcenter: genericDesc,
           pg1: null,
           pg2: null,
           pg3: null,
         });
       }
 
-      const existing = ccMap.get(cc)!;
+      const existing = ccMap.get(genericCode)!;
       if (r.pg === "PG1") existing.pg1 = (existing.pg1 ?? 0) + (act ?? 0);
       else if (r.pg === "PG2") existing.pg2 = (existing.pg2 ?? 0) + (act ?? 0);
       else if (r.pg === "PG3") existing.pg3 = (existing.pg3 ?? 0) + (act ?? 0);
     }
 
-    const costCenterTable = Array.from(ccMap.values()).map((c) => ({
-      costcenter: c.costcenter,
-      deskripsiCostcenter: c.deskripsiCostcenter,
-      pg1: c.pg1 !== null ? Math.round(c.pg1) : null,
-      pg2: c.pg2 !== null ? Math.round(c.pg2) : null,
-      pg3: c.pg3 !== null ? Math.round(c.pg3) : null,
-    }));
+    const costCenterTable = Array.from(ccMap.values())
+      .map((c) => ({
+        costcenter: c.costcenter,
+        deskripsiCostcenter: c.deskripsiCostcenter,
+        pg1: c.pg1 !== null ? Math.round(c.pg1) : null,
+        pg2: c.pg2 !== null ? Math.round(c.pg2) : null,
+        pg3: c.pg3 !== null ? Math.round(c.pg3) : null,
+      }))
+      .sort((a, b) => {
+        // Urutkan berdasarkan akumulasi biaya PG1+PG2+PG3 tertinggi
+        const totA = (a.pg1 ?? 0) + (a.pg2 ?? 0) + (a.pg3 ?? 0);
+        const totB = (b.pg1 ?? 0) + (b.pg2 ?? 0) + (b.pg3 ?? 0);
+        return totB - totA;
+      });
 
-    return NextResponse.json({
-      monthlyTrend,
-      costCenterTable,
-    });
+    return NextResponse.json(
+      {
+        monthlyTrend,
+        costCenterTable,
+      },
+      {
+        headers: {
+          "Cache-Control": "no-store, no-cache, must-revalidate, proxy-revalidate",
+        },
+      }
+    );
   } catch (error) {
     console.error("Error fetching trend PG:", error);
     return NextResponse.json(
@@ -135,3 +155,4 @@ export async function GET(request: NextRequest) {
     );
   }
 }
+
