@@ -131,20 +131,52 @@ export default function PublicDashboardPage() {
     setGlobalFilters(newFilters);
   };
 
-  // Handle click on Umur in Trend Chart/Table -> Filter Location Table for clicked Umur & all Wilayah, then scroll down
-  const handleSelectUmurFromTrend = (umur: number) => {
-    setLocationFilters({
-      umur: [umur],
-      wilayah: "all",
-    });
+  // ── PENDING SCROLL TARGET STATE (DIRECT SETELAH LOAD DATA SELESAI) ──
+  const [pendingScrollTarget, setPendingScrollTarget] = useState<"location" | null>(null);
 
-    setTimeout(() => {
-      const locationSection = document.getElementById("location-analysis-section");
-      if (locationSection) {
-        locationSection.scrollIntoView({ behavior: "smooth", block: "start" });
+  const scrollToElement = useCallback((id: string) => {
+    const el = document.getElementById(id);
+    if (el) {
+      el.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  }, []);
+
+  // Handle click on Umur in Trend Chart/Table -> Filter Location Table for clicked Umur & all Wilayah, then scroll down
+  const handleSelectUmurFromTrend = useCallback(
+    (umur: number) => {
+      const isSameFilter =
+        (Array.isArray(locationFilters.umur)
+          ? locationFilters.umur.length === 1 && locationFilters.umur[0] === umur
+          : locationFilters.umur === umur) && locationFilters.wilayah === "all";
+
+      // Jika data sudah sesuai filter dan tidak sedang memuat, langsung scroll seketika
+      if (isSameFilter && !loadingLocations) {
+        scrollToElement("location-analysis-section");
+      } else {
+        setLoadingLocations(true);
+        setPendingScrollTarget("location");
+        setLocationFilters({
+          umur: [umur],
+          wilayah: "all",
+        });
       }
-    }, 2000);
-  };
+    },
+    [locationFilters, loadingLocations, scrollToElement]
+  );
+
+  // Effect: Menjalankan Smooth Scroll tepat ketika proses load data lokasi telah selesai
+  useEffect(() => {
+    if (!pendingScrollTarget) return;
+
+    if (pendingScrollTarget === "location" && !loadingLocations) {
+      // Jeda singkat (80ms) untuk memastikan browser selesai me-render baris tabel lokasi
+      const timer = setTimeout(() => {
+        scrollToElement("location-analysis-section");
+        setPendingScrollTarget(null);
+      }, 80);
+      return () => clearTimeout(timer);
+    }
+  }, [pendingScrollTarget, loadingLocations, scrollToElement]);
 
   return (
     <div className="min-h-screen bg-[#F7F9F7] text-[#17231B] flex flex-col font-sans">
