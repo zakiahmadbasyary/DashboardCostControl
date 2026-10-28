@@ -13,6 +13,7 @@ export async function middleware(request: NextRequest) {
 
   if (ssoToken) {
     try {
+      // Exchange one-time SSO token with Admin Pusat
       const exchangeRes = await fetch(`${adminInternalBaseUrl}/api/auth/sso/exchange`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -23,12 +24,14 @@ export async function middleware(request: NextRequest) {
       if (exchangeRes.ok) {
         const exchangeData = await exchangeRes.json();
         if (exchangeData.success && exchangeData.user) {
+          // Generate local session token for OPEX dashboard
           const localToken = createSessionToken({
             id: exchangeData.user.id,
             username: exchangeData.user.username,
             role: exchangeData.user.role,
           });
 
+          // Redirect to clean target URL without ?sso= query parameter
           const cleanUrl = new URL(request.nextUrl.pathname, request.url);
           request.nextUrl.searchParams.forEach((val, key) => {
             if (key !== "sso") {
@@ -37,6 +40,7 @@ export async function middleware(request: NextRequest) {
           });
 
           const response = NextResponse.redirect(cleanUrl);
+          // Set local HttpOnly, Secure, SameSite=Lax admin_session cookie
           return attachSessionCookie(response, localToken);
         }
       }
@@ -44,6 +48,7 @@ export async function middleware(request: NextRequest) {
       console.error("SSO Exchange Error in OPEX middleware:", e);
     }
 
+    // If exchange fails, redirect to Central Admin login page
     return NextResponse.redirect(new URL(`${adminPublicBaseUrl}/login?error=sso_failed`));
   }
 
@@ -63,64 +68,98 @@ export async function middleware(request: NextRequest) {
             const isSuperAdmin = verifyData.user.role === "SUPER_ADMIN";
             const hasOpexAccess =
               Array.isArray(verifyData.user.allowedDashboards) &&
-              (verifyData.user.allowedDashboards.includes("opex") || verifyData.user.allowedDashboards.includes("all"));
+              (verifyData.user.allowedDashboards.includes("opex") ||
+                verifyData.user.allowedDashboards.includes("all"));
 
             if (isSuperAdmin || hasOpexAccess) {
               return NextResponse.next();
             }
           }
         }
-      } catch {
-        // Fall through in case central admin is unreachable locally
-        return NextResponse.next();
+      } catch (e) {
+        console.warn("Central session verification check failed in OPEX, falling back:", e);
       }
 
+      // If central session was revoked, logged out, or access removed, clear local session and redirect
       const redirectRes = NextResponse.redirect(new URL(`${adminPublicBaseUrl}/login?error=session_expired`));
       redirectRes.cookies.delete("admin_session");
       return redirectRes;
     }
   }
 
-  // 3. Fallback: Central Session Check
+  // 3. Fallback: Central Session Check (If request carries central admin session cookie / authorization header)
   const centralCookie = request.cookies.get("admin_central_session")?.value;
   const authHeader = request.headers.get("authorization");
   const fallbackToken = centralCookie || (authHeader?.startsWith("Bearer ") ? authHeader.substring(7).trim() : null);
 
-  if (fallbackToken) {
-    try {
-      const verifyRes = await fetch(`${adminInternalBaseUrl}/api/auth/verify?token=${fallbackToken}`, {
-        headers: { "Cache-Control": "no-cache" },
-      });
-
-      if (verifyRes.ok) {
-        const data = await verifyRes.json();
-        if (data.authenticated && data.user) {
-          return NextResponse.next();
-        }
-      }
-    } catch {
-      return NextResponse.next();
+  // If central session cookie/token does not exist (user logged out from Admin Pusat or session ended)
+  if (!fallbackToken) {
+    if (pathname.startsWith("/api/admin")) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: "Unauthorized: Token sesi Admin Utama telah berakhir atau logout.",
+        },
+        { status: 401 }
+      );
     }
+
+    const redirectRes = NextResponse.redirect(new URL(`${adminPublicBaseUrl}/login`));
+    redirectRes.cookies.delete("admin_session");
+    return redirectRes;
   }
 
-  // If running in development without strict enforcement, allow direct admin testing
-  if (process.env.NODE_ENV !== "production" && !process.env.STRICT_ADMIN_AUTH) {
+  try {
+    // Verify fallback central token with Admin Pusat Central Auth API
+    const verifyRes = await fetch(`${adminInternalBaseUrl}/api/auth/verify?token=${fallbackToken}`, {
+      headers: { "Cache-Control": "no-cache" },
+    });
+
+    if (!verifyRes.ok) {
+      if (pathname.startsWith("/api/admin")) {
+        return NextResponse.json({ success: false, error: "Session tidak valid" }, { status: 401 });
+      }
+      return NextResponse.redirect(new URL(`${adminPublicBaseUrl}/login`));
+    }
+
+    const data = await verifyRes.json();
+    if (!data.authenticated || !data.user) {
+      if (pathname.startsWith("/api/admin")) {
+        return NextResponse.json({ success: false, error: "Sesi telah berakhir" }, { status: 401 });
+      }
+      return NextResponse.redirect(new URL(`${adminPublicBaseUrl}/login`));
+    }
+
+    const user = data.user;
+    const isSuperAdmin = user.role === "SUPER_ADMIN";
+    const hasOpexAccess =
+      Array.isArray(user.allowedDashboards) &&
+      (user.allowedDashboards.includes("opex") || user.allowedDashboards.includes("all"));
+
+    if (!isSuperAdmin && !hasOpexAccess) {
+      if (pathname.startsWith("/api/admin")) {
+        return NextResponse.json(
+          {
+            success: false,
+            error: "403 Forbidden: Anda tidak memiliki hak akses untuk mengelola Dashboard OPEX.",
+          },
+          { status: 403 }
+        );
+      }
+      return NextResponse.rewrite(new URL("/403", request.url));
+    }
+
     return NextResponse.next();
+  } catch (error) {
+    console.warn("Middleware verify request error in OPEX:", error);
+    if (pathname.startsWith("/api/admin")) {
+      return NextResponse.json(
+        { success: false, error: "Gagal memverifikasi sesi ke server pusat" },
+        { status: 401 }
+      );
+    }
+    return NextResponse.redirect(new URL(`${adminPublicBaseUrl}/login?error=connection_error`));
   }
-
-  if (pathname.startsWith("/api/admin")) {
-    return NextResponse.json(
-      {
-        success: false,
-        error: "Unauthorized: Token sesi Admin telah berakhir atau logout.",
-      },
-      { status: 401 }
-    );
-  }
-
-  const redirectRes = NextResponse.redirect(new URL(`${adminPublicBaseUrl}/login`));
-  redirectRes.cookies.delete("admin_session");
-  return redirectRes;
 }
 
 export const config = {
