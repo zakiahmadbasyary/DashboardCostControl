@@ -62,10 +62,11 @@ export async function GET(request: NextRequest) {
     }
 
     const result = Array.from(map.values()).map((item) => {
+      // Jika budget 0 atau negatif (-), variancenya otomatis 100%
       const variance =
         item.budget > 0
           ? Number((((item.actual - item.budget) / item.budget) * 100).toFixed(2))
-          : null;
+          : 100;
 
       return {
         ce2: item.ce2,

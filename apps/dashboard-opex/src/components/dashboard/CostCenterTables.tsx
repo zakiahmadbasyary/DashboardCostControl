@@ -24,6 +24,11 @@ export default function CostCenterTables({
 
   const filteredData = [...data]
     .filter((item) => {
+      // Sembunyikan data jika nilai budget 0 atau tidak ada
+      if (!item.budget || item.budget <= 0) {
+        return false;
+      }
+
       const q = search.toLowerCase();
       return (
         item.costcenter.toLowerCase().includes(q) ||
@@ -113,14 +118,14 @@ export default function CostCenterTables({
                     }`}
                   >
                     <span className={isSelected ? "font-semibold" : "font-normal"}>
-                      {row.actual.toLocaleString("id-ID")}
+                      {row.actual !== 0 ? row.actual.toLocaleString("id-ID") : "-"}
                     </span>
                   </td>
                   <td className="py-2.5 px-3 text-right font-mono text-[#5F6B63] whitespace-nowrap">
-                    {row.budget.toLocaleString("id-ID")}
+                    {row.budget !== 0 ? row.budget.toLocaleString("id-ID") : "-"}
                   </td>
                   <td className="py-2.5 px-3 text-right font-mono whitespace-nowrap">
-                    {row.variance !== null ? (
+                    {row.variance !== null && Math.round(row.variance) !== 0 ? (
                       <span
                         className={`inline-block px-1.5 py-0.5 rounded text-[10px] font-bold ${
                           isOver
@@ -128,7 +133,9 @@ export default function CostCenterTables({
                             : "bg-emerald-50 text-emerald-700 border border-emerald-200"
                         }`}
                       >
-                        {row.variance > 0 ? `+${row.variance.toFixed(1)}%` : `${row.variance.toFixed(1)}%`}
+                        {Math.round(row.variance) > 0
+                          ? `+${Math.round(row.variance)}%`
+                          : `${Math.round(row.variance)}%`}
                       </span>
                     ) : (
                       <span className="text-[#89938D]">-</span>
@@ -203,7 +210,9 @@ export default function CostCenterTables({
         </div>
       ) : filteredData.length === 0 ? (
         <div className="py-12 text-center text-xs text-[#89938D]">
-          Tidak ada Cost Center yang cocok dengan kata kunci &quot;{search}&quot;.
+          {search
+            ? `Tidak ada Cost Center yang cocok dengan kata kunci "${search}".`
+            : "Tidak ada data Cost Center dengan anggaran (budget) aktif pada periode ini."}
         </div>
       ) : (
         <div className="flex flex-col gap-4">

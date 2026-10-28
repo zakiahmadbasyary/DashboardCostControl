@@ -219,9 +219,6 @@ export default function UserApproverSection({
             )}
           </div>
 
-          <div className="pt-3 mt-3 border-t border-[#E8EFE9] text-[10px] text-[#89938D]">
-            * Pending dihitung secara berjenjang (sequential) untuk approver aktif pertama yang belum menyetujui (<code className="font-mono">date_approve = NULL</code>).
-          </div>
         </div>
 
         {/* ============================================================== */}

@@ -55,20 +55,22 @@ export async function GET(request: NextRequest) {
       existing.budget += bgt;
     }
 
-    const result = Array.from(map.values()).map((item) => {
-      const variance =
-        item.budget > 0
-          ? Number((((item.actual - item.budget) / item.budget) * 100).toFixed(2))
-          : null;
+    const result = Array.from(map.values())
+      .filter((item) => Math.round(item.budget) > 0)
+      .map((item) => {
+        const variance =
+          item.budget > 0
+            ? Number((((item.actual - item.budget) / item.budget) * 100).toFixed(2))
+            : null;
 
-      return {
-        costcenter: item.costcenter,
-        deskripsiCostcenter: item.deskripsiCostcenter,
-        actual: Math.round(item.actual),
-        budget: Math.round(item.budget),
-        variance,
-      };
-    });
+        return {
+          costcenter: item.costcenter,
+          deskripsiCostcenter: item.deskripsiCostcenter,
+          actual: Math.round(item.actual),
+          budget: Math.round(item.budget),
+          variance,
+        };
+      });
     // Urutkan dari variance paling besar ke kecil (Descending)
     result.sort((a, b) => {
       const vA = a.variance ?? -Infinity;

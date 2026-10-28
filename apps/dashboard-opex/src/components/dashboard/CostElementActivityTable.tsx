@@ -111,7 +111,7 @@ export default function CostElementActivityTable({
                       </span>
                     </td>
                     <td className="py-2 px-3 text-right font-mono font-bold text-[#17231B] whitespace-nowrap">
-                      {act.totalCost.toLocaleString("id-ID")}
+                      {act.totalCost !== 0 ? act.totalCost.toLocaleString("id-ID") : "-"}
                     </td>
                   </tr>
                 ))}
@@ -186,7 +186,7 @@ export default function CostElementActivityTable({
         <div className="pt-2 border-t border-[#DDE5DF] flex items-center justify-between text-xs min-h-[35px]">
           <span className="font-bold text-[#5F6B63]">Total Biaya Aktivitas:</span>
           <span className="font-mono font-extrabold text-sm text-[#16823B]">
-            Rp {totalCost.toLocaleString("id-ID")}
+            Rp {totalCost !== 0 ? totalCost.toLocaleString("id-ID") : "-"}
           </span>
         </div>
       )}

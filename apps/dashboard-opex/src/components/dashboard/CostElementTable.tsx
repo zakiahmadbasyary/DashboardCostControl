@@ -28,11 +28,22 @@ export default function CostElementTable({
   }, [selectedCostCenter]);
 
   const sortedData = useMemo(() => {
-    return [...data].sort((a, b) => {
-      const vA = a.variance !== null ? a.variance : -Infinity;
-      const vB = b.variance !== null ? b.variance : -Infinity;
-      return vB - vA;
-    });
+    return [...data]
+      .map((item) => ({
+        ...item,
+        // Jika budget 0 atau negatif (-), variancenya otomatis 100%
+        variance:
+          item.variance !== null
+            ? item.variance
+            : (!item.budget || item.budget <= 0)
+              ? 100
+              : null,
+      }))
+      .sort((a, b) => {
+        const vA = a.variance !== null ? a.variance : -Infinity;
+        const vB = b.variance !== null ? b.variance : -Infinity;
+        return vB - vA;
+      });
   }, [data]);
 
   const totalPages = Math.max(1, Math.ceil(sortedData.length / PAGE_SIZE));
@@ -139,14 +150,14 @@ export default function CostElementTable({
                         }`}
                       >
                         <span className={isSelected ? "font-semibold" : "font-normal"}>
-                          {row.actual.toLocaleString("id-ID")}
+                          {row.actual !== 0 ? row.actual.toLocaleString("id-ID") : "-"}
                         </span>
                       </td>
                       <td className="py-2 px-3 text-right font-mono text-[#5F6B63] whitespace-nowrap">
-                        {row.budget.toLocaleString("id-ID")}
+                        {row.budget !== 0 ? row.budget.toLocaleString("id-ID") : "-"}
                       </td>
                       <td className="py-2 px-3 text-right font-mono">
-                        {row.variance !== null ? (
+                        {row.variance !== null && Math.round(row.variance) !== 0 ? (
                           <span
                             className={`px-1.5 py-0.5 rounded text-[10px] font-bold ${
                               isOver
@@ -154,7 +165,9 @@ export default function CostElementTable({
                                 : "bg-emerald-50 text-emerald-700 border border-emerald-200"
                             }`}
                           >
-                            {row.variance > 0 ? `+${row.variance.toFixed(1)}%` : `${row.variance.toFixed(1)}%`}
+                            {Math.round(row.variance) > 0
+                              ? `+${Math.round(row.variance)}%`
+                              : `${Math.round(row.variance)}%`}
                           </span>
                         ) : (
                           <span className="text-[#89938D]">-</span>
@@ -237,10 +250,10 @@ export default function CostElementTable({
           <span className="font-bold text-[#5F6B63]">Total Cost Center:</span>
           <div className="flex items-center gap-3">
             <span className="font-mono font-bold text-[#17231B]">
-              Actual: Rp {totalActual.toLocaleString("id-ID")}
+              Actual: Rp {totalActual !== 0 ? totalActual.toLocaleString("id-ID") : "-"}
             </span>
             <span className="font-mono text-[#89938D]">
-              Bgt: Rp {totalBudget.toLocaleString("id-ID")}
+              Bgt: Rp {totalBudget !== 0 ? totalBudget.toLocaleString("id-ID") : "-"}
             </span>
           </div>
         </div>

@@ -39,11 +39,10 @@ const formatVariancePill = (actual: number, budget: number, rawVariance: number 
   if (!budget || budget <= 0) return "-";
 
   const v = rawVariance !== null ? rawVariance : ((actual - budget) / budget) * 100;
+  const rounded = Math.round(v);
+  if (rounded === 0) return "-";
 
-  if (Math.abs(v) >= 10) {
-    return `${Math.round(v)}%`;
-  }
-  return `${v.toFixed(1).replace(".", ",")}%`;
+  return `${rounded}%`;
 };
 
 export default function SummaryMonthlyChart({
@@ -369,8 +368,8 @@ export default function SummaryMonthlyChart({
 
               {/* Badge Variansi Kuning Total */}
               <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[44px] sm:w-[50px] bg-[#FCE27A] text-[#17231B] border border-[#E5C959] font-mono font-bold text-[9px] sm:text-[10px] md:text-[11px] py-0.5 text-center shadow-2xs z-10 select-none">
-                {totalVariance !== null
-                  ? `${totalVariance.toFixed(1).replace(".", ",")}%`
+                {totalVariance !== null && Math.round(totalVariance) !== 0
+                  ? `${Math.round(totalVariance)}%`
                   : "-"}
               </div>
             </div>
@@ -441,8 +440,8 @@ export default function SummaryMonthlyChart({
                         : "text-[#16823B]"
                     }`}
                   >
-                    {tooltip.variance !== null
-                      ? `${tooltip.variance > 0 ? "+" : ""}${tooltip.variance.toFixed(1).replace(".", ",")}%`
+                    {tooltip.variance !== null && Math.round(tooltip.variance) !== 0
+                      ? `${Math.round(tooltip.variance) > 0 ? "+" : ""}${Math.round(tooltip.variance)}%`
                       : "-"}
                   </span>
                 </div>

@@ -97,21 +97,21 @@ export default function TrendPgTables({
                         isPg1Highest ? "bg-[#FCE27A]/35 text-[#17231B] font-semibold" : "text-[#17231B]"
                       }`}
                     >
-                      {row.pg1 !== null ? row.pg1.toLocaleString("id-ID") : "-"}
+                      {row.pg1 !== null && row.pg1 !== 0 ? row.pg1.toLocaleString("id-ID") : "-"}
                     </td>
                     <td
                       className={`py-2 px-3 text-right font-mono whitespace-nowrap ${
                         isPg2Highest ? "bg-[#FCE27A]/35 text-[#17231B] font-semibold" : "text-[#17231B]"
                       }`}
                     >
-                      {row.pg2 !== null ? row.pg2.toLocaleString("id-ID") : "-"}
+                      {row.pg2 !== null && row.pg2 !== 0 ? row.pg2.toLocaleString("id-ID") : "-"}
                     </td>
                     <td
                       className={`py-2 px-3 text-right font-mono whitespace-nowrap ${
                         isPg3Highest ? "bg-[#FCE27A]/35 text-[#17231B] font-semibold" : "text-[#17231B]"
                       }`}
                     >
-                      {row.pg3 !== null ? row.pg3.toLocaleString("id-ID") : "-"}
+                      {row.pg3 !== null && row.pg3 !== 0 ? row.pg3.toLocaleString("id-ID") : "-"}
                     </td>
                   </tr>
                 );
