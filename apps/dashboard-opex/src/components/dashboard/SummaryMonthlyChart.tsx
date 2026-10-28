@@ -33,7 +33,7 @@ const formatInMillions = (val: number): string => {
   return inJt.toLocaleString("id-ID");
 };
 
-// Helper untuk memformat persentase variansi pada badge kuning
+// Helper untuk memformat persentase variansi pada badge kuning bulanan (bulat tanpa desimal)
 const formatVariancePill = (actual: number, budget: number, rawVariance: number | null): string => {
   if (!actual || actual <= 0) return "-";
   if (!budget || budget <= 0) return "-";
@@ -43,6 +43,17 @@ const formatVariancePill = (actual: number, budget: number, rawVariance: number 
   if (rounded === 0) return "-";
 
   return `${rounded}%`;
+};
+
+// Helper khusus untuk memformat variansi pada batang Total (1 angka di belakang koma)
+const formatTotalVariancePill = (val: number | null): string => {
+  if (val === null || val === undefined) return "-";
+  const num = Number(val);
+  if (isNaN(num)) return "-";
+  const rounded = Number(num.toFixed(1));
+  if (rounded === 0) return "-";
+
+  return `${num.toFixed(1)}%`;
 };
 
 export default function SummaryMonthlyChart({
@@ -366,11 +377,9 @@ export default function SummaryMonthlyChart({
                 />
               </div>
 
-              {/* Badge Variansi Kuning Total */}
-              <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[44px] sm:w-[50px] bg-[#FCE27A] text-[#17231B] border border-[#E5C959] font-mono font-bold text-[9px] sm:text-[10px] md:text-[11px] py-0.5 text-center shadow-2xs z-10 select-none">
-                {totalVariance !== null && Math.round(totalVariance) !== 0
-                  ? `${Math.round(totalVariance)}%`
-                  : "-"}
+              {/* Badge Variansi Kuning Total (1 angka di belakang koma) */}
+              <div className="absolute bottom-0 left-1/2 -translate-x-1/2 min-w-[46px] sm:min-w-[52px] px-1 bg-[#FCE27A] text-[#17231B] border border-[#E5C959] font-mono font-bold text-[9px] sm:text-[10px] md:text-[11px] py-0.5 text-center shadow-2xs z-10 select-none">
+                {formatTotalVariancePill(totalVariance)}
               </div>
             </div>
 
@@ -440,8 +449,13 @@ export default function SummaryMonthlyChart({
                         : "text-[#16823B]"
                     }`}
                   >
-                    {tooltip.variance !== null && Math.round(tooltip.variance) !== 0
-                      ? `${Math.round(tooltip.variance) > 0 ? "+" : ""}${Math.round(tooltip.variance)}%`
+                    {tooltip.variance !== null &&
+                    (tooltip.isTotal
+                      ? Number(tooltip.variance.toFixed(1)) !== 0
+                      : Math.round(tooltip.variance) !== 0)
+                      ? tooltip.isTotal
+                        ? `${tooltip.variance > 0 ? "+" : ""}${tooltip.variance.toFixed(1)}%`
+                        : `${Math.round(tooltip.variance) > 0 ? "+" : ""}${Math.round(tooltip.variance)}%`
                       : "-"}
                   </span>
                 </div>
