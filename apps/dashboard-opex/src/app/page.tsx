@@ -8,7 +8,6 @@ import CostCenterTables from "@/components/dashboard/CostCenterTables";
 import CostElementTable from "@/components/dashboard/CostElementTable";
 import CostElementActivityTable from "@/components/dashboard/CostElementActivityTable";
 import TrendPgChart from "@/components/dashboard/TrendPgChart";
-import TrendPgTables from "@/components/dashboard/TrendPgTables";
 
 import {
   PeriodOption,
@@ -360,28 +359,19 @@ export default function DashboardOpexPage() {
           </div>
         </section>
 
-        {/* Section 7: Trend Cost Element Antar PG (7.1, 7.2, 7.3) */}
-        <section className="space-y-5 pt-2">
-          {/* Card Atas: Grafik Actual Antar PG (7.1 & 7.2) */}
+        {/* Section 7: Trend & Komparasi Cost Element Antar PG (Satu Card Kanan-Kiri) */}
+        <section id="section-trend-pg-tables" className="pt-2 scroll-mt-24 sm:scroll-mt-28">
           <TrendPgChart
             data={trendMonthly}
             ce2List={ce2MasterList}
             selectedCe2={trendCe2}
             onSelectCe2={setTrendCe2}
             selectedPeriod={selectedPeriod}
+            selectedPeriodLabel={selectedPeriodLabel}
             onSelectPeriod={handleTrendPgMonthClick}
+            costCentersData={trendCostCenters}
             loading={loadingTrendPg}
           />
-
-          {/* Card Bawah: Tabel Cost Center Antar PG (7.3) */}
-          <div id="section-trend-pg-tables" className="scroll-mt-24 sm:scroll-mt-28">
-            <TrendPgTables
-              data={trendCostCenters}
-              selectedPeriodLabel={selectedPeriodLabel}
-              selectedCe2={trendCe2}
-              loading={loadingTrendPg}
-            />
-          </div>
         </section>
       </main>
 

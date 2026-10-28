@@ -1,8 +1,9 @@
 "use client";
 
 import React, { useState, useRef } from "react";
-import { Ce2Option, TrendPgMonthlyPoint } from "@/types/opex";
-import { TrendingUp, Filter, Calendar } from "lucide-react";
+import { Ce2Option, TrendPgCostCenterItem, TrendPgMonthlyPoint } from "@/types/opex";
+import { TrendingUp, Filter } from "lucide-react";
+import TrendPgTables from "./TrendPgTables";
 
 interface TrendPgChartProps {
   data: TrendPgMonthlyPoint[];
@@ -12,6 +13,8 @@ interface TrendPgChartProps {
   selectedPeriod: number;
   onSelectPeriod?: (period: number) => void;
   loading?: boolean;
+  costCentersData?: TrendPgCostCenterItem[];
+  selectedPeriodLabel?: string;
 }
 
 interface TooltipState {
@@ -25,14 +28,6 @@ interface TooltipState {
   y: number;
 }
 
-const formatInMillions = (val: number): string => {
-  if (val === 0) return "";
-  const inMillions = val / 1_000_000;
-  if (inMillions >= 100) return inMillions.toFixed(0);
-  if (inMillions >= 10) return inMillions.toFixed(1);
-  return inMillions.toFixed(2);
-};
-
 export default function TrendPgChart({
   data,
   ce2List,
@@ -41,6 +36,8 @@ export default function TrendPgChart({
   selectedPeriod,
   onSelectPeriod,
   loading,
+  costCentersData = [],
+  selectedPeriodLabel,
 }: TrendPgChartProps) {
   const [hoveredMonth, setHoveredMonth] = useState<number | null>(null);
   const [tooltip, setTooltip] = useState<TooltipState | null>(null);
@@ -53,10 +50,10 @@ export default function TrendPgChart({
   const totalPg2 = data.reduce((acc, curr) => acc + curr.pg2, 0);
   const totalPg3 = data.reduce((acc, curr) => acc + curr.pg3, 0);
 
-  // Maximum value for proportional bar scaling (with 25% overhead for top numbers)
+  // Maximum value for proportional bar scaling (overhead 6% agar bar proporsional dan tidak terpotong)
   const maxMonthlyVal =
-    Math.max(...data.map((d) => Math.max(d.pg1, d.pg2, d.pg3)), 1) * 1.25;
-  const maxTotalVal = Math.max(totalPg1, totalPg2, totalPg3, 1) * 1.25;
+    Math.max(...data.map((d) => Math.max(d.pg1, d.pg2, d.pg3)), 1) * 1.06;
+  const maxTotalVal = Math.max(totalPg1, totalPg2, totalPg3, 1) * 1.06;
 
   const totalPg1Height = (totalPg1 / maxTotalVal) * 100;
   const totalPg2Height = (totalPg2 / maxTotalVal) * 100;
@@ -145,10 +142,10 @@ export default function TrendPgChart({
           </div>
           <div>
             <h3 className="font-bold text-base text-[#17231B] tracking-tight">
-              Trend Cost Element Antar PG (Actual Bulanan)
+              Trend & Komparasi Cost Element Antar PG
             </h3>
             <p className="text-xs text-[#5F6B63]">
-              Perbandingan realisasi biaya operasional murni (Actual) antara PG1, PG2, dan PG3 per bulan.
+              Perbandingan tren bulanan dan komparasi realisasi biaya per Cost Center antara PG1, PG2, dan PG3.
             </p>
           </div>
         </div>
@@ -194,220 +191,139 @@ export default function TrendPgChart({
         </div>
       </div>
 
-      {/* ── Content (Loading or Interactive Bar Chart with Total Column) ── */}
-      {loading ? (
-        <div className="h-64 flex flex-col justify-center items-center">
-          <div className="w-7 h-7 border-3 border-[#16823B] border-t-transparent rounded-full animate-spin mb-2" />
-          <p className="text-xs font-semibold text-[#5F6B63]">Memuat diagram tren antar PG...</p>
-        </div>
-      ) : (
-        <div className="overflow-x-auto pb-2 scrollbar-thin">
-          <div className="min-w-[700px] sm:min-w-0 w-full flex items-stretch gap-1 sm:gap-2">
-            {/* 1. SEKSI 12 BULAN (Januari s.d. Desember) */}
-            <div className="flex-1 relative">
-              {/* Background Dashed Grid Lines */}
-              <div className="absolute inset-0 top-6 bottom-10 pointer-events-none flex flex-col justify-between">
-                <div className="border-b border-dashed border-[#EAEFEF] w-full" />
-                <div className="border-b border-dashed border-[#EAEFEF] w-full" />
-                <div className="border-b border-dashed border-[#EAEFEF] w-full" />
-                <div className="border-b border-dashed border-[#EAEFEF] w-full" />
-              </div>
+      {/* ── Card Body: Layout Kanan Kiri (Kiri 60%, Kanan Menyesuaikan 40%) ── */}
+      <div className="flex flex-col lg:flex-row gap-6 items-stretch">
+        {/* ── SISI KIRI (60%): Grafik Trend Bulanan Antar PG ── */}
+        <div className="w-full lg:w-[60%] flex flex-col justify-between">
+          <div className="flex items-center justify-between pb-2 mb-2 border-b border-[#DDE5DF]/80">
+            <span className="text-xs font-bold text-[#17231B]">
+              Grafik Realisasi Bulanan & Total YTD
+            </span>
+            <span className="text-[11px] text-[#5F6B63]">
+              Sorot batang untuk melihat detail angka
+            </span>
+          </div>
 
-              {/* Columns Grid 12 Bulan */}
-              <div className="grid grid-cols-12 gap-0.5 sm:gap-1 relative z-10 w-full">
-                {data.map((item) => {
-                  const isSelected = item.month === selectedPeriod;
-                  const isHovered = item.month === hoveredMonth;
-
-                  const pg1Height = (item.pg1 / maxMonthlyVal) * 100;
-                  const pg2Height = (item.pg2 / maxMonthlyVal) * 100;
-                  const pg3Height = (item.pg3 / maxMonthlyVal) * 100;
-
-                  const pg1Label = formatInMillions(item.pg1);
-                  const pg2Label = formatInMillions(item.pg2);
-                  const pg3Label = formatInMillions(item.pg3);
-
-                  // Anti-Tabrakan / Vertical Staggering (sama seperti di Ringkasan OPEX PG1)
-                  const diff12 = Math.abs(pg1Height - pg2Height);
-                  const diff23 = Math.abs(pg2Height - pg3Height);
-
-                  let pg1Lift = "mb-0.5";
-                  let pg2Lift = "mb-0.5";
-                  let pg3Lift = "mb-0.5";
-
-                  if (diff12 < 14 || diff23 < 14) {
-                    if (diff12 < 14 && diff23 < 14) {
-                      const sorted = [
-                        { key: 1, val: item.pg1 },
-                        { key: 2, val: item.pg2 },
-                        { key: 3, val: item.pg3 },
-                      ].sort((a, b) => b.val - a.val);
-
-                      const lifts = ["mb-6", "mb-3", "mb-0.5"];
-                      sorted.forEach((s, idx) => {
-                        if (s.key === 1) pg1Lift = lifts[idx];
-                        else if (s.key === 2) pg2Lift = lifts[idx];
-                        else if (s.key === 3) pg3Lift = lifts[idx];
-                      });
-                    } else if (diff12 < 14) {
-                      if (item.pg1 >= item.pg2) pg1Lift = "mb-3.5";
-                      else pg2Lift = "mb-3.5";
-                    } else if (diff23 < 14) {
-                      if (item.pg2 >= item.pg3) pg2Lift = "mb-3.5";
-                      else pg3Lift = "mb-3.5";
-                    }
-                  }
-
-                  return (
-                    <div
-                      key={item.month}
-                      onClick={() => onSelectPeriod?.(item.month)}
-                      onMouseEnter={(e) => showMonthTooltip(item, e)}
-                      onMouseLeave={hideTooltip}
-                      className={`flex flex-col items-center cursor-pointer transition-all rounded-t-lg pt-1 ${
-                        isSelected
-                          ? "bg-[#EAF3EC]/70 ring-2 ring-[#16823B]/30"
-                          : isHovered
-                          ? "bg-[#F8FAF9]"
-                          : ""
-                      }`}
-                      title={`Klik untuk memilih bulan ${item.monthName}`}
-                    >
-                      {/* Area Batang & Angka di Atas (Tinggi 220px) */}
-                      <div className="h-[220px] w-full flex items-end justify-center gap-0.5 sm:gap-1 relative px-0.5">
-                        {/* Batang 1: PG1 (#16823B Hijau Tua) */}
-                        <div className="flex flex-col items-center justify-end h-full w-2.5 sm:w-3.5 md:w-4 shrink-0 relative">
-                          {pg1Label && (
-                            <span
-                              className={`hidden sm:block font-mono text-[8px] sm:text-[9px] md:text-[10px] text-[#17231B] select-none leading-none -translate-x-0.5 ${pg1Lift}`}
-                            >
-                              {pg1Label}
-                            </span>
-                          )}
-                          <div
-                            style={{ height: `${pg1Height}%` }}
-                            className={`w-full bg-[#16823B] transition-all duration-300 rounded-t-xs ${
-                              isSelected ? "opacity-100 ring-1 ring-[#0F5A28]" : "opacity-85 hover:opacity-100"
-                            }`}
-                          />
-                        </div>
-
-                        {/* Batang 2: PG2 (#29A9D6 Biru Terang) */}
-                        <div className="flex flex-col items-center justify-end h-full w-2.5 sm:w-3.5 md:w-4 shrink-0 relative">
-                          {pg2Label && (
-                            <span
-                              className={`hidden sm:block font-mono text-[8px] sm:text-[9px] md:text-[10px] text-[#17231B] select-none leading-none translate-x-0 ${pg2Lift}`}
-                            >
-                              {pg2Label}
-                            </span>
-                          )}
-                          <div
-                            style={{ height: `${pg2Height}%` }}
-                            className={`w-full bg-[#29A9D6] transition-all duration-300 rounded-t-xs ${
-                              isSelected ? "opacity-100 ring-1 ring-[#1B7E9F]" : "opacity-85 hover:opacity-100"
-                            }`}
-                          />
-                        </div>
-
-                        {/* Batang 3: PG3 (#E5C959 Kuning WIP) */}
-                        <div className="flex flex-col items-center justify-end h-full w-2.5 sm:w-3.5 md:w-4 shrink-0 relative">
-                          {pg3Label && (
-                            <span
-                              className={`hidden sm:block font-mono text-[8px] sm:text-[9px] md:text-[10px] text-[#17231B] select-none leading-none translate-x-0.5 ${pg3Lift}`}
-                            >
-                              {pg3Label}
-                            </span>
-                          )}
-                          <div
-                            style={{ height: `${pg3Height}%` }}
-                            className={`w-full bg-[#E5C959] transition-all duration-300 rounded-t-xs ${
-                              isSelected ? "opacity-100 ring-1 ring-[#B59D38]" : "opacity-85 hover:opacity-100"
-                            }`}
-                          />
-                        </div>
-                      </div>
-
-                      {/* Garis Dasar Bawah Solid Hitam */}
-                      <div className="w-full border-b-2 border-[#17231B]" />
-
-                      {/* Label Nama Bulan di Bawah Garis */}
-                      <div className="pt-2 pb-1 text-center w-full px-0.5">
-                        <span
-                          className={`text-[9px] sm:text-[10px] md:text-xs block select-none truncate ${
-                            isSelected
-                              ? "font-bold text-[#16823B]"
-                              : "font-semibold text-[#5F6B63]"
-                          }`}
-                        >
-                          {item.monthName}
-                        </span>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
+          {loading ? (
+            <div className="h-[320px] flex flex-col justify-center items-center">
+              <div className="w-7 h-7 border-3 border-[#16823B] border-t-transparent rounded-full animate-spin mb-2" />
+              <p className="text-xs font-semibold text-[#5F6B63]">Memuat diagram tren antar PG...</p>
             </div>
-
-            {/* 2. PEMISAH VERTIKAL (GAP ANTARA DESEMBER & TOTAL) */}
-            <div className="w-3 sm:w-4 shrink-0 flex flex-col justify-end">
-              <div className="w-full border-r border-[#DDE5DF] h-[220px]" />
-            </div>
-
-            {/* 3. SEKSI TOTAL YTD (DI SEBELAH KANAN) */}
-            {(() => {
-              const totalDiff12 = Math.abs(totalPg1Height - totalPg2Height);
-              const totalDiff23 = Math.abs(totalPg2Height - totalPg3Height);
-
-              let totalPg1Lift = "mb-0.5";
-              let totalPg2Lift = "mb-0.5";
-              let totalPg3Lift = "mb-0.5";
-
-              if (totalDiff12 < 14 || totalDiff23 < 14) {
-                if (totalDiff12 < 14 && totalDiff23 < 14) {
-                  const sorted = [
-                    { key: 1, val: totalPg1 },
-                    { key: 2, val: totalPg2 },
-                    { key: 3, val: totalPg3 },
-                  ].sort((a, b) => b.val - a.val);
-
-                  const lifts = ["mb-6", "mb-3", "mb-0.5"];
-                  sorted.forEach((s, idx) => {
-                    if (s.key === 1) totalPg1Lift = lifts[idx];
-                    else if (s.key === 2) totalPg2Lift = lifts[idx];
-                    else if (s.key === 3) totalPg3Lift = lifts[idx];
-                  });
-                } else if (totalDiff12 < 14) {
-                  if (totalPg1 >= totalPg2) totalPg1Lift = "mb-3.5";
-                  else totalPg2Lift = "mb-3.5";
-                } else if (totalDiff23 < 14) {
-                  if (totalPg2 >= totalPg3) totalPg2Lift = "mb-3.5";
-                  else totalPg3Lift = "mb-3.5";
-                }
-              }
-
-              return (
-                <div
-                  onMouseEnter={showTotalTooltip}
-                  onMouseLeave={hideTooltip}
-                  className="w-28 sm:w-32 shrink-0 relative flex flex-col cursor-pointer hover:bg-[#F8FAF9]/80 rounded-t-lg transition-colors pt-1"
-                >
-                  {/* Background Dashed Grid Lines khusus Total */}
-                  <div className="absolute inset-0 top-6 bottom-10 pointer-events-none flex flex-col justify-between">
+          ) : (
+            <div className="overflow-x-auto pb-1 scrollbar-thin">
+              <div className="min-w-[560px] sm:min-w-0 w-full flex items-stretch gap-1 sm:gap-2">
+                {/* 1. SEKSI 12 BULAN (Januari s.d. Desember) */}
+                <div className="flex-1 relative">
+                  {/* Background Dashed Grid Lines */}
+                  <div className="absolute inset-0 top-3 bottom-8 pointer-events-none flex flex-col justify-between">
                     <div className="border-b border-dashed border-[#EAEFEF] w-full" />
                     <div className="border-b border-dashed border-[#EAEFEF] w-full" />
                     <div className="border-b border-dashed border-[#EAEFEF] w-full" />
                     <div className="border-b border-dashed border-[#EAEFEF] w-full" />
                   </div>
 
-                  {/* Area Batang Total 3 PG (Tinggi 220px) */}
-                  <div className="h-[220px] w-full flex items-end justify-center gap-1 sm:gap-1.5 relative px-1 z-10">
+                  {/* Columns Grid 12 Bulan */}
+                  <div className="grid grid-cols-12 gap-0.5 sm:gap-1 relative z-10 w-full">
+                    {data.map((item) => {
+                      const isSelected = item.month === selectedPeriod;
+                      const isHovered = item.month === hoveredMonth;
+
+                      const pg1Height = (item.pg1 / maxMonthlyVal) * 100;
+                      const pg2Height = (item.pg2 / maxMonthlyVal) * 100;
+                      const pg3Height = (item.pg3 / maxMonthlyVal) * 100;
+
+                      return (
+                        <div
+                          key={item.month}
+                          onClick={() => onSelectPeriod?.(item.month)}
+                          onMouseEnter={(e) => showMonthTooltip(item, e)}
+                          onMouseLeave={hideTooltip}
+                          className={`flex flex-col items-center cursor-pointer transition-all rounded-t-lg pt-2 ${
+                            isSelected
+                              ? "bg-[#EAF3EC]/70 ring-2 ring-[#16823B]/30"
+                              : isHovered
+                              ? "bg-[#F8FAF9]"
+                              : ""
+                          }`}
+                          title={`Klik untuk memilih bulan ${item.monthName}`}
+                        >
+                          {/* Area Batang Murni (Tinggi 240px - Angka dihilangkan, hanya visual bar & tooltip) */}
+                          <div className="h-[240px] w-full flex items-end justify-center gap-0.5 sm:gap-1 relative px-0.5">
+                            {/* Batang 1: PG1 (#16823B Hijau Tua) */}
+                            <div className="flex flex-col items-center justify-end h-full w-2 sm:w-2.5 md:w-3.5 shrink-0 relative">
+                              <div
+                                style={{ height: `${pg1Height}%` }}
+                                className={`w-full bg-[#16823B] transition-all duration-300 rounded-t-xs ${
+                                  isSelected ? "opacity-100 ring-1 ring-[#0F5A28]" : "opacity-85 hover:opacity-100"
+                                }`}
+                              />
+                            </div>
+
+                            {/* Batang 2: PG2 (#29A9D6 Biru Terang) */}
+                            <div className="flex flex-col items-center justify-end h-full w-2 sm:w-2.5 md:w-3.5 shrink-0 relative">
+                              <div
+                                style={{ height: `${pg2Height}%` }}
+                                className={`w-full bg-[#29A9D6] transition-all duration-300 rounded-t-xs ${
+                                  isSelected ? "opacity-100 ring-1 ring-[#1B7E9F]" : "opacity-85 hover:opacity-100"
+                                }`}
+                              />
+                            </div>
+
+                            {/* Batang 3: PG3 (#E5C959 Kuning WIP) */}
+                            <div className="flex flex-col items-center justify-end h-full w-2 sm:w-2.5 md:w-3.5 shrink-0 relative">
+                              <div
+                                style={{ height: `${pg3Height}%` }}
+                                className={`w-full bg-[#E5C959] transition-all duration-300 rounded-t-xs ${
+                                  isSelected ? "opacity-100 ring-1 ring-[#B59D38]" : "opacity-85 hover:opacity-100"
+                                }`}
+                              />
+                            </div>
+                          </div>
+
+                          {/* Garis Dasar Bawah Solid Hitam */}
+                          <div className="w-full border-b-2 border-[#17231B]" />
+
+                          {/* Label Nama Bulan di Bawah Garis */}
+                          <div className="pt-2 pb-1 text-center w-full px-0.5">
+                            <span
+                              className={`text-[9px] sm:text-[10px] md:text-xs block select-none truncate ${
+                                isSelected
+                                  ? "font-bold text-[#16823B]"
+                                  : "font-semibold text-[#5F6B63]"
+                              }`}
+                            >
+                              {item.monthName}
+                            </span>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* 2. PEMISAH VERTIKAL (GAP ANTARA DESEMBER & TOTAL) */}
+                <div className="w-2 sm:w-3 shrink-0 flex flex-col justify-end">
+                  <div className="w-full border-r border-[#DDE5DF] h-[240px]" />
+                </div>
+
+                {/* 3. SEKSI TOTAL YTD (DI SEBELAH KANAN) */}
+                <div
+                  onMouseEnter={showTotalTooltip}
+                  onMouseLeave={hideTooltip}
+                  className="w-20 sm:w-24 shrink-0 relative flex flex-col cursor-pointer hover:bg-[#F8FAF9]/80 rounded-t-lg transition-colors pt-2"
+                >
+                  {/* Background Dashed Grid Lines khusus Total */}
+                  <div className="absolute inset-0 top-3 bottom-8 pointer-events-none flex flex-col justify-between">
+                    <div className="border-b border-dashed border-[#EAEFEF] w-full" />
+                    <div className="border-b border-dashed border-[#EAEFEF] w-full" />
+                    <div className="border-b border-dashed border-[#EAEFEF] w-full" />
+                    <div className="border-b border-dashed border-[#EAEFEF] w-full" />
+                  </div>
+
+                  {/* Area Batang Total 3 PG (Tinggi 240px - Angka dihilangkan, hanya visual bar & tooltip) */}
+                  <div className="h-[240px] w-full flex items-end justify-center gap-1 relative px-1 z-10">
                     {/* Total PG1 */}
-                    <div className="flex flex-col items-center justify-end h-full w-3.5 sm:w-4 md:w-5 shrink-0 relative">
-                      <span
-                        className={`hidden sm:block font-mono text-[8px] sm:text-[9px] md:text-[10px] text-[#17231B] select-none leading-none -translate-x-0.5 ${totalPg1Lift}`}
-                      >
-                        {formatInMillions(totalPg1)}
-                      </span>
+                    <div className="flex flex-col items-center justify-end h-full w-2.5 sm:w-3.5 shrink-0 relative">
                       <div
                         style={{ height: `${totalPg1Height}%` }}
                         className="w-full bg-[#16823B] transition-all duration-300 rounded-t-xs"
@@ -415,12 +331,7 @@ export default function TrendPgChart({
                     </div>
 
                     {/* Total PG2 */}
-                    <div className="flex flex-col items-center justify-end h-full w-3.5 sm:w-4 md:w-5 shrink-0 relative">
-                      <span
-                        className={`hidden sm:block font-mono text-[8px] sm:text-[9px] md:text-[10px] text-[#17231B] select-none leading-none translate-x-0 ${totalPg2Lift}`}
-                      >
-                        {formatInMillions(totalPg2)}
-                      </span>
+                    <div className="flex flex-col items-center justify-end h-full w-2.5 sm:w-3.5 shrink-0 relative">
                       <div
                         style={{ height: `${totalPg2Height}%` }}
                         className="w-full bg-[#29A9D6] transition-all duration-300 rounded-t-xs"
@@ -428,12 +339,7 @@ export default function TrendPgChart({
                     </div>
 
                     {/* Total PG3 */}
-                    <div className="flex flex-col items-center justify-end h-full w-3.5 sm:w-4 md:w-5 shrink-0 relative">
-                      <span
-                        className={`hidden sm:block font-mono text-[8px] sm:text-[9px] md:text-[10px] text-[#17231B] select-none leading-none translate-x-0.5 ${totalPg3Lift}`}
-                      >
-                        {formatInMillions(totalPg3)}
-                      </span>
+                    <div className="flex flex-col items-center justify-end h-full w-2.5 sm:w-3.5 shrink-0 relative">
                       <div
                         style={{ height: `${totalPg3Height}%` }}
                         className="w-full bg-[#E5C959] transition-all duration-300 rounded-t-xs"
@@ -446,28 +352,38 @@ export default function TrendPgChart({
 
                   {/* Label "Total YTD" di Bawah Garis */}
                   <div className="pt-2 pb-1 text-center">
-                    <span className="text-[10px] sm:text-[11px] md:text-xs font-bold text-[#17231B] block select-none">
+                    <span className="text-[10px] sm:text-[11px] font-bold text-[#17231B] block select-none">
                       Total YTD
                     </span>
                   </div>
                 </div>
-              );
-            })()}
+              </div>
+            </div>
+          )}
+
+          {/* Status Bar Keterangan Bawah */}
+          <div className="mt-3 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-[11px] text-[#5F6B63] bg-[#F8FAF9] border border-[#DDE5DF] px-3.5 py-2 rounded-xl">
+            <span>
+              Cost Element: <strong className="text-[#16823B]">{selectedCe2} ({currentCe2?.deskripsiCe2 || selectedCe2})</strong>
+            </span>
+            <span className="text-[#89938D]">
+              Bulan aktif: <strong className="text-[#16823B]">{data.find((d) => d.month === selectedPeriod)?.monthName || `Bulan ${selectedPeriod}`}</strong> (Klik kolom untuk filter bulan)
+            </span>
           </div>
         </div>
-      )}
 
-      {/* ── Status Bar Keterangan Bawah ── */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-[11px] text-[#5F6B63] bg-[#F8FAF9] border border-[#DDE5DF] px-3.5 py-2 rounded-xl">
-        <span>
-          Filter Cost Element aktif: <strong className="text-[#16823B]">{selectedCe2} ({currentCe2?.deskripsiCe2 || selectedCe2})</strong>
-        </span>
-        <span className="text-[#89938D]">
-          Bulan aktif: <strong className="text-[#16823B]">{data.find((d) => d.month === selectedPeriod)?.monthName || `Bulan ${selectedPeriod}`}</strong> (Klik kolom bulan untuk sinkronisasi Main Filter)
-        </span>
+        {/* ── SISI KANAN (MENYESUAIKAN / 40%): Tabel Komparasi Cost Center Antar PG ── */}
+        <div className="w-full lg:w-[40%] flex-1 border-t lg:border-t-0 lg:border-l border-[#DDE5DF] pt-5 lg:pt-0 lg:pl-6 flex flex-col justify-between">
+          <TrendPgTables
+            data={costCentersData}
+            selectedPeriodLabel={selectedPeriodLabel}
+            selectedCe2={selectedCe2}
+            loading={loading}
+          />
+        </div>
       </div>
 
-      {/* ── Floating Tooltip (Konsisten dengan Desain Standar OPEX & WIP) ── */}
+      {/* ── Floating Tooltip (Muncul saat hover batang bulan / Total YTD) ── */}
       {tooltip &&
         (() => {
           const { left, top, arrowOffset } = getTooltipStyle(tooltip.x, tooltip.y);
