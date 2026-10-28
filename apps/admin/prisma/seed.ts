@@ -39,7 +39,7 @@ async function main() {
       name: "Dashboard Opex (Operational Expenditure)",
       adminUrl: `${hppM3Url}/admin`,
       publicUrl: hppM3Url,
-      status: "DEVELOPMENT",
+      status: "ACTIVE",
     },
     {
       code: "irigasi",

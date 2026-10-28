@@ -100,7 +100,7 @@ export const getDashboardNavConfig = (): DashboardNavConfig => {
         label: "Opex",
         url: opexUrl,
         description: "Operational Expenditure (Biaya Operasional)",
-        isHosted: false,
+        isHosted: true,
       },
       {
         key: "irigasi",

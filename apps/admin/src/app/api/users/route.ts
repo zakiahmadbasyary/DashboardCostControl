@@ -108,7 +108,7 @@ export async function POST(request: Request) {
               name: `Dashboard ${code.toUpperCase()}`,
               adminUrl: `/${code}/admin`,
               publicUrl: `/${code}`,
-              status: code === "wip" ? "ACTIVE" : "DEVELOPMENT",
+              status: ["wip", "hpp", "capex", "harga_material", "opex"].includes(code) ? "ACTIVE" : "DEVELOPMENT",
             },
           });
         }
@@ -186,7 +186,7 @@ export async function PUT(request: Request) {
                 name: `Dashboard ${code.toUpperCase()}`,
                 adminUrl: `/${code}/admin`,
                 publicUrl: `/${code}`,
-                status: code === "wip" ? "ACTIVE" : "DEVELOPMENT",
+                status: ["wip", "hpp", "capex", "harga_material", "opex"].includes(code) ? "ACTIVE" : "DEVELOPMENT",
               },
             });
           }

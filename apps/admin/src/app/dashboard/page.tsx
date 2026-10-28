@@ -373,7 +373,7 @@ export default function AdminDashboardPage() {
       url: opexUrl,
       adminUrl: `${opexUrl}/admin`,
       icon: Receipt,
-      isHosted: false,
+      isHosted: true,
     },
     {
       code: "irigasi",

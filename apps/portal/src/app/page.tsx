@@ -82,7 +82,7 @@ export default function PortalHomePage() {
       url: opexUrl,
       icon: Receipt,
       badge: "Biaya Operasional",
-      isHosted: false,
+      isHosted: true,
     },
     {
       id: "irigasi",
