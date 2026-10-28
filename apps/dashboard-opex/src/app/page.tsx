@@ -8,6 +8,7 @@ import CostCenterTables from "@/components/dashboard/CostCenterTables";
 import CostElementTable from "@/components/dashboard/CostElementTable";
 import CostElementActivityTable from "@/components/dashboard/CostElementActivityTable";
 import TrendPgChart from "@/components/dashboard/TrendPgChart";
+import type { OpexSectionTab } from "@/components/dashboard/OpexSubNav";
 
 import {
   PeriodOption,
@@ -280,18 +281,54 @@ export default function DashboardOpexPage() {
     }
   }, [pendingScrollTarget, loadingCostCenters, loadingCostElements, loadingTrendPg, scrollToElement]);
 
+  // ── 7. SUB-MENU NAVIGATION STATE & SCROLLSPY ──
+  const [activeSection, setActiveSection] = useState<OpexSectionTab>("pg1");
+
+  const handleSelectSubNav = useCallback(
+    (section: OpexSectionTab) => {
+      setActiveSection(section);
+      if (section === "pg1") {
+        scrollToElement("section-overview-pg1");
+      } else if (section === "antar-pg") {
+        scrollToElement("section-trend-pg-tables");
+      }
+    },
+    [scrollToElement]
+  );
+
+  // ScrollSpy: Mengupdate activeSection otomatis saat user scroll manual
+  useEffect(() => {
+    const handleScroll = () => {
+      const antarPgEl = document.getElementById("section-trend-pg-tables");
+      if (!antarPgEl) return;
+      const rect = antarPgEl.getBoundingClientRect();
+      // Saat card Antar PG sudah mencapai area pandang atas (<= 320px dari top viewport)
+      if (rect.top <= 320) {
+        setActiveSection("antar-pg");
+      } else {
+        setActiveSection("pg1");
+      }
+    };
+
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
   const selectedPeriodObj = periods.find((p) => p.periode === selectedPeriod);
   const selectedPeriodLabel = selectedPeriodObj ? selectedPeriodObj.label : `Bulan ${selectedPeriod}`;
 
   return (
     <div className="min-h-screen bg-[#F7F9F7] text-[#17231B] flex flex-col font-sans">
       {/* ── 1. TOP NAVBAR & SIDEBAR NAVIGATION ── */}
-      <DashboardHeader />
+      <DashboardHeader
+        activeSection={activeSection}
+        onSelectSection={handleSelectSubNav}
+      />
 
       {/* ── 2. MAIN DASHBOARD CONTENT ── */}
       <main className="flex-1 w-full md:w-[calc(100%-4rem)] md:ml-16 px-4 sm:px-6 lg:px-8 py-5 sm:py-6 space-y-6">
         {/* Section 4: Main Filter (Periode Bulan) - Freeze / Sticky */}
-        <section className="sticky top-16 sm:top-20 z-20 bg-[#F7F9F7]/95 backdrop-blur-xs ">
+        <section className="sticky top-16 sm:top-20 z-20 bg-[#F7F9F7]/95 backdrop-blur-xs">
           <OpexMainFilter
             periods={periods}
             selectedPeriod={selectedPeriod}
@@ -301,15 +338,17 @@ export default function DashboardOpexPage() {
         </section>
 
         {/* Section 5.1: Summary Overhead PG1 — Grafik Actual vs Budget per Bulan */}
-        <SummaryMonthlyChart
-          data={monthlyChartData}
-          totalActual={totalActual}
-          totalBudget={totalBudget}
-          totalVariance={totalVariance}
-          selectedPeriod={selectedPeriod}
-          onSelectPeriod={handleSummaryMonthClick}
-          loading={loadingMonthlyChart}
-        />
+        <div id="section-overview-pg1" className="scroll-mt-24 sm:scroll-mt-28">
+          <SummaryMonthlyChart
+            data={monthlyChartData}
+            totalActual={totalActual}
+            totalBudget={totalBudget}
+            totalVariance={totalVariance}
+            selectedPeriod={selectedPeriod}
+            onSelectPeriod={handleSummaryMonthClick}
+            loading={loadingMonthlyChart}
+          />
+        </div>
 
         {/* Section 5.2: Dua Tabel Cost Center PG1 Berdampingan */}
         <div id="section-cost-center-table" className="scroll-mt-24 sm:scroll-mt-28">

@@ -34,7 +34,15 @@ const MODULE_ICONS: Record<string, React.ElementType> = {
   poll_pg1: Gauge,
 };
 
-export default function DashboardHeader() {
+interface DashboardHeaderProps {
+  activeSection?: "pg1" | "antar-pg";
+  onSelectSection?: (section: "pg1" | "antar-pg") => void;
+}
+
+export default function DashboardHeader({
+  activeSection = "pg1",
+  onSelectSection,
+}: DashboardHeaderProps = {}) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
@@ -200,6 +208,47 @@ export default function DashboardHeader() {
               </div>
             </a>
 
+            {/* Center Sub-Menu Navigation: OPEX PG1 & Antar PG */}
+            {onSelectSection && (
+              <div className="hidden md:flex items-center gap-1 bg-[#F8FAF9] border border-[#DDE5DF] p-1 rounded-xl shadow-2xs">
+                <button
+                  type="button"
+                  onClick={() => onSelectSection("pg1")}
+                  className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs transition-all cursor-pointer select-none ${
+                    activeSection === "pg1"
+                      ? "bg-white text-[#16823B] font-bold shadow-xs border border-[#CBE0D1]"
+                      : "text-[#5F6B63] hover:text-[#17231B] hover:bg-white/60 font-semibold border border-transparent"
+                  }`}
+                  title="Direct ke Ringkasan & Detail OPEX PG1"
+                >
+                  <Building2
+                    className={`w-3.5 h-3.5 shrink-0 ${
+                      activeSection === "pg1" ? "text-[#16823B]" : "text-[#89938D]"
+                    }`}
+                  />
+                  <span>OPEX PG1</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => onSelectSection("antar-pg")}
+                  className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs transition-all cursor-pointer select-none ${
+                    activeSection === "antar-pg"
+                      ? "bg-white text-[#16823B] font-bold shadow-xs border border-[#CBE0D1]"
+                      : "text-[#5F6B63] hover:text-[#17231B] hover:bg-white/60 font-semibold border border-transparent"
+                  }`}
+                  title="Direct ke Trend & Komparasi Cost Element Antar PG"
+                >
+                  <TrendingUp
+                    className={`w-3.5 h-3.5 shrink-0 ${
+                      activeSection === "antar-pg" ? "text-[#16823B]" : "text-[#89938D]"
+                    }`}
+                  />
+                  <span>Komparasi Antar PG</span>
+                </button>
+              </div>
+            )}
+
             {/* Right Action Buttons */}
             <div className="flex items-center gap-1.5 sm:gap-2.5 shrink-0">
               <a
@@ -242,6 +291,47 @@ export default function DashboardHeader() {
         {/* Mobile Dropdown Menu (Under Navbar, NOT a sidebar) */}
         {mobileMenuOpen && (
           <div className="md:hidden border-t border-[#DDE5DF] bg-white px-3 sm:px-4 py-3.5 space-y-3 shadow-lg max-h-[80vh] overflow-y-auto animate-in slide-in-from-top-2 duration-150">
+            {/* Mobile Sub-Menu Direct Navigation */}
+            {onSelectSection && (
+              <div className="space-y-1.5 pb-2 border-b border-[#DDE5DF]">
+                <div className="text-[11px] font-bold text-[#5F6B63] uppercase tracking-wider px-1">
+                  Navigasi Cepat Halaman OPEX
+                </div>
+                <div className="grid grid-cols-2 gap-1.5 p-1 bg-[#F8FAF9] border border-[#DDE5DF] rounded-xl">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      onSelectSection("pg1");
+                      setMobileMenuOpen(false);
+                    }}
+                    className={`flex items-center justify-center gap-1.5 py-2 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                      activeSection === "pg1"
+                        ? "bg-white text-[#16823B] shadow-xs border border-[#CBE0D1]"
+                        : "text-[#5F6B63] hover:text-[#17231B]"
+                    }`}
+                  >
+                    <Building2 className="w-3.5 h-3.5 text-[#16823B]" />
+                    <span>OPEX PG1</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      onSelectSection("antar-pg");
+                      setMobileMenuOpen(false);
+                    }}
+                    className={`flex items-center justify-center gap-1.5 py-2 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                      activeSection === "antar-pg"
+                        ? "bg-white text-[#16823B] shadow-xs border border-[#CBE0D1]"
+                        : "text-[#5F6B63] hover:text-[#17231B]"
+                    }`}
+                  >
+                    <TrendingUp className="w-3.5 h-3.5 text-[#16823B]" />
+                    <span>Antar PG</span>
+                  </button>
+                </div>
+              </div>
+            )}
+
             <div className="w-full space-y-3">
               <div className="flex items-center justify-between text-xs font-bold text-[#5F6B63] uppercase tracking-wider px-1">
                 <span>Navigasi Dashboard (9 Modul)</span>
