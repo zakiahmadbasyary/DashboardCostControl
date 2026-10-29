@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useCallback } from "react";
-import CapexDashboardHeader from "@/components/CapexDashboardHeader";
+import CapexDashboardHeader, { CapexSectionTab } from "@/components/CapexDashboardHeader";
 import CapexMainFilters from "@/components/CapexMainFilters";
 import CapexAnalyticsChartsCard, { ChartFilterMode } from "@/components/CapexAnalyticsChartsCard";
 import CapexListCard from "@/components/CapexListCard";
@@ -204,10 +204,52 @@ export default function DashboardCapexPage() {
     }));
   };
 
+  // ─── 5. SUB-MENU NAVIGATION STATE & SCROLLSPY ──────────────────────────────
+  const [activeSection, setActiveSection] = useState<CapexSectionTab>("capex");
+
+  const scrollToElement = useCallback((elementId: string) => {
+    const el = document.getElementById(elementId);
+    if (!el) return;
+    el.scrollIntoView({ behavior: "smooth", block: "start" });
+  }, []);
+
+  const handleSelectSubNav = useCallback(
+    (section: CapexSectionTab) => {
+      setActiveSection(section);
+      if (section === "capex") {
+        scrollToElement("section-data-capex");
+      } else if (section === "approver") {
+        scrollToElement("section-pending-approver");
+      }
+    },
+    [scrollToElement]
+  );
+
+  // ScrollSpy: Mengupdate activeSection otomatis saat user scroll manual
+  useEffect(() => {
+    const handleScroll = () => {
+      const approverEl = document.getElementById("section-pending-approver");
+      if (!approverEl) return;
+      const rect = approverEl.getBoundingClientRect();
+      // Saat card Pending Approver sudah mencapai area pandang atas (<= 320px dari top viewport)
+      if (rect.top <= 320) {
+        setActiveSection("approver");
+      } else {
+        setActiveSection("capex");
+      }
+    };
+
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
   return (
     <div className="min-h-screen bg-[#F7F9F7] font-sans antialiased flex flex-col">
-      {/* ── GLOBAL NAVBAR (Kept untouched as required) ── */}
-      <CapexDashboardHeader />
+      {/* ── GLOBAL NAVBAR WITH CENTER SUB-MENU NAVIGATION ── */}
+      <CapexDashboardHeader
+        activeSection={activeSection}
+        onSelectSection={handleSelectSubNav}
+      />
 
       {/* ── MAIN CONTENT ── */}
       <main className="w-full md:w-[calc(100%-4rem)] md:ml-16 px-3 sm:px-6 lg:px-8 py-3.5 sm:py-4 flex flex-col gap-2.5 sm:gap-3 flex-1">
@@ -224,7 +266,7 @@ export default function DashboardCapexPage() {
         </section>
 
         {/* ── CARD BARU: GRAFIK ANALISIS STATUS & KATEGORI CAPEX (INTERAKTIF FILTER) ── */}
-        <section>
+        <section id="section-data-capex" className="scroll-mt-24 sm:scroll-mt-28">
           <CapexAnalyticsChartsCard
             items={capexList}
             globalItems={allCapexList.length > 0 ? allCapexList : capexList}
@@ -283,7 +325,7 @@ export default function DashboardCapexPage() {
         </section>
 
         {/* ── 4. AREA USER APPROVER (DUA CARD KIRI & KANAN, INDEPENDEN DARI FILTER) ── */}
-        <div className="pt-2 sm:pt-3">
+        <div id="section-pending-approver" className="pt-2 sm:pt-3 scroll-mt-24 sm:scroll-mt-28">
           <UserApproverSection
             approvers={approvers}
             loading={loadingApprovers}
