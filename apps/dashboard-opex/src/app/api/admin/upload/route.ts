@@ -6,6 +6,9 @@ import { Prisma } from "@/generated/client";
 
 const MAX_FILE_SIZE_BYTES = 25 * 1024 * 1024; // 25MB Limit
 
+export const dynamic = "force-dynamic";
+export const maxDuration = 300;
+
 export async function POST(request: NextRequest) {
   try {
     const formData = await request.formData();

@@ -23,9 +23,13 @@ export const uploadService = {
     });
 
     try {
+      // Bersihkan nama file dari spasi, tanda kurung, dan karakter non-alphanumeric agar aman bagi multipart parser
+      const safeName = file.name.replace(/[^a-zA-Z0-9_.-]/g, "_");
+      const safeFile = new File([file], safeName, { type: file.type });
+
       const formData = new FormData();
       formData.append("category", categoryKey);
-      formData.append("file", file);
+      formData.append("file", safeFile);
 
       // Phase 2: Processing & Validating
       onProgress({
