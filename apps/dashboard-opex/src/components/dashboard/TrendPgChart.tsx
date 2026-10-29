@@ -2,7 +2,7 @@
 
 import React, { useState, useRef } from "react";
 import { Ce2Option, TrendPgCostCenterItem, TrendPgMonthlyPoint } from "@/types/opex";
-import { TrendingUp, Filter } from "lucide-react";
+import { TrendingUp, Filter, ChevronDown } from "lucide-react";
 import TrendPgTables from "./TrendPgTables";
 
 interface TrendPgChartProps {
@@ -135,7 +135,7 @@ export default function TrendPgChart({
       className="relative bg-white border border-[#DDE5DF] rounded-2xl p-5 sm:p-6 shadow-sm shadow-[#16823B]/5 flex flex-col gap-5 font-sans"
     >
       {/* ── Top Bar: Title, Legend, Unit & Independent CE2 Selector ── */}
-      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-4 border-b border-[#DDE5DF]">
+      <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-4 pb-4 border-b border-[#DDE5DF]">
         <div className="flex items-center gap-3">
           <div className="p-2.5 rounded-xl bg-[#16823B]/10 text-[#16823B] shrink-0">
             <TrendingUp className="w-5 h-5" />
@@ -151,7 +151,7 @@ export default function TrendPgChart({
         </div>
 
         {/* Legend, Unit & CE2 Dropdown */}
-        <div className="flex flex-wrap items-center gap-3 self-start lg:self-center shrink-0">
+        <div className="flex flex-wrap items-center gap-3 self-start xl:self-center shrink-0">
           {/* Legend */}
           <div className="flex items-center gap-3 text-xs text-[#5F6B63]">
             <div className="flex items-center gap-1.5">
@@ -172,21 +172,25 @@ export default function TrendPgChart({
             Juta (Rp)
           </span>
 
-          {/* Independent CE2 Filter */}
-          <div className="flex items-center gap-1.5 bg-[#F8FAF9] border border-[#DDE5DF] rounded-xl pl-2.5 pr-1 py-1">
-            <Filter className="w-3.5 h-3.5 text-[#16823B]" />
+          {/* Independent CE2 Filter (Diperbesar & Lebih Jelas) */}
+          <div className="relative flex items-center gap-2 bg-[#F8FAF9] hover:bg-[#EEF4F0]/60 border border-[#DDE5DF] hover:border-[#CBE0D1] rounded-xl pl-3 pr-2.5 py-1.5 shadow-2xs transition-all w-full sm:w-auto min-w-[280px] sm:min-w-[340px] md:min-w-[400px] max-w-[500px]">
+            <Filter className="w-4 h-4 text-[#16823B] shrink-0" />
             <select
               value={selectedCe2}
               onChange={(e) => onSelectCe2(e.target.value)}
               suppressHydrationWarning
-              className="bg-transparent text-xs font-semibold text-[#17231B] focus:outline-none cursor-pointer max-w-[180px] sm:max-w-[210px] truncate pr-1"
+              title={currentCe2 ? `${currentCe2.ce2} — ${currentCe2.deskripsiCe2}` : selectedCe2}
+              className="bg-transparent text-xs sm:text-[13px] font-semibold text-[#17231B] focus:outline-none cursor-pointer w-full pr-6 appearance-none truncate"
             >
               {ce2List.map((c) => (
-                <option key={c.ce2} value={c.ce2}>
+                <option key={c.ce2} value={c.ce2} className="text-[#17231B] bg-white py-1">
                   {c.ce2} — {c.deskripsiCe2}
                 </option>
               ))}
             </select>
+            <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-[#5F6B63]">
+              <ChevronDown className="w-3.5 h-3.5" />
+            </div>
           </div>
         </div>
       </div>
