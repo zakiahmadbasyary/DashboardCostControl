@@ -11,25 +11,45 @@ export const maxDuration = 300;
 
 export async function POST(request: NextRequest) {
   try {
-    const formData = await request.formData();
-    const category = String(formData.get("category") || "").toLowerCase().trim();
-    const file = formData.get("file") as File | null;
+    const contentType = request.headers.get("content-type") || "";
+    let category = "";
+    let fileName = "";
+    let buffer: Buffer;
 
-    if (!file) {
-      return NextResponse.json({ success: false, message: "File wajib diunggah." }, { status: 400 });
+    if (contentType.includes("application/octet-stream")) {
+      // 1. Direct Binary Stream Upload (Bypass multipart FormData parser sepenuhnya)
+      const url = new URL(request.url);
+      category = String(url.searchParams.get("category") || "").toLowerCase().trim();
+      fileName = decodeURIComponent(url.searchParams.get("fileName") || "upload.xlsx");
+
+      const arrayBuffer = await request.arrayBuffer();
+      if (!arrayBuffer || arrayBuffer.byteLength === 0) {
+        return NextResponse.json({ success: false, message: "File kosong atau data tidak diterima." }, { status: 400 });
+      }
+      buffer = Buffer.from(arrayBuffer);
+    } else {
+      // 2. Fallback FormData Upload
+      const formData = await request.formData();
+      category = String(formData.get("category") || "").toLowerCase().trim();
+      const file = formData.get("file") as File | null;
+
+      if (!file) {
+        return NextResponse.json({ success: false, message: "File wajib diunggah." }, { status: 400 });
+      }
+      fileName = file.name;
+      const arrayBuffer = await file.arrayBuffer();
+      buffer = Buffer.from(arrayBuffer);
     }
 
-    if (file.size > MAX_FILE_SIZE_BYTES) {
+    if (buffer.length > MAX_FILE_SIZE_BYTES) {
       return NextResponse.json(
         { success: false, message: "Ukuran file terlalu besar. Batas maksimal adalah 25 MB." },
         { status: 400 }
       );
     }
 
-    const fileName = file.name;
     const fileExt = path.extname(fileName).toLowerCase();
-
-    if (![".xlsx", ".xls", ".csv"].includes(fileExt)) {
+    if (fileExt && ![".xlsx", ".xls", ".csv"].includes(fileExt)) {
       return NextResponse.json(
         { success: false, message: "Format file tidak didukung. Gunakan file .xlsx, .xls, atau .csv." },
         { status: 400 }
@@ -37,9 +57,6 @@ export async function POST(request: NextRequest) {
     }
 
     // 1. Baca buffer file & parse dengan SheetJS (in-memory tanpa disimpan ke disk, cellDates: true untuk membaca format tanggal Excel)
-    const arrayBuffer = await file.arrayBuffer();
-    const buffer = Buffer.from(arrayBuffer);
-
     const workbook = XLSX.read(buffer, { type: "buffer", cellDates: true });
     const firstSheetName = workbook.SheetNames[0];
     if (!firstSheetName) {

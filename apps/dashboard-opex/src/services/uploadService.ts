@@ -23,26 +23,23 @@ export const uploadService = {
     });
 
     try {
-      // Bersihkan nama file dari spasi, tanda kurung, dan karakter non-alphanumeric agar aman bagi multipart parser
-      const safeName = file.name.replace(/[^a-zA-Z0-9_.-]/g, "_");
-      const safeFile = new File([file], safeName, { type: file.type });
-
-      const formData = new FormData();
-      formData.append("category", categoryKey);
-      formData.append("file", safeFile);
-
       // Phase 2: Processing & Validating
       onProgress({
         fileName,
         fileSize,
         status: "validating",
-        progressPercentage: 60,
-        message: "Membaca data Excel, memvalidasi kolom, & menyinkronkan Summary OPEX...",
+        progressPercentage: 50,
+        message: "Mengirim file ke server & memproses data Excel...",
       });
 
-      const res = await fetch("/api/admin/upload", {
+      // Mengirim raw file binary stream secara langsung agar 100% bebas dari bug multipart/form-data parser
+      const uploadUrl = `/api/admin/upload?category=${encodeURIComponent(categoryKey)}&fileName=${encodeURIComponent(file.name)}`;
+      const res = await fetch(uploadUrl, {
         method: "POST",
-        body: formData,
+        headers: {
+          "Content-Type": "application/octet-stream",
+        },
+        body: file,
       });
 
       let data: { success?: boolean; message?: string } = {};
