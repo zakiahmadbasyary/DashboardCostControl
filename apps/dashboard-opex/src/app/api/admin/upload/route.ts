@@ -374,7 +374,8 @@ function mapActualRows(rawRows: Record<string, unknown>[]) {
     const idrAct = parseNum(getVal(row, ["idr_act", "idr act", "idr", "actual", "Actual IDR"]));
     const usdAct = parseNum(getVal(row, ["usd_act", "usd act", "usd", "Actual USD"]));
     const totalQuantity = parseNum(getVal(row, ["total_quantity", "total quantity", "quantity", "qty"]));
-    const kode = String(getVal(row, ["kode", "Kode"]) || `${period}${costcenter}${ce2}${pg}`).trim();
+    const rawKode = String(getVal(row, ["kode", "Kode"]) || "").trim();
+    const kode = rawKode || `${period}${costcenter}${ce2}${pg}`;
 
     actualRecords.push({
       kode,
@@ -437,7 +438,8 @@ function mapBudgetRows(rawRows: Record<string, unknown>[]) {
 
     const amountIdr = parseNum(getVal(row, ["amount_idr", "amount idr", "budget", "anggaran", "Budget IDR"]));
     const amountUsd = parseNum(getVal(row, ["amount_usd", "amount usd", "Budget USD"]));
-    const kode = String(getVal(row, ["kode", "Kode"]) || `${period}${costcenter}${ce2}`).trim();
+    const rawKode = String(getVal(row, ["kode", "Kode"]) || "").trim();
+    const kode = rawKode || `${period}${costcenter}${ce2}`;
 
     budgetRecords.push({
       kode,

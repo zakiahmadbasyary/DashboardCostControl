@@ -28,7 +28,6 @@ export async function GET(request: NextRequest) {
     if (category === "budget") {
       const sampleBudget = [
         {
-          kode: "1CC101CE01",
           costcenter: "CC101",
           deskripsi_costcenter: "Pengolahan Tanah & Persiapan Lahan PG1",
           ce2: "CE01",
@@ -40,7 +39,6 @@ export async function GET(request: NextRequest) {
           group_exp: "OPERATING_EXPENSES",
         },
         {
-          kode: "1CC101CE02",
           costcenter: "CC101",
           deskripsi_costcenter: "Pengolahan Tanah & Persiapan Lahan PG1",
           ce2: "CE02",
@@ -57,7 +55,6 @@ export async function GET(request: NextRequest) {
     } else {
       const sampleActual = [
         {
-          kode: "1CC101CE01PG1",
           costcenter: "CC101",
           deskripsi_costcenter: "Pengolahan Tanah & Persiapan Lahan PG1",
           costelement: "CE01",
@@ -84,7 +81,6 @@ export async function GET(request: NextRequest) {
           mapping_biaya: "OPEX_PLANTATION",
         },
         {
-          kode: "1CC101CE02PG1",
           costcenter: "CC101",
           deskripsi_costcenter: "Pengolahan Tanah & Persiapan Lahan PG1",
           costelement: "CE02",
