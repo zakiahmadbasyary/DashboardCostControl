@@ -26,7 +26,8 @@ export const uploadService = {
       });
 
       const arrayBuffer = await file.arrayBuffer();
-      const workbook = XLSX.read(arrayBuffer, { type: "array", cellDates: true });
+      // cellDates: false penting agar angka serial Excel (misal 46023 untuk Jan-26, 46266 untuk Sep-26) tidak tergeser mundur 1 hari/bulan oleh konversi timezone UTC SheetJS
+      const workbook = XLSX.read(arrayBuffer, { type: "array", cellDates: false });
       const firstSheetName = workbook.SheetNames[0];
 
       if (!firstSheetName) {

@@ -87,7 +87,10 @@ function parseNum(val: unknown): number {
 function parseDate(val: unknown): Date | null {
   if (!val) return null;
   if (val instanceof Date) {
-    return isNaN(val.getTime()) ? null : val;
+    if (isNaN(val.getTime())) return null;
+    const utcHours = val.getUTCHours();
+    const adjusted = utcHours >= 15 ? new Date(val.getTime() + 7 * 3600 * 1000 + 60000) : val;
+    return new Date(Date.UTC(adjusted.getUTCFullYear(), adjusted.getUTCMonth(), adjusted.getUTCDate()));
   }
 
   if (typeof val === "number") {
@@ -95,7 +98,7 @@ function parseDate(val: unknown): Date | null {
       const utcMs = Math.round((val - 25569) * 86400 * 1000);
       const d = new Date(utcMs);
       if (!isNaN(d.getTime())) {
-        return new Date(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate());
+        return new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate()));
       }
     }
     return null;
@@ -110,8 +113,18 @@ function parseDate(val: unknown): Date | null {
       const utcMs = Math.round((num - 25569) * 86400 * 1000);
       const d = new Date(utcMs);
       if (!isNaN(d.getTime())) {
-        return new Date(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate());
+        return new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate()));
       }
+    }
+  }
+
+  // Format teks ISO atau datetime
+  if (str.includes("T")) {
+    const d = new Date(str);
+    if (!isNaN(d.getTime())) {
+      const utcHours = d.getUTCHours();
+      const adjusted = utcHours >= 15 ? new Date(d.getTime() + 7 * 3600 * 1000 + 60000) : d;
+      return new Date(Date.UTC(adjusted.getUTCFullYear(), adjusted.getUTCMonth(), adjusted.getUTCDate()));
     }
   }
 
@@ -121,8 +134,7 @@ function parseDate(val: unknown): Date | null {
     const month = parseInt(dmyMatch[2], 10);
     const year = parseInt(dmyMatch[3], 10);
     if (month >= 1 && month <= 12 && day >= 1 && day <= 31) {
-      const d = new Date(year, month - 1, day);
-      return isNaN(d.getTime()) ? null : d;
+      return new Date(Date.UTC(year, month - 1, day));
     }
   }
 
@@ -132,8 +144,7 @@ function parseDate(val: unknown): Date | null {
     const month = parseInt(ymdMatch[2], 10);
     const day = parseInt(ymdMatch[3], 10);
     if (month >= 1 && month <= 12 && day >= 1 && day <= 31) {
-      const d = new Date(year, month - 1, day);
-      return isNaN(d.getTime()) ? null : d;
+      return new Date(Date.UTC(year, month - 1, day));
     }
   }
 
@@ -164,14 +175,18 @@ function parseDate(val: unknown): Date | null {
           year = temp;
         }
         if (year < 100) year += 2000;
-        const d = new Date(year, mNum - 1, day);
-        if (!isNaN(d.getTime())) return d;
+        return new Date(Date.UTC(year, mNum - 1, day));
       }
     }
   }
 
   const d = new Date(str);
-  return isNaN(d.getTime()) ? null : d;
+  if (!isNaN(d.getTime())) {
+    const utcHours = d.getUTCHours();
+    const adjusted = utcHours >= 15 ? new Date(d.getTime() + 7 * 3600 * 1000 + 60000) : d;
+    return new Date(Date.UTC(adjusted.getUTCFullYear(), adjusted.getUTCMonth(), adjusted.getUTCDate()));
+  }
+  return null;
 }
 
 const monthNames: Record<string, number> = {
@@ -200,9 +215,11 @@ function parsePeriodMonth(val: unknown): { period: number; monthDate: Date | nul
 
   if (val instanceof Date) {
     if (!isNaN(val.getTime())) {
+      const utcHours = val.getUTCHours();
+      const adjusted = utcHours >= 15 ? new Date(val.getTime() + 7 * 3600 * 1000 + 60000) : val;
       return {
-        period: val.getMonth() + 1,
-        monthDate: val,
+        period: adjusted.getUTCMonth() + 1,
+        monthDate: new Date(Date.UTC(adjusted.getUTCFullYear(), adjusted.getUTCMonth(), 1)),
       };
     }
     return { period: 1, monthDate: null };
@@ -213,15 +230,16 @@ function parsePeriodMonth(val: unknown): { period: number; monthDate: Date | nul
       const p = Math.round(val);
       return {
         period: p,
-        monthDate: new Date(new Date().getFullYear(), p - 1, 1),
+        monthDate: new Date(Date.UTC(new Date().getFullYear(), p - 1, 1)),
       };
     }
     if (val > 25000 && val < 60000) {
-      const d = new Date(Math.round((val - 25569) * 86400 * 1000));
+      const utcMs = Math.round((val - 25569) * 86400 * 1000);
+      const d = new Date(utcMs);
       if (!isNaN(d.getTime())) {
         return {
           period: d.getUTCMonth() + 1,
-          monthDate: d,
+          monthDate: new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), 1)),
         };
       }
     }
@@ -231,7 +249,7 @@ function parsePeriodMonth(val: unknown): { period: number; monthDate: Date | nul
       if (m >= 1 && m <= 12) {
         return {
           period: m,
-          monthDate: new Date(y, m - 1, 1),
+          monthDate: new Date(Date.UTC(y, m - 1, 1)),
         };
       }
     }
@@ -243,28 +261,22 @@ function parsePeriodMonth(val: unknown): { period: number; monthDate: Date | nul
     const p = parseInt(str, 10);
     return {
       period: p,
-      monthDate: new Date(new Date().getFullYear(), p - 1, 1),
+      monthDate: new Date(Date.UTC(new Date().getFullYear(), p - 1, 1)),
     };
   }
 
-  const yyyyMmMatch = str.match(/^(\d{4})[-/.](0?[1-9]|1[0-2])([-/.]\d+)?$/);
-  if (yyyyMmMatch) {
-    const y = parseInt(yyyyMmMatch[1], 10);
-    const m = parseInt(yyyyMmMatch[2], 10);
-    return {
-      period: m,
-      monthDate: new Date(y, m - 1, 1),
-    };
-  }
-
-  const mmYyyyMatch = str.match(/^(0?[1-9]|1[0-2])[-/.](\d{4})$/);
-  if (mmYyyyMatch) {
-    const m = parseInt(mmYyyyMatch[1], 10);
-    const y = parseInt(mmYyyyMatch[2], 10);
-    return {
-      period: m,
-      monthDate: new Date(y, m - 1, 1),
-    };
+  if (/^\d{5}$/.test(str)) {
+    const num = parseInt(str, 10);
+    if (num > 25000 && num < 60000) {
+      const utcMs = Math.round((num - 25569) * 86400 * 1000);
+      const d = new Date(utcMs);
+      if (!isNaN(d.getTime())) {
+        return {
+          period: d.getUTCMonth() + 1,
+          monthDate: new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), 1)),
+        };
+      }
+    }
   }
 
   const lower = str.toLowerCase();
@@ -277,16 +289,50 @@ function parsePeriodMonth(val: unknown): { period: number; monthDate: Date | nul
       }
       return {
         period: num,
-        monthDate: new Date(y, num - 1, 1),
+        monthDate: new Date(Date.UTC(y, num - 1, 1)),
       };
     }
   }
 
+  if (str.includes("T")) {
+    const d = new Date(str);
+    if (!isNaN(d.getTime())) {
+      const utcHours = d.getUTCHours();
+      const adjusted = utcHours >= 15 ? new Date(d.getTime() + 7 * 3600 * 1000 + 60000) : d;
+      return {
+        period: adjusted.getUTCMonth() + 1,
+        monthDate: new Date(Date.UTC(adjusted.getUTCFullYear(), adjusted.getUTCMonth(), 1)),
+      };
+    }
+  }
+
+  const yyyyMmMatch = str.match(/^(\d{4})[-/.](0?[1-9]|1[0-2])([-/.]\d+)?$/);
+  if (yyyyMmMatch) {
+    const y = parseInt(yyyyMmMatch[1], 10);
+    const m = parseInt(yyyyMmMatch[2], 10);
+    return {
+      period: m,
+      monthDate: new Date(Date.UTC(y, m - 1, 1)),
+    };
+  }
+
+  const mmYyyyMatch = str.match(/^(0?[1-9]|1[0-2])[-/.](\d{4})$/);
+  if (mmYyyyMatch) {
+    const m = parseInt(mmYyyyMatch[1], 10);
+    const y = parseInt(mmYyyyMatch[2], 10);
+    return {
+      period: m,
+      monthDate: new Date(Date.UTC(y, m - 1, 1)),
+    };
+  }
+
   const parsedD = new Date(str);
   if (!isNaN(parsedD.getTime())) {
+    const utcHours = parsedD.getUTCHours();
+    const adjusted = utcHours >= 15 ? new Date(parsedD.getTime() + 7 * 3600 * 1000 + 60000) : parsedD;
     return {
-      period: parsedD.getMonth() + 1,
-      monthDate: parsedD,
+      period: adjusted.getUTCMonth() + 1,
+      monthDate: new Date(Date.UTC(adjusted.getUTCFullYear(), adjusted.getUTCMonth(), 1)),
     };
   }
 
@@ -589,7 +635,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const workbook = XLSX.read(buffer, { type: "buffer", cellDates: true });
+    const workbook = XLSX.read(buffer, { type: "buffer", cellDates: false });
     const firstSheetName = workbook.SheetNames[0];
     if (!firstSheetName) {
       return NextResponse.json({ success: false, message: "File Excel kosong atau tidak memiliki sheet." }, { status: 400 });
