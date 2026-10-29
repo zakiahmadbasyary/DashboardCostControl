@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { CostCenterSummaryItem } from "@/types/opex";
 import { Building2, Search, CheckCircle2, ChevronLeft, ChevronRight, X } from "lucide-react";
 
@@ -45,6 +45,16 @@ export default function CostCenterTables({
   const PAGE_SIZE = 16;
   const COLUMN_SIZE = 8;
   const totalPages = Math.ceil(filteredData.length / PAGE_SIZE) || 1;
+
+  // Sinkronkan halaman pagination jika costcenter dipilih dari luar (misal dari filter CostElementTable)
+  useEffect(() => {
+    if (!selectedCostCenter) return;
+    const index = filteredData.findIndex((c) => c.costcenter === selectedCostCenter);
+    if (index !== -1) {
+      const targetPage = Math.floor(index / PAGE_SIZE) + 1;
+      setCurrentPage((prev) => (prev !== targetPage ? targetPage : prev));
+    }
+  }, [selectedCostCenter, filteredData]);
 
   const startIndex = (currentPage - 1) * PAGE_SIZE;
   const currentSlice = filteredData.slice(startIndex, startIndex + PAGE_SIZE);

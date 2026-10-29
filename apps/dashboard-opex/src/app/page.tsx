@@ -384,6 +384,8 @@ export default function DashboardOpexPage() {
               selectedCe2={selectedCe2}
               onSelectCe2={setSelectedCe2}
               loading={loadingCostElements}
+              costCenters={costCenters}
+              onSelectCostCenter={handleCostCenterSelect}
             />
 
             {/* Card Kanan: Tabel Aktivitas Riil */}

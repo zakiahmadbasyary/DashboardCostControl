@@ -1,8 +1,8 @@
 "use client";
 
 import React, { useMemo } from "react";
-import { CostElementSummaryItem } from "@/types/opex";
-import { Layers, CheckCircle2, AlertCircle } from "lucide-react";
+import { CostElementSummaryItem, CostCenterSummaryItem } from "@/types/opex";
+import { Layers, CheckCircle2, AlertCircle, Building2, ChevronDown } from "lucide-react";
 
 interface CostElementTableProps {
   selectedCostCenter: string | null;
@@ -10,6 +10,8 @@ interface CostElementTableProps {
   selectedCe2: string | null;
   onSelectCe2: (ce2: string) => void;
   loading?: boolean;
+  costCenters?: CostCenterSummaryItem[];
+  onSelectCostCenter?: (costcenter: string) => void;
 }
 
 export default function CostElementTable({
@@ -18,6 +20,8 @@ export default function CostElementTable({
   selectedCe2,
   onSelectCe2,
   loading,
+  costCenters = [],
+  onSelectCostCenter,
 }: CostElementTableProps) {
   const sortedData = useMemo(() => {
     return [...data]
@@ -46,8 +50,30 @@ export default function CostElementTable({
         </div>
         <h4 className="font-bold text-sm text-[#17231B]">Cost Center Belum Dipilih</h4>
         <p className="text-xs text-[#5F6B63] mt-1 max-w-xs leading-relaxed">
-          Silakan klik salah satu baris pada <strong>Tabel Cost Center PG1</strong> di atas untuk memuat rincian Cost Element (CE2).
+          Silakan pilih Cost Center melalui filter di bawah atau klik salah satu baris pada <strong>Tabel Cost Center PG1</strong> di atas.
         </p>
+        {costCenters.length > 0 && (
+          <div className="mt-4 w-full max-w-xs relative">
+            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-[#16823B]">
+              <Building2 className="w-4 h-4" />
+            </div>
+            <select
+              value=""
+              onChange={(e) => onSelectCostCenter?.(e.target.value)}
+              className="w-full text-xs font-semibold text-[#17231B] bg-white border border-[#16823B] rounded-xl py-2 pl-9 pr-8 shadow-xs cursor-pointer outline-none appearance-none"
+            >
+              <option value="" disabled>-- Pilih Cost Center --</option>
+              {costCenters.map((cc) => (
+                <option key={cc.costcenter} value={cc.costcenter}>
+                  {cc.costcenter} - {cc.deskripsiCostcenter}
+                </option>
+              ))}
+            </select>
+            <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none text-[#89938D]">
+              <ChevronDown className="w-4 h-4" />
+            </div>
+          </div>
+        )}
       </div>
     );
   }
@@ -58,24 +84,54 @@ export default function CostElementTable({
   return (
     <div className="bg-white border border-[#DDE5DF] rounded-2xl p-5 shadow-xs h-full flex flex-col justify-between space-y-4">
       <div>
-        {/* Header */}
-        <div className="flex items-center justify-between mb-3 pb-2 border-b border-[#DDE5DF]">
-          <div className="flex items-center gap-2">
-            <div className="p-1.5 rounded-lg bg-[#16823B]/10 text-[#16823B]">
+        {/* Header dengan Filter Cost Center Terhubung */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 mb-3 pb-3 border-b border-[#DDE5DF]">
+          <div className="flex items-center gap-2 min-w-0">
+            <div className="p-1.5 rounded-lg bg-[#16823B]/10 text-[#16823B] shrink-0">
               <Layers className="w-4 h-4" />
             </div>
-            <div>
-              <h4 className="font-bold text-sm text-[#17231B]">
-                Cost Element (CE2)
-              </h4>
-              <p className="text-[11px] text-[#5F6B63]">
-                Rincian akun biaya untuk Cost Center <strong className="text-[#16823B]">{selectedCostCenter}</strong>
+            <div className="min-w-0">
+              <div className="flex items-center gap-2">
+                <h4 className="font-bold text-sm text-[#17231B] truncate">
+                  Cost Element (CE2)
+                </h4>
+                <span className="text-[10px] font-semibold text-[#89938D] bg-[#F8FAF9] px-2 py-0.5 rounded-md border border-[#DDE5DF] shrink-0">
+                  {data.length} Akun
+                </span>
+              </div>
+              <p className="text-[11px] text-[#5F6B63] truncate">
+                Rincian akun biaya Cost Center <strong className="text-[#16823B]">{selectedCostCenter}</strong>
               </p>
             </div>
           </div>
-          <span className="text-[11px] font-semibold text-[#89938D] bg-[#F8FAF9] px-2 py-0.5 rounded-lg border border-[#DDE5DF]">
-            {data.length} Akun
-          </span>
+
+          {/* Filter Cost Center Dropdown */}
+          {costCenters.length > 0 && (
+            <div className="flex items-center gap-2 w-full sm:w-auto shrink-0">
+              <div className="relative w-full sm:w-[220px]">
+                <div className="absolute inset-y-0 left-0 pl-2.5 flex items-center pointer-events-none text-[#16823B]">
+                  <Building2 className="w-3.5 h-3.5" />
+                </div>
+                <select
+                  id="filter-costcenter-in-ce2"
+                  value={selectedCostCenter || ""}
+                  onChange={(e) => onSelectCostCenter?.(e.target.value)}
+                  className="w-full text-xs font-semibold text-[#17231B] bg-[#F8FAF9] hover:bg-[#F2F6F3] focus:bg-white border border-[#DDE5DF] focus:border-[#16823B] focus:ring-1 focus:ring-[#16823B] rounded-lg py-1.5 pl-8 pr-7 transition-colors cursor-pointer outline-none appearance-none truncate"
+                  title="Pilih Cost Center"
+                >
+                  <option value="" disabled>-- Pilih Cost Center --</option>
+                  {costCenters.map((cc) => (
+                    <option key={cc.costcenter} value={cc.costcenter}>
+                      {cc.costcenter} - {cc.deskripsiCostcenter || cc.costcenter}
+                    </option>
+                  ))}
+                </select>
+                <div className="absolute inset-y-0 right-0 pr-2 flex items-center pointer-events-none text-[#89938D]">
+                  <ChevronDown className="w-3.5 h-3.5" />
+                </div>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Content (Scrollable, Ukuran Tetap, Sticky Header) */}
