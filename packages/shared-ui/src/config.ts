@@ -113,8 +113,8 @@ export const getDashboardNavConfig = (): DashboardNavConfig => {
         key: "sulam",
         label: "Sulam",
         url: sulamUrl,
-        description: "Monitoring Biaya Pemeliharaan & Penyulaman (Tahap Pembuatan)",
-        isHosted: false,
+        description: "Monitoring Biaya Pemeliharaan & Penyulaman Tanaman",
+        isHosted: true,
       },
       {
         key: "selesai_bongkar",

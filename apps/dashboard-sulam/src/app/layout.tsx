@@ -1,9 +1,20 @@
 import type { Metadata } from "next";
+import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 
+const geistSans = Geist({
+  variable: "--font-geist-sans",
+  subsets: ["latin"],
+});
+
+const geistMono = Geist_Mono({
+  variable: "--font-geist-mono",
+  subsets: ["latin"],
+});
+
 export const metadata: Metadata = {
-  title: "Dashboard Sulam | Pemeliharaan Tanaman",
-  description: "Modul Monitoring Biaya Material & Penyulaman Tanaman Perkebunan",
+  title: "Dashboard Sulam | Monitoring Cost Control Sulam",
+  description: "Modul Monitoring Biaya Pemeliharaan & Penyulaman Tanaman Perkebunan GGF",
   icons: {
     icon: "/logo.png",
     shortcut: "/logo.png",
@@ -13,8 +24,14 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="id">
-      <body className="antialiased min-h-screen bg-slate-950 text-slate-100">{children}</body>
+    <html
+      lang="id"
+      suppressHydrationWarning
+      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+    >
+      <body className="min-h-full flex flex-col" suppressHydrationWarning>
+        {children}
+      </body>
     </html>
   );
 }
