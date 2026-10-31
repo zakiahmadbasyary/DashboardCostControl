@@ -138,18 +138,30 @@ export async function GET(request: NextRequest) {
                 : null,
             }
           : null,
-        createdList: item.createdList.map((c) => ({
-          idCreated: c.idCreated.toString(),
-          capexNo: c.capexNo,
-          type: c.type,
-          requestor: c.requestor,
-          reqDate: c.reqDate ? c.reqDate.toISOString().split("T")[0] : null,
-          nama: c.nama,
-          dateApprove: c.dateApprove ? c.dateApprove.toISOString().split("T")[0] : null,
-          notes: c.notes,
-          budgetStatus: c.budgetStatus,
-          kodeApprover: c.kodeApprover,
-        })),
+        createdList: item.createdList
+          .map((c) => ({
+            idCreated: c.idCreated.toString(),
+            capexNo: c.capexNo,
+            type: c.type,
+            requestor: c.requestor,
+            reqDate: c.reqDate ? c.reqDate.toISOString().split("T")[0] : null,
+            nama: c.nama,
+            dateApprove: c.dateApprove ? c.dateApprove.toISOString().split("T")[0] : null,
+            notes: c.notes,
+            budgetStatus: c.budgetStatus,
+            kodeApprover: c.kodeApprover,
+          }))
+          .sort((a, b) => {
+            // Urutan dateApprove: duluan -> baru -> null paling bawah
+            if (a.dateApprove && b.dateApprove) {
+              const cmp = a.dateApprove.localeCompare(b.dateApprove);
+              if (cmp !== 0) return cmp;
+              return Number(a.idCreated) - Number(b.idCreated);
+            }
+            if (a.dateApprove && !b.dateApprove) return -1;
+            if (!a.dateApprove && b.dateApprove) return 1;
+            return Number(a.idCreated) - Number(b.idCreated);
+          }),
       };
     });
 

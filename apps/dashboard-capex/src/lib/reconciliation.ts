@@ -32,7 +32,8 @@ export async function runCapexReconciliation() {
       orderBy: { reqDate: "asc" },
     });
     const allPo = await tx.po.findMany();
-    const poSet = new Set(allPo.map((p) => p.nomorPr));
+    const poSet = new Set(allPo.map((p) => p.nomorPr.trim()));
+    const poMap = new Map(allPo.map((p) => [p.nomorPr.trim(), p]));
     const allKategori = await tx.kategori.findMany();
     const kategoriMap = new Map(allKategori.map((k) => [k.capexNo, k]));
 
@@ -184,7 +185,10 @@ export async function runCapexReconciliation() {
       // Extract fields with priority
       const description = cRep?.description || bRep?.description || null;
       const budgetType = cRep?.budgetType || null;
-      const budgetStatus = cRep?.budgetStatus || null;
+      let budgetStatus = cRep?.budgetStatus || null;
+      if (budgetStatus !== BudgetStatus.approved && cList.some((c) => c.budgetStatus === BudgetStatus.approved)) {
+        budgetStatus = BudgetStatus.approved;
+      }
       const reqDate = cRep?.reqDate || null;
       const quantity = cRep?.quantity ?? bRep?.quantity ?? null;
       
@@ -213,16 +217,28 @@ export async function runCapexReconciliation() {
       const kRep = capexNo ? kategoriMap.get(capexNo) : undefined;
       const komoditi = kRep?.komoditi || bRep?.komoditi || null;
 
-      // nomorPr from Created.noPr (must exist in PO and not duplicate)
-      let nomorPr: string | null = null;
-      if (cRep?.noPr && poSet.has(cRep.noPr) && !usedNomorPr.has(cRep.noPr)) {
-        nomorPr = cRep.noPr;
-        usedNomorPr.add(cRep.noPr);
+      // nomorPr from Created.noPr (check cRep first, then any row in cList)
+      let candidatePr = cRep?.noPr ? cRep.noPr.trim() : null;
+      if (!candidatePr) {
+        const found = cList.find((c) => c.noPr && c.noPr.trim() !== "");
+        if (found?.noPr) candidatePr = found.noPr.trim();
       }
 
-      // Compute status_capex
+      let nomorPr: string | null = null;
+      if (candidatePr && poSet.has(candidatePr) && !usedNomorPr.has(candidatePr)) {
+        nomorPr = candidatePr;
+        usedNomorPr.add(candidatePr);
+      }
+
+      // Check if PO record has valid noPo
+      const poRecord = nomorPr ? poMap.get(nomorPr) : null;
+      const hasNoPo = Boolean(poRecord?.noPo && poRecord.noPo.trim() !== "");
+
+      // Compute status_capex:
+      // - Sudah PO: HANYA jika sudah ada nomor PR DAN nomor PO sudah terbit (hasNoPo && nomorPr)
+      // - Final Approve: jika sudah diapprove semua (budgetStatus = 'approved'), termasuk jika baru ada No PR saja
       let statusCapex: StatusCapex = StatusCapex.Belum_Created;
-      if (nomorPr && io && !wbs && !mo) {
+      if (hasNoPo && nomorPr) {
         statusCapex = StatusCapex.Sudah_PO;
       } else if (budgetStatus === BudgetStatus.approved) {
         statusCapex = StatusCapex.Final_Approve;
@@ -326,14 +342,19 @@ export async function runCapexReconciliation() {
         continue;
       }
 
+      let candidatePr = c.noPr ? c.noPr.trim() : null;
       let nomorPr: string | null = null;
-      if (c.noPr && poSet.has(c.noPr) && !usedNomorPr.has(c.noPr)) {
-        nomorPr = c.noPr;
-        usedNomorPr.add(c.noPr);
+      if (candidatePr && poSet.has(candidatePr) && !usedNomorPr.has(candidatePr)) {
+        nomorPr = candidatePr;
+        usedNomorPr.add(candidatePr);
       }
 
+      const poRecord = nomorPr ? poMap.get(nomorPr) : null;
+      const hasNoPo = Boolean(poRecord?.noPo && poRecord.noPo.trim() !== "");
+
+      // - Sudah PO: HANYA jika sudah ada nomor PR DAN nomor PO sudah terbit (hasNoPo && nomorPr)
       let statusCapex: StatusCapex = StatusCapex.Belum_Created;
-      if (nomorPr && c.io && !c.wbs && !c.mo) {
+      if (hasNoPo && nomorPr) {
         statusCapex = StatusCapex.Sudah_PO;
       } else if (c.budgetStatus === BudgetStatus.approved) {
         statusCapex = StatusCapex.Final_Approve;

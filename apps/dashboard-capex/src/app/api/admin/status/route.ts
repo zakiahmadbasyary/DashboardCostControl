@@ -252,6 +252,7 @@ export async function PATCH(request: NextRequest) {
     // Fetch target records
     const targetItems = await prisma.total.findMany({
       where: { idTotal: { in: bigIntIds } },
+      include: { po: true },
     });
 
     if (targetItems.length === 0) {
@@ -317,7 +318,7 @@ export async function PATCH(request: NextRequest) {
       for (const item of targetItems) {
         // Calculate restored status
         let restoredStatus: StatusCapex = StatusCapex.Belum_Created;
-        if (item.nomorPr) {
+        if (item.po?.noPo && item.nomorPr) {
           restoredStatus = StatusCapex.Sudah_PO;
         } else if (item.budgetStatus === BudgetStatus.approved) {
           restoredStatus = StatusCapex.Final_Approve;

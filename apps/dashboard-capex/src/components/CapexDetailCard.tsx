@@ -63,6 +63,22 @@ export default function CapexDetailCard({
   const ioDisplay = getIoWbsMoDisplay(selectedItem);
   const unitPrice = calculateUnitPrice(selectedItem.amount, selectedItem.quantity);
 
+  // Urutkan riwayat approval: dateApprove paling awal (duluan) -> lebih baru -> yang null paling bawah
+  const sortedCreatedList = React.useMemo(() => {
+    if (!selectedItem?.createdList) return [];
+    return [...selectedItem.createdList].sort((a, b) => {
+      if (a.dateApprove && b.dateApprove) {
+        const timeA = new Date(a.dateApprove).getTime();
+        const timeB = new Date(b.dateApprove).getTime();
+        if (timeA !== timeB) return timeA - timeB;
+        return Number(a.idCreated || 0) - Number(b.idCreated || 0);
+      }
+      if (a.dateApprove && !b.dateApprove) return -1;
+      if (!a.dateApprove && b.dateApprove) return 1;
+      return Number(a.idCreated || 0) - Number(b.idCreated || 0);
+    });
+  }, [selectedItem?.createdList]);
+
   return (
     <div
       className="bg-white border border-[#DDE5DF] rounded-2xl p-4 sm:p-5 shadow-xs flex flex-col gap-5 font-sans h-full"
@@ -353,7 +369,7 @@ export default function CapexDetailCard({
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-[#F0F5F1]">
-                  {selectedItem.createdList.map((created, idx) => (
+                  {sortedCreatedList.map((created, idx) => (
                     <tr key={created.idCreated || idx} className="hover:bg-[#F8FAF9]">
                       {/* Approver */}
                       <td className="py-2.5 px-3">
