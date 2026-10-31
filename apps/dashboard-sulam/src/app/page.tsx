@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import { UnderConstructionView } from "@dashboard/shared-ui";
 import DashboardHeader from "@/components/dashboard/DashboardHeader";
 import {
   Sprout,
@@ -19,7 +20,20 @@ import {
   Table as TableIcon,
 } from "lucide-react";
 
+// Ubah ke false jika ingin membuka kembali akses dashboard Sulam
+const IS_UNDER_CONSTRUCTION = true;
+
 export default function DashboardSulamPage() {
+  if (IS_UNDER_CONSTRUCTION) {
+    return (
+      <UnderConstructionView
+        dashboardTitle="Sulam"
+        dashboardSubtitle="Monitoring Biaya Pemeliharaan & Penyulaman Tanaman"
+        dashboardKey="sulam"
+      />
+    );
+  }
+
   const [selectedWilayah, setSelectedWilayah] = useState("all");
   const [selectedTahun, setSelectedTahun] = useState("2026");
   const [selectedJenisBibit, setSelectedJenisBibit] = useState("all");

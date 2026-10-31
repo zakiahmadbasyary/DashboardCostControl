@@ -391,7 +391,7 @@ export default function AdminDashboardPage() {
       url: sulamUrl,
       adminUrl: `${sulamUrl}/admin`,
       icon: Sprout,
-      isHosted: true,
+      isHosted: false,
     },
     {
       code: "capex",
