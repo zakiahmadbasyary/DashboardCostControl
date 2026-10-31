@@ -11,7 +11,7 @@ const ALLOWED_DASHBOARD_CODES = [
   "opex",
   "irigasi",
   "sulam",
-  "selesai_bongkar",
+  "weed_control",
   "harga_material",
   "poll_pg1",
   "dashboard_a",

@@ -16,7 +16,7 @@ Repository ini menyimpan seluruh aplikasi platform **Cost Control Portal** (Port
 | 6 | **Admin Pusat** | `apps/admin` | Pusat Administrasi, Single Sign-On (SSO) & Akses User | `3005` | `npm run dev:admin` |
 | 7 | **Irigasi** | `apps/dashboard-irigasi` | Pengawasan Biaya Pengairan & Infrastruktur Irigasi | `3006` | `npm run dev:irigasi` |
 | 8 | **Sulam** | `apps/dashboard-sulam` | Monitoring Biaya Pemeliharaan & Penyulaman Tanaman | `3007` | `npm run dev:sulam` |
-| 9 | **Selesai Bongkar** | `apps/dashboard-selesai-bongkar` | Evaluasi Pasca Selesai Bongkar & Land Prep | `3008` | `npm run dev:selesai-bongkar` |
+| 9 | **Weed Control** | `apps/dashboard-weed-control` | Monitoring & Pengendalian Biaya Gulma & Herbisida | `3008` | `npm run dev:weed-control` |
 | 10 | **Harga Material** | `apps/dashboard-harga-material` | Master Data Logistik & Fluktuasi Harga Material | `3009` | `npm run dev:harga-material` |
 | 11 | **Poll PG 1** | `apps/dashboard-poll-pg1` | Pengendalian Biaya Pool Armada & Transportasi PG1 | `3010` | `npm run dev:poll-pg1` |
 
@@ -35,7 +35,7 @@ dashboard-platform/
 │   ├── admin/                     # Admin Pusat & Single Sign-On (Port 3005)
 │   ├── dashboard-irigasi/         # Dashboard Irigasi (Port 3006)
 │   ├── dashboard-sulam/           # Dashboard Sulam (Port 3007)
-│   ├── dashboard-selesai-bongkar/ # Dashboard Selesai Bongkar (Port 3008)
+│   ├── dashboard-weed-control/    # Dashboard Weed Control (Port 3008)
 │   ├── dashboard-harga-material/  # Dashboard Harga Material (Port 3009)
 │   └── dashboard-poll-pg1/        # Dashboard Poll PG 1 (Port 3010)
 ├── packages/
@@ -69,7 +69,7 @@ npm run dev
 - **Admin Pusat**: `npm run dev:admin`
 - **Dashboard Irigasi**: `npm run dev:irigasi`
 - **Dashboard Sulam**: `npm run dev:sulam`
-- **Dashboard Selesai Bongkar**: `npm run dev:selesai-bongkar`
+- **Dashboard Weed Control**: `npm run dev:weed-control`
 - **Dashboard Harga Material**: `npm run dev:harga-material`
 - **Dashboard Poll PG 1**: `npm run dev:poll-pg1`
 

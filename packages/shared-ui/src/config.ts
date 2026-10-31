@@ -17,7 +17,7 @@ export interface DashboardNavConfig {
   opexUrl: string;
   irigasiUrl: string;
   sulamUrl: string;
-  selesaiBongkarUrl: string;
+  weedControlUrl: string;
   hargaMaterialUrl: string;
   pollPg1Url: string;
   wipPg1Url: string;
@@ -55,7 +55,8 @@ export const getDashboardNavConfig = (): DashboardNavConfig => {
   const adminUrl = process.env.NEXT_PUBLIC_ADMIN_URL || "http://localhost:3005";
   const irigasiUrl = process.env.NEXT_PUBLIC_IRIGASI_URL || "http://localhost:3006";
   const sulamUrl = process.env.NEXT_PUBLIC_SULAM_URL || "http://localhost:3007";
-  const selesaiBongkarUrl = process.env.NEXT_PUBLIC_SELESAI_BONGKAR_URL || "http://localhost:3008";
+  const weedControlUrl =
+    process.env.NEXT_PUBLIC_WEED_CONTROL_URL || "http://localhost:3008";
   const hargaMaterialUrl = process.env.NEXT_PUBLIC_HARGA_MATERIAL_URL || "http://localhost:3009";
   const pollPg1Url = process.env.NEXT_PUBLIC_POLL_PG1_URL || "http://localhost:3010";
 
@@ -89,18 +90,18 @@ export const getDashboardNavConfig = (): DashboardNavConfig => {
         isHosted: true,
       },
       {
-        key: "capex",
-        label: "Capex",
-        url: capexUrl,
-        description: "Capital Expenditure (Belanja Modal)",
+        key: "harga_material",
+        label: "Harga Material",
+        url: hargaMaterialUrl,
+        description: "Master Data & Fluktuasi Harga Material Logistik PG 1",
         isHosted: true,
       },
       {
-        key: "opex",
-        label: "Opex",
-        url: opexUrl,
-        description: "Operational Expenditure (Biaya Operasional)",
-        isHosted: true,
+        key: "weed_control",
+        label: "Weed Control",
+        url: weedControlUrl,
+        description: "Pengendalian & Pengawasan Biaya Weed Control (Tahap Pembuatan)",
+        isHosted: false,
       },
       {
         key: "irigasi",
@@ -117,22 +118,22 @@ export const getDashboardNavConfig = (): DashboardNavConfig => {
         isHosted: true,
       },
       {
-        key: "selesai_bongkar",
-        label: "Selesai Bongkar",
-        url: selesaiBongkarUrl,
-        description: "Evaluasi Pasca Selesai Bongkar (Tahap Pembuatan)",
-        isHosted: false,
+        key: "opex",
+        label: "Opex",
+        url: opexUrl,
+        description: "Operational Expenditure (Biaya Operasional)",
+        isHosted: true,
       },
       {
-        key: "harga_material",
-        label: "Harga Material",
-        url: hargaMaterialUrl,
-        description: "Master Data & Fluktuasi Harga Material Logistik PG 1",
+        key: "capex",
+        label: "Capex",
+        url: capexUrl,
+        description: "Capital Expenditure (Belanja Modal)",
         isHosted: true,
       },
       {
         key: "poll_pg1",
-        label: "Poll PG 1",
+        label: "Pool PG 1",
         url: pollPg1Url,
         description: "Pengendalian Biaya Armada & Transportasi PG1 (Tahap Pembuatan)",
         isHosted: false,
@@ -147,7 +148,7 @@ export const getDashboardNavConfig = (): DashboardNavConfig => {
     opexUrl,
     irigasiUrl,
     sulamUrl,
-    selesaiBongkarUrl,
+    weedControlUrl,
     hargaMaterialUrl,
     pollPg1Url,
     wipPg1Url,

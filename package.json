@@ -17,7 +17,7 @@
     "dev:opex": "npm run dev --workspace=apps/dashboard-opex",
     "dev:irigasi": "npm run dev --workspace=apps/dashboard-irigasi",
     "dev:sulam": "npm run dev --workspace=apps/dashboard-sulam",
-    "dev:selesai-bongkar": "npm run dev --workspace=apps/dashboard-selesai-bongkar",
+    "dev:weed-control": "npm run dev --workspace=apps/dashboard-weed-control",
     "dev:harga-material": "npm run dev --workspace=apps/dashboard-harga-material",
     "dev:poll-pg1": "npm run dev --workspace=apps/dashboard-poll-pg1",
     "dev:admin": "npm run dev --workspace=apps/admin",

@@ -17,6 +17,7 @@ import {
   Droplets,
   Sprout,
   Truck,
+  Tractor,
   Boxes,
   Gauge,
 } from "lucide-react";
@@ -25,13 +26,14 @@ import {
 const MODULE_ICONS: Record<string, React.ElementType> = {
   wip: Layers,
   hpp: TrendingUp,
-  capex: Building2,
-  opex: DollarSign,
+  harga_material: Boxes,
+  weed_control: Tractor,
   irigasi: Droplets,
   sulam: Sprout,
-  selesai_bongkar: Truck,
-  harga_material: Boxes,
+  opex: DollarSign,
+  capex: Building2,
   poll_pg1: Gauge,
+  pool_pg1: Gauge,
 };
 
 export default function HargaMaterialDashboardHeader() {

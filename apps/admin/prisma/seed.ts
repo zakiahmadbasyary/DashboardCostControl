@@ -56,8 +56,8 @@ async function main() {
       status: "DEVELOPMENT",
     },
     {
-      code: "selesai_bongkar",
-      name: "Dashboard Selesai Bongkar (Land Prep)",
+      code: "weed_control",
+      name: "Dashboard Weed Control (Pengendalian Gulma)",
       adminUrl: "http://localhost:3008/admin",
       publicUrl: "http://localhost:3008",
       status: "DEVELOPMENT",

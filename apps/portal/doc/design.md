@@ -151,7 +151,7 @@ Berikut adalah pemetaan 9 modul dashboard yang ada di dalam Portal:
 | 4 | **Opex** | Operational Expenditure | Biaya Operasional | 🚧 Pembuatan | `Receipt` |
 | 5 | **Irigasi** | Pengairan & Pump | Fasilitas | 🚧 Pembuatan | `Droplets` |
 | 6 | **Sulam** | Pemeliharaan Tanaman | Pemeliharaan | 🚧 Pembuatan | `Sprout` |
-| 7 | **Selesai Bongkar** | Land Prep & Ratoon | Land Prep | 🚧 Pembuatan | `Tractor` |
+| 7 | **Weed Control** | Pengendalian Gulma | Pemeliharaan | 🚧 Pembuatan | `Tractor` |
 | 8 | **Harga Material** | Master Data Logistik | Master Logistik | 🚧 Pembuatan | `Boxes` |
 | 9 | **Poll PG 1** | Armada & Transportasi | Armada PG1 | 🚧 Pembuatan | `Truck` |
 
@@ -169,7 +169,7 @@ Portal terintegrasi dengan modul shared UI `@dashboard/shared-ui` melalui fungsi
 - `NEXT_PUBLIC_OPEX_URL`
 - `NEXT_PUBLIC_IRIGASI_URL`
 - `NEXT_PUBLIC_SULAM_URL`
-- `NEXT_PUBLIC_SELESAI_BONGKAR_URL`
+- `NEXT_PUBLIC_WEED_CONTROL_URL`
 - `NEXT_PUBLIC_HARGA_MATERIAL_URL`
 - `NEXT_PUBLIC_POLL_PG1_URL`
 - `NEXT_PUBLIC_ADMIN_URL`

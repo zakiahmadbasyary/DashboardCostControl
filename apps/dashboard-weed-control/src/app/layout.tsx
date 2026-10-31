@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Dashboard Selesai Bongkar | Land Prep & Ratoon",
-  description: "Modul Evaluasi Biaya, Progres & Area Pasca Selesai Bongkar",
+  title: "Dashboard Weed Control | Pengendalian Gulma",
+  description: "Modul Monitoring & Evaluasi Biaya Weed Control Perkebunan",
   icons: {
     icon: "/logo.png",
     shortcut: "/logo.png",
