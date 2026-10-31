@@ -118,17 +118,17 @@ export const getDashboardNavConfig = (): DashboardNavConfig => {
         isHosted: true,
       },
       {
-        key: "opex",
-        label: "Opex",
-        url: opexUrl,
-        description: "Operational Expenditure (Biaya Operasional)",
-        isHosted: true,
-      },
-      {
         key: "capex",
         label: "Capex",
         url: capexUrl,
         description: "Capital Expenditure (Belanja Modal)",
+        isHosted: true,
+      },
+      {
+        key: "opex",
+        label: "Opex",
+        url: opexUrl,
+        description: "Operational Expenditure (Biaya Operasional)",
         isHosted: true,
       },
       {

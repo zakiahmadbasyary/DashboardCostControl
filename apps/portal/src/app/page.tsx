@@ -107,17 +107,6 @@ export default function PortalHomePage() {
       isHosted: true,
     },
     {
-      id: "opex",
-      name: "Opex",
-      subtitle: "Operational Expenditure",
-      description:
-        "Monitoring dan pengendalian biaya operasional harian (Operational Expenditure) perkebunan.",
-      url: opexUrl,
-      icon: Receipt,
-      badge: "Biaya Operasional",
-      isHosted: true,
-    },
-    {
       id: "capex",
       name: "Capex",
       subtitle: "Capital Expenditure",
@@ -126,6 +115,17 @@ export default function PortalHomePage() {
       url: capexUrl,
       icon: Building2,
       badge: "Belanja Modal",
+      isHosted: true,
+    },
+    {
+      id: "opex",
+      name: "Opex",
+      subtitle: "Operational Expenditure",
+      description:
+        "Monitoring dan pengendalian biaya operasional harian (Operational Expenditure) perkebunan.",
+      url: opexUrl,
+      icon: Receipt,
+      badge: "Biaya Operasional",
       isHosted: true,
     },
     {
