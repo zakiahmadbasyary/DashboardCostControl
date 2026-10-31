@@ -413,8 +413,8 @@ export default function AdminDashboardPage() {
     },
     {
       code: "poll_pg1",
-      name: "Dashboard Pool PG 1 (Armada & Transportasi)",
-      desc: "Pengendalian biaya pool armada PG1, BBM, & utilitas kendaraan",
+      name: "Dashboard POL PG1 (Biaya Operasional Kegiatan General)",
+      desc: "Pengendalian biaya operasional yang dilakukan untuk keperluan general",
       url: pollPg1Url,
       adminUrl: `${pollPg1Url}/admin`,
       icon: Truck,

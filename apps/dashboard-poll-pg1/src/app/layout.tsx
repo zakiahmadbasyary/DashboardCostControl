@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Dashboard Poll PG 1 | Armada & Transportasi PG1",
-  description: "Modul Pengendalian Biaya Operasional Pool Armada PG1 & Utilitas Kendaraan",
+  title: "Dashboard POL PG1 | Biaya Operasional Kegiatan General",
+  description: "Pengendalian biaya operasional yang dilakukan untuk keperluan general",
   icons: {
     icon: "/logo.png",
     shortcut: "/logo.png",

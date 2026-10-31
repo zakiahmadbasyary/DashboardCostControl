@@ -130,13 +130,13 @@ export default function PortalHomePage() {
     },
     {
       id: "poll-pg1",
-      name: "Pool PG 1",
-      subtitle: "Armada & Transportasi",
+      name: "POL PG1",
+      subtitle: "Biaya Operasional Kegiatan General",
       description:
-        "Pengendalian biaya operasional pool armada PG1, efisiensi BBM, dan utilitas kendaraan.",
+        "Pengendalian biaya operasional yang dilakukan untuk keperluan general",
       url: pollPg1Url,
       icon: Truck,
-      badge: "Armada PG1",
+      badge: "Operasional General",
       isHosted: false,
     },
   ];

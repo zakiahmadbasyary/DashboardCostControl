@@ -6,8 +6,8 @@ import { UnderConstructionView } from "@dashboard/shared-ui";
 export default function DashboardPollPg1Page() {
   return (
     <UnderConstructionView
-      dashboardTitle="Poll PG 1"
-      dashboardSubtitle="Armada & Transportasi PG1"
+      dashboardTitle="POL PG1"
+      dashboardSubtitle="Biaya Operasional Kegiatan General"
       dashboardKey="poll_pg1"
     />
   );

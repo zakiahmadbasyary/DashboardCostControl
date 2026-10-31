@@ -133,9 +133,9 @@ export const getDashboardNavConfig = (): DashboardNavConfig => {
       },
       {
         key: "poll_pg1",
-        label: "Pool PG 1",
+        label: "POL PG1",
         url: pollPg1Url,
-        description: "Pengendalian Biaya Armada & Transportasi PG1 (Tahap Pembuatan)",
+        description: "Pengendalian biaya operasional yang dilakukan untuk keperluan general",
         isHosted: false,
       },
     ],
