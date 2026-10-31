@@ -141,6 +141,7 @@ export async function GET(request: NextRequest) {
         createdList: item.createdList
           .map((c) => ({
             idCreated: c.idCreated.toString(),
+            byte: c.byte ?? null,
             capexNo: c.capexNo,
             type: c.type,
             requestor: c.requestor,
@@ -152,7 +153,16 @@ export async function GET(request: NextRequest) {
             kodeApprover: c.kodeApprover,
           }))
           .sort((a, b) => {
-            // Urutan dateApprove: duluan -> baru -> null paling bawah
+            // Prioritas 1: urutan nomor step / byte approver (1, 2, 3...)
+            if (a.byte !== null && b.byte !== null) {
+              if (a.byte !== b.byte) return a.byte - b.byte;
+            } else if (a.byte !== null) {
+              return -1;
+            } else if (b.byte !== null) {
+              return 1;
+            }
+
+            // Prioritas 2 (fallback): urutan dateApprove (duluan -> baru -> null paling bawah)
             if (a.dateApprove && b.dateApprove) {
               const cmp = a.dateApprove.localeCompare(b.dateApprove);
               if (cmp !== 0) return cmp;

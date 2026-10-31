@@ -11,11 +11,12 @@ export async function GET() {
       },
     });
 
-    // 2. Fetch all Created records ordered by idCreated asc (preserving workflow sequence)
+    // 2. Fetch all Created records ordered by workflow sequence (byte asc, then idCreated asc)
     const allCreated = await prisma.created.findMany({
-      orderBy: {
-        idCreated: "asc",
-      },
+      orderBy: [
+        { byte: "asc" },
+        { idCreated: "asc" },
+      ],
     });
 
     // 3. Group Created records by CAPEX / PR identity
@@ -34,6 +35,18 @@ export async function GET() {
     // 5. Evaluate sequential approval for each CAPEX group
     // Sequential rule: only the FIRST approver in sequence whose dateApprove is null receives the pending status.
     for (const [, items] of groupedCapex.entries()) {
+      // Pastikan items terurut berdasarkan byte asc (workflow step), fallback ke idCreated
+      items.sort((a, b) => {
+        if (a.byte !== null && b.byte !== null) {
+          if (a.byte !== b.byte) return a.byte - b.byte;
+        } else if (a.byte !== null) {
+          return -1;
+        } else if (b.byte !== null) {
+          return 1;
+        }
+        return Number(a.idCreated) - Number(b.idCreated);
+      });
+
       // Find the first approver in the sequence that has NOT approved yet (dateApprove == null)
       const activePendingItem = items.find((row) => row.dateApprove === null);
 
@@ -43,6 +56,7 @@ export async function GET() {
 
         currentList.push({
           idCreated: activePendingItem.idCreated.toString(),
+          byte: activePendingItem.byte,
           capexNo: activePendingItem.capexNo,
           description: activePendingItem.description,
           amount: activePendingItem.amount ? Number(activePendingItem.amount) : null,

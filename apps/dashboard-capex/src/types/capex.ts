@@ -19,6 +19,7 @@ export interface PoInfo {
 
 export interface CreatedTrackingInfo {
   idCreated: string;
+  byte: number | null;
   capexNo: string | null;
   type: string | null;
   requestor: string | null;
@@ -57,6 +58,7 @@ export interface CapexItem {
 
 export interface PendingCapexItem {
   idCreated: string;
+  byte: number | null;
   capexNo: string | null;
   description: string | null;
   amount: number | null;

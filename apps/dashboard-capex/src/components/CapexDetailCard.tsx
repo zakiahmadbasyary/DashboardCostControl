@@ -63,10 +63,20 @@ export default function CapexDetailCard({
   const ioDisplay = getIoWbsMoDisplay(selectedItem);
   const unitPrice = calculateUnitPrice(selectedItem.amount, selectedItem.quantity);
 
-  // Urutkan riwayat approval: dateApprove paling awal (duluan) -> lebih baru -> yang null paling bawah
+  // Urutkan riwayat approval: prioritas nomor byte / step urutan -> fallback dateApprove -> null paling bawah
   const sortedCreatedList = React.useMemo(() => {
     if (!selectedItem?.createdList) return [];
     return [...selectedItem.createdList].sort((a, b) => {
+      // 1. Prioritas utama: byte (no urut approver 1, 2, 3...)
+      if (a.byte !== null && a.byte !== undefined && b.byte !== null && b.byte !== undefined) {
+        if (a.byte !== b.byte) return a.byte - b.byte;
+      } else if (a.byte !== null && a.byte !== undefined) {
+        return -1;
+      } else if (b.byte !== null && b.byte !== undefined) {
+        return 1;
+      }
+
+      // 2. Fallback: urutkan tanggal approve paling awal (duluan) -> lebih baru -> yang null paling bawah
       if (a.dateApprove && b.dateApprove) {
         const timeA = new Date(a.dateApprove).getTime();
         const timeB = new Date(b.dateApprove).getTime();
@@ -373,11 +383,21 @@ export default function CapexDetailCard({
                     <tr key={created.idCreated || idx} className="hover:bg-[#F8FAF9]">
                       {/* Approver */}
                       <td className="py-2.5 px-3">
-                        <div className="font-semibold text-[#17231B] text-[11px]">
-                          {created.nama || "—"}
+                        <div className="flex items-center gap-1.5">
+                          {created.byte !== null && created.byte !== undefined && (
+                            <span
+                              className="inline-flex items-center justify-center min-w-[20px] h-[18px] px-1 rounded text-[9px] font-bold bg-[#EAF3EC] text-[#16823B] border border-[#CBE0D1]"
+                              title={`Urutan Approval Step #${created.byte}`}
+                            >
+                              #{created.byte}
+                            </span>
+                          )}
+                          <div className="font-semibold text-[#17231B] text-[11px]">
+                            {created.nama || "—"}
+                          </div>
                         </div>
                         {created.kodeApprover && (
-                          <span className="text-[9px] text-[#89938D] font-mono">
+                          <span className="text-[9px] text-[#89938D] font-mono block mt-0.5">
                             {created.kodeApprover}
                           </span>
                         )}

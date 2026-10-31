@@ -320,10 +320,22 @@ export async function POST(request: NextRequest) {
           const kategoriVal = String(getVal(row, ["kategori", "category"]) || "").trim() || null;
           const komoditiVal = String(getVal(row, ["komoditi", "commodity"]) || "").trim() || null;
 
+          const rawByte = getVal(row, [
+            "byte", "no_urut", "nourut", "urutan", "step", "sequence", "seq", "no"
+          ]);
+          let byte: number | null = null;
+          if (rawByte !== undefined && rawByte !== null && String(rawByte).trim() !== "") {
+            const parsedInt = parseInt(String(rawByte).trim(), 10);
+            if (!isNaN(parsedInt)) {
+              byte = parsedInt;
+            }
+          }
+
           // Require at least capexNo, description, io, mo, or wbs
           if (!capexNo && !description && !io && !mo && !wbs) return null;
 
           return {
+            byte,
             capexNo,
             type,
             requestor,

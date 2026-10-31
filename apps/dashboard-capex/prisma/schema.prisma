@@ -148,6 +148,7 @@ model Budget {
 /// capex_no boleh duplikat. Kolom nama/kategori/komoditi = audit historis (disengaja)
 model Created {
   idCreated     BigInt        @id @default(autoincrement()) @map("id_created")
+  byte          Int?          @map("byte")           // No urut approver / step sequence (1, 2, 3, ...)
   idTotal       BigInt?       @map("id_total")       // FK SOFT ke total.id_total; nullable sebelum rekonsiliasi
   capexNo       String?       @map("capex_no")       // Boleh duplikat; SOFT ref ke kategori.capex_no
   type          String?       @map("type")           // WBS / order / MO
