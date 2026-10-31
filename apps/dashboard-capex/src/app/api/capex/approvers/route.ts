@@ -59,18 +59,25 @@ export async function GET() {
       }
     }
 
-    // 6. Assemble response matching UserApproverItem structure
-    const data: UserApproverItem[] = approvers.map((app) => {
-      const code = app.kodeApprover.trim();
-      const pendingItems = pendingByApprover.get(code) || [];
+    // 6. Assemble response matching UserApproverItem structure and sort by pendingCount descending
+    const data: UserApproverItem[] = approvers
+      .map((app) => {
+        const code = app.kodeApprover.trim();
+        const pendingItems = pendingByApprover.get(code) || [];
 
-      return {
-        kodeApprover: app.kodeApprover,
-        nama: app.nama,
-        pendingCount: pendingItems.length,
-        pendingItems,
-      };
-    });
+        return {
+          kodeApprover: app.kodeApprover,
+          nama: app.nama,
+          pendingCount: pendingItems.length,
+          pendingItems,
+        };
+      })
+      .sort((a, b) => {
+        if (b.pendingCount !== a.pendingCount) {
+          return b.pendingCount - a.pendingCount;
+        }
+        return (a.nama || a.kodeApprover).localeCompare(b.nama || b.kodeApprover);
+      });
 
     return NextResponse.json({
       success: true,

@@ -30,13 +30,32 @@ export default function UserApproverSection({
   const [approverSearch, setApproverSearch] = useState("");
   const [pendingSearch, setPendingSearch] = useState("");
 
-  // Derived selected approver: falls back to first approver if none selected
+  // Ranking user approver berdasarkan jumlah pending terbanyak (descending)
+  const sortedApprovers = React.useMemo(() => {
+    return [...approvers].sort((a, b) => {
+      if (b.pendingCount !== a.pendingCount) {
+        return b.pendingCount - a.pendingCount;
+      }
+      return (a.nama || a.kodeApprover).localeCompare(b.nama || b.kodeApprover);
+    });
+  }, [approvers]);
+
+  // Map peringkat global tetap konsisten saat difilter via search bar
+  const rankMap = React.useMemo(() => {
+    const map = new Map<string, number>();
+    sortedApprovers.forEach((app, idx) => {
+      map.set(app.kodeApprover, idx + 1);
+    });
+    return map;
+  }, [sortedApprovers]);
+
+  // Derived selected approver: default ke peringkat #1 (pending terbanyak) jika belum ada pilihan
   const selectedApprover =
-    (selectedKode ? approvers.find((a) => a.kodeApprover === selectedKode) : null) ||
-    approvers[0] ||
+    (selectedKode ? sortedApprovers.find((a) => a.kodeApprover === selectedKode) : null) ||
+    sortedApprovers[0] ||
     null;
 
-  const filteredApprovers = approvers.filter((app) => {
+  const filteredApprovers = sortedApprovers.filter((app) => {
     if (!approverSearch.trim()) return true;
     const q = approverSearch.toLowerCase().trim();
     return (
@@ -118,7 +137,7 @@ export default function UserApproverSection({
                   Daftar User Approver
                 </h3>
                 <p className="text-[11px] text-[#5F6B63] truncate">
-                  Pilih approver untuk melihat daftar pending
+                  Diranking dari pending terbanyak • Klik untuk detail
                 </p>
               </div>
             </div>
@@ -156,8 +175,8 @@ export default function UserApproverSection({
               <table className="w-full text-left text-xs border-collapse">
                 <thead className="sticky top-0 z-10 bg-[#F8FAF9] shadow-2xs">
                   <tr className="text-[#5F6B63] border-b border-[#E8EFE9]">
-                    <th className="py-2.5 px-3 font-bold text-[10px] uppercase w-[110px] bg-[#F8FAF9]">
-                      Index (Kode)
+                    <th className="py-2.5 px-3 font-bold text-[10px] uppercase w-[120px] bg-[#F8FAF9]">
+                      Rank • Kode
                     </th>
                     <th className="py-2.5 px-3 font-bold text-[10px] uppercase bg-[#F8FAF9]">
                       User Approver
@@ -171,6 +190,7 @@ export default function UserApproverSection({
                   {filteredApprovers.map((app) => {
                     const isSelected = app.kodeApprover === selectedKode;
                     const hasPending = app.pendingCount > 0;
+                    const rank = rankMap.get(app.kodeApprover) || 1;
 
                     return (
                       <tr
@@ -182,15 +202,31 @@ export default function UserApproverSection({
                             : "hover:bg-[#F8FAF9]"
                         }`}
                       >
-                        {/* 1. Index (Kode Approver) */}
-                        <td className="py-2.5 px-3 font-mono text-[11px] text-[#5F6B63] whitespace-nowrap">
-                          <span
-                            className={
-                              isSelected ? "text-[#16823B] font-bold" : "text-[#5F6B63]"
-                            }
-                          >
-                            {app.kodeApprover}
-                          </span>
+                        {/* 1. Rank & Kode Approver */}
+                        <td className="py-2.5 px-3 font-mono text-[11px] whitespace-nowrap">
+                          <div className="flex items-center gap-1.5">
+                            <span
+                              className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${
+                                rank === 1 && hasPending
+                                  ? "bg-[#FEF6E5] text-[#b45309] border border-[#FCDFA8]"
+                                  : rank === 2 && hasPending
+                                  ? "bg-[#F0F4F1] text-[#2C3830] border border-[#D0DDD4]"
+                                  : rank === 3 && hasPending
+                                  ? "bg-amber-50 text-amber-900 border border-amber-200"
+                                  : "text-[#89938D] bg-[#F4F7F5]"
+                              }`}
+                              title={`Peringkat #${rank} (${app.pendingCount} pending)`}
+                            >
+                              #{rank}
+                            </span>
+                            <span
+                              className={
+                                isSelected ? "text-[#16823B] font-bold" : "text-[#5F6B63]"
+                              }
+                            >
+                              {app.kodeApprover}
+                            </span>
+                          </div>
                         </td>
 
                         {/* 2. User Approver (Nama) */}
