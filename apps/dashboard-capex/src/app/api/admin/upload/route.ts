@@ -5,6 +5,12 @@ import * as path from "path";
 import { BudgetStatus, Prisma } from "@/generated/client";
 import { runCapexReconciliation } from "@/lib/reconciliation";
 import { COST_CENTER_MAP } from "@/lib/costCenters";
+import {
+  cleanStr,
+  cleanNullableStr,
+  cleanIdentifier,
+  cleanNullableIdentifier,
+} from "@/lib/sanitize";
 
 const MAX_FILE_SIZE_BYTES = 25 * 1024 * 1024; // 25 MB
 
@@ -188,12 +194,12 @@ function parseBudgetStatus(val: unknown): BudgetStatus | null {
   return null;
 }
 
-// Case-insensitive key lookup helper (removes spaces, underscores, dashes, and dots)
+// Case-insensitive key lookup helper (removes spaces, unicode whitespaces, underscores, dashes, and dots)
 function getVal(row: Record<string, unknown>, keys: string[]): unknown {
   for (const k of keys) {
-    const target = k.trim().toLowerCase().replace(/[\s_\-\.]+/g, "");
+    const target = k.toLowerCase().replace(/[\s\u00A0\u2000-\u200F\u2028-\u202F\u205F\u3000\uFEFF_\-\.]+/g, "");
     const foundKey = Object.keys(row).find(
-      (rk) => rk.trim().toLowerCase().replace(/[\s_\-\.]+/g, "") === target
+      (rk) => rk.toLowerCase().replace(/[\s\u00A0\u2000-\u200F\u2028-\u202F\u205F\u3000\uFEFF_\-\.]+/g, "") === target
     );
     if (foundKey && row[foundKey] !== undefined && row[foundKey] !== null) {
       return row[foundKey];
@@ -210,8 +216,8 @@ async function ensureCostCentersExist(
   const distinct = Array.from(
     new Set(
       costCenters
-        .filter((cc): cc is string => Boolean(cc && cc.trim()))
-        .map((cc) => cc.trim())
+        .map((cc) => cleanIdentifier(cc))
+        .filter((cc): cc is string => Boolean(cc))
     )
   );
 
@@ -286,10 +292,10 @@ export async function POST(request: NextRequest) {
 
       const parsedRows = rawRows
         .map((row) => {
-          const capexNo = String(getVal(row, ["capex_no", "capexno", "no_capex", "capex"]) || "").trim() || null;
-          const description = String(getVal(row, ["description", "deskripsi", "keterangan"]) || "").trim() || null;
-          const requestor = String(getVal(row, ["requestor", "pemohon"]) || "").trim() || null;
-          const type = String(getVal(row, ["type", "tipe", "jenis"]) || "").trim() || null;
+          const capexNo = cleanNullableIdentifier(getVal(row, ["capex_no", "capexno", "no_capex", "capex"]));
+          const description = cleanNullableStr(getVal(row, ["description", "deskripsi", "keterangan"]));
+          const requestor = cleanNullableStr(getVal(row, ["requestor", "pemohon"]));
+          const type = cleanNullableStr(getVal(row, ["type", "tipe", "jenis"]));
           const reqDate = parseExcelDate(
             getVal(row, [
               "req_date", "reqdate", "request_date", "requestdate", "tanggal_request",
@@ -297,15 +303,15 @@ export async function POST(request: NextRequest) {
               "created_date", "tanggal_dibuat", "tgl_dibuat", "pengajuan_date", "tanggal_pengajuan"
             ])
           );
-          const budgetType = String(getVal(row, ["budget_type", "budgettype", "tipe_budget"]) || "").trim() || null;
-          const io = String(getVal(row, ["io", "internal_order"]) || "").trim() || null;
-          const mo = String(getVal(row, ["mo", "maintenance_order"]) || "").trim() || null;
-          const wbs = String(getVal(row, ["wbs", "wbs_element"]) || "").trim() || null;
-          const costCenter = String(getVal(row, ["cost_center", "costcenter", "cc"]) || "").trim() || null;
+          const budgetType = cleanNullableStr(getVal(row, ["budget_type", "budgettype", "tipe_budget"]));
+          const io = cleanNullableIdentifier(getVal(row, ["io", "internal_order"]));
+          const mo = cleanNullableIdentifier(getVal(row, ["mo", "maintenance_order"]));
+          const wbs = cleanNullableIdentifier(getVal(row, ["wbs", "wbs_element"]));
+          const costCenter = cleanNullableIdentifier(getVal(row, ["cost_center", "costcenter", "cc"]));
           const quantity = parseDecimal(getVal(row, ["quantity", "qty", "jumlah"]));
           const amount = parseDecimal(getVal(row, ["amount", "nilai", "total_amount", "biaya"]));
-          const kodeApprover = String(getVal(row, ["kode_approver", "kodeapprover", "approver_code"]) || "").trim() || null;
-          const nama = String(getVal(row, ["nama", "nama_approver", "approver_name"]) || "").trim() || null;
+          const kodeApprover = cleanNullableIdentifier(getVal(row, ["kode_approver", "kodeapprover", "approver_code"]));
+          const nama = cleanNullableStr(getVal(row, ["nama", "nama_approver", "approver_name"]));
           const dateApprove = parseExcelDate(
             getVal(row, [
               "date_approve", "dateapprove", "date_approver", "dateapprover", "tanggal_approve", "approval_date", "approvaldate",
@@ -313,21 +319,24 @@ export async function POST(request: NextRequest) {
               "date_approved", "tanggal_approval", "tgl_approval", "tgl_persetujuan"
             ])
           );
-          const noPr = String(getVal(row, ["no_pr", "nopr", "nomor_pr", "pr_no", "banfn"]) || "").trim() || null;
-          const orderNo = String(getVal(row, ["order_no", "orderno", "no_order"]) || "").trim() || null;
-          const notes = String(getVal(row, ["notes", "catatan"]) || "").trim() || null;
+          const noPr = cleanNullableIdentifier(getVal(row, ["no_pr", "nopr", "nomor_pr", "pr_no", "banfn"]));
+          const orderNo = cleanNullableIdentifier(getVal(row, ["order_no", "orderno", "no_order"]));
+          const notes = cleanNullableStr(getVal(row, ["notes", "catatan"]));
           const budgetStatus = parseBudgetStatus(getVal(row, ["budget_status", "budgetstatus", "status_budget"]));
-          const kategoriVal = String(getVal(row, ["kategori", "category"]) || "").trim() || null;
-          const komoditiVal = String(getVal(row, ["komoditi", "commodity"]) || "").trim() || null;
+          const kategoriVal = cleanNullableStr(getVal(row, ["kategori", "category"]));
+          const komoditiVal = cleanNullableStr(getVal(row, ["komoditi", "commodity"]));
 
           const rawByte = getVal(row, [
             "byte", "no_urut", "nourut", "urutan", "step", "sequence", "seq", "no"
           ]);
           let byte: number | null = null;
-          if (rawByte !== undefined && rawByte !== null && String(rawByte).trim() !== "") {
-            const parsedInt = parseInt(String(rawByte).trim(), 10);
-            if (!isNaN(parsedInt)) {
-              byte = parsedInt;
+          if (rawByte !== undefined && rawByte !== null) {
+            const cleanedByteStr = cleanIdentifier(rawByte);
+            if (cleanedByteStr !== "") {
+              const parsedInt = parseInt(cleanedByteStr, 10);
+              if (!isNaN(parsedInt)) {
+                byte = parsedInt;
+              }
             }
           }
 
@@ -489,21 +498,21 @@ export async function POST(request: NextRequest) {
 
       const parsedRows = rawRows
         .map((row) => {
-          const nomorPr = String(
+          const nomorPr = cleanIdentifier(
             getVal(row, [
               "nomor_pr", "nomorpr", "no_pr", "nopr", "pr_no", "prno",
               "banfn", "pr_number", "no_purchase_requisition", "purchase_requisition"
-            ]) || ""
-          ).trim();
+            ])
+          );
           if (!nomorPr) return null;
 
-          const keterangan = String(
-            getVal(row, ["keterangan", "description", "deskripsi", "nama_barang", "item_description", "txz01", "matnr"]) || ""
-          ).trim() || null;
+          const keterangan = cleanNullableStr(
+            getVal(row, ["keterangan", "description", "deskripsi", "nama_barang", "item_description", "txz01", "matnr"])
+          );
           const quantity = parseDecimal(getVal(row, ["quantity", "qty", "jumlah", "menge"]));
-          const unitOfMeasure = String(
-            getVal(row, ["unit_of_measure", "unit", "uom", "satuan", "meins"]) || ""
-          ).trim() || null;
+          const unitOfMeasure = cleanNullableStr(
+            getVal(row, ["unit_of_measure", "unit", "uom", "satuan", "meins"])
+          );
           const valuationPrice = parseDecimal(
             getVal(row, ["valuation_price", "valuationprice", "harga_satuan", "price", "harga", "preis"])
           );
@@ -517,12 +526,12 @@ export async function POST(request: NextRequest) {
               "badat", "erdat", "tanggal", "date"
             ])
           );
-          const pgr = String(
-            getVal(row, ["pgr", "purchasing_group", "purchasinggroup", "ekgrp", "kode_pgr", "grup_purchasing"]) || ""
-          ).trim() || null;
-          const noPo = String(
-            getVal(row, ["no_po", "nopo", "nomor_po", "nomorpo", "po_no", "pono", "ebeln", "po_number", "purchase_order", "no_purchase_order"]) || ""
-          ).trim() || null;
+          const pgr = cleanNullableIdentifier(
+            getVal(row, ["pgr", "purchasing_group", "purchasinggroup", "ekgrp", "kode_pgr", "grup_purchasing"])
+          );
+          const noPo = cleanNullableIdentifier(
+            getVal(row, ["no_po", "nopo", "nomor_po", "nomorpo", "po_no", "pono", "ebeln", "po_number", "purchase_order", "no_purchase_order"])
+          );
 
           return {
             nomorPr,
@@ -602,17 +611,17 @@ export async function POST(request: NextRequest) {
 
       const parsedRows = rawRows
         .map((row) => {
-          const io = String(getVal(row, ["io", "internal_order"]) || "").trim() || null;
-          const mo = String(getVal(row, ["mo", "maintenance_order"]) || "").trim() || null;
-          const wbs = String(getVal(row, ["wbs", "wbs_element"]) || "").trim() || null;
-          const description = String(getVal(row, ["description", "deskripsi", "keterangan"]) || "").trim() || null;
-          const costCenter = String(getVal(row, ["cost_center", "costcenter", "cc"]) || "").trim() || null;
+          const io = cleanNullableIdentifier(getVal(row, ["io", "internal_order"]));
+          const mo = cleanNullableIdentifier(getVal(row, ["mo", "maintenance_order"]));
+          const wbs = cleanNullableIdentifier(getVal(row, ["wbs", "wbs_element"]));
+          const description = cleanNullableStr(getVal(row, ["description", "deskripsi", "keterangan"]));
+          const costCenter = cleanNullableIdentifier(getVal(row, ["cost_center", "costcenter", "cc"]));
           const quantity = parseDecimal(getVal(row, ["quantity", "qty", "jumlah"]));
           const amount = parseDecimal(getVal(row, ["amount", "nilai", "total_amount", "biaya"]));
-          const groupCapex = String(getVal(row, ["group_capex", "groupcapex", "group"]) || "").trim() || null;
-          const capexNo = String(getVal(row, ["capex_no", "capexno", "no_capex"]) || "").trim() || null;
-          const kategoriVal = String(getVal(row, ["kategori", "category"]) || "").trim() || null;
-          const komoditiVal = String(getVal(row, ["komoditi", "commodity"]) || "").trim() || null;
+          const groupCapex = cleanNullableStr(getVal(row, ["group_capex", "groupcapex", "group"]));
+          const capexNo = cleanNullableIdentifier(getVal(row, ["capex_no", "capexno", "no_capex"]));
+          const kategoriVal = cleanNullableStr(getVal(row, ["kategori", "category"]));
+          const komoditiVal = cleanNullableStr(getVal(row, ["komoditi", "commodity"]));
 
           // capexNo is optional: will be auto-derived from Created via WBS -> MO -> IO during reconciliation
           if (!io && !mo && !wbs && !description) return null;
@@ -705,12 +714,12 @@ export async function POST(request: NextRequest) {
 
       const parsedRows = rawRows
         .map((row) => {
-          const pgr = String(getVal(row, ["pgr", "purchasing_group", "kode_pgr"]) || "").trim();
+          const pgr = cleanIdentifier(getVal(row, ["pgr", "purchasing_group", "kode_pgr"]));
           if (!pgr) return null;
 
-          const description = String(getVal(row, ["description", "deskripsi", "keterangan"]) || "").trim() || null;
-          const telephone = String(getVal(row, ["telephone", "telp", "no_telp", "telepon"]) || "").trim() || null;
-          const faxNumber = String(getVal(row, ["fax_number", "fax", "no_fax"]) || "").trim() || null;
+          const description = cleanNullableStr(getVal(row, ["description", "deskripsi", "keterangan"]));
+          const telephone = cleanNullableStr(getVal(row, ["telephone", "telp", "no_telp", "telepon"]));
+          const faxNumber = cleanNullableStr(getVal(row, ["fax_number", "fax", "no_fax"]));
 
           return {
             pgr,
@@ -757,13 +766,13 @@ export async function POST(request: NextRequest) {
 
       const parsedRows = rawRows
         .map((row) => {
-          const capexNo = String(getVal(row, ["capex_no", "capexno", "no_capex"]) || "").trim();
+          const capexNo = cleanIdentifier(getVal(row, ["capex_no", "capexno", "no_capex"]));
           if (!capexNo) return null;
 
-          const description = String(getVal(row, ["description", "deskripsi", "keterangan"]) || "").trim() || null;
-          const costCenter = String(getVal(row, ["cost_center", "costcenter", "cc"]) || "").trim() || null;
-          const kategoriVal = String(getVal(row, ["kategori", "category"]) || "").trim() || null;
-          const komoditiVal = String(getVal(row, ["komoditi", "commodity"]) || "").trim() || null;
+          const description = cleanNullableStr(getVal(row, ["description", "deskripsi", "keterangan"]));
+          const costCenter = cleanNullableIdentifier(getVal(row, ["cost_center", "costcenter", "cc"]));
+          const kategoriVal = cleanNullableStr(getVal(row, ["kategori", "category"]));
+          const komoditiVal = cleanNullableStr(getVal(row, ["komoditi", "commodity"]));
 
           return {
             capexNo,
@@ -809,10 +818,10 @@ export async function POST(request: NextRequest) {
 
       const parsedRows = rawRows
         .map((row) => {
-          const kodeApprover = String(getVal(row, ["kode_approver", "kodeapprover", "kode", "approver_code"]) || "").trim();
+          const kodeApprover = cleanIdentifier(getVal(row, ["kode_approver", "kodeapprover", "kode", "approver_code"]));
           if (!kodeApprover) return null;
 
-          const nama = String(getVal(row, ["nama", "nama_approver", "name"]) || "").trim() || null;
+          const nama = cleanNullableStr(getVal(row, ["nama", "nama_approver", "name"]));
 
           return {
             kodeApprover,
@@ -852,7 +861,7 @@ export async function POST(request: NextRequest) {
 
       const parsedRows = rawRows
         .map((row) => {
-          const kodeCostCenter = String(
+          const kodeCostCenter = cleanIdentifier(
             getVal(row, [
               "kode_cost_center",
               "kodecostcenter",
@@ -861,22 +870,22 @@ export async function POST(request: NextRequest) {
               "kode_cc",
               "kode",
               "cc",
-            ]) || ""
-          ).trim();
+            ])
+          );
           if (!kodeCostCenter) return null;
 
-          const keterangan =
-            String(
-              getVal(row, [
-                "keterangan",
-                "description",
-                "deskripsi",
-                "nama",
-                "nama_cost_center",
-                "nama_bagian",
-                "bagian",
-              ]) || ""
-            ).trim() || kodeCostCenter;
+          const keteranganRaw = cleanStr(
+            getVal(row, [
+              "keterangan",
+              "description",
+              "deskripsi",
+              "nama",
+              "nama_cost_center",
+              "nama_bagian",
+              "bagian",
+            ])
+          );
+          const keterangan = keteranganRaw || kodeCostCenter;
 
           return {
             kodeCostCenter,

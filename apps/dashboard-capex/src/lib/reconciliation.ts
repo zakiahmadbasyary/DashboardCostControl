@@ -1,5 +1,11 @@
 import prisma from "@/lib/prisma";
 import { BudgetStatus, StatusCapex } from "@/generated/client";
+import {
+  cleanStr,
+  cleanNullableStr,
+  cleanIdentifier,
+  cleanNullableIdentifier,
+} from "@/lib/sanitize";
 
 /**
  * Reconciles Budget, Created, and PO tables into the Total table
@@ -22,7 +28,7 @@ export async function runCapexReconciliation() {
     });
     const preservedCapexNos = new Set(
       manuallyClosedTotals
-        .map((t) => t.capexNo)
+        .map((t) => cleanIdentifier(t.capexNo))
         .filter((c): c is string => Boolean(c))
     );
 
@@ -32,10 +38,10 @@ export async function runCapexReconciliation() {
       orderBy: { reqDate: "asc" },
     });
     const allPo = await tx.po.findMany();
-    const poSet = new Set(allPo.map((p) => p.nomorPr.trim()));
-    const poMap = new Map(allPo.map((p) => [p.nomorPr.trim(), p]));
+    const poSet = new Set(allPo.map((p) => cleanIdentifier(p.nomorPr)).filter(Boolean));
+    const poMap = new Map(allPo.map((p) => [cleanIdentifier(p.nomorPr), p]));
     const allKategori = await tx.kategori.findMany();
-    const kategoriMap = new Map(allKategori.map((k) => [k.capexNo, k]));
+    const kategoriMap = new Map(allKategori.map((k) => [cleanIdentifier(k.capexNo), k]));
 
     // 3. Clear non-manually closed Total records
     // Unlink foreign keys first to avoid constraint conflicts
@@ -62,7 +68,7 @@ export async function runCapexReconciliation() {
     const createdWithoutCapex: typeof allCreated = [];
 
     for (const c of allCreated) {
-      const cleanCapex = c.capexNo?.trim();
+      const cleanCapex = cleanIdentifier(c.capexNo);
       if (cleanCapex) {
         if (!createdByCapexNo.has(cleanCapex)) {
           createdByCapexNo.set(cleanCapex, []);
@@ -80,20 +86,20 @@ export async function runCapexReconciliation() {
     const ioToCapex = new Map<string, string>();
 
     for (const c of allCreated) {
-      const cleanCapex = c.capexNo?.trim();
+      const cleanCapex = cleanIdentifier(c.capexNo);
       if (!cleanCapex) continue;
 
-      const cleanWbs = c.wbs?.trim().toLowerCase();
+      const cleanWbs = cleanIdentifier(c.wbs).toLowerCase();
       if (cleanWbs && !wbsToCapex.has(cleanWbs)) {
         wbsToCapex.set(cleanWbs, cleanCapex);
       }
 
-      const cleanMo = c.mo?.trim().toLowerCase();
+      const cleanMo = cleanIdentifier(c.mo).toLowerCase();
       if (cleanMo && !moToCapex.has(cleanMo)) {
         moToCapex.set(cleanMo, cleanCapex);
       }
 
-      const cleanIo = c.io?.trim().toLowerCase();
+      const cleanIo = cleanIdentifier(c.io).toLowerCase();
       if (cleanIo && !ioToCapex.has(cleanIo)) {
         ioToCapex.set(cleanIo, cleanCapex);
       }
@@ -101,9 +107,9 @@ export async function runCapexReconciliation() {
 
     // Resolve capexNo for Budget rows based on matching WBS -> MO -> IO
     for (const b of allBudgets) {
-      const cleanWbs = b.wbs?.trim().toLowerCase();
-      const cleanMo = b.mo?.trim().toLowerCase();
-      const cleanIo = b.io?.trim().toLowerCase();
+      const cleanWbs = cleanIdentifier(b.wbs).toLowerCase();
+      const cleanMo = cleanIdentifier(b.mo).toLowerCase();
+      const cleanIo = cleanIdentifier(b.io).toLowerCase();
 
       let matchedCapex: string | null = null;
       if (cleanWbs && wbsToCapex.has(cleanWbs)) {
@@ -115,7 +121,8 @@ export async function runCapexReconciliation() {
       }
 
       // If a match is found from Created and differs from current Budget capexNo, update it
-      if (matchedCapex && matchedCapex !== b.capexNo) {
+      const currentCapex = cleanIdentifier(b.capexNo);
+      if (matchedCapex && matchedCapex !== currentCapex) {
         b.capexNo = matchedCapex;
         await tx.budget.update({
           where: { idBudget: b.idBudget },
@@ -129,7 +136,7 @@ export async function runCapexReconciliation() {
     const budgetWithoutCapex: typeof allBudgets = [];
 
     for (const b of allBudgets) {
-      const cleanCapex = b.capexNo?.trim();
+      const cleanCapex = cleanIdentifier(b.capexNo);
       if (cleanCapex) {
         if (!budgetByCapexNo.has(cleanCapex)) {
           budgetByCapexNo.set(cleanCapex, []);
@@ -148,7 +155,9 @@ export async function runCapexReconciliation() {
 
     // Keep track of used nomorPr to respect unique constraint on Total.nomor_pr
     const usedNomorPr = new Set<string>(
-      manuallyClosedTotals.map((t) => t.nomorPr).filter((p): p is string => Boolean(p))
+      manuallyClosedTotals
+        .map((t) => cleanIdentifier(t.nomorPr))
+        .filter((p): p is string => Boolean(p))
     );
 
     // 5. Process grouped CAPEX items
@@ -218,10 +227,10 @@ export async function runCapexReconciliation() {
       const komoditi = kRep?.komoditi || bRep?.komoditi || null;
 
       // nomorPr from Created.noPr (check cRep first, then any row in cList)
-      let candidatePr = cRep?.noPr ? cRep.noPr.trim() : null;
+      let candidatePr = cRep?.noPr ? cleanIdentifier(cRep.noPr) : null;
       if (!candidatePr) {
-        const found = cList.find((c) => c.noPr && c.noPr.trim() !== "");
-        if (found?.noPr) candidatePr = found.noPr.trim();
+        const found = cList.find((c) => c.noPr && cleanIdentifier(c.noPr) !== "");
+        if (found?.noPr) candidatePr = cleanIdentifier(found.noPr);
       }
 
       let nomorPr: string | null = null;
@@ -232,7 +241,8 @@ export async function runCapexReconciliation() {
 
       // Check if PO record has valid noPo
       const poRecord = nomorPr ? poMap.get(nomorPr) : null;
-      const hasNoPo = Boolean(poRecord?.noPo && poRecord.noPo.trim() !== "");
+      const cleanNoPo = poRecord?.noPo ? cleanIdentifier(poRecord.noPo) : null;
+      const hasNoPo = Boolean(cleanNoPo && cleanNoPo !== "");
 
       // Compute status_capex:
       // - Sudah PO: HANYA jika sudah ada nomor PR DAN nomor PO sudah terbit (hasNoPo && nomorPr)
@@ -256,20 +266,20 @@ export async function runCapexReconciliation() {
       const createdTotal = await tx.total.create({
         data: {
           nomorPr,
-          capexNo,
-          description,
-          budgetType,
+          capexNo: cleanNullableIdentifier(capexNo),
+          description: cleanNullableStr(description),
+          budgetType: cleanNullableStr(budgetType),
           budgetStatus,
           reqDate,
           quantity,
           amount,
-          costCenter,
-          io,
-          mo,
-          wbs,
+          costCenter: cleanNullableIdentifier(costCenter),
+          io: cleanNullableIdentifier(io),
+          mo: cleanNullableIdentifier(mo),
+          wbs: cleanNullableIdentifier(wbs),
           statusCapex,
           tahun,
-          komoditi,
+          komoditi: cleanNullableStr(komoditi),
           isManuallyClose: false,
         },
       });
@@ -313,19 +323,19 @@ export async function runCapexReconciliation() {
         data: {
           nomorPr: null,
           capexNo: null,
-          description,
+          description: cleanNullableStr(description),
           budgetType: null,
           budgetStatus,
           reqDate: null,
           quantity,
           amount,
-          costCenter,
-          io,
-          mo,
-          wbs,
+          costCenter: cleanNullableIdentifier(costCenter),
+          io: cleanNullableIdentifier(io),
+          mo: cleanNullableIdentifier(mo),
+          wbs: cleanNullableIdentifier(wbs),
           statusCapex,
           tahun,
-          komoditi,
+          komoditi: cleanNullableStr(komoditi),
           isManuallyClose: false,
         },
       });
@@ -342,7 +352,7 @@ export async function runCapexReconciliation() {
         continue;
       }
 
-      let candidatePr = c.noPr ? c.noPr.trim() : null;
+      let candidatePr = c.noPr ? cleanIdentifier(c.noPr) : null;
       let nomorPr: string | null = null;
       if (candidatePr && poSet.has(candidatePr) && !usedNomorPr.has(candidatePr)) {
         nomorPr = candidatePr;
@@ -350,7 +360,8 @@ export async function runCapexReconciliation() {
       }
 
       const poRecord = nomorPr ? poMap.get(nomorPr) : null;
-      const hasNoPo = Boolean(poRecord?.noPo && poRecord.noPo.trim() !== "");
+      const cleanNoPo = poRecord?.noPo ? cleanIdentifier(poRecord.noPo) : null;
+      const hasNoPo = Boolean(cleanNoPo && cleanNoPo !== "");
 
       // - Sudah PO: HANYA jika sudah ada nomor PR DAN nomor PO sudah terbit (hasNoPo && nomorPr)
       let statusCapex: StatusCapex = StatusCapex.Belum_Created;
@@ -368,16 +379,16 @@ export async function runCapexReconciliation() {
         data: {
           nomorPr,
           capexNo: null,
-          description: c.description,
-          budgetType: c.budgetType,
+          description: cleanNullableStr(c.description),
+          budgetType: cleanNullableStr(c.budgetType),
           budgetStatus: c.budgetStatus,
           reqDate: c.reqDate,
           quantity: c.quantity,
           amount: c.amount,
-          costCenter: c.costCenter,
-          io: c.io,
-          mo: c.mo,
-          wbs: c.wbs,
+          costCenter: cleanNullableIdentifier(c.costCenter),
+          io: cleanNullableIdentifier(c.io),
+          mo: cleanNullableIdentifier(c.mo),
+          wbs: cleanNullableIdentifier(c.wbs),
           statusCapex,
           tahun,
           komoditi: null,
