@@ -1,5 +1,5 @@
 import prisma from "@/lib/prisma";
-import { BudgetStatus, StatusCapex } from "@/generated/client";
+import { BudgetStatus, StatusCapex, Prisma } from "@/generated/client";
 import {
   cleanStr,
   cleanNullableStr,
@@ -162,12 +162,16 @@ export async function runCapexReconciliation() {
 
     // 5. Process grouped CAPEX items
     for (const capexNo of allCapexNos) {
-      // If this capexNo is already manually closed, link items to existing Total
+      // If this capexNo is already manually closed, link items to existing Total and backfill missing PR
       if (preservedCapexNos.has(capexNo)) {
-        const closedTotal = manuallyClosedTotals.find((t) => t.capexNo === capexNo);
+        const closedTotal = manuallyClosedTotals.find(
+          (t) => cleanIdentifier(t.capexNo) === capexNo
+        );
         if (closedTotal) {
           const cList = createdByCapexNo.get(capexNo) || [];
           const bList = budgetByCapexNo.get(capexNo) || [];
+
+          // Link Created & Budget rows to existing Total
           if (cList.length > 0) {
             await tx.created.updateMany({
               where: { idCreated: { in: cList.map((c) => c.idCreated) } },
@@ -178,6 +182,50 @@ export async function runCapexReconciliation() {
             await tx.budget.updateMany({
               where: { idBudget: { in: bList.map((b) => b.idBudget) } },
               data: { idTotal: closedTotal.idTotal },
+            });
+          }
+
+          // Backfill nomorPr dan metadata jika masih null, tanpa mengubah status Sudah Close
+          const cRep = cList.length > 0 ? cList[0] : null;
+          const bRep = bList.length > 0 ? bList[0] : null;
+          const updateData: Prisma.TotalUncheckedUpdateInput = {};
+
+          if (!closedTotal.nomorPr) {
+            let candidatePr: string | null = null;
+            if (cRep?.noPr) candidatePr = cleanIdentifier(cRep.noPr);
+            if (!candidatePr) {
+              const found = cList.find((c) => c.noPr && cleanIdentifier(c.noPr) !== "");
+              if (found?.noPr) candidatePr = cleanIdentifier(found.noPr);
+            }
+
+            if (candidatePr && poSet.has(candidatePr) && !usedNomorPr.has(candidatePr)) {
+              updateData.nomorPr = candidatePr;
+              usedNomorPr.add(candidatePr);
+              closedTotal.nomorPr = candidatePr;
+            }
+          }
+
+          if (!closedTotal.io) {
+            const resolvedIo = cleanNullableIdentifier(cRep?.io || bRep?.io);
+            if (resolvedIo) updateData.io = resolvedIo;
+          }
+          if (!closedTotal.mo) {
+            const resolvedMo = cleanNullableIdentifier(cRep?.mo || bRep?.mo);
+            if (resolvedMo) updateData.mo = resolvedMo;
+          }
+          if (!closedTotal.wbs) {
+            const resolvedWbs = cleanNullableIdentifier(cRep?.wbs || bRep?.wbs);
+            if (resolvedWbs) updateData.wbs = resolvedWbs;
+          }
+          if (!closedTotal.costCenter) {
+            const resolvedCc = cleanNullableIdentifier(cRep?.costCenter || bRep?.costCenter);
+            if (resolvedCc) updateData.costCenter = resolvedCc;
+          }
+
+          if (Object.keys(updateData).length > 0) {
+            await tx.total.update({
+              where: { idTotal: closedTotal.idTotal },
+              data: updateData,
             });
           }
         }
