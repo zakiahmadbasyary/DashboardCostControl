@@ -21,7 +21,7 @@ import {
 } from "lucide-react";
 
 // Ubah ke false jika ingin membuka kembali akses dashboard Sulam
-const IS_UNDER_CONSTRUCTION = true;
+const IS_UNDER_CONSTRUCTION = false;
 
 export default function DashboardSulamPage() {
   if (IS_UNDER_CONSTRUCTION) {

@@ -99,10 +99,10 @@ export default function AdminSidebar() {
         </Link>
         <button
           onClick={handleLogout}
-          className="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs sm:text-sm font-semibold text-rose-600 hover:bg-rose-50 hover:text-rose-700 transition-colors"
+          className="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs sm:text-sm font-bold text-rose-600 hover:bg-rose-50 transition-colors cursor-pointer"
         >
           <LogOut className="w-4.5 h-4.5 shrink-0" />
-          <span>Logout Sistem</span>
+          <span>Keluar (Logout)</span>
         </button>
       </div>
     </div>
@@ -110,41 +110,46 @@ export default function AdminSidebar() {
 
   return (
     <>
-      {/* Mobile Top Toggle Bar */}
-      <div className="lg:hidden flex items-center justify-between p-4 bg-white border-b border-[#DDE5DF] sticky top-0 z-40">
+      {/* Mobile Header Bar */}
+      <header className="lg:hidden bg-white border-b border-[#DDE5DF] px-4 py-3 sticky top-0 z-30 flex items-center justify-between shadow-xs w-full">
         <div className="flex items-center gap-3">
-          <img src="/logo.png" alt="GGF Logo" className="h-8 w-auto object-contain" />
-          <span className="font-extrabold text-sm text-[#17231B]">Admin Sulam</span>
+          <div className="h-11 w-auto flex items-center shrink-0">
+            <img
+              src="/logo.png"
+              alt="GGF Logo"
+              className="h-11 max-h-11 w-auto object-contain"
+              style={{ height: "44px", maxHeight: "44px", width: "auto" }}
+            />
+          </div>
+          <span className="font-extrabold text-base text-[#17231B]">GGF Admin</span>
         </div>
         <button
-          onClick={() => setMobileOpen(true)}
-          className="p-2 text-[#5F6B63] hover:text-[#17231B] rounded-lg hover:bg-[#F7F9F7]"
+          onClick={() => setMobileOpen(!mobileOpen)}
+          className="p-2 text-[#17231B] bg-[#F7F9F7] border border-[#DDE5DF] rounded-xl focus:outline-none cursor-pointer"
         >
-          <Menu className="w-6 h-6" />
+          <Menu className="w-5 h-5" />
         </button>
-      </div>
+      </header>
 
-      {/* Desktop Persistent Sidebar */}
-      <aside className="hidden lg:block w-72 bg-white border-r border-[#DDE5DF] shrink-0 min-h-screen sticky top-0 h-screen overflow-y-auto">
-        {sidebarContent}
-      </aside>
-
-      {/* Mobile Drawer Backdrop */}
+      {/* Mobile Drawer Overlay & Menu */}
       {mobileOpen && (
-        <div
-          className="lg:hidden fixed inset-0 bg-black/40 backdrop-blur-xs z-50 transition-opacity"
-          onClick={() => setMobileOpen(false)}
-        />
+        <div className="lg:hidden fixed inset-0 z-50 flex">
+          {/* Backdrop */}
+          <div
+            className="fixed inset-0 bg-black/40 backdrop-blur-xs transition-opacity"
+            onClick={() => setMobileOpen(false)}
+          />
+          {/* Drawer Container */}
+          <div className="relative w-72 bg-white h-full shadow-2xl z-10 flex flex-col">
+            {sidebarContent}
+          </div>
+        </div>
       )}
 
-      {/* Mobile Drawer */}
-      <div
-        className={`lg:hidden fixed inset-y-0 left-0 w-72 bg-white z-50 shadow-2xl transition-transform duration-300 ease-in-out ${
-          mobileOpen ? "translate-x-0" : "-translate-x-full"
-        }`}
-      >
+      {/* Desktop Fixed Sidebar */}
+      <aside className="hidden lg:flex w-72 bg-white border-r border-[#DDE5DF] flex-col justify-between h-screen sticky top-0 shrink-0">
         {sidebarContent}
-      </div>
+      </aside>
     </>
   );
 }
