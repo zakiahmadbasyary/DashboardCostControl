@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useMemo } from "react";
-import { Table as TableIcon, Filter, Search, ArrowUpDown, ChevronUp, ChevronDown } from "lucide-react";
+import { Table as TableIcon, Filter, Search, ArrowUpDown, ChevronUp, ChevronDown, X } from "lucide-react";
 import { formatNumberId, formatRatioId } from "@/lib/formatters";
 
 interface LocationItem {
@@ -143,33 +143,34 @@ export default function LocationDetailTable({
   };
 
   return (
-    <div className="bg-white border border-[#DDE5DF] rounded-2xl p-5 shadow-xs font-sans" suppressHydrationWarning>
-      {/* ── Top Bar: Title, Wilayah Sub-Filter & Search Input (Persis seperti PgSummaryTable) ── */}
-      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 mb-4">
-        <div className="flex items-center gap-2">
-          <div className="p-2 rounded-lg bg-[#16823B]/10 text-[#16823B] shrink-0">
+    <div className="bg-white border border-[#DDE5DF] rounded-2xl p-4 sm:p-5 shadow-xs font-sans" suppressHydrationWarning>
+      {/* ── Top Bar: Title, Wilayah Sub-Filter & Search Input (Responsive Mobile & Desktop) ── */}
+      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3.5 sm:gap-4 mb-3 sm:mb-4">
+        <div className="flex items-start sm:items-center gap-2.5">
+          <div className="p-2 rounded-lg bg-[#16823B]/10 text-[#16823B] shrink-0 mt-0.5 sm:mt-0">
             <TableIcon className="w-4 h-4" />
           </div>
           <div>
-            <h3 className="font-bold text-base text-[#17231B]">
+            <h3 className="font-bold text-sm sm:text-base text-[#17231B] leading-tight">
               Tabel Detail Seluruh Lokasi --- {monthName}
             </h3>
-            <p className="text-xs text-[#5F6B63]">
+            <p className="text-[11px] sm:text-xs text-[#5F6B63] mt-0.5 leading-snug">
               Rekapitulasi tenaga kerja, bibit, luas, dan kapasitas per lokasi di PG1 (
               {selectedWilayah === "all" ? "Seluruh Wilayah AW01--AW07" : `Wilayah ${selectedWilayah}`}) pada bulan {monthName}.
             </p>
           </div>
         </div>
 
-        {/* Filter Wilayah Dropdown & Search */}
-        <div className="flex flex-wrap items-center gap-2.5">
-          <div className="flex items-center gap-2 bg-[#F7F9F7] px-3 py-1.5 border border-[#DDE5DF] rounded-xl text-xs font-semibold text-[#17231B]">
-            <Filter className="w-3.5 h-3.5 text-[#16823B]" />
-            <span className="text-[#5F6B63]">Wilayah:</span>
+        {/* Filter Wilayah Dropdown & Search Bar */}
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-2.5 w-full lg:w-auto">
+          {/* Dropdown Filter Wilayah */}
+          <div className="flex items-center gap-2 bg-[#F7F9F7] px-3 py-2 sm:py-1.5 border border-[#DDE5DF] rounded-xl text-xs font-semibold text-[#17231B] flex-1 sm:flex-initial focus-within:border-[#16823B] focus-within:bg-white transition-all">
+            <Filter className="w-3.5 h-3.5 text-[#16823B] shrink-0" />
+            <span className="text-[#5F6B63] shrink-0 text-xs">Wilayah:</span>
             <select
               value={selectedWilayah}
               onChange={(e) => setSelectedWilayah(e.target.value)}
-              className="bg-white border border-[#DDE5DF] rounded-lg px-2.5 py-1 text-xs font-bold text-[#17231B] focus:outline-none focus:border-[#16823B] transition-colors cursor-pointer"
+              className="w-full sm:w-auto bg-transparent border-0 text-xs font-bold text-[#17231B] focus:outline-none cursor-pointer truncate pr-1"
             >
               {WILAYAH_OPTIONS.map((w) => (
                 <option key={w.id} value={w.id}>
@@ -180,17 +181,57 @@ export default function LocationDetailTable({
           </div>
 
           {/* Pencarian Lokasi */}
-          <div className="relative min-w-[170px] sm:min-w-[190px]">
-            <Search className="w-3.5 h-3.5 text-[#5F6B63] absolute left-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+          <div className="relative w-full sm:w-56 lg:w-60">
+            <Search className="w-3.5 h-3.5 text-[#5F6B63] absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
             <input
               type="text"
               placeholder="Cari lokasi / wilayah..."
               value={internalSearch}
               onChange={(e) => setInternalSearch(e.target.value)}
-              className="w-full pl-8 pr-3 py-1.5 rounded-xl border border-[#DDE5DF] bg-[#F7F9F7] text-xs font-semibold text-[#17231B] placeholder:text-[#89938D] focus:bg-white focus:outline-none focus:border-[#16823B] transition-all"
+              className="w-full pl-8.5 pr-8 py-2 sm:py-1.5 rounded-xl border border-[#DDE5DF] bg-[#F7F9F7] text-xs font-semibold text-[#17231B] placeholder:text-[#89938D] focus:bg-white focus:outline-none focus:border-[#16823B] transition-all"
             />
+            {internalSearch && (
+              <button
+                type="button"
+                onClick={() => setInternalSearch("")}
+                className="absolute right-2.5 top-1/2 -translate-y-1/2 p-0.5 text-[#89938D] hover:text-[#17231B] cursor-pointer"
+                title="Hapus pencarian"
+              >
+                <X className="w-3.5 h-3.5" />
+              </button>
+            )}
           </div>
         </div>
+      </div>
+
+      {/* ── Quick-Filter Pills untuk Wilayah di Tampilan Mobile (< sm) ── */}
+      <div className="sm:hidden mb-3.5 overflow-x-auto pb-1 -mx-1 px-1 scrollbar-none flex items-center gap-1.5">
+        {WILAYAH_OPTIONS.map((w) => {
+          const isSelected = selectedWilayah === w.id;
+          const shortLabel = w.id === "all" ? "Semua" : w.id;
+          return (
+            <button
+              key={w.id}
+              type="button"
+              onClick={() => setSelectedWilayah(w.id)}
+              className={`px-3 py-1.5 rounded-lg text-xs font-bold shrink-0 transition-all cursor-pointer flex items-center gap-1.5 ${
+                isSelected
+                  ? "bg-[#16823B] text-white shadow-xs"
+                  : "bg-[#F7F9F7] text-[#5F6B63] hover:text-[#17231B] border border-[#DDE5DF] hover:bg-white active:bg-gray-100"
+              }`}
+            >
+              {w.id !== "all" && (
+                <span
+                  className="w-2 h-2 rounded-full shrink-0"
+                  style={{
+                    backgroundColor: isSelected ? "#FFFFFF" : REGION_COLORS[w.id] || "#16823B",
+                  }}
+                />
+              )}
+              <span>{shortLabel}</span>
+            </button>
+          );
+        })}
       </div>
 
       {/* ── Main Table: Scrollable Vertikal & Horizontal, Sticky Header & Sticky Footer ── */}
@@ -321,7 +362,7 @@ export default function LocationDetailTable({
           .
         </span>
         <span className="text-[#89938D] italic">
-          *Gulir (scroll) vertikal tabel di atas untuk menjelajahi seluruh baris lokasi
+          *Gulir tabel ke samping & vertikal untuk menjelajahi seluruh data lokasi
         </span>
       </div>
     </div>
