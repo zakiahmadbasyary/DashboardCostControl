@@ -110,7 +110,7 @@ export default function SulamMainFilters({
             <select
               value={selectedIndicator}
               onChange={(e) => onSelectIndicator(e.target.value as PgIndicatorKey)}
-              className="w-full bg-[#F7F9F7] border border-[#DDE5DF] rounded-lg px-2.5 py-1.5 text-xs font-bold text-[#17231B] focus:outline-none focus:border-[#16823B] transition-colors truncate cursor-pointer"
+              className="w-full bg-[#F7F9F7] border border-[#DDE5DF] rounded-lg px-2.5 py-1.5 text-xs font-semibold text-[#17231B] focus:outline-none focus:border-[#16823B] transition-colors truncate cursor-pointer"
               suppressHydrationWarning
             >
               {PG_INDICATORS.map((ind) => (
@@ -129,7 +129,7 @@ export default function SulamMainFilters({
             <select
               value={selectedYear}
               onChange={(e) => onYearChange(parseInt(e.target.value, 10))}
-              className="w-full bg-[#F7F9F7] border border-[#DDE5DF] rounded-lg px-2.5 py-1.5 text-xs font-bold text-[#17231B] focus:outline-none focus:border-[#16823B] transition-colors truncate cursor-pointer"
+              className="w-full bg-[#F7F9F7] border border-[#DDE5DF] rounded-lg px-2.5 py-1.5 text-xs font-semibold text-[#17231B] focus:outline-none focus:border-[#16823B] transition-colors truncate cursor-pointer"
               suppressHydrationWarning
             >
               {availableYears.map((y) => (
