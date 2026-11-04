@@ -2,10 +2,11 @@
 
 import React, { useState, useEffect, useCallback } from "react";
 import DashboardHeader from "@/components/dashboard/DashboardHeader";
-import SubMenuTabs, { SulamSubMenu } from "@/components/sulam/SubMenuTabs";
+import { SulamSubMenu } from "@/components/sulam/SubMenuTabs";
 import SulamMainFilters, { PgIndicatorKey } from "@/components/sulam/antar-pg/SulamMainFilters";
 import PgComparisonChart from "@/components/sulam/antar-pg/PgComparisonChart";
 import PgSummaryTable from "@/components/sulam/antar-pg/PgSummaryTable";
+import WilayahMainFilters from "@/components/sulam/antar-wilayah/WilayahMainFilters";
 import MonthlyMatrixSection from "@/components/sulam/antar-wilayah/MonthlyMatrixSection";
 import MonthlyAnalysisSection from "@/components/sulam/antar-wilayah/MonthlyAnalysisSection";
 import LocationDetailTable from "@/components/sulam/antar-wilayah/LocationDetailTable";
@@ -186,10 +187,15 @@ export default function DashboardSulamPage() {
         {/* ========================================================= */}
         {activeTab === "antar-wilayah" && (
           <div className="space-y-4">
-            {/* Sticky Top Filter for Antar Wilayah */}
+            {/* ── STICKY / FREEZE MAIN FILTER SECTION (CAPEX STYLE: BULAN & TAHUN) ── */}
             <section className="sticky top-16 sm:top-20 z-20 bg-[#F7F9F7] py-1" suppressHydrationWarning>
-              <SubMenuTabs
-                activeTab={activeTab}
+              <WilayahMainFilters
+                selectedMonth={selectedMonth}
+                onMonthChange={(m) => {
+                  setSelectedMonth(m);
+                  setCurrentPage(1);
+                }}
+                monthsWithData={monthsWithData}
                 selectedYear={selectedYear}
                 availableYears={availableYears}
                 onYearChange={(year) => {
@@ -201,7 +207,7 @@ export default function DashboardSulamPage() {
               />
             </section>
 
-            {/* Bagian 1: Perbandingan Bulanan (Selalu 12 Bulan) */}
+            {/* 1. Perbandingan Bulanan (Selalu 12 Bulan) */}
             <MonthlyMatrixSection
               tkChartData={wilayahData.bagian1?.tkChartData || []}
               tkMatrixRows={wilayahData.bagian1?.tkMatrixRows || []}
@@ -211,7 +217,7 @@ export default function DashboardSulamPage() {
               loading={loadingWilayah}
             />
 
-            {/* Bagian 2: Analisis per Wilayah (Filter Bulan + 4 Grafik) */}
+            {/* 2. Analisis per Wilayah (Filter Bulan + 4 Grafik) */}
             <MonthlyAnalysisSection
               selectedMonth={selectedMonth}
               onMonthChange={(m) => {
@@ -223,7 +229,7 @@ export default function DashboardSulamPage() {
               loading={loadingWilayah}
             />
 
-            {/* Bagian 3: Tabel Detail Lokasi */}
+            {/* 3. Tabel Detail Lokasi */}
             <LocationDetailTable
               locations={wilayahData.bagian3?.locations || []}
               totalCount={wilayahData.bagian3?.totalCount || 0}

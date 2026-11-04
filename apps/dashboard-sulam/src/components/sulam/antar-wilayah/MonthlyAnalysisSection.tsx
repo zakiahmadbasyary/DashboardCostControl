@@ -47,11 +47,11 @@ export default function MonthlyAnalysisSection({
 
   return (
     <div className="space-y-4">
-      {/* Header Bagian 2 + Filter Bulan - CAPEX Style */}
+      {/* Header Analisis per Wilayah + Filter Bulan - CAPEX Style */}
       <div className="bg-white rounded-2xl border border-[#DDE5DF] p-4 shadow-xs flex flex-wrap items-center justify-between gap-4">
         <div>
           <h2 className="text-base font-black text-[#17231B] tracking-tight">
-            Bagian 2: Analisis per Wilayah --- {currentMonthName}
+            Analisis per Wilayah --- {currentMonthName}
           </h2>
           <p className="text-xs text-[#5F6B63] mt-0.5">
             Analisis biaya, cost per hektar, tenaga kerja, dan batang bibit pada bulan terpilih.

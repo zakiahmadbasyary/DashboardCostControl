@@ -65,7 +65,7 @@ export default function LocationDetailTable({
           <div className="flex items-center gap-2">
             <TableIcon className="w-5 h-5 text-[#16823B]" />
             <h2 className="text-base font-black text-[#17231B] tracking-tight">
-              Bagian 3: Tabel Detail Seluruh Lokasi --- {monthName}
+              Tabel Detail Seluruh Lokasi --- {monthName}
             </h2>
           </div>
           <p className="text-xs text-[#5F6B63] mt-0.5">
