@@ -10,7 +10,7 @@ import {
   CartesianGrid,
   Tooltip,
 } from "recharts";
-import { Calendar, DollarSign, TrendingUp, Users, Sprout } from "lucide-react";
+import { DollarSign, TrendingUp, Users, Sprout } from "lucide-react";
 import { formatCurrencyRp, formatNumberId } from "@/lib/formatters";
 
 const MONTH_OPTIONS = [
@@ -30,54 +30,30 @@ const MONTH_OPTIONS = [
 
 interface MonthlyAnalysisSectionProps {
   selectedMonth: number;
-  onMonthChange: (month: number) => void;
-  monthsWithData: number[];
+  onMonthChange?: (month: number) => void;
+  monthsWithData?: number[];
   chartsData: any[];
   loading?: boolean;
 }
 
 export default function MonthlyAnalysisSection({
   selectedMonth,
-  onMonthChange,
-  monthsWithData,
   chartsData,
   loading,
 }: MonthlyAnalysisSectionProps) {
   const currentMonthName = MONTH_OPTIONS.find((m) => m.value === selectedMonth)?.label || "";
 
   return (
-    <div className="space-y-4">
-      {/* Header Analisis per Wilayah + Filter Bulan - CAPEX Style */}
-      <div className="bg-white rounded-2xl border border-[#DDE5DF] p-4 shadow-xs flex flex-wrap items-center justify-between gap-4">
+    <div className="space-y-4 font-sans">
+      {/* Header Analisis per Wilayah (Style seragam dengan Perbandingan Bulanan) */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
         <div>
           <h2 className="text-base font-black text-[#17231B] tracking-tight">
             Analisis per Wilayah --- {currentMonthName}
           </h2>
           <p className="text-xs text-[#5F6B63] mt-0.5">
-            Analisis biaya, cost per hektar, tenaga kerja, dan batang bibit pada bulan terpilih.
+            Analisis biaya, cost per hektar, tenaga kerja, dan batang bibit pada bulan {currentMonthName}.
           </p>
-        </div>
-
-        {/* Filter Bulan */}
-        <div className="flex items-center gap-2 text-xs">
-          <div className="flex items-center gap-1 text-[#5F6B63] font-semibold">
-            <Calendar className="w-3.5 h-3.5 text-[#16823B]" />
-            <span>Bulan Analisis:</span>
-          </div>
-          <select
-            value={selectedMonth}
-            onChange={(e) => onMonthChange(parseInt(e.target.value, 10))}
-            className="px-3 py-1.5 rounded-lg border border-[#DDE5DF] bg-[#F8FAF9] hover:bg-white font-bold text-[#17231B] text-xs focus:outline-[#16823B] cursor-pointer shadow-2xs transition-colors"
-          >
-            {MONTH_OPTIONS.map((m) => {
-              const hasData = monthsWithData.includes(m.value);
-              return (
-                <option key={m.value} value={m.value}>
-                  {m.label} {hasData ? "●" : ""}
-                </option>
-              );
-            })}
-          </select>
         </div>
       </div>
 
@@ -160,7 +136,6 @@ export default function MonthlyAnalysisSection({
                         <div>
                           Cost/HA: {val !== null ? `${formatNumberId(val as number, 2)} Juta Rp/HA` : "-"}
                         </div>
-                        <div className="text-[10px] text-gray-300 mt-0.5">Biaya (Mat+Upah) / Luas</div>
                       </div>
                     );
                   }}

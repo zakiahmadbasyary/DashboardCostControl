@@ -86,11 +86,7 @@ export default function DashboardSulamPage() {
       const params = new URLSearchParams({
         year: String(selectedYear),
         month: String(selectedMonth),
-        search: searchLocation,
-        sortBy,
-        sortDir,
-        page: String(currentPage),
-        pageSize: "15",
+        all: "true",
       });
 
       const res = await fetch(`/api/sulam/antar-wilayah?${params.toString()}`);
@@ -109,7 +105,7 @@ export default function DashboardSulamPage() {
     } finally {
       setLoadingWilayah(false);
     }
-  }, [selectedYear, selectedMonth, searchLocation, sortBy, sortDir, currentPage]);
+  }, [selectedYear, selectedMonth]);
 
   // Effect saat Sub-menu atau Tahun berubah
   useEffect(() => {
@@ -217,35 +213,18 @@ export default function DashboardSulamPage() {
               loading={loadingWilayah}
             />
 
-            {/* 2. Analisis per Wilayah (Filter Bulan + 4 Grafik) */}
+            {/* 2. Analisis per Wilayah (4 Grafik) */}
             <MonthlyAnalysisSection
               selectedMonth={selectedMonth}
-              onMonthChange={(m) => {
-                setSelectedMonth(m);
-                setCurrentPage(1);
-              }}
-              monthsWithData={monthsWithData}
               chartsData={wilayahData.bagian2?.charts || []}
               loading={loadingWilayah}
             />
 
-            {/* 3. Tabel Detail Lokasi */}
+            {/* 3. Tabel Detail Seluruh Lokasi (Scrollable + Filter Wilayah) */}
             <LocationDetailTable
               locations={wilayahData.bagian3?.locations || []}
               totalCount={wilayahData.bagian3?.totalCount || 0}
               locationTotal={wilayahData.bagian3?.locationTotal}
-              currentPage={currentPage}
-              totalPages={wilayahData.bagian3?.totalPages || 1}
-              pageSize={15}
-              onPageChange={setCurrentPage}
-              searchQuery={searchLocation}
-              onSearchChange={(s) => {
-                setSearchLocation(s);
-                setCurrentPage(1);
-              }}
-              sortBy={sortBy}
-              sortDir={sortDir}
-              onSortChange={handleSortChange}
               monthName={wilayahData.monthName || "Januari"}
               loading={loadingWilayah}
             />

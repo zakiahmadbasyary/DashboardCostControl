@@ -285,6 +285,12 @@ export async function GET(req: Request) {
       return (valA - valB) * sortDir;
     });
 
+    // Filter wilayah opsional
+    const wilayahFilter = searchParams.get("wilayah");
+    if (wilayahFilter && wilayahFilter !== "all" && wilayahFilter !== "Semua") {
+      locationList = locationList.filter((l) => l.wilayah === wilayahFilter);
+    }
+
     // Hitung Total Akumulasi Keseluruhan Lokasi
     let totalLocationTk = 0;
     let totalLocationBatang = 0;
@@ -303,12 +309,13 @@ export async function GET(req: Request) {
       batangTk: totalLocationTk > 0 ? Number((totalLocationBatang / totalLocationTk).toFixed(1)) : null,
     };
 
-    // Pagination
+    // Pagination / Return All
+    const isAll = searchParams.get("all") === "true";
     const page = Math.max(1, parseInt(searchParams.get("page") || "1", 10));
     const pageSize = Math.max(5, parseInt(searchParams.get("pageSize") || "15", 10));
     const totalItems = locationList.length;
-    const totalPages = Math.ceil(totalItems / pageSize) || 1;
-    const paginatedLocations = locationList.slice((page - 1) * pageSize, page * pageSize);
+    const totalPages = isAll ? 1 : Math.ceil(totalItems / pageSize) || 1;
+    const paginatedLocations = isAll || pageSize >= 1000 ? locationList : locationList.slice((page - 1) * pageSize, page * pageSize);
 
     return NextResponse.json({
       success: true,

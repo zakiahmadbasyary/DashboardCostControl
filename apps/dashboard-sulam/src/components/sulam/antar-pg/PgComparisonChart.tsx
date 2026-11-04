@@ -284,7 +284,7 @@ export default function PgComparisonChart({
       {/* ── Status Bar Keterangan Bawah (Sama persis seperti OPEX) ── */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-[11px] text-[#5F6B63] bg-[#F8FAF9] border border-[#DDE5DF] px-3.5 py-2 rounded-xl">
         <span>
-          Indikator Terpilih: <strong className="text-[#16823B]">{currentIndicator.label}</strong> ({currentIndicator.desc})
+          Indikator Terpilih: <strong className="text-[#16823B]">{currentIndicator.label}</strong> 
         </span>
         <span className="text-[#89938D]">
           Satuan: <strong className="text-[#16823B] font-mono">{currentIndicator.unit}</strong>
