@@ -12,9 +12,9 @@ import {
   ChevronRight,
   Filter,
   Layers,
-  ArrowUpDown,
   Building2,
   MapPin,
+  Calendar,
 } from "lucide-react";
 
 interface SummaryItem {
@@ -27,18 +27,6 @@ interface SummaryItem {
   batang: string | number;
   jumlahTk: string | number;
   luas: string | number;
-}
-
-interface SummaryByPgItem {
-  pg: string;
-  wilayahCount: number;
-  material: number;
-  upah: number;
-  totalBiaya: number;
-  batang: number;
-  jumlahTk: number;
-  luas: number;
-  biayaPerHa: number;
 }
 
 interface TransactionItem {
@@ -64,40 +52,46 @@ interface TransactionItem {
   pasDocument: string | null;
 }
 
+const MONTH_NAMES = [
+  "Jan",
+  "Feb",
+  "Mar",
+  "Apr",
+  "Mei",
+  "Jun",
+  "Jul",
+  "Agu",
+  "Sep",
+  "Okt",
+  "Nov",
+  "Des",
+];
+
 export default function SulamAdminPreviewPage() {
-  // Tab Switcher: "summary" | "sulam" (Hanya 2 tabel, tidak ada opsi tampilkan kedua tabel)
+  // Tab Switcher: "summary" | "sulam" (Hanya 1 tabel yang aktif dalam satu waktu)
   const [activeTab, setActiveTab] = useState<"summary" | "sulam">("summary");
 
-  // Tabel 1: Pilihan View Mode ("pg" | "pg_wilayah")
+  // Tabel Rekapitulasi Mode: "pg" | "pg_wilayah"
   const [summaryMode, setSummaryMode] = useState<"pg" | "pg_wilayah">("pg");
 
   // Loading states
   const [loading, setLoading] = useState<boolean>(true);
 
   // Data states
+  const [availableYears, setAvailableYears] = useState<number[]>([2025]);
   const [summaryList, setSummaryList] = useState<SummaryItem[]>([]);
-  const [summaryByPg, setSummaryByPg] = useState<SummaryByPgItem[]>([]);
   const [transactions, setTransactions] = useState<TransactionItem[]>([]);
   const [totalTransactionsCount, setTotalTransactionsCount] = useState<number>(0);
-  const [totals, setTotals] = useState<any>({
-    totalMaterial: 0,
-    totalUpah: 0,
-    totalBiaya: 0,
-    totalBatang: 0,
-    totalJumlahTk: 0,
-    totalLuas: 0,
-    biayaPerHa: 0,
-  });
 
   // Filter states
+  const [selectedYear, setSelectedYear] = useState<string>("2025");
   const [selectedPg, setSelectedPg] = useState<string>("all");
   const [selectedWilayah, setSelectedWilayah] = useState<string>("all");
-  const [selectedYear, setSelectedYear] = useState<string>("all");
-  const [selectedMonth, setSelectedMonth] = useState<string>("all");
 
   // Transaksi filter & pagination states
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [selectedJenisData, setSelectedJenisData] = useState<string>("all");
+  const [selectedMonth, setSelectedMonth] = useState<string>("all");
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [pageSize, setPageSize] = useState<string>("50"); // "50", "100", "250", "500", "all"
 
@@ -120,11 +114,12 @@ export default function SulamAdminPreviewPage() {
       const data = await res.json();
 
       if (data.success) {
+        if (data.availableYears && data.availableYears.length > 0) {
+          setAvailableYears(data.availableYears);
+        }
         setSummaryList(data.summaryList || []);
-        setSummaryByPg(data.summaryByPg || []);
         setTransactions(data.transactions || []);
         setTotalTransactionsCount(data.totalTransactionsCount || 0);
-        setTotals(data.totals || {});
       }
     } catch (e) {
       console.error("Gagal mengambil data preview Sulam:", e);
@@ -146,10 +141,20 @@ export default function SulamAdminPreviewPage() {
     fetchData();
   }, [fetchData]);
 
-  // Reset page when search or filters change
-  const handleFilterChange = (setter: (val: string) => void, val: string) => {
-    setter(val);
-    setCurrentPage(1);
+  // Formatter Angka Standar Indonesia (Sesuai Gambar Acuan)
+  const formatCostOrQty = (val: number | string | null | undefined): string => {
+    const num = Math.round(Number(val) || 0);
+    if (num === 0) return "-";
+    return num.toLocaleString("id-ID");
+  };
+
+  const formatLuas = (val: number | string | null | undefined): string => {
+    const num = Number(val) || 0;
+    if (num === 0) return "-";
+    return num.toLocaleString("id-ID", {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    });
   };
 
   const formatCurrency = (val: number | string) => {
@@ -174,6 +179,23 @@ export default function SulamAdminPreviewPage() {
       ? 1
       : Math.max(1, Math.ceil(totalTransactionsCount / (parseInt(pageSize, 10) || 50)));
 
+  // List entitas untuk tabel rekapitulasi matriks
+  const pgEntities =
+    selectedPg === "all" ? ["PG1", "PG2", "PG3"] : [selectedPg];
+
+  const allWilayahs = Array.from(
+    new Set(
+      summaryList
+        .filter((s) => selectedPg === "all" || s.pg === selectedPg)
+        .map((s) => s.wilayah)
+    )
+  ).sort();
+
+  const wilayahEntities =
+    selectedWilayah === "all"
+      ? allWilayahs
+      : allWilayahs.filter((w) => w === selectedWilayah);
+
   return (
     <div className="space-y-6 font-sans">
       {/* ── Page Header ── */}
@@ -183,7 +205,7 @@ export default function SulamAdminPreviewPage() {
             Preview Data Sulam
           </h1>
           <p className="text-xs sm:text-sm text-[#5F6B63] mt-1">
-            Data rekapitulasi summary dan tabel transaksi lengkap yang tersimpan di database.
+            Data rekapitulasi matriks bulanan dan tabel transaksi lengkap yang tersimpan di database.
           </p>
         </div>
 
@@ -208,46 +230,70 @@ export default function SulamAdminPreviewPage() {
         </div>
       </div>
 
-      {/* ── Tab Switcher & Master Filters ── */}
+      {/* ── Tab Switcher: 2 Tab Bersih (Rekapitulasi vs Sulam) ── */}
       <div className="bg-white p-3.5 rounded-2xl border border-[#DDE5DF] shadow-xs flex flex-wrap items-center justify-between gap-3">
-        {/* Switcher 2 Tab: Tabel Rekapitulasi vs Tabel Sulam */}
+        {/* Switcher 2 Tab */}
         <div className="flex items-center gap-1.5 p-1 bg-[#F7F9F7] rounded-xl border border-[#DDE5DF]">
           <button
             type="button"
             onClick={() => setActiveTab("summary")}
-            className={`flex items-center gap-2 px-3.5 py-1.5 text-xs font-bold rounded-lg transition-all cursor-pointer ${
+            className={`flex items-center gap-2 px-4 py-2 text-xs font-bold rounded-lg transition-all cursor-pointer ${
               activeTab === "summary"
                 ? "bg-white text-[#16823B] shadow-2xs"
                 : "text-[#5F6B63] hover:text-[#17231B]"
             }`}
           >
-            <Layers className="w-3.5 h-3.5 text-[#16823B]" />
+            <Layers className="w-4 h-4 text-[#16823B]" />
             <span>Tabel Rekapitulasi</span>
           </button>
           <button
             type="button"
             onClick={() => setActiveTab("sulam")}
-            className={`flex items-center gap-2 px-3.5 py-1.5 text-xs font-bold rounded-lg transition-all cursor-pointer ${
+            className={`flex items-center gap-2 px-4 py-2 text-xs font-bold rounded-lg transition-all cursor-pointer ${
               activeTab === "sulam"
                 ? "bg-white text-[#16823B] shadow-2xs"
                 : "text-[#5F6B63] hover:text-[#17231B]"
             }`}
           >
-            <TableIcon className="w-3.5 h-3.5 text-[#16823B]" />
+            <TableIcon className="w-4 h-4 text-[#16823B]" />
             <span>Tabel Sulam ({totalTransactionsCount.toLocaleString("id-ID")})</span>
           </button>
         </div>
 
-        {/* Global Filter PG & Wilayah */}
+        {/* Global Filter Bar */}
         <div className="flex flex-wrap items-center gap-2 text-xs">
           <div className="flex items-center gap-1 text-[#5F6B63]">
             <Filter className="w-3.5 h-3.5" />
             <span className="font-semibold">Filter:</span>
           </div>
 
+          {/* Filter Tahun */}
+          <div className="flex items-center gap-1.5 bg-[#F7F9F7] px-2.5 py-1 rounded-lg border border-[#DDE5DF]">
+            <Calendar className="w-3.5 h-3.5 text-[#16823B]" />
+            <span className="text-[#5F6B63] font-semibold">Tahun:</span>
+            <select
+              value={selectedYear}
+              onChange={(e) => {
+                setSelectedYear(e.target.value);
+                setCurrentPage(1);
+              }}
+              className="bg-transparent font-bold text-[#17231B] text-xs focus:outline-hidden cursor-pointer"
+            >
+              {availableYears.map((yr) => (
+                <option key={yr} value={String(yr)}>
+                  {yr}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* Filter PG */}
           <select
             value={selectedPg}
-            onChange={(e) => handleFilterChange(setSelectedPg, e.target.value)}
+            onChange={(e) => {
+              setSelectedPg(e.target.value);
+              setCurrentPage(1);
+            }}
             className="px-2.5 py-1.5 rounded-lg border border-[#DDE5DF] bg-white font-medium text-[#17231B] text-xs focus:outline-[#16823B] cursor-pointer"
           >
             <option value="all">Semua PG</option>
@@ -256,56 +302,68 @@ export default function SulamAdminPreviewPage() {
             <option value="PG3">PG3</option>
           </select>
 
-          <select
-            value={selectedWilayah}
-            onChange={(e) => handleFilterChange(setSelectedWilayah, e.target.value)}
-            className="px-2.5 py-1.5 rounded-lg border border-[#DDE5DF] bg-white font-medium text-[#17231B] text-xs focus:outline-[#16823B] cursor-pointer"
-          >
-            <option value="all">Semua Wilayah</option>
-            {Array.from({ length: 23 }, (_, i) => {
-              const code = `AW${(i + 1).toString().padStart(2, "0")}`;
-              return (
-                <option key={code} value={code}>
-                  {code}
-                </option>
-              );
-            })}
-          </select>
+          {/* Filter Wilayah (Aktif jika di tab Sulam atau mode Wilayah) */}
+          {(activeTab === "sulam" || summaryMode === "pg_wilayah") && (
+            <select
+              value={selectedWilayah}
+              onChange={(e) => {
+                setSelectedWilayah(e.target.value);
+                setCurrentPage(1);
+              }}
+              className="px-2.5 py-1.5 rounded-lg border border-[#DDE5DF] bg-white font-medium text-[#17231B] text-xs focus:outline-[#16823B] cursor-pointer"
+            >
+              <option value="all">Semua Wilayah</option>
+              {Array.from({ length: 23 }, (_, i) => {
+                const code = `AW${(i + 1).toString().padStart(2, "0")}`;
+                return (
+                  <option key={code} value={code}>
+                    {code}
+                  </option>
+                );
+              })}
+            </select>
+          )}
 
-          <select
-            value={selectedMonth}
-            onChange={(e) => handleFilterChange(setSelectedMonth, e.target.value)}
-            className="px-2.5 py-1.5 rounded-lg border border-[#DDE5DF] bg-white font-medium text-[#17231B] text-xs focus:outline-[#16823B] cursor-pointer"
-          >
-            <option value="all">Semua Bulan</option>
-            {[
-              "Januari",
-              "Februari",
-              "Maret",
-              "April",
-              "Mei",
-              "Juni",
-              "Juli",
-              "Agustus",
-              "September",
-              "Oktober",
-              "November",
-              "Desember",
-            ].map((name, i) => (
-              <option key={name} value={String(i + 1)}>
-                {name}
-              </option>
-            ))}
-          </select>
+          {/* Filter Bulan (Khusus Tab Transaksi Sulam) */}
+          {activeTab === "sulam" && (
+            <select
+              value={selectedMonth}
+              onChange={(e) => {
+                setSelectedMonth(e.target.value);
+                setCurrentPage(1);
+              }}
+              className="px-2.5 py-1.5 rounded-lg border border-[#DDE5DF] bg-white font-medium text-[#17231B] text-xs focus:outline-[#16823B] cursor-pointer"
+            >
+              <option value="all">Semua Bulan</option>
+              {[
+                "Januari",
+                "Februari",
+                "Maret",
+                "April",
+                "Mei",
+                "Juni",
+                "Juli",
+                "Agustus",
+                "September",
+                "Oktober",
+                "November",
+                "Desember",
+              ].map((name, i) => (
+                <option key={name} value={String(i + 1)}>
+                  {name}
+                </option>
+              ))}
+            </select>
+          )}
         </div>
       </div>
 
       {/* ══════════════════════════════════════════════════════════════ */}
-      {/* ── TABEL 1: REKAPITULASI SUMMARY ──                           */}
+      {/* ── TABEL 1: TABEL REKAPITULASI (GAYA ACUAN EXCEL GAMBAR) ──    */}
       {/* ══════════════════════════════════════════════════════════════ */}
       {activeTab === "summary" && (
         <div className="bg-white rounded-2xl border border-[#DDE5DF] shadow-xs overflow-hidden">
-          {/* Header Tabel Rekapitulasi & Pilihan Mode (Per PG / Per PG Wilayah) */}
+          {/* Header Sub-bar: Judul & Toggle Mode (Per PG vs Per PG Wilayah) */}
           <div className="p-4 border-b border-[#DDE5DF] bg-[#FAFCFA] flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div className="flex items-center gap-2.5">
               <div className="p-2 rounded-xl bg-[#16823B]/10 text-[#16823B]">
@@ -313,10 +371,10 @@ export default function SulamAdminPreviewPage() {
               </div>
               <div>
                 <h2 className="text-sm font-extrabold text-[#17231B]">
-                  Tabel Rekapitulasi Data Sulam
+                  Tabel Rekapitulasi Data Sulam --- Tahun {selectedYear}
                 </h2>
                 <p className="text-[11px] text-[#5F6B63]">
-                  Pilih mode agregasi untuk melihat ringkasan biaya, bibit, tenaga kerja, dan luasan.
+                  Format matriks bulanan (Januari s/d Desember) untuk Cost Material, Upah, Qty Bibit, Jumlah TK, dan Luas.
                 </p>
               </div>
             </div>
@@ -351,202 +409,312 @@ export default function SulamAdminPreviewPage() {
             </div>
           </div>
 
-          {/* Konten Tabel 1 */}
+          {/* Konten Matriks Rekapitulasi Bulanan */}
           {loading ? (
-            <div className="py-16 flex flex-col items-center justify-center gap-2.5 text-xs text-[#5F6B63]">
+            <div className="py-20 flex flex-col items-center justify-center gap-2.5 text-xs text-[#5F6B63]">
               <RefreshCw className="w-5 h-5 text-[#16823B] animate-spin" />
-              <span>Memuat data rekapitulasi...</span>
+              <span>Memuat matriks data rekapitulasi...</span>
             </div>
-          ) : summaryMode === "pg" ? (
-            /* Mode 1: Per PG */
-            summaryByPg.length === 0 ? (
-              <div className="py-12 text-center text-xs text-[#5F6B63]">
-                <FileSpreadsheet className="w-8 h-8 text-[#CBE0D1] mx-auto mb-1.5" />
-                <p className="font-bold text-[#17231B]">Tidak ada data rekapitulasi PG</p>
-              </div>
-            ) : (
-              <div className="overflow-x-auto">
-                <table className="w-full text-left text-xs">
-                  <thead className="bg-[#F7F9F7] text-[#5F6B63] font-bold border-b border-[#DDE5DF]">
-                    <tr>
-                      <th className="px-4 py-3">Plantation Group (PG)</th>
-                      <th className="px-3 py-3 text-center">Jumlah Wilayah</th>
-                      <th className="px-4 py-3 text-right">Biaya Material</th>
-                      <th className="px-4 py-3 text-right">Biaya Upah</th>
-                      <th className="px-4 py-3 text-right">Total Biaya Sulam</th>
-                      <th className="px-4 py-3 text-right">Batang Bibit</th>
-                      <th className="px-4 py-3 text-right">Tenaga Kerja (TK)</th>
-                      <th className="px-4 py-3 text-right">Luas Efektif (HA)</th>
-                      <th className="px-4 py-3 text-right">Biaya / HA</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-[#DDE5DF] font-medium text-[#17231B]">
-                    {summaryByPg.map((row) => (
-                      <tr key={row.pg} className="hover:bg-[#F7F9F7] transition-colors">
-                        <td className="px-4 py-3 font-bold text-[#16823B] flex items-center gap-2">
-                          <Building2 className="w-4 h-4 text-[#16823B]" />
-                          <span>{row.pg}</span>
-                        </td>
-                        <td className="px-3 py-3 text-center">
-                          <span className="px-2 py-0.5 rounded-full bg-[#EAF3EC] text-[#16823B] font-bold text-[11px]">
-                            {row.wilayahCount} Wilayah
-                          </span>
-                        </td>
-                        <td className="px-4 py-3 text-right font-mono">
-                          {formatCurrency(row.material)}
-                        </td>
-                        <td className="px-4 py-3 text-right font-mono">
-                          {formatCurrency(row.upah)}
-                        </td>
-                        <td className="px-4 py-3 text-right font-mono font-bold text-[#17231B]">
-                          {formatCurrency(row.totalBiaya)}
-                        </td>
-                        <td className="px-4 py-3 text-right font-mono">
-                          {formatNumber(row.batang, 0)} btg
-                        </td>
-                        <td className="px-4 py-3 text-right font-mono">
-                          {formatNumber(row.jumlahTk, 1)} TK
-                        </td>
-                        <td className="px-4 py-3 text-right font-mono">
-                          {formatNumber(row.luas, 2)} HA
-                        </td>
-                        <td className="px-4 py-3 text-right font-mono font-semibold text-[#16823B]">
-                          {formatCurrency(row.biayaPerHa)}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                  {/* Total Baris Bawah */}
-                  <tfoot className="bg-[#EAF3EC]/60 border-t-2 border-[#16823B]/30 font-black text-[#17231B]">
-                    <tr>
-                      <td className="px-4 py-3 uppercase tracking-wider text-xs">
-                        TOTAL KESELURUHAN
-                      </td>
-                      <td className="px-3 py-3 text-center">-</td>
-                      <td className="px-4 py-3 text-right font-mono">
-                        {formatCurrency(totals.totalMaterial)}
-                      </td>
-                      <td className="px-4 py-3 text-right font-mono">
-                        {formatCurrency(totals.totalUpah)}
-                      </td>
-                      <td className="px-4 py-3 text-right font-mono text-[#16823B]">
-                        {formatCurrency(totals.totalBiaya)}
-                      </td>
-                      <td className="px-4 py-3 text-right font-mono">
-                        {formatNumber(totals.totalBatang, 0)} btg
-                      </td>
-                      <td className="px-4 py-3 text-right font-mono">
-                        {formatNumber(totals.totalJumlahTk, 1)} TK
-                      </td>
-                      <td className="px-4 py-3 text-right font-mono">
-                        {formatNumber(totals.totalLuas, 2)} HA
-                      </td>
-                      <td className="px-4 py-3 text-right font-mono text-[#16823B]">
-                        {formatCurrency(totals.biayaPerHa)}
-                      </td>
-                    </tr>
-                  </tfoot>
-                </table>
-              </div>
-            )
+          ) : summaryList.length === 0 ? (
+            <div className="py-16 text-center text-xs text-[#5F6B63]">
+              <FileSpreadsheet className="w-10 h-10 text-[#CBE0D1] mx-auto mb-2" />
+              <p className="font-bold text-[#17231B] text-sm">Tidak ada data rekapitulasi</p>
+              <p className="mt-1">Coba sesuaikan filter tahun atau upload data baru.</p>
+            </div>
           ) : (
-            /* Mode 2: Per PG & Wilayah */
-            summaryList.length === 0 ? (
-              <div className="py-12 text-center text-xs text-[#5F6B63]">
-                <FileSpreadsheet className="w-8 h-8 text-[#CBE0D1] mx-auto mb-1.5" />
-                <p className="font-bold text-[#17231B]">Tidak ada data rekapitulasi Wilayah</p>
-              </div>
-            ) : (
-              <div className="overflow-x-auto max-h-[500px]">
-                <table className="w-full text-left text-xs">
-                  <thead className="bg-[#F7F9F7] text-[#5F6B63] font-bold border-b border-[#DDE5DF] sticky top-0 z-10">
-                    <tr>
-                      <th className="px-4 py-3">PG</th>
-                      <th className="px-3 py-3">Wilayah</th>
-                      <th className="px-3 py-3">Periode</th>
-                      <th className="px-4 py-3 text-right">Biaya Material</th>
-                      <th className="px-4 py-3 text-right">Biaya Upah</th>
-                      <th className="px-4 py-3 text-right">Total Biaya</th>
-                      <th className="px-4 py-3 text-right">Batang Bibit</th>
-                      <th className="px-4 py-3 text-right">Tenaga Kerja</th>
-                      <th className="px-4 py-3 text-right">Luas (HA)</th>
-                      <th className="px-4 py-3 text-right">Biaya / HA</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-[#DDE5DF] font-medium text-[#17231B]">
-                    {summaryList.map((row, idx) => {
-                      const mat = Number(row.material) || 0;
-                      const uph = Number(row.upah) || 0;
-                      const tot = mat + uph;
-                      const luasNum = Number(row.luas) || 0;
-                      const perHa = luasNum > 0 ? tot / luasNum : 0;
+            <div className="overflow-x-auto p-4">
+              <table className="w-full text-xs text-left border-collapse border border-[#DDE5DF]">
+                {/* ── THEAD DUA TINGKAT SESUAI GAMBAR ACUAN ── */}
+                <thead className="bg-[#F7F9F7] text-[#17231B] font-bold">
+                  <tr>
+                    <th
+                      rowSpan={2}
+                      className="border border-[#DDE5DF] px-4 py-2.5 text-center align-middle font-extrabold text-[#17231B] min-w-[90px]"
+                    >
+                      Asal
+                    </th>
+                    <th
+                      rowSpan={2}
+                      className="border border-[#DDE5DF] px-3 py-2.5 text-center align-middle font-extrabold text-[#17231B] min-w-[70px]"
+                    >
+                      Bulan
+                    </th>
+                    <th
+                      colSpan={2}
+                      className="border border-[#DDE5DF] px-4 py-2 text-center font-extrabold text-[#17231B]"
+                    >
+                      Cost
+                    </th>
+                    <th
+                      colSpan={2}
+                      className="border border-[#DDE5DF] px-4 py-2 text-center font-extrabold text-[#17231B]"
+                    >
+                      Qty
+                    </th>
+                    <th
+                      rowSpan={2}
+                      className="border border-[#DDE5DF] px-4 py-2.5 text-center align-middle font-extrabold text-[#17231B] min-w-[80px]"
+                    >
+                      Luas
+                    </th>
+                  </tr>
+                  <tr>
+                    <th className="border border-[#DDE5DF] px-3 py-2 text-center font-bold text-[#17231B] bg-[#F7F9F7]">
+                      Material
+                    </th>
+                    <th className="border border-[#DDE5DF] px-3 py-2 text-center font-bold text-[#17231B] bg-[#F7F9F7]">
+                      Upah
+                    </th>
+                    <th className="border border-[#DDE5DF] px-3 py-2 text-center font-bold text-[#17231B] bg-[#F7F9F7]">
+                      Bibit
+                    </th>
+                    <th className="border border-[#DDE5DF] px-3 py-2 text-center font-bold text-[#17231B] bg-[#F7F9F7]">
+                      Jumlah TK
+                    </th>
+                  </tr>
+                </thead>
 
-                      return (
-                        <tr
-                          key={`${row.pg}-${row.wilayah}-${row.year}-${row.month}-${idx}`}
-                          className="hover:bg-[#F7F9F7] transition-colors"
-                        >
-                          <td className="px-4 py-2.5 font-bold text-[#16823B]">{row.pg}</td>
-                          <td className="px-3 py-2.5 font-bold text-[#17231B]">{row.wilayah}</td>
-                          <td className="px-3 py-2.5 font-mono text-[#5F6B63]">
-                            {row.year}-{String(row.month).padStart(2, "0")}
+                {/* ── TBODY: MODE PER PG ── */}
+                {summaryMode === "pg" &&
+                  pgEntities.map((pg) => {
+                    const rowsForPg = Array.from({ length: 12 }, (_, i) => {
+                      const monthNum = i + 1;
+                      const matchItems = summaryList.filter(
+                        (s) => s.pg === pg && Number(s.month) === monthNum
+                      );
+                      const material = matchItems.reduce(
+                        (acc, c) => acc + (Number(c.material) || 0),
+                        0
+                      );
+                      const upah = matchItems.reduce(
+                        (acc, c) => acc + (Number(c.upah) || 0),
+                        0
+                      );
+                      const batang = matchItems.reduce(
+                        (acc, c) => acc + (Number(c.batang) || 0),
+                        0
+                      );
+                      const jumlahTk = matchItems.reduce(
+                        (acc, c) => acc + (Number(c.jumlahTk) || 0),
+                        0
+                      );
+                      const luas = matchItems.reduce(
+                        (acc, c) => acc + (Number(c.luas) || 0),
+                        0
+                      );
+
+                      return {
+                        monthNum,
+                        monthName: MONTH_NAMES[i],
+                        material,
+                        upah,
+                        batang,
+                        jumlahTk,
+                        luas,
+                      };
+                    });
+
+                    const totalPg = rowsForPg.reduce(
+                      (acc, r) => {
+                        acc.material += r.material;
+                        acc.upah += r.upah;
+                        acc.batang += r.batang;
+                        acc.jumlahTk += r.jumlahTk;
+                        acc.luas += r.luas;
+                        return acc;
+                      },
+                      { material: 0, upah: 0, batang: 0, jumlahTk: 0, luas: 0 }
+                    );
+
+                    return (
+                      <tbody
+                        key={pg}
+                        className="divide-y divide-[#DDE5DF] font-medium text-[#17231B]"
+                      >
+                        {rowsForPg.map((row, idx) => (
+                          <tr
+                            key={`${pg}-${row.monthNum}`}
+                            className="hover:bg-[#16823B]/5 transition-colors"
+                          >
+                            {/* Sel Asal digabung vertikal rowspan=12 persis gambar */}
+                            {idx === 0 && (
+                              <td
+                                rowSpan={12}
+                                className="border border-[#DDE5DF] px-4 py-3 text-center align-middle font-bold text-sm text-[#17231B] bg-white tracking-wide"
+                              >
+                                {pg}
+                              </td>
+                            )}
+                            <td className="border border-[#DDE5DF] px-3 py-1.5 text-center font-semibold text-[#17231B] bg-[#FAFCFA]">
+                              {row.monthName}
+                            </td>
+                            <td className="border border-[#DDE5DF] px-3 py-1.5 text-right font-mono text-[#17231B]">
+                              {formatCostOrQty(row.material)}
+                            </td>
+                            <td className="border border-[#DDE5DF] px-3 py-1.5 text-right font-mono text-[#17231B]">
+                              {formatCostOrQty(row.upah)}
+                            </td>
+                            <td className="border border-[#DDE5DF] px-3 py-1.5 text-right font-mono text-[#17231B]">
+                              {formatCostOrQty(row.batang)}
+                            </td>
+                            <td className="border border-[#DDE5DF] px-3 py-1.5 text-right font-mono text-[#17231B]">
+                              {formatCostOrQty(row.jumlahTk)}
+                            </td>
+                            <td className="border border-[#DDE5DF] px-3 py-1.5 text-right font-mono text-[#17231B]">
+                              {formatLuas(row.luas)}
+                            </td>
+                          </tr>
+                        ))}
+
+                        {/* Baris Total Akumulasi per PG */}
+                        <tr className="bg-[#EAF3EC]/60 font-black border-t-2 border-[#16823B]/30">
+                          <td
+                            colSpan={2}
+                            className="border border-[#DDE5DF] px-4 py-2 text-center uppercase tracking-wider text-[11px] font-extrabold text-[#16823B]"
+                          >
+                            Total {pg}
                           </td>
-                          <td className="px-4 py-2.5 text-right font-mono">
-                            {formatCurrency(mat)}
+                          <td className="border border-[#DDE5DF] px-3 py-2 text-right font-mono text-[#16823B]">
+                            {formatCostOrQty(totalPg.material)}
                           </td>
-                          <td className="px-4 py-2.5 text-right font-mono">
-                            {formatCurrency(uph)}
+                          <td className="border border-[#DDE5DF] px-3 py-2 text-right font-mono text-[#16823B]">
+                            {formatCostOrQty(totalPg.upah)}
                           </td>
-                          <td className="px-4 py-2.5 text-right font-mono font-bold text-[#17231B]">
-                            {formatCurrency(tot)}
+                          <td className="border border-[#DDE5DF] px-3 py-2 text-right font-mono text-[#17231B]">
+                            {formatCostOrQty(totalPg.batang)}
                           </td>
-                          <td className="px-4 py-2.5 text-right font-mono">
-                            {formatNumber(row.batang, 0)}
+                          <td className="border border-[#DDE5DF] px-3 py-2 text-right font-mono text-[#17231B]">
+                            {formatCostOrQty(totalPg.jumlahTk)}
                           </td>
-                          <td className="px-4 py-2.5 text-right font-mono">
-                            {formatNumber(row.jumlahTk, 1)}
-                          </td>
-                          <td className="px-4 py-2.5 text-right font-mono">
-                            {formatNumber(row.luas, 2)}
-                          </td>
-                          <td className="px-4 py-2.5 text-right font-mono text-[#16823B] font-semibold">
-                            {formatCurrency(perHa)}
+                          <td className="border border-[#DDE5DF] px-3 py-2 text-right font-mono text-[#17231B]">
+                            {formatLuas(totalPg.luas)}
                           </td>
                         </tr>
+                      </tbody>
+                    );
+                  })}
+
+                {/* ── TBODY: MODE PER PG & WILAYAH ── */}
+                {summaryMode === "pg_wilayah" &&
+                  wilayahEntities.map((wilayah) => {
+                    const rowsForWilayah = Array.from({ length: 12 }, (_, i) => {
+                      const monthNum = i + 1;
+                      const matchItems = summaryList.filter(
+                        (s) => s.wilayah === wilayah && Number(s.month) === monthNum
                       );
-                    })}
-                  </tbody>
-                  <tfoot className="bg-[#EAF3EC]/60 border-t-2 border-[#16823B]/30 font-black text-[#17231B] sticky bottom-0 z-10">
-                    <tr>
-                      <td colSpan={3} className="px-4 py-2.5 uppercase tracking-wider text-xs">
-                        TOTAL REKAPITULASI ({summaryList.length} Baris)
-                      </td>
-                      <td className="px-4 py-2.5 text-right font-mono">
-                        {formatCurrency(totals.totalMaterial)}
-                      </td>
-                      <td className="px-4 py-2.5 text-right font-mono">
-                        {formatCurrency(totals.totalUpah)}
-                      </td>
-                      <td className="px-4 py-2.5 text-right font-mono text-[#16823B]">
-                        {formatCurrency(totals.totalBiaya)}
-                      </td>
-                      <td className="px-4 py-2.5 text-right font-mono">
-                        {formatNumber(totals.totalBatang, 0)}
-                      </td>
-                      <td className="px-4 py-2.5 text-right font-mono">
-                        {formatNumber(totals.totalJumlahTk, 1)}
-                      </td>
-                      <td className="px-4 py-2.5 text-right font-mono">
-                        {formatNumber(totals.totalLuas, 2)}
-                      </td>
-                      <td className="px-4 py-2.5 text-right font-mono text-[#16823B]">
-                        {formatCurrency(totals.biayaPerHa)}
-                      </td>
-                    </tr>
-                  </tfoot>
-                </table>
-              </div>
-            )
+                      const material = matchItems.reduce(
+                        (acc, c) => acc + (Number(c.material) || 0),
+                        0
+                      );
+                      const upah = matchItems.reduce(
+                        (acc, c) => acc + (Number(c.upah) || 0),
+                        0
+                      );
+                      const batang = matchItems.reduce(
+                        (acc, c) => acc + (Number(c.batang) || 0),
+                        0
+                      );
+                      const jumlahTk = matchItems.reduce(
+                        (acc, c) => acc + (Number(c.jumlahTk) || 0),
+                        0
+                      );
+                      const luas = matchItems.reduce(
+                        (acc, c) => acc + (Number(c.luas) || 0),
+                        0
+                      );
+
+                      return {
+                        monthNum,
+                        monthName: MONTH_NAMES[i],
+                        material,
+                        upah,
+                        batang,
+                        jumlahTk,
+                        luas,
+                      };
+                    });
+
+                    const totalWilayah = rowsForWilayah.reduce(
+                      (acc, r) => {
+                        acc.material += r.material;
+                        acc.upah += r.upah;
+                        acc.batang += r.batang;
+                        acc.jumlahTk += r.jumlahTk;
+                        acc.luas += r.luas;
+                        return acc;
+                      },
+                      { material: 0, upah: 0, batang: 0, jumlahTk: 0, luas: 0 }
+                    );
+
+                    return (
+                      <tbody
+                        key={wilayah}
+                        className="divide-y divide-[#DDE5DF] font-medium text-[#17231B]"
+                      >
+                        {rowsForWilayah.map((row, idx) => (
+                          <tr
+                            key={`${wilayah}-${row.monthNum}`}
+                            className="hover:bg-[#16823B]/5 transition-colors"
+                          >
+                            {/* Sel Asal digabung vertikal rowspan=12 */}
+                            {idx === 0 && (
+                              <td
+                                rowSpan={12}
+                                className="border border-[#DDE5DF] px-4 py-3 text-center align-middle font-bold text-sm text-[#17231B] bg-white tracking-wide"
+                              >
+                                {wilayah}
+                              </td>
+                            )}
+                            <td className="border border-[#DDE5DF] px-3 py-1.5 text-center font-semibold text-[#17231B] bg-[#FAFCFA]">
+                              {row.monthName}
+                            </td>
+                            <td className="border border-[#DDE5DF] px-3 py-1.5 text-right font-mono text-[#17231B]">
+                              {formatCostOrQty(row.material)}
+                            </td>
+                            <td className="border border-[#DDE5DF] px-3 py-1.5 text-right font-mono text-[#17231B]">
+                              {formatCostOrQty(row.upah)}
+                            </td>
+                            <td className="border border-[#DDE5DF] px-3 py-1.5 text-right font-mono text-[#17231B]">
+                              {formatCostOrQty(row.batang)}
+                            </td>
+                            <td className="border border-[#DDE5DF] px-3 py-1.5 text-right font-mono text-[#17231B]">
+                              {formatCostOrQty(row.jumlahTk)}
+                            </td>
+                            <td className="border border-[#DDE5DF] px-3 py-1.5 text-right font-mono text-[#17231B]">
+                              {formatLuas(row.luas)}
+                            </td>
+                          </tr>
+                        ))}
+
+                        {/* Baris Total per Wilayah */}
+                        <tr className="bg-[#EAF3EC]/60 font-black border-t-2 border-[#16823B]/30">
+                          <td
+                            colSpan={2}
+                            className="border border-[#DDE5DF] px-4 py-2 text-center uppercase tracking-wider text-[11px] font-extrabold text-[#16823B]"
+                          >
+                            Total {wilayah}
+                          </td>
+                          <td className="border border-[#DDE5DF] px-3 py-2 text-right font-mono text-[#16823B]">
+                            {formatCostOrQty(totalWilayah.material)}
+                          </td>
+                          <td className="border border-[#DDE5DF] px-3 py-2 text-right font-mono text-[#16823B]">
+                            {formatCostOrQty(totalWilayah.upah)}
+                          </td>
+                          <td className="border border-[#DDE5DF] px-3 py-2 text-right font-mono text-[#17231B]">
+                            {formatCostOrQty(totalWilayah.batang)}
+                          </td>
+                          <td className="border border-[#DDE5DF] px-3 py-2 text-right font-mono text-[#17231B]">
+                            {formatCostOrQty(totalWilayah.jumlahTk)}
+                          </td>
+                          <td className="border border-[#DDE5DF] px-3 py-2 text-right font-mono text-[#17231B]">
+                            {formatLuas(totalWilayah.luas)}
+                          </td>
+                        </tr>
+                      </tbody>
+                    );
+                  })}
+              </table>
+            </div>
           )}
         </div>
       )}
@@ -588,7 +756,9 @@ export default function SulamAdminPreviewPage() {
                   <option value="100">100 Baris</option>
                   <option value="250">250 Baris</option>
                   <option value="500">500 Baris</option>
-                  <option value="all">Semua ({totalTransactionsCount.toLocaleString("id-ID")} Data)</option>
+                  <option value="all">
+                    Semua ({totalTransactionsCount.toLocaleString("id-ID")} Data)
+                  </option>
                 </select>
               </div>
             </div>
@@ -601,7 +771,10 @@ export default function SulamAdminPreviewPage() {
                   type="text"
                   placeholder="Cari SPK, lokasi, wilayah, atau deskripsi pekerjaan..."
                   value={searchQuery}
-                  onChange={(e) => handleFilterChange(setSearchQuery, e.target.value)}
+                  onChange={(e) => {
+                    setSearchQuery(e.target.value);
+                    setCurrentPage(1);
+                  }}
                   className="w-full pl-8.5 pr-3 py-1.5 rounded-xl border border-[#DDE5DF] bg-white text-xs text-[#17231B] placeholder:text-[#89938D] focus:outline-[#16823B]"
                 />
               </div>
@@ -610,7 +783,10 @@ export default function SulamAdminPreviewPage() {
                 <div className="flex items-center gap-1.5 p-0.5 bg-[#F7F9F7] rounded-lg border border-[#DDE5DF]">
                   <button
                     type="button"
-                    onClick={() => handleFilterChange(setSelectedJenisData, "all")}
+                    onClick={() => {
+                      setSelectedJenisData("all");
+                      setCurrentPage(1);
+                    }}
                     className={`px-2.5 py-1 rounded text-[11px] font-bold transition-all cursor-pointer ${
                       selectedJenisData === "all"
                         ? "bg-white text-[#16823B] shadow-2xs"
@@ -621,7 +797,10 @@ export default function SulamAdminPreviewPage() {
                   </button>
                   <button
                     type="button"
-                    onClick={() => handleFilterChange(setSelectedJenisData, "Upah")}
+                    onClick={() => {
+                      setSelectedJenisData("Upah");
+                      setCurrentPage(1);
+                    }}
                     className={`px-2.5 py-1 rounded text-[11px] font-bold transition-all cursor-pointer ${
                       selectedJenisData === "Upah"
                         ? "bg-amber-100 text-amber-800 shadow-2xs"
@@ -632,7 +811,10 @@ export default function SulamAdminPreviewPage() {
                   </button>
                   <button
                     type="button"
-                    onClick={() => handleFilterChange(setSelectedJenisData, "Material")}
+                    onClick={() => {
+                      setSelectedJenisData("Material");
+                      setCurrentPage(1);
+                    }}
                     className={`px-2.5 py-1 rounded text-[11px] font-bold transition-all cursor-pointer ${
                       selectedJenisData === "Material"
                         ? "bg-blue-100 text-blue-800 shadow-2xs"

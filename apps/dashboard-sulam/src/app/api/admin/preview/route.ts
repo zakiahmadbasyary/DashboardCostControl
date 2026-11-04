@@ -15,12 +15,11 @@ export async function GET(req: Request) {
     const limitParam = searchParams.get("limit");
     const pageParam = parseInt(searchParams.get("page") || "1", 10);
 
-    // 1. Where clause untuk tabel summary_sulam
+    // 1. Where clause untuk tabel summary_sulam (tidak filter month agar matriks 12 bulan selalu lengkap)
     const whereSummary: any = {};
     if (pg && pg !== "all") whereSummary.pg = pg;
     if (wilayah && wilayah !== "all") whereSummary.wilayah = wilayah;
     if (year && year !== "all") whereSummary.year = parseInt(year, 10);
-    if (month && month !== "all") whereSummary.month = parseInt(month, 10);
 
     // 2. Where clause untuk tabel sulam (transaksi)
     const whereTx: any = {};
@@ -47,11 +46,11 @@ export async function GET(req: Request) {
     const limit = isAll ? undefined : Math.max(1, parseInt(limitParam || "50", 10));
     const skip = isAll ? undefined : (Math.max(1, pageParam) - 1) * (limit || 50);
 
-    const [summaryList, totalSummaryCount, transactions, totalTransactionsCount] =
+    const [summaryList, totalSummaryCount, transactions, totalTransactionsCount, yearsDistinct] =
       await Promise.all([
         prisma.summarySulam.findMany({
           where: whereSummary,
-          orderBy: [{ year: "desc" }, { month: "desc" }, { pg: "asc" }, { wilayah: "asc" }],
+          orderBy: [{ year: "desc" }, { month: "asc" }, { pg: "asc" }, { wilayah: "asc" }],
           select: {
             pg: true,
             wilayah: true,
@@ -99,7 +98,14 @@ export async function GET(req: Request) {
           },
         }),
         prisma.sulam.count({ where: whereTx }),
+        prisma.summarySulam.findMany({
+          select: { year: true },
+          distinct: ["year"],
+          orderBy: { year: "desc" },
+        }),
       ]);
+
+    const availableYears = yearsDistinct.map((y) => y.year);
 
     // Agregasi tabel rekapitulasi Per PG
     const byPgMap: Record<
@@ -179,6 +185,7 @@ export async function GET(req: Request) {
 
     return NextResponse.json({
       success: true,
+      availableYears,
       summaryList,
       summaryByPg,
       totalSummaryCount,
