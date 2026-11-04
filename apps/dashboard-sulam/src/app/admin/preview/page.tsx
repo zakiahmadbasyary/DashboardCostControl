@@ -78,13 +78,13 @@ export default function SulamAdminPreviewPage() {
   const [loading, setLoading] = useState<boolean>(true);
 
   // Data states
-  const [availableYears, setAvailableYears] = useState<number[]>([2025]);
+  const [availableYears, setAvailableYears] = useState<number[]>([2026, 2025]);
   const [summaryList, setSummaryList] = useState<SummaryItem[]>([]);
   const [transactions, setTransactions] = useState<TransactionItem[]>([]);
   const [totalTransactionsCount, setTotalTransactionsCount] = useState<number>(0);
 
   // Filter states
-  const [selectedYear, setSelectedYear] = useState<string>("2025");
+  const [selectedYear, setSelectedYear] = useState<string>("2026");
   const [selectedPg, setSelectedPg] = useState<string>("all");
   const [selectedWilayah, setSelectedWilayah] = useState<string>("all");
 
@@ -116,6 +116,9 @@ export default function SulamAdminPreviewPage() {
       if (data.success) {
         if (data.availableYears && data.availableYears.length > 0) {
           setAvailableYears(data.availableYears);
+          if (!data.availableYears.includes(Number(selectedYear))) {
+            setSelectedYear(String(data.availableYears[0]));
+          }
         }
         setSummaryList(data.summaryList || []);
         setTransactions(data.transactions || []);
