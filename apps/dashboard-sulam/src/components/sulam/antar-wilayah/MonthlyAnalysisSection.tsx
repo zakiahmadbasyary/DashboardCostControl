@@ -67,7 +67,7 @@ export default function MonthlyAnalysisSection({
                 <DollarSign className="w-4 h-4" />
               </div>
               <h3 className="text-xs sm:text-sm font-bold text-[#17231B]">
-                Cost per Wilayah (Material + Upah)
+                Cost per Wilayah 
               </h3>
             </div>
             <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-[#EAF3EC] text-[#16823B] border border-[#CBE0D1]">
@@ -154,7 +154,7 @@ export default function MonthlyAnalysisSection({
                 <Users className="w-4 h-4" />
               </div>
               <h3 className="text-xs sm:text-sm font-bold text-[#17231B]">
-                Penggunaan TK Sulam (Upah)
+                Penggunaan TK Sulam 
               </h3>
             </div>
             <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-amber-50 text-amber-800 border border-amber-200">
@@ -194,7 +194,7 @@ export default function MonthlyAnalysisSection({
                 <Sprout className="w-4 h-4" />
               </div>
               <h3 className="text-xs sm:text-sm font-bold text-[#17231B]">
-                Penggunaan Batang Sulam (Material)
+                Penggunaan Batang Sulam
               </h3>
             </div>
             <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-emerald-50 text-emerald-800 border border-emerald-200">
