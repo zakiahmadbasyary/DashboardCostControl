@@ -2,6 +2,7 @@
 
 import { useState, useRef } from "react";
 import Link from "next/link";
+import { uploadService, UploadProgress } from "@/services/uploadService";
 import {
   UploadCloud,
   FileSpreadsheet,
@@ -9,298 +10,357 @@ import {
   AlertCircle,
   RefreshCw,
   Info,
+  Download,
+  Trash2,
   ArrowRight,
   Database,
   Layers,
-  Calendar,
 } from "lucide-react";
-import * as XLSX from "xlsx";
-
-interface UploadStatus {
-  status: "idle" | "reading" | "saving" | "success" | "error";
-  message: string;
-  progress: number;
-  result?: {
-    totalRows: number;
-    validRows: number;
-    summaryCount: number;
-    errorCount: number;
-    sampleErrors?: { row: number; error: string }[];
-  };
-}
 
 export default function SulamAdminUploadPage() {
-  const [uploadStatus, setUploadStatus] = useState<UploadStatus>({
-    status: "idle",
-    message: "",
-    progress: 0,
-  });
-  const [dragActive, setDragActive] = useState(false);
+  const [progress, setProgress] = useState<UploadProgress | null>(null);
+  const [isResetModalOpen, setIsResetModalOpen] = useState(false);
+  const [isResetting, setIsResetting] = useState(false);
+  const [isDragging, setIsDragging] = useState(false);
+
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
-  const processFile = async (file: File) => {
-    try {
-      setUploadStatus({
-        status: "reading",
-        message: `Membaca file ${file.name}...`,
-        progress: 25,
-      });
+  const isUploading =
+    progress?.status === "uploading" || progress?.status === "validating";
+  const isSuccess = progress?.status === "success";
+  const isError = progress?.status === "error";
 
-      const arrayBuffer = await file.arrayBuffer();
-      const workbook = XLSX.read(arrayBuffer, { type: "array", cellDates: false });
-      const firstSheetName = workbook.SheetNames[0];
+  const handleFile = async (file: File) => {
+    await uploadService.uploadSourceFile(file, (p) => {
+      setProgress(p);
+    });
 
-      if (!firstSheetName) {
-        throw new Error("File Excel tidak memiliki lembar kerja (sheet).");
-      }
-
-      const sheet = workbook.Sheets[firstSheetName];
-      const rawRows = XLSX.utils.sheet_to_json<Record<string, any>>(sheet);
-
-      if (!rawRows || rawRows.length === 0) {
-        throw new Error("Tidak ada data dalam lembar kerja Excel ini.");
-      }
-
-      setUploadStatus({
-        status: "saving",
-        message: `Mengirim ${rawRows.length.toLocaleString("id-ID")} baris data ke database (Mode Replace All)...`,
-        progress: 60,
-      });
-
-      const response = await fetch("/api/admin/upload", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ data: rawRows }),
-      });
-
-      const resJson = await response.json();
-
-      if (!response.ok || !resJson.success) {
-        throw new Error(resJson.message || "Gagal menyimpan data ke database.");
-      }
-
-      setUploadStatus({
-        status: "success",
-        message: resJson.message,
-        progress: 100,
-        result: resJson.data,
-      });
-    } catch (err: any) {
-      console.error("Upload error:", err);
-      setUploadStatus({
-        status: "error",
-        message: err.message || "Terjadi kesalahan saat memproses file Excel.",
-        progress: 100,
-      });
-    } finally {
-      if (fileInputRef.current) fileInputRef.current.value = "";
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
     }
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file) processFile(file);
-  };
-
-  const handleDrag = (e: React.DragEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    if (e.type === "dragenter" || e.type === "dragover") {
-      setDragActive(true);
-    } else if (e.type === "dragleave") {
-      setDragActive(false);
+    if (file) {
+      handleFile(file);
     }
   };
 
-  const handleDrop = (e: React.DragEvent) => {
+  const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
-    e.stopPropagation();
-    setDragActive(false);
-    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
-      processFile(e.dataTransfer.files[0]);
+    setIsDragging(false);
+    const file = e.dataTransfer.files?.[0];
+    if (file) {
+      handleFile(file);
+    }
+  };
+
+  const handleDownloadTemplate = () => {
+    uploadService.downloadTemplate();
+  };
+
+  const handleConfirmReset = async () => {
+    setIsResetting(true);
+    try {
+      const res = await uploadService.resetDatabase();
+      if (res.success) {
+        setProgress({
+          fileName: "-",
+          fileSize: 0,
+          status: "success",
+          progressPercentage: 100,
+          message: res.message,
+        });
+      } else {
+        setProgress({
+          fileName: "-",
+          fileSize: 0,
+          status: "error",
+          progressPercentage: 100,
+          message: res.message,
+        });
+      }
+    } catch (err: any) {
+      console.error("Error resetting sulam:", err);
+    } finally {
+      setIsResetting(false);
+      setIsResetModalOpen(false);
     }
   };
 
   return (
-    <div className="space-y-6 max-w-5xl">
-      {/* Header Halaman */}
+    <div className="space-y-6 max-w-4xl font-sans">
+      {/* ── Page Header ── */}
       <div>
-        <div className="flex flex-wrap items-center justify-between gap-4">
-          <div>
-            <h1 className="text-2xl font-black text-[#17231B] tracking-tight">Upload Data Sulam</h1>
-            <p className="text-sm text-[#5F6B63] mt-1">
-              Unggah file transaksi Excel untuk memperbarui database operasional dan rekapitulasi summary Sulam.
-            </p>
-          </div>
-          <Link
-            href="/admin/preview"
-            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold text-[#16823B] bg-[#EAF3EC] hover:bg-[#D5E7DA] transition-colors border border-[#CBE0D1]"
-          >
-            <span>Lihat Preview Data</span>
-            <ArrowRight className="w-4 h-4" />
-          </Link>
-        </div>
+        <h1 className="text-xl sm:text-2xl font-black text-[#17231B] tracking-tight">
+          Upload Data Sumber Excel SULAM
+        </h1>
+        <p className="text-xs sm:text-sm text-[#5F6B63] mt-1">
+          Unggah <strong>1 file Excel Transaksi Sulam</strong> untuk memperbarui database PostgreSQL secara{" "}
+          <strong className="text-[#16823B]">Replace All</strong> dan menyinkronkan ringkasan analitik.
+        </p>
       </div>
 
-      {/* Info Banner Mode Replace All */}
-      <div className="bg-amber-50 border border-amber-200 rounded-2xl p-4 sm:p-5 flex items-start gap-3.5">
-        <Info className="w-5 h-5 text-amber-700 shrink-0 mt-0.5" />
-        <div className="text-xs sm:text-sm text-amber-900 leading-relaxed">
-          <strong className="font-bold">Mode Aktif: Replace Keseluruhan Data (Replace All).</strong>
-          <p className="mt-0.5 text-amber-800">
-            Setiap file Excel yang diunggah akan menggantikan seluruh data transaksi <code className="bg-amber-100 px-1 py-0.5 rounded font-mono text-xs">sulam</code> dan perhitungan <code className="bg-amber-100 px-1 py-0.5 rounded font-mono text-xs">summary_sulam</code> sebelumnya. Pastikan berkas yang diunggah berisi rekapitulasi data lengkap.
+      {/* ── Info Banner (Style OPEX) ── */}
+      <div className="bg-[#16823B]/10 border border-[#16823B]/20 rounded-2xl p-4 sm:p-5 flex items-start gap-3.5 text-xs text-[#17231B] shadow-xs">
+        <Info className="w-5 h-5 text-[#16823B] shrink-0 mt-0.5" />
+        <div className="space-y-1.5 leading-relaxed">
+          <p className="font-bold text-[#16823B] text-sm">
+            Petunjuk Pengunggahan File Excel SULAM:
           </p>
+          <p className="text-[#5F6B63]">
+            Sistem SULAM menggunakan <strong>1 file sumber terpadu</strong> yang memuat data realisasi transaksi upah tenaga kerja dan material bibit sulam per wilayah (AW01 s/d AW23).
+          </p>
+          <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-[11px] text-[#5F6B63] pt-1 border-t border-[#16823B]/15">
+            <span>
+              • <strong>Teknis Upload:</strong> Mode <em>Replace All</em> (data lama diganti sepenuhnya dengan data baru).
+            </span>
+            <span>
+              • <strong>Format Wajib:</strong> Tanggal realisasi, wilayah, jenis data, resource, dan luas efektif.
+            </span>
+          </div>
         </div>
       </div>
 
-      {/* Area Upload File */}
-      <div className="bg-white rounded-2xl border border-[#DDE5DF] p-6 sm:p-8 shadow-xs">
+      {/* ── Single Upload Card (Langkah 1) ── */}
+      <div className="bg-white border border-[#DDE5DF] rounded-2xl p-6 shadow-sm shadow-[#16823B]/5 flex flex-col gap-5">
+        {/* Card Header & Step */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-[#DDE5DF]">
+          <div className="flex items-center gap-3">
+            <div className="p-2.5 rounded-xl bg-[#16823B]/10 text-[#16823B] shrink-0">
+              <FileSpreadsheet className="w-5 h-5" />
+            </div>
+            <div>
+              <h3 className="font-bold text-base text-[#17231B]">Data Transaksi Sulam</h3>
+              <p className="text-xs text-[#5F6B63]">
+                Format berkas yang didukung: <span className="font-semibold text-[#17231B]">.xlsx, .xls, .csv</span>
+              </p>
+            </div>
+          </div>
+          <span className="self-start sm:self-center px-3 py-1 rounded-full bg-[#F7F9F7] border border-[#DDE5DF] text-xs font-black text-[#16823B]">
+            Langkah 1: Upload File Tunggal
+          </span>
+        </div>
+
+        <p className="text-xs text-[#5F6B63] -mt-1 leading-relaxed">
+          Unggah file Excel yang berisi rekaman SPK, tanggal realisasi, wilayah AW, lokasi blok, upah tenaga kerja, dan bibit tanaman. File akan diproses otomatis menjadi data transaksi dan matriks summary kode bulanan.
+        </p>
+
+        {/* Hidden File Input */}
         <input
-          ref={fileInputRef}
           type="file"
-          accept=".xlsx, .xls"
+          ref={fileInputRef}
+          accept=".xlsx,.xls,.csv"
           onChange={handleFileChange}
           className="hidden"
         />
 
+        {/* Dropzone Container */}
         <div
-          onDragEnter={handleDrag}
-          onDragLeave={handleDrag}
-          onDragOver={handleDrag}
-          onDrop={handleDrop}
           onClick={() => {
-            if (uploadStatus.status !== "reading" && uploadStatus.status !== "saving") {
-              fileInputRef.current?.click();
-            }
+            if (!isUploading) fileInputRef.current?.click();
           }}
-          className={`border-2 border-dashed rounded-2xl p-8 sm:p-12 text-center transition-all cursor-pointer flex flex-col items-center justify-center gap-4 ${
-            dragActive
-              ? "border-[#16823B] bg-[#EAF3EC]"
-              : "border-[#DDE5DF] hover:border-[#16823B] hover:bg-[#F7F9F7]"
+          onDragOver={(e) => {
+            e.preventDefault();
+            setIsDragging(true);
+          }}
+          onDragLeave={() => setIsDragging(false)}
+          onDrop={handleDrop}
+          className={`border-2 border-dashed rounded-2xl p-8 sm:p-10 text-center cursor-pointer transition-all flex flex-col items-center justify-center gap-2 ${
+            isUploading
+              ? "border-amber-400 bg-amber-50/50 cursor-wait"
+              : isSuccess
+              ? "border-emerald-500 bg-emerald-50/40"
+              : isError
+              ? "border-rose-400 bg-rose-50/40"
+              : isDragging
+              ? "border-[#16823B] bg-[#16823B]/10 scale-[1.01]"
+              : "border-[#DDE5DF] hover:border-[#16823B] bg-[#F7F9F7] hover:bg-[#16823B]/5"
           }`}
         >
-          <div className="w-16 h-16 rounded-2xl bg-[#EAF3EC] text-[#16823B] flex items-center justify-center border border-[#CBE0D1] shadow-2xs">
-            {uploadStatus.status === "reading" || uploadStatus.status === "saving" ? (
-              <RefreshCw className="w-8 h-8 animate-spin" />
+          <div className="p-3 rounded-2xl bg-white shadow-xs border border-[#DDE5DF]">
+            {isUploading ? (
+              <RefreshCw className="w-8 h-8 text-amber-600 animate-spin" />
+            ) : isSuccess ? (
+              <CheckCircle2 className="w-8 h-8 text-emerald-600" />
+            ) : isError ? (
+              <AlertCircle className="w-8 h-8 text-rose-600" />
             ) : (
-              <UploadCloud className="w-8 h-8" />
+              <UploadCloud className="w-8 h-8 text-[#16823B]" />
             )}
           </div>
 
           <div>
-            <h3 className="text-base font-bold text-[#17231B]">
-              Tarik & Letakkan file Excel di sini, atau <span className="text-[#16823B] underline underline-offset-2">pilih file</span>
-            </h3>
-            <p className="text-xs text-[#5F6B63] mt-1">
-              Mendukung format file spreadsheet <strong>.xlsx</strong> atau <strong>.xls</strong>
+            <p className="text-sm font-bold text-[#17231B]">
+              {isUploading
+                ? "Sedang memproses berkas Excel..."
+                : "Klik untuk memilih file atau seret ke sini"}
+            </p>
+            <p className="text-xs text-[#89938D] mt-0.5">
+              Contoh nama file: <span className="font-mono font-semibold">data_sulam.xlsx</span> (Maksimal 50MB)
             </p>
           </div>
         </div>
 
-        {/* Progress Bar & Status */}
-        {uploadStatus.status !== "idle" && (
-          <div className="mt-6 p-4 rounded-xl border border-[#DDE5DF] bg-[#F7F9F7] space-y-3">
-            <div className="flex items-center justify-between text-xs font-bold">
-              <span className="flex items-center gap-2">
-                {uploadStatus.status === "reading" || uploadStatus.status === "saving" ? (
-                  <RefreshCw className="w-4 h-4 text-[#16823B] animate-spin" />
-                ) : uploadStatus.status === "success" ? (
-                  <CheckCircle2 className="w-4 h-4 text-emerald-600" />
-                ) : (
-                  <AlertCircle className="w-4 h-4 text-red-600" />
-                )}
-                <span className={uploadStatus.status === "error" ? "text-red-700" : "text-[#17231B]"}>
-                  {uploadStatus.message}
-                </span>
-              </span>
-              <span className="text-[#5F6B63]">{uploadStatus.progress}%</span>
-            </div>
+        {/* Action Buttons: Template & Reset */}
+        <div className="flex flex-wrap items-center justify-between gap-3 pt-2">
+          <button
+            type="button"
+            onClick={handleDownloadTemplate}
+            className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl border border-[#DDE5DF] bg-[#F8FAF9] hover:bg-white text-xs font-bold text-[#17231B] transition-all cursor-pointer shadow-2xs hover:border-[#16823B]"
+          >
+            <Download className="w-3.5 h-3.5 text-[#16823B]" />
+            <span>Unduh Template Excel Sulam</span>
+          </button>
 
-            <div className="w-full bg-[#E4ECE5] h-2 rounded-full overflow-hidden">
-              <div
-                className={`h-full transition-all duration-300 ${
-                  uploadStatus.status === "error"
-                    ? "bg-red-500"
-                    : uploadStatus.status === "success"
-                    ? "bg-[#16823B]"
-                    : "bg-[#16823B]"
-                }`}
-                style={{ width: `${uploadStatus.progress}%` }}
-              />
-            </div>
-
-            {/* Hasil Ringkasan Sukses */}
-            {uploadStatus.result && (
-              <div className="pt-3 border-t border-[#DDE5DF] grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
-                <div className="bg-white p-3 rounded-lg border border-[#DDE5DF]">
-                  <p className="text-[#5F6B63]">Total Baris Excel</p>
-                  <p className="text-base font-black text-[#17231B] mt-0.5">
-                    {uploadStatus.result.totalRows.toLocaleString("id-ID")}
-                  </p>
-                </div>
-                <div className="bg-white p-3 rounded-lg border border-[#DDE5DF]">
-                  <p className="text-[#5F6B63]">Transaksi Disimpan</p>
-                  <p className="text-base font-black text-[#16823B] mt-0.5">
-                    {uploadStatus.result.validRows.toLocaleString("id-ID")}
-                  </p>
-                </div>
-                <div className="bg-white p-3 rounded-lg border border-[#DDE5DF]">
-                  <p className="text-[#5F6B63]">Kode Summary Dibuat</p>
-                  <p className="text-base font-black text-[#17231B] mt-0.5">
-                    {uploadStatus.result.summaryCount.toLocaleString("id-ID")}
-                  </p>
-                </div>
-                <div className="bg-white p-3 rounded-lg border border-[#DDE5DF]">
-                  <p className="text-[#5F6B63]">Baris Terlewati / Error</p>
-                  <p className={`text-base font-black mt-0.5 ${uploadStatus.result.errorCount > 0 ? "text-amber-600" : "text-emerald-600"}`}>
-                    {uploadStatus.result.errorCount}
-                  </p>
-                </div>
-              </div>
-            )}
-          </div>
-        )}
-      </div>
-
-      {/* Ketentuan Kolom Excel */}
-      <div className="bg-white rounded-2xl border border-[#DDE5DF] p-6 shadow-xs space-y-4">
-        <h3 className="text-sm font-black text-[#17231B] uppercase tracking-wider flex items-center gap-2">
-          <Database className="w-4 h-4 text-[#16823B]" />
-          Ketentuan Format Header & Kolom
-        </h3>
-        <p className="text-xs text-[#5F6B63] leading-relaxed">
-          Parser akan mengenali kolom-kolom utama berikut secara otomatis (case-insensitive):
-        </p>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs">
-          <div className="p-3 rounded-xl bg-[#F7F9F7] border border-[#DDE5DF]">
-            <p className="font-bold text-[#17231B]">Identitas & Waktu</p>
-            <ul className="list-disc list-inside text-[#5F6B63] mt-1.5 space-y-0.5">
-              <li>Tanggal Realisasi</li>
-              <li>SPK ID & Tanggal SPK</li>
-              <li>Wilayah (AW01 - AW23)</li>
-              <li>Lokasi & Status Tanaman</li>
-            </ul>
-          </div>
-          <div className="p-3 rounded-xl bg-[#F7F9F7] border border-[#DDE5DF]">
-            <p className="font-bold text-[#17231B]">Klasifikasi & Jenis</p>
-            <ul className="list-disc list-inside text-[#5F6B63] mt-1.5 space-y-0.5">
-              <li>Jenis Data (Upah, Material, Reverse)</li>
-              <li>Kode & Deskripsi Aktivitas</li>
-              <li>Group Bahan/Alat</li>
-              <li>Order & Act Cost Group</li>
-            </ul>
-          </div>
-          <div className="p-3 rounded-xl bg-[#F7F9F7] border border-[#DDE5DF]">
-            <p className="font-bold text-[#17231B]">Nilai Numerik</p>
-            <ul className="list-disc list-inside text-[#5F6B63] mt-1.5 space-y-0.5">
-              <li>Total Realisasi Biaya</li>
-              <li>Resource Bahan/Alat</li>
-              <li>Hasil Efektif (HA)</li>
-              <li>Cost/Working Hour & Index Biaya</li>
-            </ul>
-          </div>
+          <button
+            type="button"
+            onClick={() => setIsResetModalOpen(true)}
+            className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl border border-rose-200 bg-rose-50 hover:bg-rose-100 text-xs font-bold text-rose-700 transition-all cursor-pointer shadow-2xs"
+          >
+            <Trash2 className="w-3.5 h-3.5 text-rose-600" />
+            <span>Reset / Kosongkan Database</span>
+          </button>
         </div>
       </div>
+
+      {/* ── Progress & Status Result Card ── */}
+      {progress && (
+        <div
+          className={`border rounded-2xl p-5 shadow-xs transition-all ${
+            isError
+              ? "bg-rose-50/70 border-rose-200 text-rose-900"
+              : isSuccess
+              ? "bg-emerald-50/70 border-emerald-200 text-emerald-950"
+              : "bg-white border-[#DDE5DF] text-[#17231B]"
+          }`}
+        >
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center gap-2.5">
+              {isUploading ? (
+                <RefreshCw className="w-4 h-4 text-amber-600 animate-spin" />
+              ) : isSuccess ? (
+                <CheckCircle2 className="w-5 h-5 text-emerald-600" />
+              ) : (
+                <AlertCircle className="w-5 h-5 text-rose-600" />
+              )}
+              <span className="font-bold text-sm">
+                {isUploading ? "Status Pengunggahan..." : isSuccess ? "Berhasil Diunggah & Di-replace" : "Gagal Mengunggah"}
+              </span>
+            </div>
+            <span className="font-mono text-xs font-bold">
+              {progress.progressPercentage}%
+            </span>
+          </div>
+
+          {/* Progress Bar */}
+          <div className="w-full bg-[#DDE5DF]/60 h-2 rounded-full overflow-hidden mb-3">
+            <div
+              className={`h-full transition-all duration-300 rounded-full ${
+                isError
+                  ? "bg-rose-500"
+                  : isSuccess
+                  ? "bg-emerald-600"
+                  : "bg-amber-500"
+              }`}
+              style={{ width: `${progress.progressPercentage}%` }}
+            />
+          </div>
+
+          <p className="text-xs text-[#5F6B63] mb-3">{progress.message}</p>
+
+          {/* Result Stats on Success */}
+          {isSuccess && progress.result && (
+            <div className="pt-3 border-t border-emerald-200/80 space-y-3">
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
+                <div className="bg-white/80 p-2.5 rounded-xl border border-emerald-200">
+                  <span className="text-[#5F6B63] text-[10px] block uppercase font-bold">Total Baris File</span>
+                  <span className="font-mono font-black text-sm text-[#17231B]">
+                    {progress.result.totalRows.toLocaleString("id-ID")}
+                  </span>
+                </div>
+                <div className="bg-white/80 p-2.5 rounded-xl border border-emerald-200">
+                  <span className="text-[#5F6B63] text-[10px] block uppercase font-bold">Transaksi Valid</span>
+                  <span className="font-mono font-black text-sm text-[#16823B]">
+                    {progress.result.validRows.toLocaleString("id-ID")}
+                  </span>
+                </div>
+                <div className="bg-white/80 p-2.5 rounded-xl border border-emerald-200">
+                  <span className="text-[#5F6B63] text-[10px] block uppercase font-bold">Summary Kode</span>
+                  <span className="font-mono font-black text-sm text-[#29A9D6]">
+                    {progress.result.summaryCount.toLocaleString("id-ID")}
+                  </span>
+                </div>
+                <div className="bg-white/80 p-2.5 rounded-xl border border-emerald-200">
+                  <span className="text-[#5F6B63] text-[10px] block uppercase font-bold">Baris Error</span>
+                  <span className={`font-mono font-black text-sm ${progress.result.errorCount > 0 ? "text-amber-600" : "text-[#5F6B63]"}`}>
+                    {progress.result.errorCount.toLocaleString("id-ID")}
+                  </span>
+                </div>
+              </div>
+
+              {/* Link to Preview */}
+              <div className="flex items-center justify-end pt-1">
+                <Link
+                  href="/admin/preview"
+                  className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#16823B] hover:bg-[#0B6B32] text-white text-xs font-bold transition-all shadow-xs active:scale-95 cursor-pointer"
+                >
+                  <span>Buka Preview Data Hasil Upload</span>
+                  <ArrowRight className="w-4 h-4" />
+                </Link>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* ── Modal Konfirmasi Reset Database ── */}
+      {isResetModalOpen && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-in fade-in duration-200 font-sans"
+          onClick={() => !isResetting && setIsResetModalOpen(false)}
+        >
+          <div
+            className="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-[#DDE5DF] space-y-4 animate-in zoom-in-95 duration-200"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center gap-3 text-rose-600 pb-2 border-b border-[#DDE5DF]">
+              <div className="p-2.5 rounded-xl bg-rose-50 border border-rose-200">
+                <AlertCircle className="w-5 h-5 text-rose-600" />
+              </div>
+              <div>
+                <h3 className="font-black text-base text-[#17231B]">Konfirmasi Reset Database</h3>
+                <p className="text-xs text-[#5F6B63]">Tindakan ini tidak dapat dibatalkan</p>
+              </div>
+            </div>
+
+            <p className="text-xs text-[#5F6B63] leading-relaxed">
+              Apakah Anda yakin ingin mengosongkan seluruh data transaksi <strong>Sulam</strong> dan <strong>Summary Sulam</strong> dari database PostgreSQL? Seluruh data yang ada saat ini akan dihapus secara permanen.
+            </p>
+
+            <div className="flex items-center justify-end gap-2.5 pt-2">
+              <button
+                type="button"
+                disabled={isResetting}
+                onClick={() => setIsResetModalOpen(false)}
+                className="px-4 py-2 rounded-xl border border-[#DDE5DF] text-[#5F6B63] hover:text-[#17231B] hover:bg-[#F8FAF9] text-xs font-bold transition-colors cursor-pointer disabled:opacity-50"
+              >
+                Batal
+              </button>
+              <button
+                type="button"
+                disabled={isResetting}
+                onClick={handleConfirmReset}
+                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold transition-all shadow-xs cursor-pointer disabled:opacity-50"
+              >
+                {isResetting && <RefreshCw className="w-3.5 h-3.5 animate-spin" />}
+                <span>{isResetting ? "Mereset..." : "Ya, Kosongkan Database"}</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

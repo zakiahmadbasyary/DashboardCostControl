@@ -1,7 +1,10 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { processSulamRows, ParsedSulamRow, SummarySulamData } from "@/lib/sulamParser";
+import { processSulamRows } from "@/lib/sulamParser";
 import * as XLSX from "xlsx";
+
+export const dynamic = "force-dynamic";
+export const maxDuration = 300;
 
 export async function POST(req: Request) {
   try {
@@ -16,6 +19,14 @@ export async function POST(req: Request) {
       if (!file) {
         return NextResponse.json(
           { success: false, message: "Berkas file Excel tidak ditemukan dalam request." },
+          { status: 400 }
+        );
+      }
+
+      // Validasi ukuran berkas maksimal 50MB
+      if (file.size > 50 * 1024 * 1024) {
+        return NextResponse.json(
+          { success: false, message: "Ukuran file terlalu besar. Maksimal 50MB." },
           { status: 400 }
         );
       }
@@ -37,7 +48,7 @@ export async function POST(req: Request) {
       const body = await req.json();
       if (!body.data || !Array.isArray(body.data)) {
         return NextResponse.json(
-          { success: false, message: "Format payload salah. Wajib menyertakan array 'data'." },
+          { success: false, message: "Format payload salah. Wajib menyertakan array 'data' atau unggah file FormData." },
           { status: 400 }
         );
       }
@@ -46,7 +57,7 @@ export async function POST(req: Request) {
 
     if (rawRows.length === 0) {
       return NextResponse.json(
-        { success: false, message: "Tidak ada baris data untuk diproses." },
+        { success: false, message: "Tidak ada baris data untuk diproses dalam file Excel." },
         { status: 400 }
       );
     }
@@ -65,16 +76,16 @@ export async function POST(req: Request) {
       );
     }
 
-    // Jalankan dalam Database Transaction dengan mode REPLACE ALL
+    // Jalankan dalam Database Transaction dengan mode ATOMIC REPLACE ALL
     const result = await prisma.$transaction(
       async (tx) => {
-        // 1. Bersihkan seluruh data transaksi sulam
+        // 1. Bersihkan seluruh data transaksi sulam (anak relasi)
         await tx.sulam.deleteMany();
 
-        // 2. Bersihkan seluruh summary sulam
+        // 2. Bersihkan seluruh summary sulam (induk relasi)
         await tx.summarySulam.deleteMany();
 
-        // 3. Masukkan data summary_sulam terlebih dahulu agar Foreign Key terpenuhi
+        // 3. Masukkan data summary_sulam terlebih dahulu agar Foreign Key 'kode' terpenuhi
         for (const s of summaryRows) {
           await tx.summarySulam.create({
             data: {
@@ -92,7 +103,7 @@ export async function POST(req: Request) {
           });
         }
 
-        // 4. Masukkan data transaksi sulam dalam batch
+        // 4. Masukkan data transaksi sulam dalam batch 500 baris
         const BATCH_SIZE = 500;
         let insertedCount = 0;
 
@@ -141,13 +152,13 @@ export async function POST(req: Request) {
         };
       },
       {
-        timeout: 90000, // 90 detik untuk menangani volume data besar
+        timeout: 90000, // 90 detik
       }
     );
 
     return NextResponse.json({
       success: true,
-      message: `Berhasil me-replace database: ${result.totalSulam} transaksi sulam dan ${result.totalSummary} summary kode disimpan.`,
+      message: `Berhasil me-replace database: ${result.totalSulam.toLocaleString("id-ID")} transaksi sulam dan ${result.totalSummary.toLocaleString("id-ID")} summary kode berhasil diperbarui.`,
       data: {
         totalRows: rawRows.length,
         validRows: validRows.length,
