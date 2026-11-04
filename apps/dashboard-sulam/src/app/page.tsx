@@ -6,7 +6,7 @@ import { SulamSubMenu } from "@/components/sulam/SubMenuTabs";
 import SulamMainFilters, { PgIndicatorKey } from "@/components/sulam/antar-pg/SulamMainFilters";
 import PgComparisonChart from "@/components/sulam/antar-pg/PgComparisonChart";
 import PgSummaryTable from "@/components/sulam/antar-pg/PgSummaryTable";
-import WilayahMainFilters from "@/components/sulam/antar-wilayah/WilayahMainFilters";
+import WilayahMainFilters, { MONTH_OPTIONS } from "@/components/sulam/antar-wilayah/WilayahMainFilters";
 import MonthlyMatrixSection from "@/components/sulam/antar-wilayah/MonthlyMatrixSection";
 import MonthlyAnalysisSection from "@/components/sulam/antar-wilayah/MonthlyAnalysisSection";
 import LocationDetailTable from "@/components/sulam/antar-wilayah/LocationDetailTable";
@@ -25,7 +25,8 @@ export default function DashboardSulamPage() {
   const [loadingPg, setLoadingPg] = useState<boolean>(true);
 
   // State Sub-menu 2 (Antar Wilayah PG1)
-  const [selectedMonth, setSelectedMonth] = useState<number>(1);
+  const currentMonth = new Date().getMonth() + 1;
+  const [selectedMonth, setSelectedMonth] = useState<number>(currentMonth);
   const [monthsWithData, setMonthsWithData] = useState<number[]>([]);
   const [wilayahData, setWilayahData] = useState<any>({
     bagian1: {
@@ -46,7 +47,7 @@ export default function DashboardSulamPage() {
       totalPages: 1,
       locationTotal: null,
     },
-    monthName: "Januari",
+    monthName: MONTH_OPTIONS[currentMonth - 1]?.label || "Januari",
   });
   const [searchLocation, setSearchLocation] = useState<string>("");
   const [sortBy, setSortBy] = useState<string>("wilayah");

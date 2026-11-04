@@ -39,6 +39,7 @@ export default function WilayahMainFilters({
   onRefresh,
   loading = false,
 }: WilayahMainFiltersProps) {
+  const currentMonth = new Date().getMonth() + 1;
   const [isOpen, setIsOpen] = useState(false);
   const [tempMonth, setTempMonth] = useState<number>(selectedMonth);
   const [tempYear, setTempYear] = useState<number>(selectedYear);
@@ -68,16 +69,16 @@ export default function WilayahMainFilters({
   };
 
   const handleReset = () => {
-    onMonthChange(1);
+    onMonthChange(currentMonth);
     if (availableYears.length > 0 && selectedYear !== availableYears[0]) {
       onYearChange(availableYears[0]);
     }
-    setTempMonth(1);
+    setTempMonth(currentMonth);
     if (availableYears.length > 0) setTempYear(availableYears[0]);
   };
 
   const activeCount =
-    (selectedMonth !== 1 ? 1 : 0) +
+    (selectedMonth !== currentMonth ? 1 : 0) +
     (availableYears.length > 0 && selectedYear !== availableYears[0] ? 1 : 0);
 
   return (
@@ -146,7 +147,7 @@ export default function WilayahMainFilters({
           <button
             type="button"
             onClick={handleReset}
-            title="Reset ke Default (Januari)"
+            title={`Reset ke Default (${MONTH_OPTIONS.find((m) => m.value === currentMonth)?.label || "Bulan Sekarang"})`}
             className="inline-flex items-center justify-center gap-1 px-2.5 py-1.5 rounded-lg border border-[#DDE5DF] text-[#5F6B63] hover:text-[#17231B] hover:bg-[#F7F9F7] text-xs font-semibold transition-colors cursor-pointer"
             suppressHydrationWarning
           >

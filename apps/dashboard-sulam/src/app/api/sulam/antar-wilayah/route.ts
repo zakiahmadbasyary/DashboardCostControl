@@ -37,8 +37,10 @@ export async function GET(req: Request) {
       orderBy: { month: "desc" },
     });
     const monthsWithData = distinctMonths.map((m) => m.month);
-    const defaultMonth = monthsWithData.length > 0 ? monthsWithData[0] : 1;
-    const selectedMonth = searchParams.get("month") ? parseInt(searchParams.get("month")!, 10) : defaultMonth;
+    const currentMonth = new Date().getMonth() + 1;
+    const selectedMonth = searchParams.get("month")
+      ? parseInt(searchParams.get("month")!, 10)
+      : currentMonth;
 
     // =========================================================================
     // BAGIAN 1: Perbandingan Bulanan Antar Wilayah (Selalu 12 Bulan, AW01-AW07)
