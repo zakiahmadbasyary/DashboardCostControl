@@ -9,6 +9,7 @@ import {
   YAxis,
   CartesianGrid,
   Tooltip,
+  LabelList,
 } from "recharts";
 import { DollarSign, TrendingUp, Users, Sprout } from "lucide-react";
 import { formatCurrencyRp, formatNumberId } from "@/lib/formatters";
@@ -35,6 +36,136 @@ interface MonthlyAnalysisSectionProps {
   chartsData: any[];
   loading?: boolean;
 }
+
+// ── Custom Label Renderers (Horizontal, Ringkas, Tidak Tumpang Tindih) ──
+
+// 1. Label untuk Cost per Wilayah (contoh: "198 Jt", "56 Jt", "117 Jt")
+const renderCostLabel = (props: any) => {
+  const { x, y, width, value } = props;
+  const num = Number(value);
+  if (!num || isNaN(num) || num <= 0) return null;
+
+  let labelText = "";
+  if (num >= 1_000_000_000) {
+    const formatted = (num / 1_000_000_000).toFixed(1).replace(".", ",");
+    labelText = formatted.endsWith(",0")
+      ? `${(num / 1_000_000_000).toFixed(0)} M`
+      : `${formatted} M`;
+  } else if (num >= 1_000_000) {
+    labelText = `${Math.round(num / 1_000_000)} Jt`;
+  } else if (num >= 1_000) {
+    labelText = `${Math.round(num / 1_000)} rb`;
+  } else {
+    labelText = `${Math.round(num)}`;
+  }
+
+  const cx = x + width / 2;
+  const cy = y - 5;
+
+  return (
+    <text
+      x={cx}
+      y={cy}
+      fill="#17231B"
+      fontSize={9.5}
+      fontWeight={700}
+      fontFamily="system-ui, -apple-system, sans-serif"
+      textAnchor="middle"
+      className="select-none pointer-events-none"
+    >
+      {labelText}
+    </text>
+  );
+};
+
+// 2. Label untuk Cost / HA per Wilayah (contoh: "31,9", "20,0", "12,4")
+const renderCostHaLabel = (props: any) => {
+  const { x, y, width, value } = props;
+  const num = Number(value);
+  if (!num || isNaN(num) || num <= 0) return null;
+
+  const labelText = num.toLocaleString("id-ID", {
+    minimumFractionDigits: 1,
+    maximumFractionDigits: 1,
+  });
+
+  const cx = x + width / 2;
+  const cy = y - 5;
+
+  return (
+    <text
+      x={cx}
+      y={cy}
+      fill="#17231B"
+      fontSize={9.5}
+      fontWeight={700}
+      fontFamily="system-ui, -apple-system, sans-serif"
+      textAnchor="middle"
+      className="select-none pointer-events-none"
+    >
+      {labelText}
+    </text>
+  );
+};
+
+// 3. Label untuk Penggunaan TK Sulam (contoh: "3.053", "544", "141")
+const renderTkLabel = (props: any) => {
+  const { x, y, width, value } = props;
+  const num = Number(value);
+  if (!num || isNaN(num) || num <= 0) return null;
+
+  const labelText = Math.round(num).toLocaleString("id-ID");
+
+  const cx = x + width / 2;
+  const cy = y - 5;
+
+  return (
+    <text
+      x={cx}
+      y={cy}
+      fill="#17231B"
+      fontSize={9.5}
+      fontWeight={700}
+      fontFamily="system-ui, -apple-system, sans-serif"
+      textAnchor="middle"
+      className="select-none pointer-events-none"
+    >
+      {labelText}
+    </text>
+  );
+};
+
+// 4. Label untuk Penggunaan Batang Sulam (contoh: "875k", "668k", "250k", "1.001k")
+const renderBatangLabel = (props: any) => {
+  const { x, y, width, value } = props;
+  const num = Number(value);
+  if (!num || isNaN(num) || num <= 0) return null;
+
+  let labelText = "";
+  if (num >= 1_000) {
+    labelText = `${Math.round(num / 1_000).toLocaleString("id-ID")}k`;
+  } else {
+    labelText = Math.round(num).toLocaleString("id-ID");
+  }
+
+  const cx = x + width / 2;
+  const cy = y - 5;
+
+  return (
+    <text
+      x={cx}
+      y={cy}
+      fill="#17231B"
+      fontSize={9.5}
+      fontWeight={700}
+      fontFamily="system-ui, -apple-system, sans-serif"
+      textAnchor="middle"
+      className="select-none pointer-events-none"
+    >
+      {labelText}
+    </text>
+  );
+};
 
 export default function MonthlyAnalysisSection({
   selectedMonth,
@@ -67,21 +198,22 @@ export default function MonthlyAnalysisSection({
                 <DollarSign className="w-4 h-4" />
               </div>
               <h3 className="text-xs sm:text-sm font-bold text-[#17231B]">
-                Cost per Wilayah 
+                Cost per Wilayah
               </h3>
             </div>
             <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-[#EAF3EC] text-[#16823B] border border-[#CBE0D1]">
               Rupiah
             </span>
           </div>
-          <div className="w-full h-52">
+          <div className="w-full h-56">
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={chartsData} margin={{ top: 10, right: 10, left: 10, bottom: 0 }}>
+              <BarChart data={chartsData} margin={{ top: 22, right: 10, left: 10, bottom: 0 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#F1F5F2" vertical={false} />
                 <XAxis dataKey="wilayah" tick={{ fill: "#5F6B63", fontSize: 10 }} tickLine={false} />
                 <YAxis
                   tick={{ fill: "#5F6B63", fontSize: 9 }}
                   tickLine={false}
+                  domain={[0, (dataMax: number) => (dataMax > 0 ? Math.ceil(dataMax * 1.18) : 10)]}
                   tickFormatter={(val) => `${(val / 1000000).toFixed(0)}M`}
                 />
                 <Tooltip
@@ -97,7 +229,9 @@ export default function MonthlyAnalysisSection({
                     );
                   }}
                 />
-                <Bar dataKey="costTotal" name="Total Biaya" fill="#16823B" radius={[4, 4, 0, 0]} maxBarSize={32} />
+                <Bar dataKey="costTotal" name="Total Biaya" fill="#16823B" radius={[4, 4, 0, 0]} maxBarSize={32}>
+                  <LabelList dataKey="costTotal" content={renderCostLabel} />
+                </Bar>
               </BarChart>
             </ResponsiveContainer>
           </div>
@@ -118,12 +252,16 @@ export default function MonthlyAnalysisSection({
               Juta Rp / HA
             </span>
           </div>
-          <div className="w-full h-52">
+          <div className="w-full h-56">
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={chartsData} margin={{ top: 10, right: 10, left: -10, bottom: 0 }}>
+              <BarChart data={chartsData} margin={{ top: 22, right: 10, left: -10, bottom: 0 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#F1F5F2" vertical={false} />
                 <XAxis dataKey="wilayah" tick={{ fill: "#5F6B63", fontSize: 10 }} tickLine={false} />
-                <YAxis tick={{ fill: "#5F6B63", fontSize: 9 }} tickLine={false} />
+                <YAxis
+                  tick={{ fill: "#5F6B63", fontSize: 9 }}
+                  tickLine={false}
+                  domain={[0, (dataMax: number) => (dataMax > 0 ? Math.ceil(dataMax * 1.18) : 10)]}
+                />
                 <Tooltip
                   content={({ active, payload, label }) => {
                     if (!active || !payload || !payload.length) return null;
@@ -140,7 +278,9 @@ export default function MonthlyAnalysisSection({
                     );
                   }}
                 />
-                <Bar dataKey="costPerHaJuta" name="Cost/HA" fill="#29A9D6" radius={[4, 4, 0, 0]} maxBarSize={32} />
+                <Bar dataKey="costPerHaJuta" name="Cost/HA" fill="#29A9D6" radius={[4, 4, 0, 0]} maxBarSize={32}>
+                  <LabelList dataKey="costPerHaJuta" content={renderCostHaLabel} />
+                </Bar>
               </BarChart>
             </ResponsiveContainer>
           </div>
@@ -154,19 +294,23 @@ export default function MonthlyAnalysisSection({
                 <Users className="w-4 h-4" />
               </div>
               <h3 className="text-xs sm:text-sm font-bold text-[#17231B]">
-                Penggunaan TK Sulam 
+                Penggunaan TK Sulam
               </h3>
             </div>
             <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-amber-50 text-amber-800 border border-amber-200">
               Tenaga Kerja (TK)
             </span>
           </div>
-          <div className="w-full h-52">
+          <div className="w-full h-56">
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={chartsData} margin={{ top: 10, right: 10, left: -10, bottom: 0 }}>
+              <BarChart data={chartsData} margin={{ top: 22, right: 10, left: -10, bottom: 0 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#F1F5F2" vertical={false} />
                 <XAxis dataKey="wilayah" tick={{ fill: "#5F6B63", fontSize: 10 }} tickLine={false} />
-                <YAxis tick={{ fill: "#5F6B63", fontSize: 9 }} tickLine={false} />
+                <YAxis
+                  tick={{ fill: "#5F6B63", fontSize: 9 }}
+                  tickLine={false}
+                  domain={[0, (dataMax: number) => (dataMax > 0 ? Math.ceil(dataMax * 1.18) : 10)]}
+                />
                 <Tooltip
                   content={({ active, payload, label }) => {
                     if (!active || !payload || !payload.length) return null;
@@ -180,7 +324,9 @@ export default function MonthlyAnalysisSection({
                     );
                   }}
                 />
-                <Bar dataKey="penggunaanTk" name="Total TK" fill="#F9A91B" radius={[4, 4, 0, 0]} maxBarSize={32} />
+                <Bar dataKey="penggunaanTk" name="Total TK" fill="#F9A91B" radius={[4, 4, 0, 0]} maxBarSize={32}>
+                  <LabelList dataKey="penggunaanTk" content={renderTkLabel} />
+                </Bar>
               </BarChart>
             </ResponsiveContainer>
           </div>
@@ -201,14 +347,15 @@ export default function MonthlyAnalysisSection({
               Batang Bibit
             </span>
           </div>
-          <div className="w-full h-52">
+          <div className="w-full h-56">
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={chartsData} margin={{ top: 10, right: 10, left: -10, bottom: 0 }}>
+              <BarChart data={chartsData} margin={{ top: 22, right: 10, left: -10, bottom: 0 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#F1F5F2" vertical={false} />
                 <XAxis dataKey="wilayah" tick={{ fill: "#5F6B63", fontSize: 10 }} tickLine={false} />
                 <YAxis
                   tick={{ fill: "#5F6B63", fontSize: 9 }}
                   tickLine={false}
+                  domain={[0, (dataMax: number) => (dataMax > 0 ? Math.ceil(dataMax * 1.18) : 10)]}
                   tickFormatter={(val) => (val >= 1000 ? `${(val / 1000).toFixed(0)}k` : val)}
                 />
                 <Tooltip
@@ -224,7 +371,9 @@ export default function MonthlyAnalysisSection({
                     );
                   }}
                 />
-                <Bar dataKey="penggunaanBatang" name="Total Batang" fill="#0B6B32" radius={[4, 4, 0, 0]} maxBarSize={32} />
+                <Bar dataKey="penggunaanBatang" name="Total Batang" fill="#0B6B32" radius={[4, 4, 0, 0]} maxBarSize={32}>
+                  <LabelList dataKey="penggunaanBatang" content={renderBatangLabel} />
+                </Bar>
               </BarChart>
             </ResponsiveContainer>
           </div>
