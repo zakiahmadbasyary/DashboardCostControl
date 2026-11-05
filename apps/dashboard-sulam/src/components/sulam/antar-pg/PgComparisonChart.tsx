@@ -132,8 +132,8 @@ export default function PgComparisonChart({
         x={cx}
         y={cy}
         fill="#17231B"
-        fontSize={8}
-        fontWeight={700}
+        fontSize={8.5}
+        fontWeight={600}
         fontFamily="system-ui, -apple-system, sans-serif"
         textAnchor="middle"
         className="select-none pointer-events-none"
@@ -235,13 +235,13 @@ export default function PgComparisonChart({
         </div>
       ) : (
         <div className="w-full overflow-x-auto md:overflow-x-visible pb-2 md:pb-0 scrollbar-thin">
-          <div className="min-w-[620px] md:min-w-0 w-full h-72 sm:h-80">
+          <div className="min-w-[680px] md:min-w-0 w-full h-72 sm:h-80">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart
                 data={chartData}
                 margin={{ top: 22, right: 10, left: 0, bottom: 5 }}
-                barGap={4}
-                barCategoryGap="16%"
+                barGap={2}
+                barCategoryGap="8%"
               >
                 <CartesianGrid strokeDasharray="3 3" stroke="#EAEFEF" vertical={false} />
                 <XAxis
@@ -263,13 +263,13 @@ export default function PgComparisonChart({
                   }}
                 />
                 <Tooltip content={<CustomTooltip />} />
-                <Bar dataKey="PG1" name="PG1" fill={PG_COLORS.PG1} radius={[3, 3, 0, 0]} maxBarSize={22}>
+                <Bar dataKey="PG1" name="PG1" fill={PG_COLORS.PG1} radius={[4, 4, 0, 0]} maxBarSize={32}>
                   {isDesktop && <LabelList content={(props: any) => renderCustomBarLabel(props, "PG1")} />}
                 </Bar>
-                <Bar dataKey="PG2" name="PG2" fill={PG_COLORS.PG2} radius={[3, 3, 0, 0]} maxBarSize={22}>
+                <Bar dataKey="PG2" name="PG2" fill={PG_COLORS.PG2} radius={[4, 4, 0, 0]} maxBarSize={32}>
                   {isDesktop && <LabelList content={(props: any) => renderCustomBarLabel(props, "PG2")} />}
                 </Bar>
-                <Bar dataKey="PG3" name="PG3" fill={PG_COLORS.PG3} radius={[3, 3, 0, 0]} maxBarSize={22}>
+                <Bar dataKey="PG3" name="PG3" fill={PG_COLORS.PG3} radius={[4, 4, 0, 0]} maxBarSize={32}>
                   {isDesktop && <LabelList content={(props: any) => renderCustomBarLabel(props, "PG3")} />}
                 </Bar>
               </BarChart>
