@@ -59,9 +59,6 @@ function formatTkTop(val: number): string {
 
 function formatBatangTop(val: number): string {
   if (!val || val <= 0) return "-";
-  if (val >= 1_000) {
-    return `${Math.round(val / 1_000).toLocaleString("id-ID")}k`;
-  }
   return Math.round(val).toLocaleString("id-ID");
 }
 
