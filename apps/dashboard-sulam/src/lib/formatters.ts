@@ -9,11 +9,23 @@ export function formatCurrencyRp(val: number | null | undefined): string {
   }).format(val);
 }
 
-export function formatNumberId(val: number | null | undefined, decimals = 0): string {
+export function formatNumberId(
+  val: number | null | undefined,
+  decimals = 0,
+  fixedDecimals = false
+): string {
   if (val === null || val === undefined || isNaN(val)) return "-";
   return new Intl.NumberFormat("id-ID", {
-    minimumFractionDigits: 0,
+    minimumFractionDigits: fixedDecimals ? decimals : 0,
     maximumFractionDigits: decimals,
+  }).format(val);
+}
+
+export function formatDecimal2(val: number | null | undefined): string {
+  if (val === null || val === undefined || isNaN(val)) return "-";
+  return new Intl.NumberFormat("id-ID", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
   }).format(val);
 }
 
@@ -29,4 +41,3 @@ export function formatRatioId(
   }).format(val);
   return suffix ? `${numStr} ${suffix}` : numStr;
 }
-

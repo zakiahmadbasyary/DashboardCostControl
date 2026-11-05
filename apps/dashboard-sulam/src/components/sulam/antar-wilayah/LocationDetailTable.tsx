@@ -2,7 +2,7 @@
 
 import React, { useState, useMemo } from "react";
 import { Table as TableIcon, Filter, Search, ArrowUpDown, ChevronUp, ChevronDown, X } from "lucide-react";
-import { formatNumberId, formatRatioId } from "@/lib/formatters";
+import { formatNumberId, formatRatioId, formatDecimal2 } from "@/lib/formatters";
 
 interface LocationItem {
   wilayah: string;
@@ -317,10 +317,10 @@ export default function LocationDetailTable({
                       {formatNumberId(item.batang, 0)}
                     </td>
                     <td className="py-2.5 px-3 text-right font-mono font-medium text-[#17231B]">
-                      {formatNumberId(item.ha, 2)}
+                      {formatDecimal2(item.ha)}
                     </td>
                     <td className="py-2.5 px-3.5 text-right font-mono font-bold text-[#16823B]">
-                      {item.batangTk !== null ? formatRatioId(item.batangTk, 1) : "-"}
+                      {item.batangTk !== null ? formatRatioId(item.batangTk, 0) : "-"}
                     </td>
                   </tr>
                 ))
@@ -340,10 +340,10 @@ export default function LocationDetailTable({
                     {formatNumberId(calculatedTotal.batang, 0)}
                   </td>
                   <td className="py-3 px-3 text-right font-mono font-black text-[#17231B]">
-                    {formatNumberId(calculatedTotal.ha, 2)}
+                    {formatDecimal2(calculatedTotal.ha)}
                   </td>
                   <td className="py-3 px-3.5 text-right font-mono font-black text-[#16823B]">
-                    {calculatedTotal.batangTk !== null ? formatRatioId(calculatedTotal.batangTk, 1) : "-"}
+                    {calculatedTotal.batangTk !== null ? formatRatioId(calculatedTotal.batangTk, 0) : "-"}
                   </td>
                 </tr>
               </tfoot>

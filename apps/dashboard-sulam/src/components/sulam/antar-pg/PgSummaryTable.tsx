@@ -2,7 +2,7 @@
 
 import React from "react";
 import { Table as TableIcon, Filter } from "lucide-react";
-import { formatCurrencyRp, formatNumberId, formatRatioId } from "@/lib/formatters";
+import { formatCurrencyRp, formatNumberId, formatRatioId, formatDecimal2 } from "@/lib/formatters";
 
 interface SummaryRow {
   month: number;
@@ -140,7 +140,7 @@ export default function PgSummaryTable({
                     {formatNumberId(row.jumlahTk, 1)}
                   </td>
                   <td className="py-3 px-2.5 text-right font-mono text-[#17231B]">
-                    {formatNumberId(row.luas, 2)}
+                    {formatDecimal2(row.luas)}
                   </td>
                   <td className="py-3 px-2.5 text-right font-mono font-medium text-[#16823B]">
                     {formatCurrencyRp(row.upahHa)}
@@ -152,7 +152,7 @@ export default function PgSummaryTable({
                     {formatCurrencyRp(row.upahBatang)}
                   </td>
                   <td className="py-3 px-2.5 text-right font-mono font-medium text-[#16823B]">
-                    {formatRatioId(row.batangTk, 1)}
+                    {formatRatioId(row.batangTk, 0)}
                   </td>
                   <td className="py-3 px-2.5 text-right font-mono text-[#17231B]">
                     {formatNumberId(row.tkBulan, 1)}
@@ -178,11 +178,11 @@ export default function PgSummaryTable({
                 <td className="py-3 px-2.5 text-right font-mono font-semibold text-[#17231B]">{formatCurrencyRp(total.upah)}</td>
                 <td className="py-3 px-2.5 text-right font-mono font-semibold text-[#17231B]">{formatNumberId(total.batang, 0)}</td>
                 <td className="py-3 px-2.5 text-right font-mono font-semibold text-[#17231B]">{formatNumberId(total.jumlahTk, 1)}</td>
-                <td className="py-3 px-2.5 text-right font-mono font-semibold text-[#17231B]">{formatNumberId(total.luas, 2)}</td>
+                <td className="py-3 px-2.5 text-right font-mono font-semibold text-[#17231B]">{formatDecimal2(total.luas)}</td>
                 <td className="py-3 px-2.5 text-right font-mono font-semibold text-[#16823B]">{formatCurrencyRp(total.upahHa)}</td>
                 <td className="py-3 px-2.5 text-right font-mono font-semibold text-[#16823B]">{formatRatioId(total.batangHa, 0)}</td>
                 <td className="py-3 px-2.5 text-right font-mono font-semibold text-[#16823B]">{formatCurrencyRp(total.upahBatang)}</td>
-                <td className="py-3 px-2.5 text-right font-mono font-semibold text-[#16823B]">{formatRatioId(total.batangTk, 1)}</td>
+                <td className="py-3 px-2.5 text-right font-mono font-semibold text-[#16823B]">{formatRatioId(total.batangTk, 0)}</td>
                 <td className="py-3 px-2.5 text-right font-mono font-semibold text-[#17231B]">{formatNumberId(total.tkBulan, 1)}</td>
                 <td className="py-3 px-3 text-right font-mono font-semibold text-[#17231B]">{formatCurrencyRp(total.costTkBulan)}</td>
               </tr>

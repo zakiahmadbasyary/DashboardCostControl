@@ -101,7 +101,7 @@ export default function PgComparisonChart({
     if (indicator === "costTkBulan" || indicator === "upahHa" || indicator === "upahBatang") {
       return formatCurrencyRp(val);
     }
-    if (indicator === "batangHa" || indicator === "tkBulan") {
+    if (indicator === "batangHa" || indicator === "tkBulan" || indicator === "batangTk") {
       return formatNumberId(val, 0);
     }
     return formatRatioId(val, 1);

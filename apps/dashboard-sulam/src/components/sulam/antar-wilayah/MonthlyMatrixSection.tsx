@@ -414,11 +414,11 @@ export default function MonthlyMatrixSection({
                       </td>
                       {row.months.map((val: number | null, idx: number) => (
                         <td key={idx} className="px-1.5 py-1.5 text-right font-mono">
-                          {val !== null ? formatRatioId(val, 1) : "-"}
+                          {val !== null ? formatRatioId(val, 0) : "-"}
                         </td>
                       ))}
                       <td className="px-2.5 py-1.5 text-right font-mono font-bold bg-[#EAF3EC]/60 text-[#16823B] border-l border-[#DDE5DF]">
-                        {row.total !== null ? formatRatioId(row.total, 1) : "-"}
+                        {row.total !== null ? formatRatioId(row.total, 0) : "-"}
                       </td>
                     </tr>
                   ))}
