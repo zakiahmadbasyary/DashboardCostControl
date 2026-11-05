@@ -173,7 +173,7 @@ export default function PgComparisonChart({
   };
 
   return (
-    <div className="bg-white border border-[#DDE5DF] rounded-2xl p-4 sm:p-5 shadow-sm shadow-[#16823B]/5 flex flex-col gap-3.5 sm:gap-4 font-sans">
+    <div className="bg-white border border-[#DDE5DF] rounded-2xl p-4 sm:p-5 shadow-sm shadow-[#16823B]/5 flex flex-col gap-3 font-sans">
       {/* ── Top Bar: Title, Legend & Unit (Sama persis seperti OPEX) ── */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-[#DDE5DF]">
         <div className="flex items-center gap-3">
@@ -213,38 +213,26 @@ export default function PgComparisonChart({
         </div>
       </div>
 
-      {/* Sub-header keterangan grafik */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 pb-1 -mt-1">
-        <span className="text-xs font-bold text-[#17231B]">
-          Grafik Realisasi Bulanan ({currentIndicator.label})
-        </span>
-        <span className="text-[11px] text-[#5F6B63]">
-          {isDesktop
-            ? "Label nilai horizontal di atas setiap bar. Sorot batang untuk rincian lengkap."
-            : "Geser grafik ke samping untuk melihat seluruh bulan & sorot batang untuk rincian angka."}
-        </span>
-      </div>
-
       {/* Chart Canvas: Desktop w-full tanpa scroll, Mobile scrollable tanpa angka nilai */}
       {loading ? (
-        <div className="h-64 sm:h-72 flex flex-col items-center justify-center gap-2 text-xs font-semibold text-[#5F6B63]">
+        <div className="h-52 sm:h-60 flex flex-col items-center justify-center gap-2 text-xs font-semibold text-[#5F6B63]">
           <div className="w-7 h-7 border-3 border-[#16823B] border-t-transparent rounded-full animate-spin mb-1" />
           <span>Memuat diagram perbandingan antar PG...</span>
         </div>
       ) : chartData.length === 0 ? (
-        <div className="h-64 sm:h-72 flex flex-col items-center justify-center gap-2 text-xs text-[#5F6B63]">
+        <div className="h-52 sm:h-60 flex flex-col items-center justify-center gap-2 text-xs text-[#5F6B63]">
           <AlertCircle className="w-8 h-8 text-[#E5C959]" />
           <span className="font-bold text-[#17231B]">Tidak ada data untuk periode ini</span>
         </div>
       ) : (
         <div className="w-full overflow-x-auto md:overflow-x-visible pb-2 md:pb-0 scrollbar-thin">
-          <div className="min-w-[540px] md:min-w-0 w-full h-64 sm:h-72">
+          <div className="min-w-[520px] md:min-w-0 w-full h-52 sm:h-60">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart
                 data={chartData}
-                margin={{ top: 18, right: 10, left: 0, bottom: 5 }}
+                margin={{ top: 14, right: 10, left: -10, bottom: 0 }}
                 barGap={2}
-                barCategoryGap="22%"
+                barCategoryGap="24%"
               >
                 <CartesianGrid strokeDasharray="3 3" stroke="#EAEFEF" vertical={false} />
                 <XAxis
@@ -266,13 +254,13 @@ export default function PgComparisonChart({
                   }}
                 />
                 <Tooltip content={<CustomTooltip />} />
-                <Bar dataKey="PG1" name="PG1" fill={PG_COLORS.PG1} radius={[2, 2, 0, 0]} maxBarSize={16}>
+                <Bar dataKey="PG1" name="PG1" fill={PG_COLORS.PG1} radius={[2, 2, 0, 0]} maxBarSize={15}>
                   {isDesktop && <LabelList content={renderCustomBarLabel} />}
                 </Bar>
-                <Bar dataKey="PG2" name="PG2" fill={PG_COLORS.PG2} radius={[2, 2, 0, 0]} maxBarSize={16}>
+                <Bar dataKey="PG2" name="PG2" fill={PG_COLORS.PG2} radius={[2, 2, 0, 0]} maxBarSize={15}>
                   {isDesktop && <LabelList content={renderCustomBarLabel} />}
                 </Bar>
-                <Bar dataKey="PG3" name="PG3" fill={PG_COLORS.PG3} radius={[2, 2, 0, 0]} maxBarSize={16}>
+                <Bar dataKey="PG3" name="PG3" fill={PG_COLORS.PG3} radius={[2, 2, 0, 0]} maxBarSize={15}>
                   {isDesktop && <LabelList content={renderCustomBarLabel} />}
                 </Bar>
               </BarChart>
