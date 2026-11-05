@@ -108,22 +108,31 @@ export default function PgComparisonChart({
   };
 
   // Custom label renderer horizontal di atas setiap bar (hanya tampil di desktop, ringkas & tidak tumpang tindih)
-  const renderCustomBarLabel = (props: any) => {
-    const { x, y, width, value } = props;
+  const renderCustomBarLabel = (props: any, pgKey?: string) => {
+    const { x, y, width, value, payload } = props;
     if (!isDesktop || value === null || value === undefined || value === 0) return null;
 
     const labelText = formatBarValue(value, indicator);
     if (!labelText) return null;
 
     const cx = x + width / 2;
-    const cy = y - 4;
+    let cy = y - 5;
+
+    // Jika PG2 dan PG3 memiliki nilai berdekatan (selisih < 12%), beri offset bertingkat agar angka tidak tumpang tindih
+    if (pgKey === "PG3" && payload && payload.PG2 && payload.PG3) {
+      const diff = Math.abs(Number(payload.PG2) - Number(payload.PG3));
+      const maxVal = Math.max(Number(payload.PG2), Number(payload.PG3), 1);
+      if (diff / maxVal < 0.12) {
+        cy = y - 15;
+      }
+    }
 
     return (
       <text
         x={cx}
         y={cy}
         fill="#17231B"
-        fontSize={7.5}
+        fontSize={8}
         fontWeight={700}
         fontFamily="system-ui, -apple-system, sans-serif"
         textAnchor="middle"
@@ -215,24 +224,24 @@ export default function PgComparisonChart({
 
       {/* Chart Canvas: Desktop w-full tanpa scroll, Mobile scrollable tanpa angka nilai */}
       {loading ? (
-        <div className="h-52 sm:h-60 flex flex-col items-center justify-center gap-2 text-xs font-semibold text-[#5F6B63]">
+        <div className="h-72 sm:h-80 flex flex-col items-center justify-center gap-2 text-xs font-semibold text-[#5F6B63]">
           <div className="w-7 h-7 border-3 border-[#16823B] border-t-transparent rounded-full animate-spin mb-1" />
           <span>Memuat diagram perbandingan antar PG...</span>
         </div>
       ) : chartData.length === 0 ? (
-        <div className="h-52 sm:h-60 flex flex-col items-center justify-center gap-2 text-xs text-[#5F6B63]">
+        <div className="h-72 sm:h-80 flex flex-col items-center justify-center gap-2 text-xs text-[#5F6B63]">
           <AlertCircle className="w-8 h-8 text-[#E5C959]" />
           <span className="font-bold text-[#17231B]">Tidak ada data untuk periode ini</span>
         </div>
       ) : (
         <div className="w-full overflow-x-auto md:overflow-x-visible pb-2 md:pb-0 scrollbar-thin">
-          <div className="min-w-[520px] md:min-w-0 w-full h-52 sm:h-60">
+          <div className="min-w-[620px] md:min-w-0 w-full h-72 sm:h-80">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart
                 data={chartData}
-                margin={{ top: 14, right: 10, left: -10, bottom: 0 }}
-                barGap={2}
-                barCategoryGap="24%"
+                margin={{ top: 22, right: 10, left: 0, bottom: 5 }}
+                barGap={4}
+                barCategoryGap="16%"
               >
                 <CartesianGrid strokeDasharray="3 3" stroke="#EAEFEF" vertical={false} />
                 <XAxis
@@ -242,7 +251,7 @@ export default function PgComparisonChart({
                   axisLine={{ stroke: "#DDE5DF" }}
                 />
                 <YAxis
-                  domain={[0, (dataMax: number) => Math.ceil(dataMax * 1.15)]}
+                  domain={[0, (dataMax: number) => Math.ceil(dataMax * 1.2)]}
                   tick={{ fill: "#5F6B63", fontSize: 9.5 }}
                   tickLine={false}
                   axisLine={{ stroke: "#DDE5DF" }}
@@ -254,14 +263,14 @@ export default function PgComparisonChart({
                   }}
                 />
                 <Tooltip content={<CustomTooltip />} />
-                <Bar dataKey="PG1" name="PG1" fill={PG_COLORS.PG1} radius={[2, 2, 0, 0]} maxBarSize={15}>
-                  {isDesktop && <LabelList content={renderCustomBarLabel} />}
+                <Bar dataKey="PG1" name="PG1" fill={PG_COLORS.PG1} radius={[3, 3, 0, 0]} maxBarSize={22}>
+                  {isDesktop && <LabelList content={(props: any) => renderCustomBarLabel(props, "PG1")} />}
                 </Bar>
-                <Bar dataKey="PG2" name="PG2" fill={PG_COLORS.PG2} radius={[2, 2, 0, 0]} maxBarSize={15}>
-                  {isDesktop && <LabelList content={renderCustomBarLabel} />}
+                <Bar dataKey="PG2" name="PG2" fill={PG_COLORS.PG2} radius={[3, 3, 0, 0]} maxBarSize={22}>
+                  {isDesktop && <LabelList content={(props: any) => renderCustomBarLabel(props, "PG2")} />}
                 </Bar>
-                <Bar dataKey="PG3" name="PG3" fill={PG_COLORS.PG3} radius={[2, 2, 0, 0]} maxBarSize={15}>
-                  {isDesktop && <LabelList content={renderCustomBarLabel} />}
+                <Bar dataKey="PG3" name="PG3" fill={PG_COLORS.PG3} radius={[3, 3, 0, 0]} maxBarSize={22}>
+                  {isDesktop && <LabelList content={(props: any) => renderCustomBarLabel(props, "PG3")} />}
                 </Bar>
               </BarChart>
             </ResponsiveContainer>
