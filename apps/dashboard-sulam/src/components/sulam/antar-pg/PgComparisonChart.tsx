@@ -116,14 +116,14 @@ export default function PgComparisonChart({
     if (!labelText) return null;
 
     const cx = x + width / 2;
-    const cy = y - 5;
+    const cy = y - 4;
 
     return (
       <text
         x={cx}
         y={cy}
         fill="#17231B"
-        fontSize={8}
+        fontSize={7.5}
         fontWeight={700}
         fontFamily="system-ui, -apple-system, sans-serif"
         textAnchor="middle"
@@ -173,12 +173,12 @@ export default function PgComparisonChart({
   };
 
   return (
-    <div className="bg-white border border-[#DDE5DF] rounded-2xl p-5 sm:p-6 shadow-sm shadow-[#16823B]/5 flex flex-col gap-5 font-sans">
+    <div className="bg-white border border-[#DDE5DF] rounded-2xl p-4 sm:p-5 shadow-sm shadow-[#16823B]/5 flex flex-col gap-3.5 sm:gap-4 font-sans">
       {/* ── Top Bar: Title, Legend & Unit (Sama persis seperti OPEX) ── */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-[#DDE5DF]">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-[#DDE5DF]">
         <div className="flex items-center gap-3">
-          <div className="p-2.5 rounded-xl bg-[#16823B]/10 text-[#16823B] shrink-0">
-            <BarChart3 className="w-5 h-5" />
+          <div className="p-2 rounded-lg bg-[#16823B]/10 text-[#16823B] shrink-0">
+            <BarChart3 className="w-4 h-4" />
           </div>
           <div>
             <h3 className="font-bold text-base text-[#17231B] tracking-tight">
@@ -227,35 +227,35 @@ export default function PgComparisonChart({
 
       {/* Chart Canvas: Desktop w-full tanpa scroll, Mobile scrollable tanpa angka nilai */}
       {loading ? (
-        <div className="h-80 flex flex-col items-center justify-center gap-2 text-xs font-semibold text-[#5F6B63]">
+        <div className="h-64 sm:h-72 flex flex-col items-center justify-center gap-2 text-xs font-semibold text-[#5F6B63]">
           <div className="w-7 h-7 border-3 border-[#16823B] border-t-transparent rounded-full animate-spin mb-1" />
           <span>Memuat diagram perbandingan antar PG...</span>
         </div>
       ) : chartData.length === 0 ? (
-        <div className="h-80 flex flex-col items-center justify-center gap-2 text-xs text-[#5F6B63]">
+        <div className="h-64 sm:h-72 flex flex-col items-center justify-center gap-2 text-xs text-[#5F6B63]">
           <AlertCircle className="w-8 h-8 text-[#E5C959]" />
           <span className="font-bold text-[#17231B]">Tidak ada data untuk periode ini</span>
         </div>
       ) : (
         <div className="w-full overflow-x-auto md:overflow-x-visible pb-2 md:pb-0 scrollbar-thin">
-          <div className="min-w-[620px] md:min-w-0 w-full h-80 sm:h-96">
+          <div className="min-w-[540px] md:min-w-0 w-full h-64 sm:h-72">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart
                 data={chartData}
-                margin={{ top: 25, right: 10, left: 10, bottom: 20 }}
+                margin={{ top: 18, right: 10, left: 0, bottom: 5 }}
                 barGap={2}
-                barCategoryGap="14%"
+                barCategoryGap="22%"
               >
                 <CartesianGrid strokeDasharray="3 3" stroke="#EAEFEF" vertical={false} />
                 <XAxis
                   dataKey="monthName"
-                  tick={{ fill: "#5F6B63", fontSize: 11, fontWeight: 600 }}
+                  tick={{ fill: "#5F6B63", fontSize: 10.5, fontWeight: 600 }}
                   tickLine={false}
                   axisLine={{ stroke: "#DDE5DF" }}
                 />
                 <YAxis
                   domain={[0, (dataMax: number) => Math.ceil(dataMax * 1.15)]}
-                  tick={{ fill: "#5F6B63", fontSize: 10 }}
+                  tick={{ fill: "#5F6B63", fontSize: 9.5 }}
                   tickLine={false}
                   axisLine={{ stroke: "#DDE5DF" }}
                   tickFormatter={(val) => {
@@ -266,13 +266,13 @@ export default function PgComparisonChart({
                   }}
                 />
                 <Tooltip content={<CustomTooltip />} />
-                <Bar dataKey="PG1" name="PG1" fill={PG_COLORS.PG1} radius={[3, 3, 0, 0]} maxBarSize={28}>
+                <Bar dataKey="PG1" name="PG1" fill={PG_COLORS.PG1} radius={[2, 2, 0, 0]} maxBarSize={16}>
                   {isDesktop && <LabelList content={renderCustomBarLabel} />}
                 </Bar>
-                <Bar dataKey="PG2" name="PG2" fill={PG_COLORS.PG2} radius={[3, 3, 0, 0]} maxBarSize={28}>
+                <Bar dataKey="PG2" name="PG2" fill={PG_COLORS.PG2} radius={[2, 2, 0, 0]} maxBarSize={16}>
                   {isDesktop && <LabelList content={renderCustomBarLabel} />}
                 </Bar>
-                <Bar dataKey="PG3" name="PG3" fill={PG_COLORS.PG3} radius={[3, 3, 0, 0]} maxBarSize={28}>
+                <Bar dataKey="PG3" name="PG3" fill={PG_COLORS.PG3} radius={[2, 2, 0, 0]} maxBarSize={16}>
                   {isDesktop && <LabelList content={renderCustomBarLabel} />}
                 </Bar>
               </BarChart>
@@ -282,7 +282,7 @@ export default function PgComparisonChart({
       )}
 
       {/* ── Status Bar Keterangan Bawah (Sama persis seperti OPEX) ── */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-[11px] text-[#5F6B63] bg-[#F8FAF9] border border-[#DDE5DF] px-3.5 py-2 rounded-xl">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-[11px] text-[#5F6B63] bg-[#F8FAF9] border border-[#DDE5DF] px-3 py-1.5 rounded-xl">
         <span>
           Indikator Terpilih: <strong className="text-[#16823B]">{currentIndicator.label}</strong> 
         </span>
