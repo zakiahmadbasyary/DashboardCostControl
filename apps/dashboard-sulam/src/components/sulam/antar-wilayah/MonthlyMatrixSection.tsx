@@ -243,22 +243,22 @@ export default function MonthlyMatrixSection({
                         {m}
                       </th>
                     ))}
-                    <th className="px-2.5 py-2 text-right bg-[#EAF3EC] font-black text-[#16823B] border-l border-[#DDE5DF]">
+                    <th className="px-2.5 py-2 text-right bg-[#EAF3EC] font-bold text-[#16823B] border-l border-[#DDE5DF]">
                       Total
                     </th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-[#DDE5DF]/70 font-medium text-[#17231B]">
+                <tbody className="divide-y divide-[#DDE5DF]/70 font-normal text-[#17231B]">
                   {tkMatrixRows.map((row) => (
                     <tr
                       key={row.wilayah}
                       onMouseEnter={() => setHighlightedRegion(row.wilayah)}
                       onMouseLeave={() => setHighlightedRegion(null)}
                       className={`hover:bg-[#F8FAF9] transition-colors cursor-pointer ${
-                        highlightedRegion === row.wilayah ? "bg-emerald-50/70 font-bold" : ""
+                        highlightedRegion === row.wilayah ? "bg-emerald-50/70" : ""
                       }`}
                     >
-                      <td className="px-2.5 py-1.5 font-bold flex items-center gap-1.5">
+                      <td className="px-2.5 py-1.5 font-semibold flex items-center gap-1.5">
                         <span
                           className="w-2 h-2 rounded-full shrink-0"
                           style={{ backgroundColor: REGION_COLORS[row.wilayah] }}
@@ -266,11 +266,11 @@ export default function MonthlyMatrixSection({
                         <span>{row.wilayah}</span>
                       </td>
                       {row.months.map((val: number, idx: number) => (
-                        <td key={idx} className="px-1.5 py-1.5 text-right font-mono">
+                        <td key={idx} className="px-1.5 py-1.5 text-right font-mono font-normal">
                           {val > 0 ? formatNumberId(val, 1) : "-"}
                         </td>
                       ))}
-                      <td className="px-2.5 py-1.5 text-right font-mono font-bold bg-[#EAF3EC]/60 text-[#16823B] border-l border-[#DDE5DF]">
+                      <td className="px-2.5 py-1.5 text-right font-mono font-semibold bg-[#EAF3EC]/60 text-[#16823B] border-l border-[#DDE5DF]">
                         {formatNumberId(row.total, 1)}
                       </td>
                     </tr>
@@ -390,22 +390,22 @@ export default function MonthlyMatrixSection({
                         {m}
                       </th>
                     ))}
-                    <th className="px-2.5 py-2 text-right bg-[#EAF3EC] font-black text-[#16823B] border-l border-[#DDE5DF]">
+                    <th className="px-2.5 py-2 text-right bg-[#EAF3EC] font-bold text-[#16823B] border-l border-[#DDE5DF]">
                       Total
                     </th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-[#DDE5DF]/70 font-medium text-[#17231B]">
+                <tbody className="divide-y divide-[#DDE5DF]/70 font-normal text-[#17231B]">
                   {batangTkMatrixRows.map((row) => (
                     <tr
                       key={row.wilayah}
                       onMouseEnter={() => setHighlightedRegion(row.wilayah)}
                       onMouseLeave={() => setHighlightedRegion(null)}
                       className={`hover:bg-[#F8FAF9] transition-colors cursor-pointer ${
-                        highlightedRegion === row.wilayah ? "bg-emerald-50/70 font-bold" : ""
+                        highlightedRegion === row.wilayah ? "bg-emerald-50/70" : ""
                       }`}
                     >
-                      <td className="px-2.5 py-1.5 font-bold flex items-center gap-1.5">
+                      <td className="px-2.5 py-1.5 font-semibold flex items-center gap-1.5">
                         <span
                           className="w-2 h-2 rounded-full shrink-0"
                           style={{ backgroundColor: REGION_COLORS[row.wilayah] }}
@@ -413,11 +413,11 @@ export default function MonthlyMatrixSection({
                         <span>{row.wilayah}</span>
                       </td>
                       {row.months.map((val: number | null, idx: number) => (
-                        <td key={idx} className="px-1.5 py-1.5 text-right font-mono">
+                        <td key={idx} className="px-1.5 py-1.5 text-right font-mono font-normal">
                           {val !== null ? formatRatioId(val, 0) : "-"}
                         </td>
                       ))}
-                      <td className="px-2.5 py-1.5 text-right font-mono font-bold bg-[#EAF3EC]/60 text-[#16823B] border-l border-[#DDE5DF]">
+                      <td className="px-2.5 py-1.5 text-right font-mono font-semibold bg-[#EAF3EC]/60 text-[#16823B] border-l border-[#DDE5DF]">
                         {row.total !== null ? formatRatioId(row.total, 0) : "-"}
                       </td>
                     </tr>
