@@ -20,6 +20,8 @@ import {
   Tractor,
   Boxes,
   Gauge,
+  BarChart3,
+  MapPin,
 } from "lucide-react";
 
 // Icon mapping for each dashboard module
@@ -36,7 +38,17 @@ const MODULE_ICONS: Record<string, React.ElementType> = {
   pool_pg1: Gauge,
 };
 
-export default function DashboardHeader() {
+export type SulamSubMenu = "antar-pg" | "antar-wilayah";
+
+interface DashboardHeaderProps {
+  activeSection?: SulamSubMenu;
+  onSelectSection?: (section: SulamSubMenu) => void;
+}
+
+export default function DashboardHeader({
+  activeSection = "antar-pg",
+  onSelectSection,
+}: DashboardHeaderProps = {}) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
@@ -201,6 +213,47 @@ export default function DashboardHeader() {
               </div>
             </a>
 
+            {/* Center Sub-Menu Navigation: Evaluasi Sulam Antar PG & Antar Wilayah */}
+            {onSelectSection && (
+              <div className="hidden md:flex items-center gap-1 bg-[#F8FAF9] border border-[#DDE5DF] p-1 rounded-xl shadow-2xs">
+                <button
+                  type="button"
+                  onClick={() => onSelectSection("antar-pg")}
+                  className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs transition-all cursor-pointer select-none ${
+                    activeSection === "antar-pg"
+                      ? "bg-white text-[#16823B] font-bold shadow-xs border border-[#CBE0D1]"
+                      : "text-[#5F6B63] hover:text-[#17231B] hover:bg-white/60 font-semibold border border-transparent"
+                  }`}
+                  title="Direct ke Evaluasi Sulam Antar PG"
+                >
+                  <BarChart3
+                    className={`w-3.5 h-3.5 shrink-0 ${
+                      activeSection === "antar-pg" ? "text-[#16823B]" : "text-[#89938D]"
+                    }`}
+                  />
+                  <span>Antar PG</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => onSelectSection("antar-wilayah")}
+                  className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs transition-all cursor-pointer select-none ${
+                    activeSection === "antar-wilayah"
+                      ? "bg-white text-[#16823B] font-bold shadow-xs border border-[#CBE0D1]"
+                      : "text-[#5F6B63] hover:text-[#17231B] hover:bg-white/60 font-semibold border border-transparent"
+                  }`}
+                  title="Direct ke Evaluasi Sulam Antar Wilayah (PG1)"
+                >
+                  <MapPin
+                    className={`w-3.5 h-3.5 shrink-0 ${
+                      activeSection === "antar-wilayah" ? "text-[#16823B]" : "text-[#89938D]"
+                    }`}
+                  />
+                  <span>Antar Wilayah</span>
+                </button>
+              </div>
+            )}
+
             {/* Right Action Buttons */}
             <div className="flex items-center gap-1.5 sm:gap-2.5 shrink-0">
               <a
@@ -243,6 +296,47 @@ export default function DashboardHeader() {
         {/* Mobile Dropdown Menu (Under Navbar) */}
         {mobileMenuOpen && (
           <div className="md:hidden border-t border-[#DDE5DF] bg-white px-3 sm:px-4 py-3.5 space-y-3 shadow-lg max-h-[80vh] overflow-y-auto animate-in slide-in-from-top-2 duration-150">
+            {/* Mobile Sub-Menu Direct Navigation */}
+            {onSelectSection && (
+              <div className="space-y-1.5 pb-2 border-b border-[#DDE5DF]">
+                <span className="text-[11px] font-bold text-[#89938D] uppercase tracking-wider block px-1">
+                  Menu Sulam
+                </span>
+                <div className="grid grid-cols-2 gap-2">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      onSelectSection("antar-pg");
+                      setMobileMenuOpen(false);
+                    }}
+                    className={`flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold border transition-all ${
+                      activeSection === "antar-pg"
+                        ? "bg-[#16823B] text-white border-[#16823B] shadow-xs"
+                        : "bg-[#F8FAF9] text-[#17231B] border-[#DDE5DF]"
+                    }`}
+                  >
+                    <BarChart3 className="w-3.5 h-3.5" />
+                    <span>Antar PG</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      onSelectSection("antar-wilayah");
+                      setMobileMenuOpen(false);
+                    }}
+                    className={`flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold border transition-all ${
+                      activeSection === "antar-wilayah"
+                        ? "bg-[#16823B] text-white border-[#16823B] shadow-xs"
+                        : "bg-[#F8FAF9] text-[#17231B] border-[#DDE5DF]"
+                    }`}
+                  >
+                    <MapPin className="w-3.5 h-3.5" />
+                    <span>Antar Wilayah</span>
+                  </button>
+                </div>
+              </div>
+            )}
+
             <div className="w-full space-y-3">
               <div className="flex items-center justify-between text-xs font-bold text-[#5F6B63] uppercase tracking-wider px-1">
                 <span>Navigasi Dashboard (9 Modul)</span>

@@ -104,7 +104,7 @@ export default function PortalHomePage() {
       url: sulamUrl,
       icon: Sprout,
       badge: "Pemeliharaan",
-      isHosted: false,
+      isHosted: true,
     },
     {
       id: "capex",

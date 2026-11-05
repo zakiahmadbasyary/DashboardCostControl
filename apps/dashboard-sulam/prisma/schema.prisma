@@ -1,0 +1,91 @@
+// Skema Database Prisma untuk Dashboard SULAM (Penyulaman Tanaman)
+// Berdasarkan dokumen panduan: doc/database.md
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/client"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// 1. Model SummarySulam: menyimpan hasil agregasi transaksi untuk kebutuhan dashboard per kode
+model SummarySulam {
+  kode       String   @id @db.VarChar(40)
+  pg         String   @db.VarChar(3)
+  wilayah    String   @db.VarChar(4)
+  year       Int      @db.SmallInt
+  month      Int      @db.SmallInt
+
+  material   Decimal  @default(0) @db.Decimal(18, 2)
+  upah       Decimal  @default(0) @db.Decimal(18, 2)
+  batang     Decimal  @default(0) @db.Decimal(18, 4)
+  jumlahTk   Decimal  @default(0) @map("jumlah_tk") @db.Decimal(18, 4)
+  luas       Decimal  @default(0) @db.Decimal(18, 4)
+
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @updatedAt @map("updated_at")
+
+  sulamList  Sulam[]
+
+  @@index([pg])
+  @@index([wilayah])
+  @@index([year, month])
+  @@map("summary_sulam")
+}
+
+// 2. Model Sulam: menyimpan seluruh data transaksi hasil upload Excel
+model Sulam {
+  idSulam                      BigInt    @id @default(autoincrement()) @map("id_sulam")
+
+  tanggalRealisasi             DateTime  @map("tanggal_realisasi") @db.Date
+  spkId                        String?   @map("spk_id") @db.VarChar(50)
+  plantationGroup              String?   @map("plantation_group") @db.VarChar(50)
+  wilayah                      String    @map("wilayah") @db.VarChar(4)
+  lokasi                       String?   @map("lokasi") @db.VarChar(50)
+  statusTanaman                String?   @map("status_tanaman") @db.VarChar(50)
+  tanggalSpk                   DateTime? @map("tanggal_spk") @db.Date
+  kodeAktivitas                String?   @map("kode_aktivitas") @db.VarChar(50)
+  deskripsi                    String?   @map("deskripsi") @db.Text
+
+  jenisData                    String    @map("jenis_data") @db.VarChar(30)
+  groupBahanAlat               String?   @map("group_bahan_alat") @db.VarChar(100)
+  kodeBahanAlatLainlain        String?   @map("kode_bahan_alat_lainlain") @db.VarChar(150)
+  deskripsiBahanAlatLainlain   String?   @map("deskripsi_bahan_alat_lainlain") @db.Text
+
+  resourceBahanAlat            Decimal?  @map("resource_bahan_alat") @db.Decimal(18, 4)
+  hasilEfektif                 Decimal?  @map("hasil_efektif") @db.Decimal(18, 4)
+  satuanHasil                  String?   @map("satuan_hasil") @db.VarChar(30)
+  totalRealisasiBiaya          Decimal?  @map("total_realisasi_biaya") @db.Decimal(18, 2)
+
+  referensiLokasi              String?   @map("referensi_lokasi") @db.VarChar(150)
+  costCenterName               String?   @map("cost_center_name") @db.VarChar(150)
+  costWorkingHour              Decimal?  @map("cost_working_hour") @db.Decimal(18, 4)
+  indeksBiaya                  Decimal?  @map("indeks_biaya") @db.Decimal(18, 4)
+  indexResourceQty             Decimal?  @map("index_resource_qty") @db.Decimal(18, 4)
+
+  pasDocument                  String?   @map("pas_document") @db.VarChar(100)
+  orderNo                      String?   @map("order_no") @db.VarChar(100)
+  actCostGroup                 String?   @map("act_cost_group") @db.VarChar(100)
+
+  jenis                        String    @map("jenis") @db.VarChar(20)
+  pg                           String    @map("pg") @db.VarChar(3)
+  year                         Int       @map("year") @db.SmallInt
+  month                        Int       @map("month") @db.SmallInt
+  kode                         String    @map("kode") @db.VarChar(40)
+
+  createdAt                    DateTime  @default(now()) @map("created_at")
+  updatedAt                    DateTime  @updatedAt @map("updated_at")
+
+  summary                      SummarySulam @relation(fields: [kode], references: [kode], onDelete: Restrict, onUpdate: Cascade)
+
+  @@index([kode])
+  @@index([tanggalRealisasi])
+  @@index([wilayah])
+  @@index([jenis])
+  @@index([spkId])
+  @@map("sulam")
+}
+

@@ -6,14 +6,21 @@
     "dev": "next dev -p 3007 --webpack",
     "build": "next build --webpack",
     "start": "next start -p 3007",
-    "lint": "eslint"
+    "lint": "eslint",
+    "db:push": "prisma db push",
+    "db:migrate": "prisma migrate dev",
+    "db:generate": "prisma generate",
+    "db:seed": "tsx scripts/seed-dummy.ts"
   },
   "dependencies": {
     "@dashboard/shared-ui": "*",
+    "@prisma/client": "^6.4.0",
     "lucide-react": "^1.31.0",
     "next": "16.3.1",
     "react": "19.2.8",
-    "react-dom": "19.2.8"
+    "react-dom": "19.2.8",
+    "recharts": "^3.10.1",
+    "xlsx": "^0.18.5"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
@@ -22,6 +29,7 @@
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "16.3.1",
+    "prisma": "^6.4.0",
     "tailwindcss": "^4",
     "typescript": "^5"
   }
