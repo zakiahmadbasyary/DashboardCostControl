@@ -38,7 +38,7 @@ export default function PgSummaryTable({
 }: PgSummaryTableProps) {
   return (
     <div className="bg-white border border-[#DDE5DF] rounded-2xl p-5 shadow-xs font-sans" suppressHydrationWarning>
-      {/* Header & Filter Bar (Style Tabel HPP) */}
+      {/* Header & Filter Bar (Style Seragam dengan Analisis Lokasi WIP) */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
         <div className="flex items-center gap-2">
           <div className="p-2 rounded-lg bg-[#16823B]/10 text-[#16823B]">
@@ -46,7 +46,7 @@ export default function PgSummaryTable({
           </div>
           <div>
             <h3 className="font-bold text-base text-[#17231B]">
-              Tabel Rekapitulasi Bulanan --- {selectedPg}
+              Tabel Rekapitulasi Bulanan - {selectedPg}
             </h3>
             <p className="text-xs text-[#5F6B63]">
               Rekapitulasi biaya, tenaga kerja, luas, dan akumulasi kinerja bulanan s/d Total YTD untuk {selectedPg}.
@@ -54,7 +54,7 @@ export default function PgSummaryTable({
           </div>
         </div>
 
-        {/* Filter PG Sub-nav (Style HPP) */}
+        {/* Filter PG Sub-nav */}
         <div className="flex items-center gap-2 bg-[#F7F9F7] px-3 py-1.5 border border-[#DDE5DF] rounded-lg text-xs font-semibold text-[#17231B]">
           <Filter className="w-3.5 h-3.5 text-[#16823B]" />
           <span className="text-[#5F6B63]">Pilih PG:</span>
@@ -80,12 +80,12 @@ export default function PgSummaryTable({
         </div>
       </div>
 
-      {/* Main Table Container (Style Tabel HPP: uppercase thead, divide-y divide-[#DDE5DF]/60, no vertical scroll) */}
+      {/* Main Table Container (Style Tabel Analisis Lokasi WIP) */}
       <div className="overflow-x-auto lg:overflow-x-visible rounded-xl border border-[#DDE5DF]">
         <table className="w-full text-xs text-left">
           <thead className="bg-[#F7F9F7] text-[#17231B] uppercase font-bold border-b border-[#DDE5DF]">
             <tr>
-              <th className="py-3 px-3">Bulan</th>
+              <th className="py-3 px-3.5">Bulan</th>
               <th className="py-3 px-2.5 text-right">Material (Rp)</th>
               <th className="py-3 px-2.5 text-right">Upah (Rp)</th>
               <th className="py-3 px-2.5 text-right">Batang</th>
@@ -121,52 +121,57 @@ export default function PgSummaryTable({
                     !row.hasData ? "opacity-60 text-[#89938D]" : ""
                   }`}
                 >
-                  <td className="py-3 px-3 font-bold text-[#17231B]">{row.monthName}</td>
-                  <td className="py-3 px-2.5 text-right font-mono font-medium text-[#17231B]">
+                  <td className="py-3 px-3.5 font-bold text-[#17231B]">
+                    <div className="flex items-center gap-2">
+                      <span className="w-2 h-2 rounded-full bg-[#16823B] shrink-0" />
+                      <span>{row.monthName}</span>
+                    </div>
+                  </td>
+                  <td className="py-3 px-2.5 text-right font-mono font-semibold text-[#17231B]">
                     {formatCurrencyRp(row.material)}
                   </td>
-                  <td className="py-3 px-2.5 text-right font-mono font-medium text-[#17231B]">
+                  <td className="py-3 px-2.5 text-right font-mono font-semibold text-[#17231B]">
                     {formatCurrencyRp(row.upah)}
                   </td>
-                  <td className="py-3 px-2.5 text-right font-mono font-medium text-[#17231B]">
+                  <td className="py-3 px-2.5 text-right font-mono text-[#17231B]">
                     {formatNumberId(row.batang, 0)}
                   </td>
-                  <td className="py-3 px-2.5 text-right font-mono font-medium text-[#17231B]">
+                  <td className="py-3 px-2.5 text-right font-mono text-[#17231B]">
                     {formatNumberId(row.jumlahTk, 1)}
                   </td>
-                  <td className="py-3 px-2.5 text-right font-mono font-medium text-[#17231B]">
+                  <td className="py-3 px-2.5 text-right font-mono text-[#17231B]">
                     {formatNumberId(row.luas, 2)}
                   </td>
-                  <td className="py-3 px-2.5 text-right font-mono font-bold text-[#16823B]">
+                  <td className="py-3 px-2.5 text-right font-mono font-semibold text-[#16823B]">
                     {formatCurrencyRp(row.upahHa)}
                   </td>
-                  <td className="py-3 px-2.5 text-right font-mono font-bold text-[#16823B]">
+                  <td className="py-3 px-2.5 text-right font-mono font-semibold text-[#16823B]">
                     {formatRatioId(row.batangHa, 0)}
                   </td>
-                  <td className="py-3 px-2.5 text-right font-mono font-bold text-[#16823B]">
+                  <td className="py-3 px-2.5 text-right font-mono font-semibold text-[#16823B]">
                     {formatCurrencyRp(row.upahBatang)}
                   </td>
-                  <td className="py-3 px-2.5 text-right font-mono font-bold text-[#16823B]">
+                  <td className="py-3 px-2.5 text-right font-mono font-semibold text-[#16823B]">
                     {formatRatioId(row.batangTk, 1)}
                   </td>
-                  <td className="py-3 px-2.5 text-right font-mono font-medium text-[#17231B]">
+                  <td className="py-3 px-2.5 text-right font-mono text-[#17231B]">
                     {formatNumberId(row.tkBulan, 1)}
                   </td>
-                  <td className="py-3 px-3 text-right font-mono font-medium text-[#17231B]">
+                  <td className="py-3 px-3 text-right font-mono font-semibold text-[#17231B]">
                     {formatCurrencyRp(row.costTkBulan)}
                   </td>
                 </tr>
               ))
             )}
           </tbody>
-          {/* Total Akumulasi Tahunan (TOTAL YTD - Style HPP) */}
+          {/* Total Akumulasi Tahunan (TOTAL YTD - Style Seragam dengan WIP) */}
           {total && (
             <tfoot className="bg-[#EAF3EC] font-bold text-[#17231B] border-t-2 border-[#16823B]/30">
               <tr>
-                <td className="py-3 px-3 font-bold text-[#16823B]">
+                <td className="py-3 px-3.5 font-bold text-[#16823B]">
                   <div className="flex items-center gap-2">
-                    <span className="w-2 h-2 rounded-full bg-[#16823B]" />
-                    <span className="uppercase tracking-wider font-black">TOTAL YTD</span>
+                    <span className="w-2 h-2 rounded-full bg-[#16823B] shrink-0" />
+                    <span className="uppercase tracking-wider font-bold">TOTAL YTD</span>
                   </div>
                 </td>
                 <td className="py-3 px-2.5 text-right font-mono font-bold text-[#17231B]">{formatCurrencyRp(total.material)}</td>
@@ -174,10 +179,10 @@ export default function PgSummaryTable({
                 <td className="py-3 px-2.5 text-right font-mono font-bold text-[#17231B]">{formatNumberId(total.batang, 0)}</td>
                 <td className="py-3 px-2.5 text-right font-mono font-bold text-[#17231B]">{formatNumberId(total.jumlahTk, 1)}</td>
                 <td className="py-3 px-2.5 text-right font-mono font-bold text-[#17231B]">{formatNumberId(total.luas, 2)}</td>
-                <td className="py-3 px-2.5 text-right font-mono font-black text-[#16823B]">{formatCurrencyRp(total.upahHa)}</td>
-                <td className="py-3 px-2.5 text-right font-mono font-black text-[#16823B]">{formatRatioId(total.batangHa, 0)}</td>
-                <td className="py-3 px-2.5 text-right font-mono font-black text-[#16823B]">{formatCurrencyRp(total.upahBatang)}</td>
-                <td className="py-3 px-2.5 text-right font-mono font-black text-[#16823B]">{formatRatioId(total.batangTk, 1)}</td>
+                <td className="py-3 px-2.5 text-right font-mono font-bold text-[#16823B]">{formatCurrencyRp(total.upahHa)}</td>
+                <td className="py-3 px-2.5 text-right font-mono font-bold text-[#16823B]">{formatRatioId(total.batangHa, 0)}</td>
+                <td className="py-3 px-2.5 text-right font-mono font-bold text-[#16823B]">{formatCurrencyRp(total.upahBatang)}</td>
+                <td className="py-3 px-2.5 text-right font-mono font-bold text-[#16823B]">{formatRatioId(total.batangTk, 1)}</td>
                 <td className="py-3 px-2.5 text-right font-mono font-bold text-[#17231B]">{formatNumberId(total.tkBulan, 1)}</td>
                 <td className="py-3 px-3 text-right font-mono font-bold text-[#17231B]">{formatCurrencyRp(total.costTkBulan)}</td>
               </tr>
