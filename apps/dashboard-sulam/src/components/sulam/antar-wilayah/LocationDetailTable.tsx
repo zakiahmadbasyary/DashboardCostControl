@@ -359,10 +359,6 @@ export default function LocationDetailTable({
           <strong className="text-[#16823B]">
             {selectedWilayah === "all" ? "Seluruh Wilayah (AW01--AW07)" : `Wilayah ${selectedWilayah}`}
           </strong>
-          .
-        </span>
-        <span className="text-[#89938D] italic">
-          *Gulir tabel ke samping & vertikal untuk menjelajahi seluruh data lokasi
         </span>
       </div>
     </div>
