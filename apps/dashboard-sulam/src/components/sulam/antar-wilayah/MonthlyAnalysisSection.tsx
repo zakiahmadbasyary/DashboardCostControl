@@ -162,17 +162,17 @@ function CapexRegionalChartCard({
                     {/* Number value & percentage label on top of bar */}
                     <div className="flex flex-col items-center mb-1 w-full min-w-0">
                       <span
-                        className={`text-[8px] min-[380px]:text-[9px] sm:text-[11px] font-mono leading-tight transition-all truncate tracking-tighter w-full text-center ${
+                        className={`text-[8px] min-[380px]:text-[9px] sm:text-[11px] font-mono font-normal leading-tight transition-all truncate tracking-tighter w-full text-center ${
                           isHovered
-                            ? "text-[#16823B] font-bold scale-105"
-                            : "text-[#17231B] font-semibold opacity-90 group-hover:opacity-100"
+                            ? "text-[#16823B]"
+                            : "text-[#17231B] opacity-90 group-hover:opacity-100"
                         }`}
                       >
                         {item.topLabel}
                       </span>
                       <span
-                        className={`text-[7px] min-[380px]:text-[8px] sm:text-[9.5px] font-mono leading-tight transition-colors truncate w-full text-center ${
-                          isHovered ? "text-[#16823B] font-bold" : "text-[#5F6B63] font-medium"
+                        className={`text-[7px] min-[380px]:text-[8px] sm:text-[9.5px] font-mono font-normal leading-tight transition-colors truncate w-full text-center ${
+                          isHovered ? "text-[#16823B]" : "text-[#5F6B63]"
                         }`}
                       >
                         {item.subLabel}
@@ -191,7 +191,7 @@ function CapexRegionalChartCard({
                         }}
                       >
                         {heightPercent >= 24 && item.value > 0 && item.insideLabel && (
-                          <span className="text-[7px] sm:text-[9px] font-mono font-bold select-none truncate px-0.5 text-white drop-shadow-xs">
+                          <span className="text-[7px] sm:text-[9px] font-mono font-normal select-none truncate px-0.5 text-white drop-shadow-xs">
                             {item.insideLabel}
                           </span>
                         )}
@@ -207,10 +207,10 @@ function CapexRegionalChartCard({
                 title={summaryTooltipText}
               >
                 <div className="flex flex-col items-center mb-1 w-full min-w-0">
-                  <span className="text-[8px] min-[380px]:text-[9px] sm:text-[11px] font-mono font-bold text-[#16823B] leading-tight truncate tracking-tighter w-full text-center">
+                  <span className="text-[8px] min-[380px]:text-[9px] sm:text-[11px] font-mono font-normal text-[#16823B] leading-tight truncate tracking-tighter w-full text-center">
                     {summaryTopLabel}
                   </span>
-                  <span className="text-[7px] min-[380px]:text-[8px] sm:text-[9.5px] font-mono font-bold text-[#16823B] leading-tight truncate w-full text-center">
+                  <span className="text-[7px] min-[380px]:text-[8px] sm:text-[9.5px] font-mono font-normal text-[#16823B] leading-tight truncate w-full text-center">
                     {summarySubLabel}
                   </span>
                 </div>
@@ -220,7 +220,7 @@ function CapexRegionalChartCard({
                     className="w-full bg-[#16823B] hover:bg-[#0B6B32] rounded-t transition-all duration-300 shadow-xs flex items-center justify-center overflow-hidden"
                     style={{ height: "100%" }}
                   >
-                    <span className="text-[7px] sm:text-[9px] font-mono font-bold text-white select-none">
+                    <span className="text-[7px] sm:text-[9px] font-mono font-normal text-white select-none">
                       {summaryInsideLabel}
                     </span>
                   </div>

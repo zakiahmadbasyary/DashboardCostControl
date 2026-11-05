@@ -152,7 +152,7 @@ export default function LocationDetailTable({
           </div>
           <div>
             <h3 className="font-bold text-sm sm:text-base text-[#17231B] leading-tight">
-              Tabel Detail Seluruh Lokasi --- {monthName}
+              Tabel Detail Seluruh Lokasi - {monthName}
             </h3>
             <p className="text-[11px] sm:text-xs text-[#5F6B63] mt-0.5 leading-snug">
               Rekapitulasi tenaga kerja, bibit, luas, dan kapasitas per lokasi di PG1 (
