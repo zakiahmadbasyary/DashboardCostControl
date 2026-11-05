@@ -366,7 +366,7 @@ export default function MonthlyAnalysisSection({
                         <div className="font-bold border-b border-gray-700 pb-1 mb-1">
                           {label} --- {currentMonthName}
                         </div>
-                        <div>Total Batang: {formatNumberId(payload[0].value as number, 0)} btg</div>
+                        <div>Total Batang: {formatNumberId(payload[0].value as number, 0)} Btg</div>
                       </div>
                     );
                   }}

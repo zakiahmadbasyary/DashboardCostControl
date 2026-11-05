@@ -20,8 +20,8 @@ export interface PgIndicatorOption {
 
 export const PG_INDICATORS: PgIndicatorOption[] = [
   { key: "upahHa", label: "Upah/HA", unit: "Rp/HA", desc: "Total biaya upah / total luas efektif" },
-  { key: "batangHa", label: "Batang/HA", unit: "btg/HA", desc: "Total bibit / total luas efektif" },
-  { key: "upahBatang", label: "Upah/Batang", unit: "Rp/btg", desc: "Total biaya upah / total bibit" },
+  { key: "batangHa", label: "Batang/HA", unit: "Btg/HA", desc: "Total bibit / total luas efektif" },
+  { key: "upahBatang", label: "Upah/Batang", unit: "Rp/Btg", desc: "Total biaya upah / total bibit" },
   { key: "batangTk", label: "Batang/TK", unit: "Btg/TK", desc: "Total bibit / total tenaga kerja" },
   { key: "tkBulan", label: "TK/Bulan", unit: "TK", desc: "Total kebutuhan tenaga kerja per bulan" },
   { key: "costTkBulan", label: "Cost TK/Bulan", unit: "Rp", desc: "Total realisasi biaya upah per bulan" },

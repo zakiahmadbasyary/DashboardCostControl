@@ -108,7 +108,7 @@ export default function WilayahMainFilters({
             <select
               value={selectedMonth}
               onChange={(e) => onMonthChange(parseInt(e.target.value, 10))}
-              className="w-full bg-[#F7F9F7] border border-[#DDE5DF] rounded-lg px-2.5 py-1.5 text-xs font-semibold text-[#17231B] focus:outline-none focus:border-[#16823B] transition-colors truncate cursor-pointer"
+              className="w-full bg-[#F7F9F7] border border-[#DDE5DF] rounded-lg px-2.5 py-1.5 text-xs font-normal text-[#17231B] focus:outline-none focus:border-[#16823B] transition-colors truncate cursor-pointer"
               suppressHydrationWarning
             >
               {MONTH_OPTIONS.map((m) => {
@@ -130,7 +130,7 @@ export default function WilayahMainFilters({
             <select
               value={selectedYear}
               onChange={(e) => onYearChange(parseInt(e.target.value, 10))}
-              className="w-full bg-[#F7F9F7] border border-[#DDE5DF] rounded-lg px-2.5 py-1.5 text-xs font-semibold text-[#17231B] focus:outline-none focus:border-[#16823B] transition-colors truncate cursor-pointer"
+              className="w-full bg-[#F7F9F7] border border-[#DDE5DF] rounded-lg px-2.5 py-1.5 text-xs font-normal text-[#17231B] focus:outline-none focus:border-[#16823B] transition-colors truncate cursor-pointer"
               suppressHydrationWarning
             >
               {availableYears.map((y) => (

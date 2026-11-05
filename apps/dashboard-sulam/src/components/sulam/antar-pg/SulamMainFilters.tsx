@@ -20,8 +20,8 @@ export interface PgIndicatorOption {
 
 export const PG_INDICATORS: PgIndicatorOption[] = [
   { key: "upahHa", label: "Upah / HA (Rp/HA)", unit: "Rp/HA", desc: "Total biaya upah / total luas efektif" },
-  { key: "batangHa", label: "Batang / HA (btg/HA)", unit: "btg/HA", desc: "Total bibit / total luas efektif" },
-  { key: "upahBatang", label: "Upah / Batang (Rp/btg)", unit: "Rp/btg", desc: "Total biaya upah / total bibit" },
+  { key: "batangHa", label: "Batang / HA (Btg/HA)", unit: "Btg/HA", desc: "Total bibit / total luas efektif" },
+  { key: "upahBatang", label: "Upah / Batang (Rp/Btg)", unit: "Rp/Btg", desc: "Total biaya upah / total bibit" },
   { key: "batangTk", label: "Batang / TK (Btg/TK)", unit: "Btg/TK", desc: "Total bibit / total tenaga kerja" },
   { key: "tkBulan", label: "TK / Bulan (TK)", unit: "TK", desc: "Total kebutuhan tenaga kerja per bulan" },
   { key: "costTkBulan", label: "Cost TK / Bulan (Rp)", unit: "Rp", desc: "Total realisasi biaya upah per bulan" },
@@ -110,7 +110,7 @@ export default function SulamMainFilters({
             <select
               value={selectedIndicator}
               onChange={(e) => onSelectIndicator(e.target.value as PgIndicatorKey)}
-              className="w-full bg-[#F7F9F7] border border-[#DDE5DF] rounded-lg px-2.5 py-1.5 text-xs font-semibold text-[#17231B] focus:outline-none focus:border-[#16823B] transition-colors truncate cursor-pointer"
+              className="w-full bg-[#F7F9F7] border border-[#DDE5DF] rounded-lg px-2.5 py-1.5 text-xs font-normal text-[#17231B] focus:outline-none focus:border-[#16823B] transition-colors truncate cursor-pointer"
               suppressHydrationWarning
             >
               {PG_INDICATORS.map((ind) => (
@@ -129,7 +129,7 @@ export default function SulamMainFilters({
             <select
               value={selectedYear}
               onChange={(e) => onYearChange(parseInt(e.target.value, 10))}
-              className="w-full bg-[#F7F9F7] border border-[#DDE5DF] rounded-lg px-2.5 py-1.5 text-xs font-semibold text-[#17231B] focus:outline-none focus:border-[#16823B] transition-colors truncate cursor-pointer"
+              className="w-full bg-[#F7F9F7] border border-[#DDE5DF] rounded-lg px-2.5 py-1.5 text-xs font-normal text-[#17231B] focus:outline-none focus:border-[#16823B] transition-colors truncate cursor-pointer"
               suppressHydrationWarning
             >
               {availableYears.map((y) => (
