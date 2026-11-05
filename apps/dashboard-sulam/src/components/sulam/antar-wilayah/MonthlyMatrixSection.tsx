@@ -102,7 +102,7 @@ export default function MonthlyMatrixSection({
                     {item.value !== null && item.value !== undefined
                       ? unit === "TK"
                         ? formatNumberId(item.value, 0)
-                        : formatRatioId(item.value, 1)
+                        : formatRatioId(item.value, 0)
                       : "-"}
                   </span>
                   {isMax && (
@@ -358,7 +358,7 @@ export default function MonthlyMatrixSection({
                         tickLine={false}
                         axisLine={{ stroke: "#DDE5DF" }}
                       />
-                      <Tooltip content={<CustomTooltip unit="batang/TK" />} />
+                      <Tooltip content={<CustomTooltip unit="Btg/TK" />} />
                       {regions.map((w) => (
                         <Bar
                           key={w}
