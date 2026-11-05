@@ -100,8 +100,8 @@ export const getDashboardNavConfig = (): DashboardNavConfig => {
         key: "weed_control",
         label: "Weed Control",
         url: weedControlUrl,
-        description: "Pengendalian & Pengawasan Biaya Weed Control (Tahap Pembuatan)",
-        isHosted: false,
+        description: "Pengendalian Gulma & Aplikasi Herbisida",
+        isHosted: true,
       },
       {
         key: "irigasi",
