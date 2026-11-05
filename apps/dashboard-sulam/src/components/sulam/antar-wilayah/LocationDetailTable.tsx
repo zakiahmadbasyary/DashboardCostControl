@@ -298,7 +298,7 @@ export default function LocationDetailTable({
                     key={`${item.wilayah}-${item.lokasi}-${idx}`}
                     className="hover:bg-[#F7F9F7] text-[#17231B] transition-all"
                   >
-                    <td className="py-2.5 px-3.5 font-bold text-[#16823B]">
+                    <td className="py-2.5 px-3.5 font-semibold text-[#16823B]">
                       <span className="inline-flex items-center gap-1.5">
                         <span
                           className="w-2 h-2 rounded-full shrink-0"
@@ -307,19 +307,19 @@ export default function LocationDetailTable({
                         {item.wilayah}
                       </span>
                     </td>
-                    <td className="py-2.5 px-3.5 font-mono font-semibold text-[#17231B]">
+                    <td className="py-2.5 px-3.5 font-mono text-[#17231B]">
                       {item.lokasi}
                     </td>
-                    <td className="py-2.5 px-3 text-right font-mono font-medium text-[#17231B]">
+                    <td className="py-2.5 px-3 text-right font-mono text-[#17231B]">
                       {formatNumberId(item.tk, 1)}
                     </td>
-                    <td className="py-2.5 px-3 text-right font-mono font-medium text-[#17231B]">
+                    <td className="py-2.5 px-3 text-right font-mono text-[#17231B]">
                       {formatNumberId(item.batang, 0)}
                     </td>
-                    <td className="py-2.5 px-3 text-right font-mono font-medium text-[#17231B]">
+                    <td className="py-2.5 px-3 text-right font-mono text-[#17231B]">
                       {formatDecimal2(item.ha)}
                     </td>
-                    <td className="py-2.5 px-3.5 text-right font-mono font-bold text-[#16823B]">
+                    <td className="py-2.5 px-3.5 text-right font-mono text-[#16823B]">
                       {item.batangTk !== null ? formatRatioId(item.batangTk, 0) : "-"}
                     </td>
                   </tr>
@@ -330,19 +330,19 @@ export default function LocationDetailTable({
             {calculatedTotal && (
               <tfoot className="bg-[#EAF3EC] text-[#17231B] font-bold border-t-2 border-[#CBE0D1] sticky bottom-0 z-10 shadow-sm">
                 <tr>
-                  <td colSpan={2} className="py-3 px-3.5 font-black uppercase tracking-wider text-[#16823B]">
+                  <td colSpan={2} className="py-3 px-3.5 font-bold uppercase tracking-wider text-[#16823B]">
                     TOTAL {selectedWilayah !== "all" ? `WILAYAH ${selectedWilayah}` : "KESELURUHAN LOKASI"}
                   </td>
-                  <td className="py-3 px-3 text-right font-mono font-black text-[#17231B]">
+                  <td className="py-3 px-3 text-right font-mono font-semibold text-[#17231B]">
                     {formatNumberId(calculatedTotal.tk, 1)}
                   </td>
-                  <td className="py-3 px-3 text-right font-mono font-black text-[#17231B]">
+                  <td className="py-3 px-3 text-right font-mono font-semibold text-[#17231B]">
                     {formatNumberId(calculatedTotal.batang, 0)}
                   </td>
-                  <td className="py-3 px-3 text-right font-mono font-black text-[#17231B]">
+                  <td className="py-3 px-3 text-right font-mono font-semibold text-[#17231B]">
                     {formatDecimal2(calculatedTotal.ha)}
                   </td>
-                  <td className="py-3 px-3.5 text-right font-mono font-black text-[#16823B]">
+                  <td className="py-3 px-3.5 text-right font-mono font-semibold text-[#16823B]">
                     {calculatedTotal.batangTk !== null ? formatRatioId(calculatedTotal.batangTk, 0) : "-"}
                   </td>
                 </tr>
