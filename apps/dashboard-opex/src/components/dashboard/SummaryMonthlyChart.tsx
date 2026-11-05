@@ -208,7 +208,7 @@ export default function SummaryMonthlyChart({
         onScroll={hideTooltip}
         className="w-full overflow-x-auto sm:overflow-x-visible pb-2 sm:pb-0 scrollbar-thin"
       >
-        <div className="min-w-[640px] sm:min-w-0 w-full flex items-stretch gap-1 sm:gap-2">
+        <div className="min-w-[720px] sm:min-w-0 w-full flex items-stretch gap-1 sm:gap-2">
           {/* 1. SEKSI 12 BULAN (Januari s.d. Desember) */}
           <div className="flex-1 relative">
             {/* Background Dashed Grid Lines (Horizontal) */}
@@ -266,7 +266,7 @@ export default function SummaryMonthlyChart({
                     {/* Area Batang & Angka di Atas (Tinggi Tetap 230px) */}
                     <div className="h-[230px] w-full flex items-end justify-center gap-1 sm:gap-1.5 relative px-0.5">
                       {/* Batang 1: Actual (Hijau Tua #16823B Capex) */}
-                      <div className="flex flex-col items-center justify-end h-full w-3.5 sm:w-5 md:w-6 shrink-0 relative">
+                      <div className="flex flex-col items-center justify-end h-full w-[18px] sm:w-[26px] md:w-[32px] lg:w-[38px] xl:w-[44px] shrink-0 relative">
                         {actLabel && (
                           <span
                             className={`hidden sm:block font-mono text-[9px] sm:text-[10px] md:text-[11px] font-normal text-[#17231B] tracking-tighter select-none -translate-x-0.5 ${actExtraLift}`}
@@ -281,7 +281,7 @@ export default function SummaryMonthlyChart({
                       </div>
 
                       {/* Batang 2: Budget (Hijau Muda #8CD16B Capex) */}
-                      <div className="flex flex-col items-center justify-end h-full w-3.5 sm:w-5 md:w-6 shrink-0 relative">
+                      <div className="flex flex-col items-center justify-end h-full w-[18px] sm:w-[26px] md:w-[32px] lg:w-[38px] xl:w-[44px] shrink-0 relative">
                         {bgtLabel && (
                           <span
                             className={`hidden sm:block font-mono text-[9px] sm:text-[10px] md:text-[11px] font-normal text-[#17231B] tracking-tighter select-none translate-x-0.5 ${bgtExtraLift}`}
@@ -296,7 +296,7 @@ export default function SummaryMonthlyChart({
                       </div>
 
                       {/* Badge Variansi Kuning (Melekat di dasar kedua batang) */}
-                      <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[32px] sm:w-[40px] md:w-[46px] bg-[#FCE27A] text-[#17231B] border border-[#E5C959] font-mono font-bold text-[9px] sm:text-[10px] md:text-[11px] py-0.5 text-center shadow-2xs z-10 pointer-events-none select-none">
+                      <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[36px] sm:w-[48px] md:w-[58px] lg:w-[68px] xl:w-[76px] bg-[#FCE27A] text-[#17231B] border border-[#E5C959] font-mono font-bold text-[9px] sm:text-[10px] md:text-[11px] py-0.5 text-center shadow-2xs z-10 pointer-events-none select-none">
                         {varianceLabel}
                       </div>
                     </div>
@@ -331,7 +331,7 @@ export default function SummaryMonthlyChart({
           <div
             onMouseEnter={showTotalTooltip}
             onMouseLeave={hideTooltip}
-            className="w-24 sm:w-28 shrink-0 relative flex flex-col cursor-pointer hover:bg-[#F8FAF9]/80 rounded-t-lg transition-colors"
+            className="w-28 sm:w-32 md:w-36 lg:w-44 shrink-0 relative flex flex-col cursor-pointer hover:bg-[#F8FAF9]/80 rounded-t-lg transition-colors"
           >
             {/* Background Dashed Grid Lines (Horizontal khusus Total) */}
             <div className="absolute inset-0 top-6 bottom-10 pointer-events-none flex flex-col justify-between">
@@ -344,7 +344,7 @@ export default function SummaryMonthlyChart({
             {/* Area Batang Total (Tinggi Tetap 230px, leluasa dengan gap-2) */}
             <div className="h-[230px] w-full flex items-end justify-center gap-2 sm:gap-2.5 relative px-1 z-10 pt-1">
               {/* Batang Total Actual (Hijau Tua #16823B Capex) */}
-              <div className="flex flex-col items-center justify-end h-full w-5 sm:w-6 md:w-7 shrink-0 relative">
+              <div className="flex flex-col items-center justify-end h-full w-[22px] sm:w-[30px] md:w-[36px] lg:w-[42px] xl:w-[48px] shrink-0 relative">
                 <span
                   className={`hidden sm:block font-mono text-[9px] sm:text-[10px] md:text-[11px] font-normal text-[#17231B] tracking-tighter select-none -translate-x-1 ${
                     isTotalVeryClose && totalActual >= totalBudget ? "mb-3.5" : "mb-0.5"
@@ -361,7 +361,7 @@ export default function SummaryMonthlyChart({
               </div>
 
               {/* Batang Total Budget (Hijau Muda #8CD16B Capex) */}
-              <div className="flex flex-col items-center justify-end h-full w-5 sm:w-6 md:w-7 shrink-0 relative">
+              <div className="flex flex-col items-center justify-end h-full w-[22px] sm:w-[30px] md:w-[36px] lg:w-[42px] xl:w-[48px] shrink-0 relative">
                 <span
                   className={`hidden sm:block font-mono text-[9px] sm:text-[10px] md:text-[11px] font-normal text-[#17231B] tracking-tighter select-none translate-x-1 ${
                     isTotalVeryClose && totalBudget > totalActual ? "mb-3.5" : "mb-0.5"
@@ -378,7 +378,7 @@ export default function SummaryMonthlyChart({
               </div>
 
               {/* Badge Variansi Kuning Total (1 angka di belakang koma) */}
-              <div className="absolute bottom-0 left-1/2 -translate-x-1/2 min-w-[46px] sm:min-w-[52px] px-1 bg-[#FCE27A] text-[#17231B] border border-[#E5C959] font-mono font-bold text-[9px] sm:text-[10px] md:text-[11px] py-0.5 text-center shadow-2xs z-10 select-none">
+              <div className="absolute bottom-0 left-1/2 -translate-x-1/2 min-w-[52px] sm:min-w-[64px] md:min-w-[76px] lg:min-w-[84px] px-1 bg-[#FCE27A] text-[#17231B] border border-[#E5C959] font-mono font-bold text-[9px] sm:text-[10px] md:text-[11px] py-0.5 text-center shadow-2xs z-10 select-none">
                 {formatTotalVariancePill(totalVariance)}
               </div>
             </div>
