@@ -22,7 +22,7 @@ export const PG_INDICATORS: PgIndicatorOption[] = [
   { key: "upahHa", label: "Upah / HA (Rp/HA)", unit: "Rp/HA", desc: "Total biaya upah / total luas efektif" },
   { key: "batangHa", label: "Batang / HA (btg/HA)", unit: "btg/HA", desc: "Total bibit / total luas efektif" },
   { key: "upahBatang", label: "Upah / Batang (Rp/btg)", unit: "Rp/btg", desc: "Total biaya upah / total bibit" },
-  { key: "batangTk", label: "Batang / TK (btg/TK)", unit: "btg/TK", desc: "Total bibit / total tenaga kerja" },
+  { key: "batangTk", label: "Batang / TK (Btg/TK)", unit: "Btg/TK", desc: "Total bibit / total tenaga kerja" },
   { key: "tkBulan", label: "TK / Bulan (TK)", unit: "TK", desc: "Total kebutuhan tenaga kerja per bulan" },
   { key: "costTkBulan", label: "Cost TK / Bulan (Rp)", unit: "Rp", desc: "Total realisasi biaya upah per bulan" },
 ];

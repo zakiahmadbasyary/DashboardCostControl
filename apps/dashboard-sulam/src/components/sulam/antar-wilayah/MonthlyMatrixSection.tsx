@@ -299,7 +299,7 @@ export default function MonthlyMatrixSection({
                 </div>
               </div>
               <span className="text-[10px] font-bold px-2 py-0.5 rounded-lg bg-[#F8FAF9] text-[#16823B] border border-[#DDE5DF]">
-                Satuan: btg/TK
+                Satuan: Btg/TK
               </span>
             </div>
 
