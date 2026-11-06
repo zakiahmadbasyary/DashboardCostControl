@@ -236,7 +236,7 @@ export default function LocationDetailTable({
 
       {/* ── Main Table: Scrollable Vertikal & Horizontal, Sticky Header & Sticky Footer ── */}
       <div className="rounded-xl border border-[#DDE5DF] overflow-hidden">
-        <div className="overflow-x-auto overflow-y-auto max-h-[520px] scrollbar-thin">
+        <div className="overflow-x-auto overflow-y-auto max-h-[280px] scrollbar-thin">
           <table className="w-full text-xs text-left">
             <thead className="bg-[#F7F9F7] text-[#17231B] uppercase font-bold border-b border-[#DDE5DF] sticky top-0 z-10 shadow-2xs">
               <tr>
@@ -355,10 +355,13 @@ export default function LocationDetailTable({
       {/* ── Status Bar Keterangan Bawah ── */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-[11px] text-[#5F6B63] pt-1">
         <span>
-          Menampilkan seluruh <strong className="text-[#17231B] font-bold">{processedLocations.length}</strong> lokasi untuk{" "}
+          Menampilkan <strong className="text-[#17231B] font-bold">{processedLocations.length}</strong> lokasi untuk{" "}
           <strong className="text-[#16823B]">
             {selectedWilayah === "all" ? "Seluruh Wilayah (AW01--AW07)" : `Wilayah ${selectedWilayah}`}
           </strong>
+          {processedLocations.length > 5 && (
+            <span className="text-[#89938D] ml-1.5 font-normal">(scroll untuk melihat lokasi lainnya)</span>
+          )}
         </span>
       </div>
     </div>
