@@ -34,11 +34,12 @@ interface LocationMonthlyChartProps {
 }
 
 // Skema warna grafik:
-// - TK: Bar Hijau Solid (#16823B) pada Sumbu Kanan
-// - Batang: Garis / Dash Horizontal Kuning (#E5C959, warna kuning Filter Utama) pada Sumbu Kiri
+// - TK (Tidak Terpilih): Bar Hijau Tua Solid (#16823B) pada Sumbu Kanan
+// - TK (Terpilih / Bulan Aktif): Bar Kuning (#E5C959, warna Filter Utama)
+// - Batang: Garis / Dash Horizontal Oranye (#ED7D31) pada Sumbu Kiri
 const TK_COLOR = "#16823B";
-const TK_ACTIVE_COLOR = "#0E5C28";
-const BATANG_COLOR = "#E5C959"; // Kuning Filter Utama GGF
+const TK_ACTIVE_COLOR = "#E5C959";
+const BATANG_COLOR = "#ED7D31";
 
 const MONTH_NAMES_FULL = [
   "Januari", "Februari", "Maret", "April", "Mei", "Juni",
@@ -110,7 +111,7 @@ export default function LocationMonthlyChart({
         width={dashWidth}
         height={dashHeight}
         fill={BATANG_COLOR}
-        stroke="#C9AE40"
+        stroke="#D35400"
         strokeWidth={0.5}
         rx={1}
         cursor="pointer"
@@ -237,10 +238,10 @@ export default function LocationMonthlyChart({
             </div>
             <div className="h-6 w-px bg-[#DDE5DF]" />
             <div className="flex items-center gap-1.5 px-2">
-              <Sprout className="w-3.5 h-3.5 text-[#9A7D18]" />
+              <Sprout className="w-3.5 h-3.5 text-[#ED7D31]" />
               <div>
                 <div className="text-[10px] text-[#5F6B63] leading-none">Total Batang</div>
-                <div className="font-mono font-bold text-[#9A7D18] text-xs">
+                <div className="font-mono font-bold text-[#ED7D31] text-xs">
                   {formatNumberId(totals.sumBatang, 0)}
                 </div>
               </div>
@@ -351,20 +352,24 @@ export default function LocationMonthlyChart({
 
                   <Tooltip content={<CustomLocationTooltip activeMonth={selectedMonth} />} />
 
-                  {/* Legend di Bawah Tengah: [■ TK (Hijau)]  [― Batang (Kuning)] */}
+                  {/* Legend di Bawah Tengah: [■ TK (Hijau)]  [■ TK Bulan Aktif (Kuning)]  [― Batang (Oren)] */}
                   <Legend
                     verticalAlign="bottom"
                     align="center"
                     wrapperStyle={{ paddingTop: 16 }}
                     content={() => (
-                      <div className="flex items-center justify-center gap-6 text-xs text-[#17231B] font-medium">
-                        <div className="flex items-center gap-2">
+                      <div className="flex items-center justify-center gap-5 sm:gap-6 text-xs text-[#17231B] font-medium flex-wrap">
+                        <div className="flex items-center gap-1.5">
                           <span className="w-3.5 h-3.5 bg-[#16823B] inline-block rounded-xs" />
                           <span className="font-semibold text-[#16823B]">TK</span>
                         </div>
-                        <div className="flex items-center gap-2">
-                          <span className="w-4 h-1.5 bg-[#E5C959] border border-[#C9AE40] inline-block rounded-xs" />
-                          <span className="font-semibold text-[#8C7118]">Batang</span>
+                        <div className="flex items-center gap-1.5">
+                          <span className="w-3.5 h-3.5 bg-[#E5C959] border border-[#C9AE40] inline-block rounded-xs" />
+                          <span className="font-semibold text-[#8C7118]">TK (Bulan Aktif)</span>
+                        </div>
+                        <div className="flex items-center gap-1.5">
+                          <span className="w-4 h-1.5 bg-[#ED7D31] inline-block rounded-xs" />
+                          <span className="font-semibold text-[#ED7D31]">Batang</span>
                         </div>
                       </div>
                     )}
@@ -395,7 +400,7 @@ export default function LocationMonthlyChart({
                             onSelectMonth(entry.month);
                           }}
                           fill={isCurrent ? TK_ACTIVE_COLOR : TK_COLOR}
-                          stroke={isCurrent ? "#17231B" : undefined}
+                          stroke={isCurrent ? "#C9AE40" : undefined}
                           strokeWidth={isCurrent ? 2 : 0}
                           className="cursor-pointer transition-opacity hover:opacity-85"
                         />
@@ -452,7 +457,7 @@ function CustomLocationTooltip({ active, payload, label, activeMonth }: any) {
           <span className="font-sans font-medium text-[#5F6B63]">Tenaga Kerja:</span>
           <span className="font-bold">{formatNumberId(tk, 1)} TK</span>
         </div>
-        <div className="flex items-center justify-between text-[#8C7118]">
+        <div className="flex items-center justify-between text-[#ED7D31]">
           <span className="font-sans font-medium text-[#5F6B63]">Batang Bibit:</span>
           <span className="font-bold">{formatNumberId(batang, 0)} btg</span>
         </div>
