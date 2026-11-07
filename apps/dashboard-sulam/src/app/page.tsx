@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import DashboardHeader from "@/components/dashboard/DashboardHeader";
 import { SulamSubMenu } from "@/components/sulam/SubMenuTabs";
 import SulamMainFilters, { PgIndicatorKey } from "@/components/sulam/antar-pg/SulamMainFilters";
@@ -57,6 +57,48 @@ export default function DashboardSulamPage() {
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [loadingWilayah, setLoadingWilayah] = useState<boolean>(true);
   const [selectedLocation, setSelectedLocation] = useState<{ wilayah: string; lokasi: string } | null>(null);
+
+  // Refs & State untuk Smooth Scroll interaktif setelah data berhasil dimuat
+  const locationChartRef = useRef<HTMLDivElement>(null);
+  const mandorSectionRef = useRef<HTMLDivElement>(null);
+  const [pendingScrollTo, setPendingScrollTo] = useState<"chart" | "mandor" | null>(null);
+
+  // Helper smooth scroll dengan memperhitungkan offset sticky header di atas
+  const scrollToElement = useCallback((ref: React.RefObject<HTMLDivElement | null>) => {
+    if (typeof window === "undefined" || !ref.current) return;
+    const yOffset = -110; // offset ruang bebas di bawah sticky filter
+    const y = ref.current.getBoundingClientRect().top + (window.scrollY || window.pageYOffset || 0) + yOffset;
+    window.scrollTo({ top: Math.max(0, y), behavior: "smooth" });
+  }, []);
+
+  // Jalankan smooth scroll HANYA KETIKA data sudah berhasil load (!loadingWilayah)
+  useEffect(() => {
+    if (!loadingWilayah && pendingScrollTo) {
+      const timer = setTimeout(() => {
+        if (pendingScrollTo === "chart") {
+          scrollToElement(locationChartRef);
+        } else if (pendingScrollTo === "mandor") {
+          scrollToElement(mandorSectionRef);
+        }
+        setPendingScrollTo(null);
+      }, 120);
+
+      return () => clearTimeout(timer);
+    }
+  }, [loadingWilayah, pendingScrollTo, scrollToElement]);
+
+  // Handler saat bulan dipilih dari Grafik Analisa Bulanan Lokasi
+  const handleSelectMonthFromChart = (monthNumber: number) => {
+    if (monthNumber === selectedMonth) {
+      // Jika bulan sudah aktif & datanya sudah ada di memori, langsung scroll ke analisa mandor
+      setTimeout(() => scrollToElement(mandorSectionRef), 80);
+    } else {
+      // Jika bulan baru, set pending scroll dan tunggu data selesai diload
+      setPendingScrollTo("mandor");
+      setSelectedMonth(monthNumber);
+      setCurrentPage(1);
+    }
+  };
 
   // ==========================================
   // Fetcher Sub-menu 1: Antar PG
@@ -252,33 +294,43 @@ export default function DashboardSulamPage() {
                     monthName={wilayahData.monthName || "Januari"}
                     loading={loadingWilayah}
                     selectedLocationKey={selectedLocationKey}
-                    onSelectLocation={(loc) => setSelectedLocation(loc)}
+                    onSelectLocation={(loc) => {
+                      setSelectedLocation(loc);
+                      if (loc) {
+                        if (!loadingWilayah) {
+                          setTimeout(() => scrollToElement(locationChartRef), 80);
+                        } else {
+                          setPendingScrollTo("chart");
+                        }
+                      }
+                    }}
                   />
 
                   {/* 4. Grafik Analisa Bulanan per Lokasi (Click Action dari Tabel Lokasi & Klik Bar Bulan) */}
-                  <LocationMonthlyChart
-                    selectedLocation={selectedLocation}
-                    selectedYear={selectedYear}
-                    data={locationMonthlyMetricData}
-                    selectedMonth={selectedMonth}
-                    onSelectMonth={(m) => {
-                      setSelectedMonth(m);
-                      setCurrentPage(1);
-                    }}
-                    loading={loadingWilayah}
-                  />
+                  <div ref={locationChartRef} id="section-location-monthly-chart" className="scroll-mt-28">
+                    <LocationMonthlyChart
+                      selectedLocation={selectedLocation}
+                      selectedYear={selectedYear}
+                      data={locationMonthlyMetricData}
+                      selectedMonth={selectedMonth}
+                      onSelectMonth={handleSelectMonthFromChart}
+                      loading={loadingWilayah}
+                    />
+                  </div>
 
                   {/* 5. Analisa Mandor (Rekap Bulanan di Kiri & Histori Harian di Kanan) */}
-                  <MandorAnalysisSection
-                    selectedLocation={selectedLocation}
-                    onResetLocation={() => setSelectedLocation(null)}
-                    selectedYear={selectedYear}
-                    selectedMonth={selectedMonth}
-                    monthName={wilayahData.monthName || "Januari"}
-                    rekapData={activeRekapMandor}
-                    historiData={activeHistoriMandor}
-                    loading={loadingWilayah}
-                  />
+                  <div ref={mandorSectionRef} id="section-mandor-analysis" className="scroll-mt-28">
+                    <MandorAnalysisSection
+                      selectedLocation={selectedLocation}
+                      onResetLocation={() => setSelectedLocation(null)}
+                      selectedYear={selectedYear}
+                      selectedMonth={selectedMonth}
+                      monthName={wilayahData.monthName || "Januari"}
+                      rekapData={activeRekapMandor}
+                      historiData={activeHistoriMandor}
+                      loading={loadingWilayah}
+                    />
+                  </div>
                 </>
               );
             })()}
