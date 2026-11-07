@@ -28,6 +28,8 @@ interface LocationDetailTableProps {
   onSortChange?: (column: string) => void;
   monthName: string;
   loading?: boolean;
+  selectedLocationKey?: string | null;
+  onSelectLocation?: (location: { wilayah: string; lokasi: string } | null) => void;
 }
 
 // Skema warna per Wilayah (AW01--AW07) selaras dengan WIP & HPP
@@ -56,6 +58,8 @@ export default function LocationDetailTable({
   locations,
   monthName,
   loading,
+  selectedLocationKey,
+  onSelectLocation,
 }: LocationDetailTableProps) {
   // Filter Wilayah lokal (Semua / AW01 s/d AW07)
   const [selectedWilayah, setSelectedWilayah] = useState<string>("all");
@@ -157,6 +161,9 @@ export default function LocationDetailTable({
             <p className="text-[11px] sm:text-xs text-[#5F6B63] mt-0.5 leading-snug">
               Rekapitulasi tenaga kerja, bibit, luas, dan kapasitas per lokasi di PG1 (
               {selectedWilayah === "all" ? "Seluruh Wilayah AW01--AW07" : `Wilayah ${selectedWilayah}`}) pada bulan {monthName}.
+              <span className="ml-1 text-[#16823B] font-semibold hidden sm:inline">
+                (Klik salah satu baris lokasi untuk melihat tren grafik bulanan di bawah)
+              </span>
             </p>
           </div>
         </div>
@@ -293,37 +300,63 @@ export default function LocationDetailTable({
                   </td>
                 </tr>
               ) : (
-                processedLocations.map((item, idx) => (
-                  <tr
-                    key={`${item.wilayah}-${item.lokasi}-${idx}`}
-                    className="hover:bg-[#F7F9F7] text-[#17231B] transition-all"
-                  >
-                    <td className="py-2.5 px-3.5 font-semibold text-[#16823B]">
-                      <span className="inline-flex items-center gap-1.5">
-                        <span
-                          className="w-2 h-2 rounded-full shrink-0"
-                          style={{ backgroundColor: REGION_COLORS[item.wilayah] || "#16823B" }}
-                        />
-                        {item.wilayah}
-                      </span>
-                    </td>
-                    <td className="py-2.5 px-3.5 font-mono text-[#17231B]">
-                      {item.lokasi}
-                    </td>
-                    <td className="py-2.5 px-3 text-right font-mono text-[#17231B]">
-                      {formatNumberId(item.tk, 1)}
-                    </td>
-                    <td className="py-2.5 px-3 text-right font-mono text-[#17231B]">
-                      {formatNumberId(item.batang, 0)}
-                    </td>
-                    <td className="py-2.5 px-3 text-right font-mono text-[#17231B]">
-                      {formatDecimal2(item.ha)}
-                    </td>
-                    <td className="py-2.5 px-3.5 text-right font-mono text-[#16823B]">
-                      {item.batangTk !== null ? formatRatioId(item.batangTk, 0) : "-"}
-                    </td>
-                  </tr>
-                ))
+                processedLocations.map((item, idx) => {
+                  const itemKey = `${item.wilayah}__${item.lokasi}`;
+                  const isSelected = selectedLocationKey === itemKey;
+
+                  return (
+                    <tr
+                      key={`${item.wilayah}-${item.lokasi}-${idx}`}
+                      onClick={() =>
+                        onSelectLocation?.(
+                          isSelected ? null : { wilayah: item.wilayah, lokasi: item.lokasi }
+                        )
+                      }
+                      className={`cursor-pointer transition-all select-none ${
+                        isSelected
+                          ? "bg-[#EAF3EC] border-l-4 border-l-[#16823B] font-semibold"
+                          : "hover:bg-[#F7F9F7] text-[#17231B]"
+                      }`}
+                      title={
+                        isSelected
+                          ? `Klik untuk membatalkan pilihan lokasi ${item.lokasi}`
+                          : `Klik untuk melihat grafik analisa & data mandor lokasi ${item.lokasi}`
+                      }
+                    >
+                      <td className="py-2.5 px-3.5 font-semibold text-[#16823B]">
+                        <span className="inline-flex items-center gap-1.5">
+                          <span
+                            className="w-2 h-2 rounded-full shrink-0"
+                            style={{ backgroundColor: REGION_COLORS[item.wilayah] || "#16823B" }}
+                          />
+                          {item.wilayah}
+                        </span>
+                      </td>
+                      <td className="py-2.5 px-3.5 font-mono text-[#17231B]">
+                        <div className="flex items-center gap-2">
+                          <span>{item.lokasi}</span>
+                          {isSelected && (
+                            <span className="px-1.5 py-0.5 rounded text-[9px] font-bold bg-[#16823B] text-white">
+                              Terpilih
+                            </span>
+                          )}
+                        </div>
+                      </td>
+                      <td className="py-2.5 px-3 text-right font-mono text-[#17231B]">
+                        {formatNumberId(item.tk, 1)}
+                      </td>
+                      <td className="py-2.5 px-3 text-right font-mono text-[#17231B]">
+                        {formatNumberId(item.batang, 0)}
+                      </td>
+                      <td className="py-2.5 px-3 text-right font-mono text-[#17231B]">
+                        {formatDecimal2(item.ha)}
+                      </td>
+                      <td className="py-2.5 px-3.5 text-right font-mono text-[#16823B] font-bold">
+                        {item.batangTk !== null ? formatRatioId(item.batangTk, 0) : "-"}
+                      </td>
+                    </tr>
+                  );
+                })
               )}
             </tbody>
             {/* Sticky Bottom Footer: TOTAL KESELURUHAN LOKASI */}

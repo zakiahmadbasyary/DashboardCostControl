@@ -319,6 +319,246 @@ export async function GET(req: Request) {
     const totalPages = isAll ? 1 : Math.ceil(totalItems / pageSize) || 1;
     const paginatedLocations = isAll || pageSize >= 1000 ? locationList : locationList.slice((page - 1) * pageSize, page * pageSize);
 
+    // =========================================================================
+    // BAGIAN 4: Data Bulanan Per Lokasi (12 Bulan untuk Lokasi PG1 di Tahun Terpilih)
+    // Sumber: sulam
+    // =========================================================================
+    const locationMonthlyGroup = await prisma.sulam.groupBy({
+      by: ["wilayah", "lokasi", "month", "jenis"],
+      where: {
+        pg: "PG1",
+        year: selectedYear,
+      },
+      _sum: {
+        resourceBahanAlat: true,
+      },
+    });
+
+    const locationMonthlyMap: Record<
+      string,
+      { month: number; monthName: string; tk: number; batang: number }[]
+    > = {};
+
+    for (const row of locationMonthlyGroup) {
+      const w = row.wilayah;
+      const lok = (row.lokasi || "-").trim();
+      const key = `${w}__${lok}`;
+
+      if (!locationMonthlyMap[key]) {
+        locationMonthlyMap[key] = Array.from({ length: 12 }, (_, i) => ({
+          month: i + 1,
+          monthName: MONTH_NAMES_SHORT[i],
+          tk: 0,
+          batang: 0,
+        }));
+      }
+
+      const mIdx = row.month - 1;
+      if (mIdx >= 0 && mIdx < 12) {
+        const val = Number(row._sum.resourceBahanAlat) || 0;
+        if (row.jenis === "Upah") {
+          locationMonthlyMap[key][mIdx].tk += val;
+        } else if (row.jenis === "Material") {
+          locationMonthlyMap[key][mIdx].batang += val;
+        }
+      }
+    }
+
+    // =========================================================================
+    // BAGIAN 5: Analisa Mandor (Tersedia Keseluruhan PG1 & Per Lokasi Terpilih)
+    // Sumber: data_mandor (Global PG1) & sulam (Per Lokasi)
+    // =========================================================================
+    // 1. Data Global PG1 dari data_mandor
+    const rawDataMandor = await prisma.dataMandor.findMany({
+      where: {
+        pg: "PG1",
+        year: selectedYear,
+        month: selectedMonth,
+      },
+      orderBy: [
+        { tanggalRealisasi: "asc" },
+        { mandor: "asc" },
+      ],
+      select: {
+        tanggalRealisasi: true,
+        mandor: true,
+        pg: true,
+        wilayah: true,
+        tk: true,
+        batang: true,
+        batangPerTk: true,
+      },
+    });
+
+    const mandorRekapMap = new Map<string, { mandor: string; tk: number; batang: number }>();
+    for (const dm of rawDataMandor) {
+      let m = mandorRekapMap.get(dm.mandor);
+      if (!m) {
+        m = { mandor: dm.mandor, tk: 0, batang: 0 };
+        mandorRekapMap.set(dm.mandor, m);
+      }
+      m.tk += Number(dm.tk) || 0;
+      m.batang += Number(dm.batang) || 0;
+    }
+
+    const rekapMandor = Array.from(mandorRekapMap.values())
+      .map((m) => ({
+        mandor: m.mandor,
+        tk: Number(m.tk.toFixed(2)),
+        batang: Number(m.batang.toFixed(0)),
+        batangPerTk: m.tk > 0 ? Number((m.batang / m.tk).toFixed(2)) : 0,
+      }))
+      .sort((a, b) => b.batang - a.batang || a.mandor.localeCompare(b.mandor));
+
+    const historiMandor = rawDataMandor.map((dm) => ({
+      tanggalRealisasi: dm.tanggalRealisasi,
+      mandor: dm.mandor,
+      pg: dm.pg,
+      wilayah: dm.wilayah,
+      tk: Number(Number(dm.tk).toFixed(2)),
+      batang: Number(Number(dm.batang).toFixed(0)),
+      batangPerTk: Number(Number(dm.batangPerTk).toFixed(2)),
+    }));
+
+    // 2. Data Khusus Per Lokasi dari transaksi sulam pada bulan terpilih
+    const monthSulamRows = await prisma.sulam.findMany({
+      where: {
+        pg: "PG1",
+        year: selectedYear,
+        month: selectedMonth,
+        mandor: { not: null },
+      },
+      select: {
+        wilayah: true,
+        lokasi: true,
+        tanggalRealisasi: true,
+        mandor: true,
+        jenis: true,
+        resourceBahanAlat: true,
+      },
+      orderBy: [
+        { tanggalRealisasi: "asc" },
+        { mandor: "asc" },
+      ],
+    });
+
+    const locationMandorMap: Record<
+      string,
+      {
+        rekapMap: Map<string, { mandor: string; tk: number; batang: number }>;
+        historiMap: Map<
+          string,
+          {
+            tanggalRealisasi: Date;
+            mandor: string;
+            pg: string;
+            wilayah: string;
+            lokasi: string;
+            tk: number;
+            batang: number;
+          }
+        >;
+      }
+    > = {};
+
+    for (const row of monthSulamRows) {
+      if (!row.mandor || !row.lokasi) continue;
+      const cleanMandor = row.mandor.trim();
+      if (!cleanMandor) continue;
+
+      const locKey = `${row.wilayah}__${row.lokasi}`;
+      if (!locationMandorMap[locKey]) {
+        locationMandorMap[locKey] = {
+          rekapMap: new Map(),
+          historiMap: new Map(),
+        };
+      }
+
+      const locEntry = locationMandorMap[locKey];
+      const val = Number(row.resourceBahanAlat) || 0;
+      const isUpah = row.jenis === "Upah";
+      const isMaterial = row.jenis === "Material";
+
+      // A. Rekap Bulanan per mandor di lokasi ini
+      let m = locEntry.rekapMap.get(cleanMandor);
+      if (!m) {
+        m = { mandor: cleanMandor, tk: 0, batang: 0 };
+        locEntry.rekapMap.set(cleanMandor, m);
+      }
+      if (isUpah) m.tk += val;
+      if (isMaterial) m.batang += val;
+
+      // B. Histori Harian per (tanggal, mandor) di lokasi ini
+      const dateStr = row.tanggalRealisasi.toISOString().split("T")[0];
+      const histKey = `${dateStr}__${cleanMandor}`;
+      let h = locEntry.historiMap.get(histKey);
+      if (!h) {
+        h = {
+          tanggalRealisasi: row.tanggalRealisasi,
+          mandor: cleanMandor,
+          pg: "PG1",
+          wilayah: row.wilayah,
+          lokasi: row.lokasi,
+          tk: 0,
+          batang: 0,
+        };
+        locEntry.historiMap.set(histKey, h);
+      }
+      if (isUpah) h.tk += val;
+      if (isMaterial) h.batang += val;
+    }
+
+    // Format map lokasi ke bentuk array terstruktur & disortir
+    const finalLocationMandorMap: Record<
+      string,
+      {
+        rekapMandor: { mandor: string; tk: number; batang: number; batangPerTk: number }[];
+        historiMandor: {
+          tanggalRealisasi: Date;
+          mandor: string;
+          pg: string;
+          wilayah: string;
+          lokasi: string;
+          tk: number;
+          batang: number;
+          batangPerTk: number;
+        }[];
+      }
+    > = {};
+
+    for (const [key, entry] of Object.entries(locationMandorMap)) {
+      const rekap = Array.from(entry.rekapMap.values())
+        .map((r) => ({
+          mandor: r.mandor,
+          tk: Number(r.tk.toFixed(2)),
+          batang: Number(r.batang.toFixed(0)),
+          batangPerTk: r.tk > 0 ? Number((r.batang / r.tk).toFixed(2)) : 0,
+        }))
+        .sort((a, b) => b.batang - a.batang || a.mandor.localeCompare(b.mandor));
+
+      const histori = Array.from(entry.historiMap.values())
+        .map((h) => ({
+          tanggalRealisasi: h.tanggalRealisasi,
+          mandor: h.mandor,
+          pg: h.pg,
+          wilayah: h.wilayah,
+          lokasi: h.lokasi,
+          tk: Number(h.tk.toFixed(2)),
+          batang: Number(h.batang.toFixed(0)),
+          batangPerTk: h.tk > 0 ? Number((h.batang / h.tk).toFixed(2)) : 0,
+        }))
+        .sort(
+          (a, b) =>
+            new Date(a.tanggalRealisasi).getTime() - new Date(b.tanggalRealisasi).getTime() ||
+            a.mandor.localeCompare(b.mandor)
+        );
+
+      finalLocationMandorMap[key] = {
+        rekapMandor: rekap,
+        historiMandor: histori,
+      };
+    }
+
     return NextResponse.json({
       success: true,
       selectedYear,
@@ -343,6 +583,14 @@ export async function GET(req: Request) {
         pageSize,
         totalPages,
         locationTotal,
+      },
+      bagian4: {
+        locationMonthlyMap,
+      },
+      bagian5: {
+        rekapMandor,
+        historiMandor,
+        locationMandorMap: finalLocationMandorMap,
       },
     });
   } catch (error: any) {

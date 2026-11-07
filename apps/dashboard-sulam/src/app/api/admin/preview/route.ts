@@ -42,69 +42,112 @@ export async function GET(req: Request) {
       ];
     }
 
-    // Pagination untuk transaksi
+    // 3. Where clause untuk tabel data_mandor (khusus PG1, tidak ada filter PG)
+    const whereMandor: any = {};
+    if (wilayah && wilayah !== "all") whereMandor.wilayah = wilayah;
+    if (year && year !== "all") whereMandor.year = parseInt(year, 10);
+    if (month && month !== "all") whereMandor.month = parseInt(month, 10);
+    if (search) {
+      whereMandor.OR = [
+        { mandor: { contains: search, mode: "insensitive" } },
+        { wilayah: { contains: search, mode: "insensitive" } },
+      ];
+    }
+
+    // Pagination untuk transaksi & data mandor
     const isAll = limitParam === "all" || limitParam === "-1";
     const limit = isAll ? undefined : Math.max(1, parseInt(limitParam || "50", 10));
     const skip = isAll ? undefined : (Math.max(1, pageParam) - 1) * (limit || 50);
 
-    const [summaryList, totalSummaryCount, transactions, totalTransactionsCount, yearsDistinct] =
-      await Promise.all([
-        prisma.summarySulam.findMany({
-          where: whereSummary,
-          orderBy: [{ year: "desc" }, { month: "asc" }, { pg: "asc" }, { wilayah: "asc" }],
-          select: {
-            pg: true,
-            wilayah: true,
-            year: true,
-            month: true,
-            material: true,
-            upah: true,
-            batang: true,
-            jumlahTk: true,
-            luas: true,
-          },
-        }),
-        prisma.summarySulam.count({ where: whereSummary }),
-        prisma.sulam.findMany({
-          where: whereTx,
-          orderBy: [
-            { tanggalRealisasi: "desc" },
-            { wilayah: "asc" },
-            { spkId: "asc" },
-          ],
-          take: limit,
-          skip: skip,
-          select: {
-            // TIDAK MENAMPILKAN idSulam & kode sesuai instruksi user
-            tanggalRealisasi: true,
-            spkId: true,
-            pg: true,
-            wilayah: true,
-            lokasi: true,
-            statusTanaman: true,
-            tanggalSpk: true,
-            kodeAktivitas: true,
-            deskripsi: true,
-            jenisData: true,
-            groupBahanAlat: true,
-            kodeBahanAlatLainlain: true,
-            deskripsiBahanAlatLainlain: true,
-            resourceBahanAlat: true,
-            hasilEfektif: true,
-            satuanHasil: true,
-            totalRealisasiBiaya: true,
-            costCenterName: true,
-            orderNo: true,
-            pasDocument: true,
-          },
-        }),
-        prisma.sulam.count({ where: whereTx }),
-        prisma.summarySulam.findMany({
-          select: { year: true },
-          distinct: ["year"],
-          orderBy: { year: "desc" },
-        }),
-      ]);
+    const [
+      summaryList,
+      totalSummaryCount,
+      transactions,
+      totalTransactionsCount,
+      dataMandorList,
+      totalDataMandorCount,
+      yearsDistinct,
+    ] = await Promise.all([
+      prisma.summarySulam.findMany({
+        where: whereSummary,
+        orderBy: [{ year: "desc" }, { month: "asc" }, { pg: "asc" }, { wilayah: "asc" }],
+        select: {
+          pg: true,
+          wilayah: true,
+          year: true,
+          month: true,
+          material: true,
+          upah: true,
+          batang: true,
+          jumlahTk: true,
+          luas: true,
+        },
+      }),
+      prisma.summarySulam.count({ where: whereSummary }),
+      prisma.sulam.findMany({
+        where: whereTx,
+        orderBy: [
+          { tanggalRealisasi: "desc" },
+          { wilayah: "asc" },
+          { spkId: "asc" },
+        ],
+        take: limit,
+        skip: skip,
+        select: {
+          // TIDAK MENAMPILKAN idSulam, kode, & keyMandor sesuai instruksi user
+          tanggalRealisasi: true,
+          spkId: true,
+          pg: true,
+          wilayah: true,
+          lokasi: true,
+          statusTanaman: true,
+          tanggalSpk: true,
+          kodeAktivitas: true,
+          deskripsi: true,
+          jenisData: true,
+          groupBahanAlat: true,
+          kodeBahanAlatLainlain: true,
+          deskripsiBahanAlatLainlain: true,
+          resourceBahanAlat: true,
+          hasilEfektif: true,
+          satuanHasil: true,
+          totalRealisasiBiaya: true,
+          mandor: true,
+          costCenterName: true,
+          orderNo: true,
+          pasDocument: true,
+        },
+      }),
+      prisma.sulam.count({ where: whereTx }),
+      prisma.dataMandor.findMany({
+        where: whereMandor,
+        orderBy: [
+          { tanggalRealisasi: "desc" },
+          { wilayah: "asc" },
+          { mandor: "asc" },
+        ],
+        take: limit,
+        skip: skip,
+        select: {
+          // SEMUA KOLOM KECUALI key_mandor sesuai instruksi user
+          tanggalRealisasi: true,
+          mandor: true,
+          pg: true,
+          wilayah: true,
+          year: true,
+          month: true,
+          tk: true,
+          batang: true,
+          batangPerTk: true,
+        },
+      }),
+      prisma.dataMandor.count({ where: whereMandor }),
+      prisma.summarySulam.findMany({
+        select: { year: true },
+        distinct: ["year"],
+        orderBy: { year: "desc" },
+      }),
+    ]);
 
     const availableYears = yearsDistinct.map((y) => y.year);
 
@@ -192,6 +235,8 @@ export async function GET(req: Request) {
       totalSummaryCount,
       transactions,
       totalTransactionsCount,
+      dataMandorList,
+      totalDataMandorCount,
       pagination: {
         page: pageParam,
         limit: isAll ? totalTransactionsCount : limit || 50,

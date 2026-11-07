@@ -10,6 +10,8 @@ import WilayahMainFilters, { MONTH_OPTIONS } from "@/components/sulam/antar-wila
 import MonthlyMatrixSection from "@/components/sulam/antar-wilayah/MonthlyMatrixSection";
 import MonthlyAnalysisSection from "@/components/sulam/antar-wilayah/MonthlyAnalysisSection";
 import LocationDetailTable from "@/components/sulam/antar-wilayah/LocationDetailTable";
+import LocationMonthlyChart from "@/components/sulam/antar-wilayah/LocationMonthlyChart";
+import MandorAnalysisSection from "@/components/sulam/antar-wilayah/MandorAnalysisSection";
 
 export default function DashboardSulamPage() {
   const [activeTab, setActiveTab] = useState<SulamSubMenu>("antar-pg");
@@ -54,6 +56,7 @@ export default function DashboardSulamPage() {
   const [sortDir, setSortDir] = useState<"asc" | "desc">("asc");
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [loadingWilayah, setLoadingWilayah] = useState<boolean>(true);
+  const [selectedLocation, setSelectedLocation] = useState<{ wilayah: string; lokasi: string } | null>(null);
 
   // ==========================================
   // Fetcher Sub-menu 1: Antar PG
@@ -222,13 +225,63 @@ export default function DashboardSulamPage() {
             />
 
             {/* 3. Tabel Detail Seluruh Lokasi (Scrollable + Filter Wilayah) */}
-            <LocationDetailTable
-              locations={wilayahData.bagian3?.locations || []}
-              totalCount={wilayahData.bagian3?.totalCount || 0}
-              locationTotal={wilayahData.bagian3?.locationTotal}
-              monthName={wilayahData.monthName || "Januari"}
-              loading={loadingWilayah}
-            />
+            {(() => {
+              const selectedLocationKey = selectedLocation
+                ? `${selectedLocation.wilayah}__${selectedLocation.lokasi}`
+                : null;
+              const locationMonthlyMetricData =
+                selectedLocationKey && wilayahData.bagian4?.locationMonthlyMap?.[selectedLocationKey]
+                  ? wilayahData.bagian4.locationMonthlyMap[selectedLocationKey]
+                  : [];
+
+              // Ambil data mandor khusus lokasi jika dipilih; jika tidak dipilih maka kosong
+              const locationMandorData =
+                selectedLocationKey && wilayahData.bagian5?.locationMandorMap?.[selectedLocationKey]
+                  ? wilayahData.bagian5.locationMandorMap[selectedLocationKey]
+                  : null;
+
+              const activeRekapMandor = locationMandorData ? locationMandorData.rekapMandor : [];
+              const activeHistoriMandor = locationMandorData ? locationMandorData.historiMandor : [];
+
+              return (
+                <>
+                  <LocationDetailTable
+                    locations={wilayahData.bagian3?.locations || []}
+                    totalCount={wilayahData.bagian3?.totalCount || 0}
+                    locationTotal={wilayahData.bagian3?.locationTotal}
+                    monthName={wilayahData.monthName || "Januari"}
+                    loading={loadingWilayah}
+                    selectedLocationKey={selectedLocationKey}
+                    onSelectLocation={(loc) => setSelectedLocation(loc)}
+                  />
+
+                  {/* 4. Grafik Analisa Bulanan per Lokasi (Click Action dari Tabel Lokasi & Klik Bar Bulan) */}
+                  <LocationMonthlyChart
+                    selectedLocation={selectedLocation}
+                    selectedYear={selectedYear}
+                    data={locationMonthlyMetricData}
+                    selectedMonth={selectedMonth}
+                    onSelectMonth={(m) => {
+                      setSelectedMonth(m);
+                      setCurrentPage(1);
+                    }}
+                    loading={loadingWilayah}
+                  />
+
+                  {/* 5. Analisa Mandor (Rekap Bulanan di Kiri & Histori Harian di Kanan) */}
+                  <MandorAnalysisSection
+                    selectedLocation={selectedLocation}
+                    onResetLocation={() => setSelectedLocation(null)}
+                    selectedYear={selectedYear}
+                    selectedMonth={selectedMonth}
+                    monthName={wilayahData.monthName || "Januari"}
+                    rekapData={activeRekapMandor}
+                    historiData={activeHistoriMandor}
+                    loading={loadingWilayah}
+                  />
+                </>
+              );
+            })()}
           </div>
         )}
       </main>
