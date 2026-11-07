@@ -159,7 +159,7 @@ export default function MandorAnalysisSection({
       tk += r.tk || 0;
       batang += r.batang || 0;
     }
-    const batangPerTk = tk > 0 ? Number((batang / tk).toFixed(1)) : 0;
+    const batangPerTk = tk > 0 ? Math.round(batang / tk) : 0;
     return {
       tk,
       batang,
@@ -213,7 +213,7 @@ export default function MandorAnalysisSection({
       tk += h.tk || 0;
       batang += h.batang || 0;
     }
-    const batangPerTk = tk > 0 ? Number((batang / tk).toFixed(1)) : 0;
+    const batangPerTk = tk > 0 ? Math.round(batang / tk) : 0;
     return {
       tk,
       batang,
@@ -286,7 +286,7 @@ export default function MandorAnalysisSection({
         <div className="flex items-center gap-2 bg-[#F7F9F7] px-3 py-1.5 rounded-xl border border-[#DDE5DF] text-xs font-medium text-[#5F6B63]">
           <span>Rata-rata Rasio:</span>
           <span className="font-mono font-black text-[#16823B] text-sm">
-            {selectedLocation && totalRekap.batangPerTk > 0 ? `${formatNumberId(totalRekap.batangPerTk, 1)}` : "-"}
+            {selectedLocation && totalRekap.batangPerTk > 0 ? `${formatNumberId(totalRekap.batangPerTk, 0)}` : "-"}
           </span>
           <span className="text-[10px]">btg/TK</span>
         </div>
@@ -433,7 +433,7 @@ export default function MandorAnalysisSection({
                           {formatNumberId(r.batang, 0)}
                         </td>
                         <td className="py-2.5 px-3.5 text-right font-mono font-bold text-[#16823B]">
-                          {r.batangPerTk > 0 ? formatNumberId(r.batangPerTk, 1) : "-"}
+                          {r.batangPerTk > 0 ? formatNumberId(r.batangPerTk, 0) : "-"}
                         </td>
                       </tr>
                     );
@@ -455,7 +455,7 @@ export default function MandorAnalysisSection({
                       {formatNumberId(totalRekap.batang, 0)}
                     </td>
                     <td className="py-2.5 px-3.5 text-right font-mono text-[#16823B]">
-                      {totalRekap.batangPerTk > 0 ? formatNumberId(totalRekap.batangPerTk, 1) : "-"}
+                      {totalRekap.batangPerTk > 0 ? formatNumberId(totalRekap.batangPerTk, 0) : "-"}
                     </td>
                   </tr>
                 </tfoot>
@@ -602,7 +602,7 @@ export default function MandorAnalysisSection({
                         {formatNumberId(h.batang, 0)}
                       </td>
                       <td className="py-2.5 px-3.5 text-right font-mono font-bold text-[#16823B]">
-                        {h.batangPerTk > 0 ? formatNumberId(h.batangPerTk, 1) : "-"}
+                        {h.batangPerTk > 0 ? formatNumberId(h.batangPerTk, 0) : "-"}
                       </td>
                     </tr>
                   ))
@@ -623,7 +623,7 @@ export default function MandorAnalysisSection({
                       {formatNumberId(totalHistori.batang, 0)}
                     </td>
                     <td className="py-2.5 px-3.5 text-right font-mono text-[#16823B]">
-                      {totalHistori.batangPerTk > 0 ? formatNumberId(totalHistori.batangPerTk, 1) : "-"}
+                      {totalHistori.batangPerTk > 0 ? formatNumberId(totalHistori.batangPerTk, 0) : "-"}
                     </td>
                   </tr>
                 </tfoot>
