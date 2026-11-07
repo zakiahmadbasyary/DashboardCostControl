@@ -23,6 +23,7 @@ const DEFAULT_LOCATIONS = ["01A", "02B", "03A", "04C", "05B", "06A", "07C", "08A
 
 const STATUS_TANAMAN = ["PC", "1R", "2R", "3R"];
 const KODE_AKTIVITAS = ["SLM-01", "SLM-02", "SLM-03"];
+const MANDOR_NAMES = ["Mandor Sutrisno", "Mandor Joko", "Mandor Agus", "Mandor Supardi", "Mandor Bambang"];
 
 // Seed random generator dengan deterministik seed agar konsisten
 function seededRandom(seed: number) {
@@ -34,9 +35,10 @@ async function main() {
   console.log("=== Memulai Generate Data Dummy SULAM ===");
 
   // 1. Bersihkan data lama terlebih dahulu
-  console.log("Membersihkan data transaksi & summary lama...");
+  console.log("Membersihkan data transaksi, summary, & data_mandor lama...");
   await prisma.sulam.deleteMany({});
   await prisma.summarySulam.deleteMany({});
+  await prisma.dataMandor.deleteMany({});
 
   const years = [2025, 2026];
   const months = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
@@ -102,6 +104,12 @@ async function main() {
             spkCounter++;
             const spkMaterial = `SPK-${year}${String(month).padStart(2, "0")}-${spkCounter}`;
 
+            const mandorName = MANDOR_NAMES[(seedIndex + locIdx) % MANDOR_NAMES.length];
+            const yStr = tanggalRealisasi.getFullYear();
+            const mStr = String(tanggalRealisasi.getMonth() + 1).padStart(2, "0");
+            const dStr = String(tanggalRealisasi.getDate()).padStart(2, "0");
+            const keyMandor = pg === "PG1" ? `${yStr}-${mStr}-${dStr}_${mandorName}` : null;
+
             // 1. Transaksi UPAH
             allSulamRecords.push({
               tanggalRealisasi,
@@ -125,7 +133,8 @@ async function main() {
               costCenterName: `CC-${wilayah}`,
               costWorkingHour: 18500,
               indeksBiaya: Number((biayaUpah / luasHa).toFixed(2)),
-              indexResourceQty: Number((tk / luasHa).toFixed(2)),
+              mandor: mandorName,
+              keyMandor,
               pasDocument: `PAS-${year}${month}-${locIdx}`,
               orderNo: `ORD-${year}${month}-${locIdx}`,
               actCostGroup: "UPAH_SULAM",
@@ -159,7 +168,8 @@ async function main() {
               costCenterName: `CC-${wilayah}`,
               costWorkingHour: 0,
               indeksBiaya: Number((biayaMaterial / luasHa).toFixed(2)),
-              indexResourceQty: Number((batangBibit / luasHa).toFixed(2)),
+              mandor: mandorName,
+              keyMandor,
               pasDocument: `PAS-${year}${month}-${locIdx}-M`,
               orderNo: `ORD-${year}${month}-${locIdx}-M`,
               actCostGroup: "MATERIAL_SULAM",
@@ -202,6 +212,46 @@ async function main() {
     await prisma.summarySulam.createMany({ data: chunk });
   }
 
+  // Hitung data_mandor untuk PG1
+  const mandorMap = new Map<string, any>();
+  for (const s of allSulamRecords) {
+    if (s.pg === "PG1" && s.keyMandor) {
+      let m = mandorMap.get(s.keyMandor);
+      if (!m) {
+        m = {
+          keyMandor: s.keyMandor,
+          tanggalRealisasi: s.tanggalRealisasi,
+          mandor: s.mandor,
+          pg: s.pg,
+          wilayah: s.wilayah,
+          year: s.year,
+          month: s.month,
+          tk: 0,
+          batang: 0,
+        };
+        mandorMap.set(s.keyMandor, m);
+      }
+      if (s.jenis === "Upah") {
+        m.tk += s.resourceBahanAlat;
+      } else if (s.jenis === "Material") {
+        m.batang += s.resourceBahanAlat;
+      }
+    }
+  }
+
+  const allDataMandorRecords = Array.from(mandorMap.values()).map((m) => ({
+    ...m,
+    tk: Number(m.tk.toFixed(4)),
+    batang: Number(m.batang.toFixed(4)),
+    batangPerTk: m.tk > 0 ? Number((m.batang / m.tk).toFixed(4)) : 0,
+  }));
+
+  console.log(`Menyimpan ${allDataMandorRecords.length} baris data_mandor...`);
+  for (let i = 0; i < allDataMandorRecords.length; i += 500) {
+    const chunk = allDataMandorRecords.slice(i, i + 500);
+    await prisma.dataMandor.createMany({ data: chunk });
+  }
+
   console.log(`Menyimpan ${allSulamRecords.length} baris transaksi sulam...`);
   // Batch insert sulam (chunk 500)
   for (let i = 0; i < allSulamRecords.length; i += 500) {
@@ -211,9 +261,11 @@ async function main() {
 
   console.log("=== Generate Data Dummy SULAM Selesai ===");
   const finalSummaryCount = await prisma.summarySulam.count();
+  const finalMandorCount = await prisma.dataMandor.count();
   const finalTxCount = await prisma.sulam.count();
   console.log({
     finalSummaryCount,
+    finalMandorCount,
     finalTxCount,
   });
 }

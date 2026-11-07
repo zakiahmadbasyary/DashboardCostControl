@@ -3,19 +3,20 @@ import { prisma } from "@/lib/prisma";
 
 export async function POST() {
   try {
-    const [deletedSulam, deletedSummary] = await prisma.$transaction(async (tx) => {
+    const [deletedSulam, deletedSummary, deletedMandor] = await prisma.$transaction(async (tx) => {
       // 1. Hapus transaksi sulam (anak relasi)
       const sulamCount = await tx.sulam.deleteMany({});
-      // 2. Hapus summary sulam (induk relasi)
+      // 2. Hapus summary sulam & data mandor (induk relasi)
       const summaryCount = await tx.summarySulam.deleteMany({});
-      return [sulamCount, summaryCount];
+      const mandorCount = await tx.dataMandor.deleteMany({});
+      return [sulamCount, summaryCount, mandorCount];
     });
 
     return NextResponse.json({
       success: true,
       message: `Database Sulam berhasil direset: ${deletedSulam.count.toLocaleString(
         "id-ID"
-      )} transaksi sulam dan ${deletedSummary.count.toLocaleString("id-ID")} summary kode dihapus.`,
+      )} transaksi sulam, ${deletedSummary.count.toLocaleString("id-ID")} summary kode, dan ${deletedMandor.count.toLocaleString("id-ID")} data mandor dihapus.`,
       deletedCount: deletedSulam.count,
     });
   } catch (error: any) {

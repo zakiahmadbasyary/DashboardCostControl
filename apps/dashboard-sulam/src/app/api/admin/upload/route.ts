@@ -63,7 +63,7 @@ export async function POST(req: Request) {
     }
 
     // Proses dan validasi baris transaksi
-    const { validRows, summaryRows, errors } = processSulamRows(rawRows);
+    const { validRows, summaryRows, dataMandorRows, errors } = processSulamRows(rawRows);
 
     if (validRows.length === 0) {
       return NextResponse.json(
@@ -82,8 +82,9 @@ export async function POST(req: Request) {
         // 1. Bersihkan seluruh data transaksi sulam (anak relasi)
         await tx.sulam.deleteMany();
 
-        // 2. Bersihkan seluruh summary sulam (induk relasi)
+        // 2. Bersihkan seluruh summary sulam & data mandor (induk relasi)
         await tx.summarySulam.deleteMany();
+        await tx.dataMandor.deleteMany();
 
         // 3. Masukkan data summary_sulam terlebih dahulu agar Foreign Key 'kode' terpenuhi
         for (const s of summaryRows) {
@@ -103,7 +104,25 @@ export async function POST(req: Request) {
           });
         }
 
-        // 4. Masukkan data transaksi sulam dalam batch 500 baris
+        // 4. Masukkan data_mandor agar Foreign Key 'key_mandor' terpenuhi
+        for (const m of dataMandorRows) {
+          await tx.dataMandor.create({
+            data: {
+              keyMandor: m.keyMandor,
+              tanggalRealisasi: m.tanggalRealisasi,
+              mandor: m.mandor,
+              pg: m.pg,
+              wilayah: m.wilayah,
+              year: m.year,
+              month: m.month,
+              tk: m.tk,
+              batang: m.batang,
+              batangPerTk: m.batangPerTk,
+            },
+          });
+        }
+
+        // 5. Masukkan data transaksi sulam dalam batch 500 baris
         const BATCH_SIZE = 500;
         let insertedCount = 0;
 
@@ -132,7 +151,7 @@ export async function POST(req: Request) {
               costCenterName: r.costCenterName,
               costWorkingHour: r.costWorkingHour,
               indeksBiaya: r.indeksBiaya,
-              indexResourceQty: r.indexResourceQty,
+              mandor: r.mandor,
               pasDocument: r.pasDocument,
               orderNo: r.orderNo,
               actCostGroup: r.actCostGroup,
@@ -141,6 +160,7 @@ export async function POST(req: Request) {
               year: r.year,
               month: r.month,
               kode: r.kode,
+              keyMandor: r.keyMandor,
             })),
           });
           insertedCount += chunk.length;
@@ -148,6 +168,7 @@ export async function POST(req: Request) {
 
         return {
           totalSummary: summaryRows.length,
+          totalMandor: dataMandorRows.length,
           totalSulam: insertedCount,
         };
       },
@@ -158,11 +179,12 @@ export async function POST(req: Request) {
 
     return NextResponse.json({
       success: true,
-      message: `Berhasil me-replace database: ${result.totalSulam.toLocaleString("id-ID")} transaksi sulam dan ${result.totalSummary.toLocaleString("id-ID")} summary kode berhasil diperbarui.`,
+      message: `Berhasil me-replace database: ${result.totalSulam.toLocaleString("id-ID")} transaksi sulam, ${result.totalSummary.toLocaleString("id-ID")} summary kode, dan ${result.totalMandor.toLocaleString("id-ID")} rekap data mandor PG1 berhasil diperbarui.`,
       data: {
         totalRows: rawRows.length,
         validRows: validRows.length,
         summaryCount: result.totalSummary,
+        mandorCount: result.totalMandor,
         errorCount: errors.length,
         sampleErrors: errors.slice(0, 10),
       },

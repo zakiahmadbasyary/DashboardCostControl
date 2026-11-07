@@ -47,6 +47,7 @@ interface TransactionItem {
   hasilEfektif: string | number | null;
   satuanHasil: string | null;
   totalRealisasiBiaya: string | number | null;
+  mandor: string | null;
   costCenterName: string | null;
   orderNo: string | null;
   pasDocument: string | null;
@@ -863,6 +864,7 @@ export default function SulamAdminPreviewPage() {
                     <th className="px-3 py-3 text-right">Hasil (HA)</th>
                     <th className="px-2 py-3 text-center">Satuan</th>
                     <th className="px-4 py-3 text-right">Total Biaya Realisasi</th>
+                    <th className="px-3 py-3">Mandor</th>
                     <th className="px-3 py-3">Cost Center</th>
                     <th className="px-3 py-3">Order No / PAS</th>
                   </tr>
@@ -929,6 +931,9 @@ export default function SulamAdminPreviewPage() {
                         </td>
                         <td className="px-4 py-2 text-right font-mono font-bold text-[#16823B]">
                           {formatCurrency(tx.totalRealisasiBiaya || 0)}
+                        </td>
+                        <td className="px-3 py-2 text-[#17231B] font-medium text-[11px]">
+                          {tx.mandor || "-"}
                         </td>
                         <td className="px-3 py-2 text-[#5F6B63] text-[11px]">
                           {tx.costCenterName || "-"}

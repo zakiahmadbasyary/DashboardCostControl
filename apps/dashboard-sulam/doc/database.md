@@ -146,7 +146,7 @@ erDiagram
         varchar cost_center_name
         numeric cost_working_hour
         numeric indeks_biaya
-        numeric index_resource_qty
+        varchar mandor
         varchar pas_document
         varchar order_no
         varchar act_cost_group
@@ -155,6 +155,20 @@ erDiagram
         smallint year
         smallint month
         varchar kode FK
+        varchar key_mandor FK
+    }
+
+    DATA_MANDOR {
+        varchar key_mandor PK
+        date tanggal_realisasi
+        varchar mandor
+        varchar pg
+        varchar wilayah
+        smallint year
+        smallint month
+        numeric tk
+        numeric batang
+        numeric batang_per_tk
     }
 ```
 
@@ -230,8 +244,7 @@ yang berhasil divalidasi disimpan sebagai satu record.
                      22 `indeks_biaya`                    NUMERIC(18,4)    Excel: Index
                                                                            Biaya/Hasil Effectif
 
-                     23 `index_resource_qty`              NUMERIC(18,4)    Excel: Index Resource
-                                                                           Qty/Hasil Effektif
+                     23 `mandor`                          VARCHAR(100)     Excel: Mandor / Foreman
 
                      24 `pas_document`                    VARCHAR(100)     Excel: PAS Document
 
@@ -412,7 +425,7 @@ CREATE TABLE sulam (
     cost_center_name VARCHAR(150),
     cost_working_hour NUMERIC(18,4),
     indeks_biaya NUMERIC(18,4),
-    index_resource_qty NUMERIC(18,4),
+    mandor VARCHAR(100),
 
     pas_document VARCHAR(100),
     order_no VARCHAR(100),

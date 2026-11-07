@@ -64,7 +64,7 @@ model Sulam {
   costCenterName               String?   @map("cost_center_name") @db.VarChar(150)
   costWorkingHour              Decimal?  @map("cost_working_hour") @db.Decimal(18, 4)
   indeksBiaya                  Decimal?  @map("indeks_biaya") @db.Decimal(18, 4)
-  indexResourceQty             Decimal?  @map("index_resource_qty") @db.Decimal(18, 4)
+  mandor                       String?   @map("mandor") @db.VarChar(100)
 
   pasDocument                  String?   @map("pas_document") @db.VarChar(100)
   orderNo                      String?   @map("order_no") @db.VarChar(100)
@@ -75,17 +75,48 @@ model Sulam {
   year                         Int       @map("year") @db.SmallInt
   month                        Int       @map("month") @db.SmallInt
   kode                         String    @map("kode") @db.VarChar(40)
+  keyMandor                    String?   @map("key_mandor") @db.VarChar(120)
 
   createdAt                    DateTime  @default(now()) @map("created_at")
   updatedAt                    DateTime  @updatedAt @map("updated_at")
 
   summary                      SummarySulam @relation(fields: [kode], references: [kode], onDelete: Restrict, onUpdate: Cascade)
+  dataMandor                   DataMandor?  @relation(fields: [keyMandor], references: [keyMandor], onDelete: SetNull, onUpdate: Cascade)
 
   @@index([kode])
+  @@index([keyMandor])
   @@index([tanggalRealisasi])
   @@index([wilayah])
   @@index([jenis])
   @@index([spkId])
+  @@index([mandor])
   @@map("sulam")
+}
+
+// 3. Model DataMandor: menyimpan rekapitulasi performa mandor harian (khusus PG1)
+model DataMandor {
+  keyMandor        String    @id @map("key_mandor") @db.VarChar(120)
+  tanggalRealisasi DateTime  @map("tanggal_realisasi") @db.Date
+  mandor           String    @db.VarChar(100)
+
+  pg               String    @default("PG1") @db.VarChar(3)
+  wilayah          String    @db.VarChar(4)
+  year             Int       @db.SmallInt
+  month            Int       @db.SmallInt
+
+  tk               Decimal   @default(0) @db.Decimal(18, 4)
+  batang           Decimal   @default(0) @db.Decimal(18, 4)
+  batangPerTk      Decimal   @default(0) @map("batang_per_tk") @db.Decimal(18, 4)
+
+  createdAt        DateTime  @default(now()) @map("created_at")
+  updatedAt        DateTime  @updatedAt @map("updated_at")
+
+  sulamList        Sulam[]
+
+  @@index([mandor])
+  @@index([tanggalRealisasi])
+  @@index([pg, wilayah])
+  @@index([year, month])
+  @@map("data_mandor")
 }
 

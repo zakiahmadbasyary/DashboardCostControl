@@ -38,6 +38,7 @@ export async function GET(req: Request) {
         { kodeAktivitas: { contains: search, mode: "insensitive" } },
         { deskripsiBahanAlatLainlain: { contains: search, mode: "insensitive" } },
         { groupBahanAlat: { contains: search, mode: "insensitive" } },
+        { mandor: { contains: search, mode: "insensitive" } },
       ];
     }
 

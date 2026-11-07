@@ -22,7 +22,7 @@ export interface SulamRawInput {
   cost_center_name?: any;
   cost_working_hour?: any;
   indeks_biaya?: any;
-  index_resource_qty?: any;
+  mandor?: any;
   pas_document?: any;
   order_no?: any;
   act_cost_group?: any;
@@ -51,7 +51,7 @@ export interface ParsedSulamRow {
   costCenterName: string | null;
   costWorkingHour: number;
   indeksBiaya: number;
-  indexResourceQty: number;
+  mandor: string | null;
   pasDocument: string | null;
   orderNo: string | null;
   actCostGroup: string | null;
@@ -62,6 +62,20 @@ export interface ParsedSulamRow {
   year: number;
   month: number;
   kode: string;
+  keyMandor: string | null;
+}
+
+export interface DataMandorData {
+  keyMandor: string;
+  tanggalRealisasi: Date;
+  mandor: string;
+  pg: string;
+  wilayah: string;
+  year: number;
+  month: number;
+  tk: number;
+  batang: number;
+  batangPerTk: number;
 }
 
 export interface SummarySulamData {
@@ -222,10 +236,24 @@ export function limitStr(val: any, maxLen: number, defaultVal: string | null = n
 export function processSulamRows(rawRows: Record<string, any>[]): {
   validRows: ParsedSulamRow[];
   summaryRows: SummarySulamData[];
+  dataMandorRows: DataMandorData[];
   errors: { row: number; error: string }[];
 } {
   const validRows: ParsedSulamRow[] = [];
   const errors: { row: number; error: string }[] = [];
+
+  // Pass 1: Bangun kamus SPK_ID -> Mandor dari baris yang kolom mandor-nya terisi
+  const spkToMandor = new Map<string, string>();
+  for (const r of rawRows) {
+    const rawSpk = limitStr(getVal(r, ["spk_id", "spk id", "no spk"]), 50);
+    const rawMandor = limitStr(getVal(r, ["mandor", "nama mandor", "nama_mandor", "foreman"]), 100);
+    if (rawSpk && rawMandor) {
+      const spkKey = rawSpk.trim().toLowerCase();
+      if (!spkToMandor.has(spkKey)) {
+        spkToMandor.set(spkKey, rawMandor.trim());
+      }
+    }
+  }
 
   for (let i = 0; i < rawRows.length; i++) {
     const r = rawRows[i];
@@ -279,13 +307,32 @@ export function processSulamRows(rawRows: Record<string, any>[]): {
     const indeksBiaya = parseIndonesianNumber(
       getVal(r, ["indeks_biaya", "index biaya/hasil effectif", "index biaya/hasil efektif", "index biaya"])
     );
-    const indexResourceQty = parseIndonesianNumber(
-      getVal(r, ["index_resource_qty", "index resource qty/hasil effektif", "index resource qty/hasil efektif", "index resource"])
+    const rawSpk = limitStr(getVal(r, ["spk_id", "spk id", "no spk"]), 50);
+    let mandor = limitStr(
+      getVal(r, ["mandor", "nama mandor", "nama_mandor", "foreman"]),
+      100
     );
+
+    // Jika mandor kosong, cek apakah SPK_ID ada di kamus mandor
+    if (!mandor && rawSpk) {
+      const spkKey = rawSpk.trim().toLowerCase();
+      if (spkToMandor.has(spkKey)) {
+        mandor = spkToMandor.get(spkKey) || null;
+      }
+    }
+
+    // Generate key_mandor otomatis (khusus PG1 yang memiliki data mandor)
+    let keyMandor: string | null = null;
+    if (pg === "PG1" && mandor) {
+      const y = tglRealisasi.getFullYear();
+      const m = String(tglRealisasi.getMonth() + 1).padStart(2, "0");
+      const d = String(tglRealisasi.getDate()).padStart(2, "0");
+      keyMandor = `${y}-${m}-${d}_${mandor.trim()}`;
+    }
 
     const rowObj: ParsedSulamRow = {
       tanggalRealisasi: tglRealisasi,
-      spkId: limitStr(getVal(r, ["spk_id", "spk id", "no spk"]), 50),
+      spkId: rawSpk,
       plantationGroup: limitStr(getVal(r, ["plantation_group", "plantation group"]), 50),
       wilayah,
       lokasi: limitStr(getVal(r, ["lokasi", "location"]), 50),
@@ -305,7 +352,7 @@ export function processSulamRows(rawRows: Record<string, any>[]): {
       costCenterName: limitStr(getVal(r, ["cost_center_name", "cost center name", "cost center"]), 150),
       costWorkingHour,
       indeksBiaya,
-      indexResourceQty,
+      mandor,
       pasDocument: limitStr(getVal(r, ["pas_document", "pas document"]), 100),
       orderNo: limitStr(getVal(r, ["order_no", "order", "order no"]), 100),
       actCostGroup: limitStr(getVal(r, ["act_cost_group", "act cost group"]), 100),
@@ -315,12 +362,13 @@ export function processSulamRows(rawRows: Record<string, any>[]): {
       year,
       month,
       kode,
+      keyMandor,
     };
 
     validRows.push(rowObj);
   }
 
-  // Hitung agregasi summary berdasarkan kode
+  // 1. Hitung agregasi summary berdasarkan kode
   const summaryMap = new Map<string, SummarySulamData>();
 
   for (const item of validRows) {
@@ -353,5 +401,63 @@ export function processSulamRows(rawRows: Record<string, any>[]): {
 
   const summaryRows = Array.from(summaryMap.values());
 
-  return { validRows, summaryRows, errors };
+  // 2. Hitung agregasi data_mandor (khusus PG1)
+  const mandorMap = new Map<
+    string,
+    {
+      keyMandor: string;
+      tanggalRealisasi: Date;
+      mandor: string;
+      pg: string;
+      wilayah: string;
+      year: number;
+      month: number;
+      tk: number;
+      batang: number;
+    }
+  >();
+
+  for (const item of validRows) {
+    if (item.pg === "PG1" && item.keyMandor && item.mandor) {
+      let mRecord = mandorMap.get(item.keyMandor);
+      if (!mRecord) {
+        mRecord = {
+          keyMandor: item.keyMandor,
+          tanggalRealisasi: item.tanggalRealisasi,
+          mandor: item.mandor,
+          pg: item.pg,
+          wilayah: item.wilayah,
+          year: item.year,
+          month: item.month,
+          tk: 0,
+          batang: 0,
+        };
+        mandorMap.set(item.keyMandor, mRecord);
+      }
+
+      if (item.jenis === "Upah") {
+        mRecord.tk += item.resourceBahanAlat;
+      } else if (item.jenis === "Material") {
+        mRecord.batang += item.resourceBahanAlat;
+      }
+    }
+  }
+
+  const dataMandorRows: DataMandorData[] = Array.from(mandorMap.values()).map((m) => {
+    const batangPerTk = m.tk > 0 ? Number((m.batang / m.tk).toFixed(4)) : 0;
+    return {
+      keyMandor: m.keyMandor,
+      tanggalRealisasi: m.tanggalRealisasi,
+      mandor: m.mandor,
+      pg: m.pg,
+      wilayah: m.wilayah,
+      year: m.year,
+      month: m.month,
+      tk: Number(m.tk.toFixed(4)),
+      batang: Number(m.batang.toFixed(4)),
+      batangPerTk,
+    };
+  });
+
+  return { validRows, summaryRows, dataMandorRows, errors };
 }
