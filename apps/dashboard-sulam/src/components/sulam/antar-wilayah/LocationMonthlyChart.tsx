@@ -14,7 +14,7 @@ import {
   Cell,
   LabelList,
 } from "recharts";
-import { BarChart3, MapPin, Users, Sprout, MousePointerClick, Calendar } from "lucide-react";
+import { BarChart3, MapPin, Users, Sprout, MousePointerClick, Calendar, MoveHorizontal } from "lucide-react";
 import { formatNumberId } from "@/lib/formatters";
 
 export interface MonthlyLocationMetric {
@@ -35,10 +35,10 @@ interface LocationMonthlyChartProps {
 
 // Skema warna grafik:
 // - TK: Bar Hijau Solid (#16823B) pada Sumbu Kanan
-// - Batang: Garis / Dash Horizontal Kuning Gold (#F59E0B) pada Sumbu Kiri
+// - Batang: Garis / Dash Horizontal Kuning (#E5C959, warna kuning Filter Utama) pada Sumbu Kiri
 const TK_COLOR = "#16823B";
 const TK_ACTIVE_COLOR = "#0E5C28";
-const BATANG_COLOR = "#F59E0B";
+const BATANG_COLOR = "#E5C959"; // Kuning Filter Utama GGF
 
 const MONTH_NAMES_FULL = [
   "Januari", "Februari", "Maret", "April", "Mei", "Juni",
@@ -110,6 +110,8 @@ export default function LocationMonthlyChart({
         width={dashWidth}
         height={dashHeight}
         fill={BATANG_COLOR}
+        stroke="#C9AE40"
+        strokeWidth={0.5}
         rx={1}
         cursor="pointer"
         onClick={(e) => {
@@ -235,10 +237,10 @@ export default function LocationMonthlyChart({
             </div>
             <div className="h-6 w-px bg-[#DDE5DF]" />
             <div className="flex items-center gap-1.5 px-2">
-              <Sprout className="w-3.5 h-3.5 text-[#D97706]" />
+              <Sprout className="w-3.5 h-3.5 text-[#9A7D18]" />
               <div>
                 <div className="text-[10px] text-[#5F6B63] leading-none">Total Batang</div>
-                <div className="font-mono font-bold text-[#D97706] text-xs">
+                <div className="font-mono font-bold text-[#9A7D18] text-xs">
                   {formatNumberId(totals.sumBatang, 0)}
                 </div>
               </div>
@@ -279,127 +281,143 @@ export default function LocationMonthlyChart({
           </p>
         </div>
       ) : (
-        <div className="h-[280px] sm:h-[320px] w-full pt-1">
-          <ResponsiveContainer width="100%" height="100%">
-            <ComposedChart
-              data={data}
-              margin={{ top: 25, right: 25, bottom: 10, left: 15 }}
-              onClick={(state: any) => {
-                if (!state) return;
-                let clickedMonth: number | null = null;
-                if (state.activePayload && state.activePayload.length > 0) {
-                  clickedMonth = state.activePayload[0].payload.month;
-                }
-                if (!clickedMonth && typeof state.activeTooltipIndex === "number") {
-                  clickedMonth = data[state.activeTooltipIndex]?.month;
-                }
-                if (clickedMonth) {
-                  onSelectMonth(clickedMonth);
-                }
-              }}
-              style={{ cursor: "pointer" }}
-            >
-              <CartesianGrid stroke="#E5E5E5" vertical={false} />
-              <XAxis
-                dataKey="monthName"
-                stroke="#17231B"
-                fontSize={11}
-                tickLine={false}
-                axisLine={{ stroke: "#4B5563" }}
-                tick={renderCustomXAxisTick}
-              />
+        <div className="w-full">
+          {/* Petunjuk Geser Horizontal Khusus Layar Mobile */}
+          <div className="flex sm:hidden items-center justify-between text-[11px] text-[#5F6B63] mb-2 px-0.5">
+            <span className="flex items-center gap-1.5 font-medium text-[#17231B]">
+              <MoveHorizontal className="w-3.5 h-3.5 text-[#16823B] shrink-0" />
+              <span>Geser grafik ke samping untuk melihat 12 bulan</span>
+            </span>
+            <span className="text-[10px] font-semibold bg-[#EAF3EC] text-[#16823B] px-2 py-0.5 rounded border border-[#CBE0D1]">
+              12 Bulan
+            </span>
+          </div>
 
-              {/* Sumbu Y Kiri: Batang Bibit (Garis / Dash Oranye) */}
-              <YAxis
-                yAxisId="left"
-                orientation="left"
-                stroke="#4B5563"
-                fontSize={10}
-                tickLine={false}
-                axisLine={false}
-                domain={[0, maxBatangDomain]}
-                tickFormatter={(v) => formatNumberId(v, 0)}
-              />
+          {/* Wrapper Scrollable Horizontal di Layar Mobile, Full Width di Layar Desktop */}
+          <div className="overflow-x-auto overflow-y-hidden scrollbar-thin pb-2 -mx-2 px-2 sm:mx-0 sm:px-0">
+            <div className="h-[290px] sm:h-[320px] min-w-[660px] sm:min-w-full w-full pt-1">
+              <ResponsiveContainer width="100%" height="100%">
+                <ComposedChart
+                  data={data}
+                  margin={{ top: 25, right: 25, bottom: 10, left: 15 }}
+                  onClick={(state: any) => {
+                    if (!state) return;
+                    let clickedMonth: number | null = null;
+                    if (state.activePayload && state.activePayload.length > 0) {
+                      clickedMonth = state.activePayload[0].payload.month;
+                    }
+                    if (!clickedMonth && typeof state.activeTooltipIndex === "number") {
+                      clickedMonth = data[state.activeTooltipIndex]?.month;
+                    }
+                    if (clickedMonth) {
+                      onSelectMonth(clickedMonth);
+                    }
+                  }}
+                  style={{ cursor: "pointer" }}
+                >
+                  <CartesianGrid stroke="#E5E5E5" vertical={false} />
+                  <XAxis
+                    dataKey="monthName"
+                    stroke="#17231B"
+                    fontSize={11}
+                    tickLine={false}
+                    axisLine={{ stroke: "#4B5563" }}
+                    tick={renderCustomXAxisTick}
+                  />
 
-              {/* Sumbu Y Kanan: Tenaga Kerja (TK - Bar Biru) */}
-              <YAxis
-                yAxisId="right"
-                orientation="right"
-                stroke="#4B5563"
-                fontSize={10}
-                tickLine={false}
-                axisLine={false}
-                domain={[0, maxTkDomain]}
-                tickFormatter={(v) => formatNumberId(v, 0)}
-              />
+                  {/* Sumbu Y Kiri: Batang Bibit (Garis / Dash Oranye) */}
+                  <YAxis
+                    yAxisId="left"
+                    orientation="left"
+                    stroke="#4B5563"
+                    fontSize={10}
+                    tickLine={false}
+                    axisLine={false}
+                    domain={[0, maxBatangDomain]}
+                    tickFormatter={(v) => formatNumberId(v, 0)}
+                  />
 
-              <Tooltip content={<CustomLocationTooltip activeMonth={selectedMonth} />} />
+                  {/* Sumbu Y Kanan: Tenaga Kerja (TK - Bar Biru) */}
+                  <YAxis
+                    yAxisId="right"
+                    orientation="right"
+                    stroke="#4B5563"
+                    fontSize={10}
+                    tickLine={false}
+                    axisLine={false}
+                    domain={[0, maxTkDomain]}
+                    tickFormatter={(v) => formatNumberId(v, 0)}
+                  />
 
-              {/* Legend di Bawah Tengah: [■ TK (Hijau)]  [― Batang (Kuning)] */}
-              <Legend
-                verticalAlign="bottom"
-                align="center"
-                wrapperStyle={{ paddingTop: 16 }}
-                content={() => (
-                  <div className="flex items-center justify-center gap-6 text-xs text-[#17231B] font-medium">
-                    <div className="flex items-center gap-2">
-                      <span className="w-3.5 h-3.5 bg-[#16823B] inline-block rounded-xs" />
-                      <span className="font-semibold text-[#16823B]">TK</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <span className="w-4 h-1.5 bg-[#F59E0B] inline-block rounded-xs" />
-                      <span className="font-semibold text-[#D97706]">Batang</span>
-                    </div>
-                  </div>
-                )}
-              />
+                  <Tooltip content={<CustomLocationTooltip activeMonth={selectedMonth} />} />
 
-              {/* 1. Bar: Tenaga Kerja (TK) pada Sumbu Kanan */}
-              <Bar
-                yAxisId="right"
-                dataKey="tk"
-                name="TK"
-                barSize={34}
-                isAnimationActive={false}
-                cursor="pointer"
-                onClick={(barData: any) => {
-                  const m = barData?.month;
-                  if (m) onSelectMonth(m);
-                }}
-              >
-                <LabelList dataKey="tk" content={renderBarLabel} />
-                {data.map((entry) => {
-                  const isCurrent = entry.month === selectedMonth;
-                  return (
-                    <Cell
-                      key={`tk-${entry.month}`}
-                      cursor="pointer"
-                      onClick={(e: any) => {
-                        e?.stopPropagation?.();
-                        onSelectMonth(entry.month);
-                      }}
-                      fill={isCurrent ? TK_ACTIVE_COLOR : TK_COLOR}
-                      stroke={isCurrent ? "#17231B" : undefined}
-                      strokeWidth={isCurrent ? 2 : 0}
-                      className="cursor-pointer transition-opacity hover:opacity-85"
-                    />
-                  );
-                })}
-              </Bar>
+                  {/* Legend di Bawah Tengah: [■ TK (Hijau)]  [― Batang (Kuning)] */}
+                  <Legend
+                    verticalAlign="bottom"
+                    align="center"
+                    wrapperStyle={{ paddingTop: 16 }}
+                    content={() => (
+                      <div className="flex items-center justify-center gap-6 text-xs text-[#17231B] font-medium">
+                        <div className="flex items-center gap-2">
+                          <span className="w-3.5 h-3.5 bg-[#16823B] inline-block rounded-xs" />
+                          <span className="font-semibold text-[#16823B]">TK</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <span className="w-4 h-1.5 bg-[#E5C959] border border-[#C9AE40] inline-block rounded-xs" />
+                          <span className="font-semibold text-[#8C7118]">Batang</span>
+                        </div>
+                      </div>
+                    )}
+                  />
 
-              {/* 2. Marker Dash: Batang Bibit pada Sumbu Kiri */}
-              <Line
-                yAxisId="left"
-                type="monotone"
-                dataKey="batang"
-                name="Batang"
-                stroke="transparent"
-                dot={renderCustomDashDot}
-                activeDot={{ r: 5, fill: BATANG_COLOR }}
-                isAnimationActive={false}
-              />
-            </ComposedChart>
-          </ResponsiveContainer>
+                  {/* 1. Bar: Tenaga Kerja (TK) pada Sumbu Kanan */}
+                  <Bar
+                    yAxisId="right"
+                    dataKey="tk"
+                    name="TK"
+                    barSize={34}
+                    isAnimationActive={false}
+                    cursor="pointer"
+                    onClick={(barData: any) => {
+                      const m = barData?.month;
+                      if (m) onSelectMonth(m);
+                    }}
+                  >
+                    <LabelList dataKey="tk" content={renderBarLabel} />
+                    {data.map((entry) => {
+                      const isCurrent = entry.month === selectedMonth;
+                      return (
+                        <Cell
+                          key={`tk-${entry.month}`}
+                          cursor="pointer"
+                          onClick={(e: any) => {
+                            e?.stopPropagation?.();
+                            onSelectMonth(entry.month);
+                          }}
+                          fill={isCurrent ? TK_ACTIVE_COLOR : TK_COLOR}
+                          stroke={isCurrent ? "#17231B" : undefined}
+                          strokeWidth={isCurrent ? 2 : 0}
+                          className="cursor-pointer transition-opacity hover:opacity-85"
+                        />
+                      );
+                    })}
+                  </Bar>
+
+                  {/* 2. Marker Dash: Batang Bibit pada Sumbu Kiri */}
+                  <Line
+                    yAxisId="left"
+                    type="monotone"
+                    dataKey="batang"
+                    name="Batang"
+                    stroke="transparent"
+                    dot={renderCustomDashDot}
+                    activeDot={{ r: 5, fill: BATANG_COLOR }}
+                    isAnimationActive={false}
+                  />
+                </ComposedChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
         </div>
       )}
     </div>
@@ -434,7 +452,7 @@ function CustomLocationTooltip({ active, payload, label, activeMonth }: any) {
           <span className="font-sans font-medium text-[#5F6B63]">Tenaga Kerja:</span>
           <span className="font-bold">{formatNumberId(tk, 1)} TK</span>
         </div>
-        <div className="flex items-center justify-between text-[#D97706]">
+        <div className="flex items-center justify-between text-[#8C7118]">
           <span className="font-sans font-medium text-[#5F6B63]">Batang Bibit:</span>
           <span className="font-bold">{formatNumberId(batang, 0)} btg</span>
         </div>
