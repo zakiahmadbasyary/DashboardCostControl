@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useMemo } from "react";
+import React, { useMemo, useState, useEffect } from "react";
 import {
   ResponsiveContainer,
   ComposedChart,
@@ -54,6 +54,38 @@ export default function LocationMonthlyChart({
   onSelectMonth,
   loading,
 }: LocationMonthlyChartProps) {
+  // Deteksi ukuran layar untuk responsivitas adaptif (Mobile / Tablet / Desktop)
+  const [screenMode, setScreenMode] = useState<"mobile" | "tablet" | "desktop">("desktop");
+
+  useEffect(() => {
+    const checkScreen = () => {
+      const w = window.innerWidth;
+      if (w < 640) {
+        setScreenMode("mobile");
+      } else if (w < 1024) {
+        setScreenMode("tablet");
+      } else {
+        setScreenMode("desktop");
+      }
+    };
+    checkScreen();
+    window.addEventListener("resize", checkScreen);
+    return () => window.removeEventListener("resize", checkScreen);
+  }, []);
+
+  const isMobile = screenMode === "mobile";
+  const isTablet = screenMode === "tablet";
+
+  // Dimensi adaptif responsif:
+  // - Desktop: Sangat tebal, besar, & dominan (bar 62px, dash 66px, dashHeight 10px)
+  // - Tablet: Proporsional & mantap (bar 48px, dash 52px, dashHeight 8px)
+  // - Mobile: Pas di genggaman, rapi & nyaman di-scroll (bar 36px, dash 42px, dashHeight 6px)
+  const barSize = isMobile ? 36 : isTablet ? 48 : 62;
+  const dashWidth = isMobile ? 42 : isTablet ? 52 : 66;
+  const dashHeight = isMobile ? 6 : isTablet ? 8 : 10;
+  const dashRx = isMobile ? 1.5 : 2;
+  const labelFontSize = isMobile ? 9.5 : 11;
+
   // Hitung total akumulasi tahunan lokasi ini
   const totals = useMemo(() => {
     let sumTk = 0;
@@ -97,12 +129,10 @@ export default function LocationMonthlyChart({
     };
   }, [data]);
 
-  // Custom marker dash horizontal tebal untuk Batang (sesuai gambar referensi)
+  // Custom marker dash horizontal tebal untuk Batang (sesuai gambar referensi & responsif)
   const renderCustomDashDot = (props: any) => {
     const { cx, cy, payload } = props;
     if (cx === undefined || cy === undefined) return null;
-    const dashWidth = 32;
-    const dashHeight = 5;
     const month = payload?.month;
     return (
       <rect
@@ -113,7 +143,7 @@ export default function LocationMonthlyChart({
         fill={BATANG_COLOR}
         stroke="#D35400"
         strokeWidth={0.5}
-        rx={1}
+        rx={dashRx}
         cursor="pointer"
         onClick={(e) => {
           e.stopPropagation();
@@ -132,11 +162,11 @@ export default function LocationMonthlyChart({
     return (
       <text
         x={x + width / 2}
-        y={y - 6}
+        y={y - (isMobile ? 5 : 7)}
         fill="#17231B"
         textAnchor="middle"
-        fontSize={10}
-        fontWeight={value && value > 0 ? "600" : "400"}
+        fontSize={labelFontSize}
+        fontWeight={value && value > 0 ? "700" : "400"}
         fontFamily="sans-serif"
       >
         {labelText}
@@ -150,6 +180,8 @@ export default function LocationMonthlyChart({
     const month = payload.index + 1;
     const monthName = payload.value;
     const isCurrent = month === selectedMonth;
+    const pillWidth = isMobile ? 32 : 36;
+    const pillHeight = isMobile ? 18 : 20;
 
     return (
       <g
@@ -162,21 +194,21 @@ export default function LocationMonthlyChart({
       >
         {isCurrent && (
           <rect
-            x={-18}
-            y={3}
-            width={36}
-            height={20}
-            rx={5}
+            x={-pillWidth / 2}
+            y={isMobile ? 2 : 3}
+            width={pillWidth}
+            height={pillHeight}
+            rx={isMobile ? 4 : 5}
             fill="#16823B"
             className="shadow-xs"
           />
         )}
         <text
           x={0}
-          y={isCurrent ? 17 : 15}
+          y={isCurrent ? (isMobile ? 15 : 17) : isMobile ? 14 : 15}
           textAnchor="middle"
           fill={isCurrent ? "#FFFFFF" : "#17231B"}
-          fontSize={11}
+          fontSize={isMobile ? 10 : 11}
           fontWeight={isCurrent ? "bold" : "500"}
           className="group-hover:fill-[#16823B] transition-colors"
         >
@@ -216,19 +248,16 @@ export default function LocationMonthlyChart({
             </div>
             <p className="text-[11px] sm:text-xs text-[#5F6B63] mt-0.5 flex items-center gap-1 flex-wrap">
               <span>Perbandingan Tenaga Kerja (TK) &amp; Batang Bibit per bulan.</span>
-              <span className="inline-flex items-center gap-1 text-[#16823B] font-semibold bg-[#16823B]/10 px-1.5 py-0.2 rounded">
-                <MousePointerClick className="w-3 h-3" />
-                Klik batang / nama bulan untuk mengubah filter utama dashboard
-              </span>
+
             </p>
           </div>
         </div>
 
         {/* Info ringkasan tahunan */}
         {hasData && (
-          <div className="flex items-center gap-3 bg-[#F7F9F7] px-3.5 py-2 rounded-xl border border-[#DDE5DF] self-start sm:self-auto">
-            <div className="flex items-center gap-1.5 px-2">
-              <Users className="w-3.5 h-3.5 text-[#16823B]" />
+          <div className="flex items-center justify-between sm:justify-start gap-2 sm:gap-3 bg-[#F7F9F7] px-3 sm:px-3.5 py-2 rounded-xl border border-[#DDE5DF] w-full sm:w-auto overflow-x-auto">
+            <div className="flex items-center gap-1.5 px-1.5 sm:px-2">
+              <Users className="w-3.5 h-3.5 text-[#16823B] shrink-0" />
               <div>
                 <div className="text-[10px] text-[#5F6B63] leading-none">Total TK</div>
                 <div className="font-mono font-bold text-[#16823B] text-xs">
@@ -236,9 +265,9 @@ export default function LocationMonthlyChart({
                 </div>
               </div>
             </div>
-            <div className="h-6 w-px bg-[#DDE5DF]" />
-            <div className="flex items-center gap-1.5 px-2">
-              <Sprout className="w-3.5 h-3.5 text-[#ED7D31]" />
+            <div className="h-6 w-px bg-[#DDE5DF] shrink-0" />
+            <div className="flex items-center gap-1.5 px-1.5 sm:px-2">
+              <Sprout className="w-3.5 h-3.5 text-[#ED7D31] shrink-0" />
               <div>
                 <div className="text-[10px] text-[#5F6B63] leading-none">Total Batang</div>
                 <div className="font-mono font-bold text-[#ED7D31] text-xs">
@@ -246,8 +275,8 @@ export default function LocationMonthlyChart({
                 </div>
               </div>
             </div>
-            <div className="h-6 w-px bg-[#DDE5DF]" />
-            <div className="px-2">
+            <div className="h-6 w-px bg-[#DDE5DF] shrink-0" />
+            <div className="px-1.5 sm:px-2">
               <div className="text-[10px] text-[#5F6B63] leading-none">Rata-rata Batang/TK</div>
               <div className="font-mono font-bold text-[#16823B] text-xs">
                 {totals.ratio > 0 ? `${formatNumberId(totals.ratio, 1)}` : "-"}
@@ -296,11 +325,15 @@ export default function LocationMonthlyChart({
 
           {/* Wrapper Scrollable Horizontal di Layar Mobile, Full Width di Layar Desktop */}
           <div className="overflow-x-auto overflow-y-hidden scrollbar-thin pb-2 -mx-2 px-2 sm:mx-0 sm:px-0">
-            <div className="h-[290px] sm:h-[320px] min-w-[660px] sm:min-w-full w-full pt-1">
+            <div className="h-[285px] sm:h-[350px] min-w-[620px] sm:min-w-full w-full pt-1">
               <ResponsiveContainer width="100%" height="100%">
                 <ComposedChart
                   data={data}
-                  margin={{ top: 25, right: 25, bottom: 10, left: 15 }}
+                  margin={
+                    isMobile
+                      ? { top: 22, right: 12, bottom: 8, left: 5 }
+                      : { top: 25, right: 25, bottom: 10, left: 15 }
+                  }
                   onClick={(state: any) => {
                     if (!state) return;
                     let clickedMonth: number | null = null;
@@ -320,7 +353,7 @@ export default function LocationMonthlyChart({
                   <XAxis
                     dataKey="monthName"
                     stroke="#17231B"
-                    fontSize={11}
+                    fontSize={isMobile ? 10 : 11}
                     tickLine={false}
                     axisLine={{ stroke: "#4B5563" }}
                     tick={renderCustomXAxisTick}
@@ -331,7 +364,8 @@ export default function LocationMonthlyChart({
                     yAxisId="left"
                     orientation="left"
                     stroke="#4B5563"
-                    fontSize={10}
+                    fontSize={isMobile ? 9 : 10}
+                    width={isMobile ? 32 : 45}
                     tickLine={false}
                     axisLine={false}
                     domain={[0, maxBatangDomain]}
@@ -343,7 +377,8 @@ export default function LocationMonthlyChart({
                     yAxisId="right"
                     orientation="right"
                     stroke="#4B5563"
-                    fontSize={10}
+                    fontSize={isMobile ? 9 : 10}
+                    width={isMobile ? 28 : 40}
                     tickLine={false}
                     axisLine={false}
                     domain={[0, maxTkDomain]}
@@ -356,19 +391,25 @@ export default function LocationMonthlyChart({
                   <Legend
                     verticalAlign="bottom"
                     align="center"
-                    wrapperStyle={{ paddingTop: 16 }}
+                    wrapperStyle={{ paddingTop: isMobile ? 12 : 16 }}
                     content={() => (
-                      <div className="flex items-center justify-center gap-5 sm:gap-6 text-xs text-[#17231B] font-medium flex-wrap">
+                      <div className="flex items-center justify-center gap-4 sm:gap-6 text-[11px] sm:text-xs text-[#17231B] font-medium flex-wrap">
                         <div className="flex items-center gap-1.5">
-                          <span className="w-3.5 h-3.5 bg-[#16823B] inline-block rounded-xs" />
+                          <span className="w-3 h-3 sm:w-3.5 sm:h-3.5 bg-[#16823B] inline-block rounded-xs" />
                           <span className="font-semibold text-[#16823B]">TK</span>
                         </div>
                         <div className="flex items-center gap-1.5">
-                          <span className="w-3.5 h-3.5 bg-[#E5C959] border border-[#C9AE40] inline-block rounded-xs" />
+                          <span className="w-3 h-3 sm:w-3.5 sm:h-3.5 bg-[#E5C959] border border-[#C9AE40] inline-block rounded-xs" />
                           <span className="font-semibold text-[#8C7118]">TK (Bulan Aktif)</span>
                         </div>
                         <div className="flex items-center gap-1.5">
-                          <span className="w-4 h-1.5 bg-[#ED7D31] inline-block rounded-xs" />
+                          <span
+                            className={
+                              isMobile
+                                ? "w-4.5 h-1.5 bg-[#ED7D31] inline-block rounded-xs"
+                                : "w-6 h-2.5 bg-[#ED7D31] inline-block rounded-xs"
+                            }
+                          />
                           <span className="font-semibold text-[#ED7D31]">Batang</span>
                         </div>
                       </div>
@@ -380,7 +421,7 @@ export default function LocationMonthlyChart({
                     yAxisId="right"
                     dataKey="tk"
                     name="TK"
-                    barSize={34}
+                    barSize={barSize}
                     isAnimationActive={false}
                     cursor="pointer"
                     onClick={(barData: any) => {
@@ -416,7 +457,7 @@ export default function LocationMonthlyChart({
                     name="Batang"
                     stroke="transparent"
                     dot={renderCustomDashDot}
-                    activeDot={{ r: 5, fill: BATANG_COLOR }}
+                    activeDot={{ r: isMobile ? 4 : 5, fill: BATANG_COLOR }}
                     isAnimationActive={false}
                   />
                 </ComposedChart>
