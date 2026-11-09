@@ -11,12 +11,17 @@ import {
   extractDataMaterialRows,
 } from "@/lib/weedControlParser";
 
-// Helper helper untuk membaca nilai field dengan variasi nama kolom
+export const dynamic = "force-dynamic";
+export const maxDuration = 300;
+
+// Helper untuk membaca nilai field dengan variasi nama kolom
 function getVal(row: Record<string, any>, ...keys: string[]): any {
   for (const k of keys) {
     if (k in row && row[k] !== undefined && row[k] !== null) return row[k];
     // case-insensitive check
-    const found = Object.keys(row).find((rk) => rk.toLowerCase().replace(/[\s_]/g, "") === k.toLowerCase().replace(/[\s_]/g, ""));
+    const found = Object.keys(row).find(
+      (rk) => rk.toLowerCase().replace(/[\s_]/g, "") === k.toLowerCase().replace(/[\s_]/g, "")
+    );
     if (found && row[found] !== undefined && row[found] !== null) return row[found];
   }
   return undefined;
@@ -107,76 +112,92 @@ export async function POST(req: NextRequest) {
         }
       }
 
-      // Proses Upsert Mastersheet & Replace cost_umur dalam transaksi
-      await prisma.$transaction(async (tx) => {
-        for (const row of rows) {
-          const loc = cleanLokasi(getVal(row, "lokasi", "location"));
-          if (!loc) continue;
+      // Siapkan item mastersheet dan costUmur
+      const mastersheetItems: Array<{ lokasi: string; data: any }> = [];
+      const allCostUmurRows: Array<{ lokasi: string; umur: number; cost: number }> = [];
 
-          const status = cleanString(getVal(row, "status"));
-          const wilayah = cleanString(getVal(row, "wilayah"));
-          const luas = parseIndonesianNumber(getVal(row, "luas"));
-          const jenis = cleanString(getVal(row, "jenis", "varietas"));
-          const kelas = cleanString(getVal(row, "kelas"));
-          const mulaiRawat = parseExcelDate(getVal(row, "mulai_rawat", "mulai rawat", "awal_rawat"));
-          const mulaiTanam = parseExcelDate(getVal(row, "mulai_tanam", "mulai tanam", "tgl_tanam"));
-          const forcingStandar = parseExcelDate(getVal(row, "forcing_standar", "forcing standar", "std_forcing"));
-          const realForcing = parseExcelDate(getVal(row, "real_forcing", "real forcing", "tgl_forcing"));
-          const selesaiPanen = parseExcelDate(getVal(row, "selesai_panen", "selesai panen", "tgl_panen"));
-          const umurForcing = parseInteger(getVal(row, "umur_forcing", "umur forcing"));
-          const umur = parseInteger(getVal(row, "umur"));
-          const totalCost = parseIndonesianNumber(getVal(row, "total_cost", "total cost", "total_biaya"));
+      for (const row of rows) {
+        const loc = cleanLokasi(getVal(row, "lokasi", "location"));
+        if (!loc) continue;
 
-          // Upsert Mastersheet
-          await tx.mastersheet.upsert({
-            where: { lokasi: loc },
-            update: {
-              status,
-              wilayah,
-              luas: luas !== null ? luas : undefined,
-              jenis,
-              kelas,
-              mulaiRawat,
-              mulaiTanam,
-              forcingStandar,
-              realForcing,
-              selesaiPanen,
-              umurForcing,
-              umur,
-              totalCost: totalCost !== null ? totalCost : undefined,
-            },
-            create: {
-              lokasi: loc,
-              status,
-              wilayah,
-              luas,
-              jenis,
-              kelas,
-              mulaiRawat,
-              mulaiTanam,
-              forcingStandar,
-              realForcing,
-              selesaiPanen,
-              umurForcing,
-              umur,
-              totalCost,
-            },
-          });
+        const status = cleanString(getVal(row, "status"));
+        const wilayah = cleanString(getVal(row, "wilayah"));
+        const luas = parseIndonesianNumber(getVal(row, "luas"));
+        const jenis = cleanString(getVal(row, "jenis", "varietas"));
+        const kelas = cleanString(getVal(row, "kelas"));
+        const mulaiRawat = parseExcelDate(getVal(row, "mulai_rawat", "mulai rawat", "awal_rawat"));
+        const mulaiTanam = parseExcelDate(getVal(row, "mulai_tanam", "mulai tanam", "tgl_tanam"));
+        const forcingStandar = parseExcelDate(getVal(row, "forcing_standar", "forcing standar", "std_forcing"));
+        const realForcing = parseExcelDate(getVal(row, "real_forcing", "real forcing", "tgl_forcing"));
+        const selesaiPanen = parseExcelDate(getVal(row, "selesai_panen", "selesai panen", "tgl_panen"));
+        const umurForcing = parseInteger(getVal(row, "umur_forcing", "umur forcing"));
+        const umur = parseInteger(getVal(row, "umur"));
+        const totalCost = parseIndonesianNumber(getVal(row, "total_cost", "total cost", "total_biaya"));
 
-          // Ekstraksi & Replace cost_umur untuk lokasi ini
-          const costUmurRows = extractCostUmurRows(loc, row);
-          await tx.costUmur.deleteMany({ where: { lokasi: loc } });
-          if (costUmurRows.length > 0) {
-            await tx.costUmur.createMany({
-              data: costUmurRows.map((cu) => ({
-                lokasi: cu.lokasi,
-                umur: cu.umur,
-                cost: cu.cost,
-              })),
-            });
+        mastersheetItems.push({
+          lokasi: loc,
+          data: {
+            status,
+            wilayah,
+            luas,
+            jenis,
+            kelas,
+            mulaiRawat,
+            mulaiTanam,
+            forcingStandar,
+            realForcing,
+            selesaiPanen,
+            umurForcing,
+            umur,
+            totalCost,
+          },
+        });
+
+        const costUmurRows = extractCostUmurRows(loc, row);
+        allCostUmurRows.push(...costUmurRows);
+      }
+
+      // Jalankan transaksi Replace dengan timeout yang aman
+      await prisma.$transaction(
+        async (tx) => {
+          if (isFirstChunk) {
+            await tx.costUmur.deleteMany({});
+          } else {
+            const locsInChunk = mastersheetItems.map((m) => m.lokasi);
+            if (locsInChunk.length > 0) {
+              await tx.costUmur.deleteMany({
+                where: { lokasi: { in: locsInChunk } },
+              });
+            }
           }
-        }
-      });
+
+          // Upsert Mastersheet secara concurrent batch 50
+          const BATCH_SIZE = 50;
+          for (let b = 0; b < mastersheetItems.length; b += BATCH_SIZE) {
+            const slice = mastersheetItems.slice(b, b + BATCH_SIZE);
+            await Promise.all(
+              slice.map((item) =>
+                tx.mastersheet.upsert({
+                  where: { lokasi: item.lokasi },
+                  update: item.data,
+                  create: { lokasi: item.lokasi, ...item.data },
+                })
+              )
+            );
+          }
+
+          // Insert batch Cost Umur dalam chunk 1000
+          if (allCostUmurRows.length > 0) {
+            const CHUNK = 1000;
+            for (let cIdx = 0; cIdx < allCostUmurRows.length; cIdx += CHUNK) {
+              await tx.costUmur.createMany({
+                data: allCostUmurRows.slice(cIdx, cIdx + CHUNK),
+              });
+            }
+          }
+        },
+        { maxWait: 20000, timeout: 60000 }
+      );
 
       return NextResponse.json({
         success: true,
@@ -212,65 +233,96 @@ export async function POST(req: NextRequest) {
         );
       }
 
-      await prisma.$transaction(async (tx) => {
-        // Pada chunk pertama, bersihkan data timeline & material lama (Replace Mode)
-        if (isFirstChunk) {
-          await tx.dataMaterial.deleteMany({});
-          await tx.dataTimeline.deleteMany({});
-        }
+      // Siapkan array timeline inserts & mapping ke original row
+      const timelineInserts: any[] = [];
+      const rowMapping: Record<number, any> = {};
 
-        // Simpan baris-baris timeline dan ekstrak kolom material dinamis
-        for (const row of rows) {
-          const loc = cleanLokasi(getVal(row, "lokasi", "location"));
-          if (!loc || !validMasterSet.has(loc)) continue;
+      for (let i = 0; i < rows.length; i++) {
+        const row = rows[i];
+        const loc = cleanLokasi(getVal(row, "lokasi", "location"));
+        if (!loc || !validMasterSet.has(loc)) continue;
 
-          const awalRawat = parseExcelDate(getVal(row, "awal_rawat", "awal rawat", "mulai_rawat"));
-          const aktivitas = cleanString(getVal(row, "aktivitas", "activity", "kegiatan"));
-          const tanggalRealisasi = parseExcelDate(getVal(row, "tanggal_realisasi", "tanggal realisasi", "tgl_realisasi", "tanggal"));
-          const umur = parseInteger(getVal(row, "umur")); // mendukung negatif
-          const hasil = parseIndonesianNumber(getVal(row, "hasil", "hasil_efektif"));
-          const uom = cleanString(getVal(row, "uom", "satuan"));
-          const tk = parseIndonesianNumber(getVal(row, "tk", "tenaga_kerja"));
-          const kapasitasPerTk = parseIndonesianNumber(getVal(row, "kapasitas_per_tk", "kapasitas per tk", "kapasitas"));
-          const totalCost = parseIndonesianNumber(getVal(row, "total_cost", "total cost", "total_biaya"));
-          const upah = parseIndonesianNumber(getVal(row, "upah"));
-          const charge = parseIndonesianNumber(getVal(row, "charge"));
-          const material = parseIndonesianNumber(getVal(row, "material"));
+        const awalRawat = parseExcelDate(getVal(row, "awal_rawat", "awal rawat", "mulai_rawat"));
+        const aktivitas = cleanString(getVal(row, "aktivitas", "activity", "kegiatan"));
+        const tanggalRealisasi = parseExcelDate(getVal(row, "tanggal_realisasi", "tanggal realisasi", "tgl_realisasi", "tanggal"));
+        const umur = parseInteger(getVal(row, "umur")); // mendukung negatif
+        const hasil = parseIndonesianNumber(getVal(row, "hasil", "hasil_efektif"));
+        const uom = cleanString(getVal(row, "uom", "satuan"));
+        const tk = parseIndonesianNumber(getVal(row, "tk", "tenaga_kerja"));
+        const kapasitasPerTk = parseIndonesianNumber(getVal(row, "kapasitas_per_tk", "kapasitas per tk", "kapasitas"));
+        const totalCost = parseIndonesianNumber(getVal(row, "total_cost", "total cost", "total_biaya"));
+        const upah = parseIndonesianNumber(getVal(row, "upah"));
+        const charge = parseIndonesianNumber(getVal(row, "charge"));
+        const material = parseIndonesianNumber(getVal(row, "material"));
 
-          // Insert baris timeline
-          const createdTimeline = await tx.dataTimeline.create({
-            data: {
-              lokasi: loc,
-              awalRawat,
-              aktivitas,
-              tanggalRealisasi,
-              umur,
-              hasil,
-              uom,
-              tk,
-              kapasitasPerTk,
-              totalCost,
-              upah,
-              charge,
-              material,
-            },
-          });
+        rowMapping[timelineInserts.length] = row;
+        timelineInserts.push({
+          lokasi: loc,
+          awalRawat,
+          aktivitas,
+          tanggalRealisasi,
+          umur,
+          hasil,
+          uom,
+          tk,
+          kapasitasPerTk,
+          totalCost,
+          upah,
+          charge,
+          material,
+        });
+      }
 
-          // Ekstraksi kolom material dinamis (kuantitas herbisida)
-          if (dynamicMaterialHeaders && dynamicMaterialHeaders.length > 0) {
-            const materialRows = extractDataMaterialRows(createdTimeline.id, row, dynamicMaterialHeaders);
-            if (materialRows.length > 0) {
-              await tx.dataMaterial.createMany({
-                data: materialRows.map((m) => ({
-                  timelineId: m.timelineId,
-                  namaMaterial: m.namaMaterial,
-                  quantity: m.quantity,
-                })),
-              });
+      await prisma.$transaction(
+        async (tx) => {
+          // Pada chunk pertama, bersihkan data timeline & material lama (Replace Mode)
+          if (isFirstChunk) {
+            await tx.dataMaterial.deleteMany({});
+            await tx.dataTimeline.deleteMany({});
+          }
+
+          if (timelineInserts.length > 0) {
+            // Bulk insert timeline dan dapatkan seluruh generated ID dalam 1 SQL statement
+            const createdTimelines = await tx.dataTimeline.createManyAndReturn({
+              data: timelineInserts,
+            });
+
+            // Ekstraksi kolom material dinamis
+            if (dynamicMaterialHeaders && dynamicMaterialHeaders.length > 0) {
+              const allMaterials: Array<{
+                timelineId: bigint;
+                namaMaterial: string;
+                quantity: number;
+              }> = [];
+
+              for (let i = 0; i < createdTimelines.length; i++) {
+                const timeline = createdTimelines[i];
+                const originalRow = rowMapping[i];
+                if (!originalRow) continue;
+
+                const matRows = extractDataMaterialRows(timeline.id, originalRow, dynamicMaterialHeaders);
+                for (const m of matRows) {
+                  allMaterials.push({
+                    timelineId: timeline.id,
+                    namaMaterial: m.namaMaterial,
+                    quantity: m.quantity,
+                  });
+                }
+              }
+
+              if (allMaterials.length > 0) {
+                const CHUNK = 1000;
+                for (let mIdx = 0; mIdx < allMaterials.length; mIdx += CHUNK) {
+                  await tx.dataMaterial.createMany({
+                    data: allMaterials.slice(mIdx, mIdx + CHUNK),
+                  });
+                }
+              }
             }
           }
-        }
-      });
+        },
+        { maxWait: 20000, timeout: 60000 }
+      );
 
       return NextResponse.json({
         success: true,
@@ -308,59 +360,65 @@ export async function POST(req: NextRequest) {
         );
       }
 
-      await prisma.$transaction(async (tx) => {
-        // Bersihkan data aktivitas lama pada chunk pertama (Replace Mode)
-        if (isFirstChunk) {
-          await tx.dataAktivitas.deleteMany({});
-        }
+      const insertData: any[] = [];
+      for (const row of cleanRows) {
+        const loc = cleanLokasi(getVal(row, "lokasi", "location"));
+        if (!loc || !validMasterSet.has(loc)) continue;
 
-        const insertData: any[] = [];
-        for (const row of cleanRows) {
-          const loc = cleanLokasi(getVal(row, "lokasi", "location"));
-          if (!loc || !validMasterSet.has(loc)) continue;
+        const status = cleanString(getVal(row, "status"));
+        const wilayah = cleanString(getVal(row, "wilayah"));
+        const luas = parseIndonesianNumber(getVal(row, "luas"));
+        const kelas = cleanString(getVal(row, "kelas"));
+        const kode = cleanString(getVal(row, "kode"));
+        const aktivitas = cleanString(getVal(row, "aktivitas", "activity", "kegiatan"));
+        const biaya = parseIndonesianNumber(getVal(row, "biaya", "total_biaya"));
+        const biayaPerHa = parseIndonesianNumber(getVal(row, "biaya_per_ha", "biaya per ha", "biaya_per_hektar", "biaya/ha"));
+        const upah = parseIndonesianNumber(getVal(row, "upah"));
+        const charge = parseIndonesianNumber(getVal(row, "charge"));
+        const material = parseIndonesianNumber(getVal(row, "material"));
+        const bibit = parseIndonesianNumber(getVal(row, "bibit"));
+        const hasil = parseIndonesianNumber(getVal(row, "hasil"));
+        const uom = cleanString(getVal(row, "uom", "satuan"));
+        const activityGroup = cleanString(getVal(row, "activity_group", "activity group", "group"));
 
-          const status = cleanString(getVal(row, "status"));
-          const wilayah = cleanString(getVal(row, "wilayah"));
-          const luas = parseIndonesianNumber(getVal(row, "luas"));
-          const kelas = cleanString(getVal(row, "kelas"));
-          const kode = cleanString(getVal(row, "kode"));
-          const aktivitas = cleanString(getVal(row, "aktivitas", "activity", "kegiatan"));
-          const biaya = parseIndonesianNumber(getVal(row, "biaya", "total_biaya"));
-          const biayaPerHa = parseIndonesianNumber(getVal(row, "biaya_per_ha", "biaya per ha", "biaya_per_hektar", "biaya/ha"));
-          const upah = parseIndonesianNumber(getVal(row, "upah"));
-          const charge = parseIndonesianNumber(getVal(row, "charge"));
-          const material = parseIndonesianNumber(getVal(row, "material"));
-          const bibit = parseIndonesianNumber(getVal(row, "bibit"));
-          const hasil = parseIndonesianNumber(getVal(row, "hasil"));
-          const uom = cleanString(getVal(row, "uom", "satuan"));
-          const activityGroup = cleanString(getVal(row, "activity_group", "activity group", "group"));
+        insertData.push({
+          lokasi: loc,
+          status,
+          wilayah,
+          luas,
+          kelas,
+          kode,
+          aktivitas,
+          biaya,
+          biayaPerHa,
+          upah,
+          charge,
+          material,
+          bibit,
+          hasil,
+          uom,
+          activityGroup,
+        });
+      }
 
-          insertData.push({
-            lokasi: loc,
-            status,
-            wilayah,
-            luas,
-            kelas,
-            kode,
-            aktivitas,
-            biaya,
-            biayaPerHa,
-            upah,
-            charge,
-            material,
-            bibit,
-            hasil,
-            uom,
-            activityGroup,
-          });
-        }
+      await prisma.$transaction(
+        async (tx) => {
+          // Bersihkan data aktivitas lama pada chunk pertama (Replace Mode)
+          if (isFirstChunk) {
+            await tx.dataAktivitas.deleteMany({});
+          }
 
-        if (insertData.length > 0) {
-          await tx.dataAktivitas.createMany({
-            data: insertData,
-          });
-        }
-      });
+          if (insertData.length > 0) {
+            const CHUNK = 1000;
+            for (let aIdx = 0; aIdx < insertData.length; aIdx += CHUNK) {
+              await tx.dataAktivitas.createMany({
+                data: insertData.slice(aIdx, aIdx + CHUNK),
+              });
+            }
+          }
+        },
+        { maxWait: 20000, timeout: 60000 }
+      );
 
       return NextResponse.json({
         success: true,

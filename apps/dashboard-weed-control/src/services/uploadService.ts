@@ -3,7 +3,7 @@ import * as XLSX from "xlsx";
 
 export { type WeedControlCategory } from "@/types/sourceData";
 
-const CHUNK_SIZE = 3000; // 3.000 baris per batch payload
+const CHUNK_SIZE = 1000; // 1.000 baris per batch payload agar responsif dan aman dari limit request body
 
 export const uploadService = {
   /**
@@ -190,3 +190,4 @@ export const uploadService = {
     window.open(`/api/admin/template?category=${categoryKey}`, "_blank");
   },
 };
+

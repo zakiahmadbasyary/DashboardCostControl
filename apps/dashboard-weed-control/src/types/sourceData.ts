@@ -18,3 +18,4 @@ export interface PreviewTableResponse {
   limit: number;
   totalPages: number;
 }
+
