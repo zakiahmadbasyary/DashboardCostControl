@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo, useRef } from "react";
 import { CostCenterSummaryItem } from "@/types/opex";
 import { Building2, Search, CheckCircle2, ChevronLeft, ChevronRight, X } from "lucide-react";
 
@@ -22,39 +22,69 @@ export default function CostCenterTables({
   const [search, setSearch] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
 
-  const filteredData = [...data]
-    .filter((item) => {
-      // Sembunyikan data jika nilai budget 0 atau tidak ada
-      if (!item.budget || item.budget <= 0) {
-        return false;
-      }
+  const filteredData = useMemo(() => {
+    return [...data]
+      .filter((item) => {
+        // Sembunyikan data jika nilai budget 0 atau tidak ada
+        if (!item.budget || item.budget <= 0) {
+          return false;
+        }
 
-      const q = search.toLowerCase();
-      return (
-        item.costcenter.toLowerCase().includes(q) ||
-        item.deskripsiCostcenter.toLowerCase().includes(q)
-      );
-    })
-    .sort((a, b) => {
-      const vA = a.variance ?? -Infinity;
-      const vB = b.variance ?? -Infinity;
-      return vB - vA; // Urutkan variance dari terbesar ke terkecil
-    });
+        const q = search.toLowerCase();
+        return (
+          item.costcenter.toLowerCase().includes(q) ||
+          item.deskripsiCostcenter.toLowerCase().includes(q)
+        );
+      })
+      .sort((a, b) => {
+        const vA = a.variance ?? -Infinity;
+        const vB = b.variance ?? -Infinity;
+        return vB - vA; // Urutkan variance dari terbesar ke terkecil
+      });
+  }, [data, search]);
 
   // Konfigurasi Pagination: 16 data per halaman (8 Kiri + 8 Kanan)
   const PAGE_SIZE = 16;
   const COLUMN_SIZE = 8;
   const totalPages = Math.ceil(filteredData.length / PAGE_SIZE) || 1;
 
-  // Sinkronkan halaman pagination jika costcenter dipilih dari luar (misal dari filter CostElementTable)
+  const lastSelectedCostCenterRef = useRef<string | null>(selectedCostCenter);
+  const lastPeriodRef = useRef<string | undefined>(selectedPeriodLabel);
+
+  // Sinkronkan halaman pagination HANYA jika costcenter berubah dari luar atau periode berubah
   useEffect(() => {
-    if (!selectedCostCenter) return;
-    const index = filteredData.findIndex((c) => c.costcenter === selectedCostCenter);
-    if (index !== -1) {
-      const targetPage = Math.floor(index / PAGE_SIZE) + 1;
-      setCurrentPage((prev) => (prev !== targetPage ? targetPage : prev));
+    const isPeriodChanged = lastPeriodRef.current !== selectedPeriodLabel;
+    const isCostCenterChanged = lastSelectedCostCenterRef.current !== selectedCostCenter;
+
+    if (isPeriodChanged) {
+      lastPeriodRef.current = selectedPeriodLabel;
     }
-  }, [selectedCostCenter, filteredData]);
+
+    if (isCostCenterChanged) {
+      lastSelectedCostCenterRef.current = selectedCostCenter;
+    }
+
+    if (isPeriodChanged || isCostCenterChanged) {
+      if (!selectedCostCenter) {
+        if (isPeriodChanged) setCurrentPage(1);
+        return;
+      }
+      const index = filteredData.findIndex((c) => c.costcenter === selectedCostCenter);
+      if (index !== -1) {
+        const targetPage = Math.floor(index / PAGE_SIZE) + 1;
+        setCurrentPage(targetPage);
+      } else if (isPeriodChanged) {
+        setCurrentPage(1);
+      }
+    }
+  }, [selectedCostCenter, selectedPeriodLabel, filteredData]);
+
+  // Jaga agar currentPage tidak melebihi totalPages (misal saat search memfilter data)
+  useEffect(() => {
+    if (currentPage > totalPages) {
+      setCurrentPage(totalPages);
+    }
+  }, [currentPage, totalPages]);
 
   const startIndex = (currentPage - 1) * PAGE_SIZE;
   const currentSlice = filteredData.slice(startIndex, startIndex + PAGE_SIZE);
@@ -62,6 +92,19 @@ export default function CostCenterTables({
   // 8 data di tabel kiri, 8 data di tabel kanan
   const leftItems = currentSlice.slice(0, COLUMN_SIZE);
   const rightItems = currentSlice.slice(COLUMN_SIZE, PAGE_SIZE);
+
+  const getPaginationItems = () => {
+    if (totalPages <= 5) {
+      return Array.from({ length: totalPages }, (_, i) => i + 1);
+    }
+    if (currentPage <= 3) {
+      return [1, 2, 3, "...", totalPages];
+    }
+    if (currentPage >= totalPages - 2) {
+      return [1, "...", totalPages - 2, totalPages - 1, totalPages];
+    }
+    return [1, "...", currentPage, "...", totalPages];
+  };
 
   const renderSingleTable = (items: CostCenterSummaryItem[], columnIndex: number) => {
     if (items.length === 0) {
@@ -276,20 +319,32 @@ export default function CostCenterTables({
                 </button>
 
                 <div className="flex items-center gap-1">
-                  {Array.from({ length: totalPages }, (_, i) => i + 1).map((pgNum) => (
-                    <button
-                      key={pgNum}
-                      type="button"
-                      onClick={() => setCurrentPage(pgNum)}
-                      className={`w-7 h-7 rounded-lg text-xs font-bold transition-all cursor-pointer ${
-                        currentPage === pgNum
-                          ? "bg-[#16823B] text-white shadow-xs"
-                          : "bg-white border border-[#DDE5DF] text-[#5F6B63] hover:bg-[#F8FAF9]"
-                      }`}
-                    >
-                      {pgNum}
-                    </button>
-                  ))}
+                  {getPaginationItems().map((item, idx) => {
+                    if (item === "...") {
+                      return (
+                        <span
+                          key={`ellipsis-${idx}`}
+                          className="w-7 h-7 flex items-center justify-center text-xs text-[#89938D]"
+                        >
+                          ...
+                        </span>
+                      );
+                    }
+                    return (
+                      <button
+                        key={item}
+                        type="button"
+                        onClick={() => setCurrentPage(item as number)}
+                        className={`w-7 h-7 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                          currentPage === item
+                            ? "bg-[#16823B] text-white shadow-xs"
+                            : "bg-white border border-[#DDE5DF] text-[#5F6B63] hover:bg-[#F8FAF9]"
+                        }`}
+                      >
+                        {item}
+                      </button>
+                    );
+                  })}
                 </div>
 
                 <button
