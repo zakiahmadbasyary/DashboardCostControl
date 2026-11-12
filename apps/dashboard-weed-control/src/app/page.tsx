@@ -281,7 +281,7 @@ export default function WeedControlDashboardPage() {
       {/* 2. Main Content Container */}
       <main className="flex-1 w-full md:w-[calc(100%-4rem)] md:ml-16 px-4 sm:px-6 lg:px-8 py-6 sm:py-8 flex flex-col gap-8">
         {/* Main Filter Section (Sticky / Freeze Header) */}
-        <section className="sticky top-16 sm:top-20 z-10 bg-[#F7F9F7] py-2 -my-2">
+        <section className="sticky top-16 sm:top-20 z-20 bg-[#F7F9F7] py-2 -my-2">
           <MainFilter
             filters={mainFilter}
             activities={activitiesOptions}
@@ -293,7 +293,7 @@ export default function WeedControlDashboardPage() {
         </section>
 
         {/* Section 2: Trend Cost Weed Control Card */}
-        <section>
+        <section className="relative z-0 isolate">
           <TrendCostCard
             data={trendData}
             loading={loadingTrend}
@@ -302,7 +302,7 @@ export default function WeedControlDashboardPage() {
         </section>
 
         {/* Section 3: List Lokasi per Wilayah Card */}
-        <section>
+        <section className="relative z-0 isolate">
           <LocationListCard
             locations={locations}
             selectedLocation={selectedLocation}
@@ -321,7 +321,7 @@ export default function WeedControlDashboardPage() {
           id="location-detail-section"
           className={`scroll-mt-16 sm:scroll-mt-20 ${
             selectedLocation || locationDetail
-              ? "sm:sticky sm:top-20 sm:z-20 sm:bg-[#F7F9F7] sm:py-2 sm:-my-2"
+              ? "sm:sticky sm:top-20 sm:z-30 sm:bg-[#F7F9F7] sm:py-2 sm:-my-2"
               : ""
           }`}
         >
@@ -332,7 +332,7 @@ export default function WeedControlDashboardPage() {
         </section>
 
         {/* Section 5: Aktivitas dan Cost Card (35% Left Table + 65% Right Combo Chart) */}
-        <section>
+        <section className="relative z-0 isolate">
           <ActivityAndCostCard
             selectedLocation={selectedLocation}
             activities={activitiesData}
@@ -342,7 +342,7 @@ export default function WeedControlDashboardPage() {
         </section>
 
         {/* Section 6: Timeline Aktivitas Card */}
-        <section>
+        <section className="relative z-0 isolate">
           <TimelineCard
             selectedLocation={selectedLocation}
             timeline={timelineData}

@@ -102,7 +102,7 @@ export default function LocationListCard({
   return (
     <div
       id="location-analysis-section"
-      className="bg-white border border-[#DDE5DF] rounded-2xl p-4 sm:p-5 shadow-xs scroll-mt-24 flex flex-col gap-3.5"
+      className="relative z-0 isolate bg-white border border-[#DDE5DF] rounded-2xl p-4 sm:p-5 shadow-xs scroll-mt-36 sm:scroll-mt-44 lg:scroll-mt-[175px] flex flex-col gap-3.5"
     >
       {/* Header Bar matching WIP Analisis Lokasi */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-[#DDE5DF]/70">
@@ -209,7 +209,7 @@ export default function LocationListCard({
                       </div>
                     ) : (
                       <table className="w-full text-left border-collapse">
-                        <thead className="bg-[#F7F9F7] text-[#5F6B63] uppercase text-[9px] font-semibold border-b border-[#DDE5DF] sticky top-0 z-10 shadow-2xs">
+                        <thead className="bg-[#F7F9F7] text-[#5F6B63] uppercase text-[9px] font-semibold border-b border-[#DDE5DF] sticky top-0 z-[1] shadow-2xs">
                           <tr>
                             <th className="py-1 px-1.5">Lokasi</th>
                             <th className="py-1 px-1.5 text-right">Cost / Ha</th>
