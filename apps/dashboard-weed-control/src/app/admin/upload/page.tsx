@@ -317,7 +317,7 @@ export default function AdminUploadPage() {
         <div className="space-y-1">
           <div className="font-extrabold text-sm sm:text-base text-[#17231B] flex items-center gap-2">
             <ShieldAlert className="w-4 h-4 text-amber-600" />
-            <span>Reset Seluruh Database Weed Control (5 Tabel)</span>
+            <span>Reset Seluruh Database Weed Control </span>
           </div>
           <p className="text-xs text-[#5F6B63]">
             Kosongkan seluruh data pada <code>mastersheet</code>, <code>cost_umur</code>, <code>data_timeline</code>, <code>data_material</code>, dan <code>data_aktivitas</code> secara serentak.
@@ -329,7 +329,7 @@ export default function AdminUploadPage() {
           onClick={() => setResetModalCategory("all")}
           className="px-4 py-2 rounded-xl bg-red-600 hover:bg-red-700 text-white font-bold text-xs sm:text-sm transition-all shadow-xs cursor-pointer shrink-0"
         >
-          Reset Seluruh 5 Tabel
+          Reset Seluruh Data
         </button>
       </div>
 

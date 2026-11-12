@@ -17,24 +17,24 @@ export default function AdminSidebar() {
   ];
 
   const sidebarContent = (
-    <div className="flex flex-col justify-between h-full">
+    <div className="flex flex-col justify-between h-full overflow-y-auto">
       <div>
         {/* Brand */}
-        <div className="p-6 border-b border-[#DDE5DF] flex items-center justify-between">
+        <div className="p-5 border-b border-[#DDE5DF] flex items-center justify-between shrink-0">
           <div className="flex items-center gap-3">
-            <div className="h-11 w-auto flex items-center shrink-0">
+            <div className="h-10 w-auto flex items-center shrink-0">
               <img
                 src="/logo.png"
                 alt="GGF Logo"
-                className="h-11 max-h-11 w-auto object-contain"
-                style={{ height: "44px", maxHeight: "44px", width: "auto" }}
+                className="h-10 max-h-10 w-auto object-contain"
+                style={{ height: "40px", maxHeight: "40px", width: "auto" }}
               />
             </div>
             <div>
-              <h2 className="font-extrabold text-base text-[#17231B] flex items-center gap-1.5">
+              <h2 className="font-extrabold text-base text-[#17231B] leading-tight flex items-center gap-1.5">
                 <span>GGF Admin</span>
               </h2>
-              <p className="text-xs font-semibold text-[#16823B] flex items-center gap-1">
+              <p className="text-xs font-semibold text-[#16823B] flex items-center gap-1 mt-0.5">
                 <Tractor className="w-3.5 h-3.5" />
                 <span>Weed Control Panel</span>
               </p>
@@ -51,8 +51,8 @@ export default function AdminSidebar() {
         </div>
 
         {/* Navigation */}
-        <nav className="p-4 space-y-2">
-          <p className="px-3 text-xs font-extrabold text-[#89938D] uppercase tracking-wider mb-2.5">
+        <nav className="p-4 space-y-1.5">
+          <p className="px-3 text-xs font-extrabold text-[#89938D] uppercase tracking-wider mb-2">
             Data Management
           </p>
           {navItems.map((item) => {
@@ -65,7 +65,7 @@ export default function AdminSidebar() {
                 key={item.label}
                 href={item.href}
                 onClick={() => setMobileOpen(false)}
-                className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold transition-all ${
+                className={`flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-bold transition-all ${
                   isActive
                     ? "bg-[#16823B] text-white shadow-xs"
                     : "text-[#5F6B63] hover:bg-[#F7F9F7] hover:text-[#17231B]"
@@ -80,7 +80,7 @@ export default function AdminSidebar() {
       </div>
 
       {/* Footer / Actions */}
-      <div className="p-4 border-t border-[#DDE5DF] space-y-2.5">
+      <div className="p-4 border-t border-[#DDE5DF] space-y-2 shrink-0">
         <a
           href={`${adminBaseUrl}/dashboard`}
           className="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs sm:text-sm font-bold text-[#16823B] bg-[#EAF3EC] hover:bg-[#D5E7DA] transition-colors shadow-2xs"
@@ -96,7 +96,7 @@ export default function AdminSidebar() {
           <LayoutDashboard className="w-4.5 h-4.5 text-[#16823B] shrink-0" />
           <span>Kembali ke Dashboard</span>
         </Link>
-        <div className="pt-2 text-center text-[11px] text-[#89938D]">
+        <div className="pt-1.5 text-center text-[11px] text-[#89938D]">
           © 2026 Great Giant Foods
         </div>
       </div>
@@ -106,7 +106,7 @@ export default function AdminSidebar() {
   return (
     <>
       {/* Mobile Top Header */}
-      <div className="lg:hidden bg-white border-b border-[#DDE5DF] px-4 py-3.5 flex items-center justify-between shrink-0 shadow-2xs">
+      <div className="lg:hidden bg-white border-b border-[#DDE5DF] px-4 py-3 flex items-center justify-between shrink-0 shadow-2xs">
         <div className="flex items-center gap-2.5">
           <img src="/logo.png" alt="GGF Logo" className="h-8 w-auto object-contain" />
           <div>
@@ -124,7 +124,7 @@ export default function AdminSidebar() {
       </div>
 
       {/* Desktop Fixed Left Sidebar */}
-      <aside className="hidden lg:block w-72 bg-white border-r border-[#DDE5DF] shrink-0 min-h-screen">
+      <aside className="hidden lg:flex flex-col justify-between w-72 bg-white border-r border-[#DDE5DF] h-screen sticky top-0 shrink-0">
         {sidebarContent}
       </aside>
 
@@ -143,4 +143,3 @@ export default function AdminSidebar() {
     </>
   );
 }
-
