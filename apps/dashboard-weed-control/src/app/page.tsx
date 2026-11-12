@@ -281,7 +281,7 @@ export default function WeedControlDashboardPage() {
       {/* 2. Main Content Container */}
       <main className="flex-1 w-full md:w-[calc(100%-4rem)] md:ml-16 px-4 sm:px-6 lg:px-8 py-6 sm:py-8 flex flex-col gap-8">
         {/* Main Filter Section (Sticky / Freeze Header) */}
-        <section className="sticky top-20 z-20 bg-[#F7F9F7] py-2 -my-2">
+        <section className="sticky top-16 sm:top-20 z-10 bg-[#F7F9F7] py-2 -my-2">
           <MainFilter
             filters={mainFilter}
             activities={activitiesOptions}
@@ -316,8 +316,15 @@ export default function WeedControlDashboardPage() {
           />
         </section>
 
-        {/* Section 4: Detail Lokasi Card (Scroll Target) */}
-        <section id="location-detail-section" className="scroll-mt-28">
+        {/* Section 4: Detail Lokasi Card (Sticky / Freeze replacing MainFilter when selected) */}
+        <section
+          id="location-detail-section"
+          className={`scroll-mt-16 sm:scroll-mt-20 ${
+            selectedLocation || locationDetail
+              ? "sticky top-16 sm:top-20 z-20 bg-[#F7F9F7] py-2 -my-2"
+              : ""
+          }`}
+        >
           <LocationDetailCard
             location={locationDetail || selectedLocation}
             loading={loadingDetail}
