@@ -51,13 +51,13 @@ export default function WeedControlDashboardPage() {
     status: "NS",
   });
 
-  // 3. Local Filter State (Only affects Location List Card)
+  // 3. Local Filter State (Default umur = 1)
   const [localFilter, setLocalFilter] = useState<{
     umur: number[] | "all";
     wilayah: string[] | "all";
     search: string;
   }>({
-    umur: "all",
+    umur: [1],
     wilayah: "all",
     search: "",
   });
@@ -84,8 +84,10 @@ export default function WeedControlDashboardPage() {
   const [loadingActivityCost, setLoadingActivityCost] = useState<boolean>(false);
   const [loadingTimeline, setLoadingTimeline] = useState<boolean>(false);
 
-  // 6. Smooth Scroll Target
-  const [pendingScrollTarget, setPendingScrollTarget] = useState<"location" | null>(null);
+  // 6. Smooth Scroll Target ("detail" atau "location")
+  const [pendingScrollTarget, setPendingScrollTarget] = useState<
+    "location" | "detail" | null
+  >(null);
 
   const scrollToElement = useCallback((id: string) => {
     const el = document.getElementById(id);
@@ -119,31 +121,38 @@ export default function WeedControlDashboardPage() {
   }, []);
 
   // Handle Location selection -> Fetch Detail, Activity+Cost, and Timeline
-  const handleSelectLocation = useCallback(async (loc: LocationItem) => {
-    setSelectedLocation(loc);
-    setLoadingDetail(true);
-    setLoadingActivityCost(true);
-    setLoadingTimeline(true);
+  const handleSelectLocation = useCallback(
+    async (loc: LocationItem, shouldScroll: boolean = false) => {
+      setSelectedLocation(loc);
+      setLoadingDetail(true);
+      setLoadingActivityCost(true);
+      setLoadingTimeline(true);
 
-    try {
-      const [detailRes, actCostRes, timelineRes] = await Promise.all([
-        weedDashboardService.getLocationDetail(loc.lokasi),
-        weedDashboardService.getActivityAndCost(loc.lokasi),
-        weedDashboardService.getTimeline(loc.lokasi),
-      ]);
+      if (shouldScroll) {
+        setPendingScrollTarget("detail");
+      }
 
-      setLocationDetail(detailRes);
-      setActivitiesData(actCostRes.activities || []);
-      setChartData(actCostRes.chartData || []);
-      setTimelineData(timelineRes || []);
-    } catch (err) {
-      console.error("Gagal memuat data hilir lokasi:", err);
-    } finally {
-      setLoadingDetail(false);
-      setLoadingActivityCost(false);
-      setLoadingTimeline(false);
-    }
-  }, []);
+      try {
+        const [detailRes, actCostRes, timelineRes] = await Promise.all([
+          weedDashboardService.getLocationDetail(loc.lokasi),
+          weedDashboardService.getActivityAndCost(loc.lokasi),
+          weedDashboardService.getTimeline(loc.lokasi),
+        ]);
+
+        setLocationDetail(detailRes);
+        setActivitiesData(actCostRes.activities || []);
+        setChartData(actCostRes.chartData || []);
+        setTimelineData(timelineRes || []);
+      } catch (err) {
+        console.error("Gagal memuat data hilir lokasi:", err);
+      } finally {
+        setLoadingDetail(false);
+        setLoadingActivityCost(false);
+        setLoadingTimeline(false);
+      }
+    },
+    []
+  );
 
   // Fetch Trend and Locations when Main Filter changes
   const fetchMainData = useCallback(async () => {
@@ -163,7 +172,6 @@ export default function WeedControlDashboardPage() {
       if (selectedLocation) {
         const stillPresent = locRes.find((l) => l.lokasi === selectedLocation.lokasi);
         if (stillPresent) {
-          // Update selected location reference
           setSelectedLocation(stillPresent);
         } else {
           // Jika lokasi terpilih tidak lagi sesuai filter, kosongkan pilihan sesuai PRD
@@ -174,8 +182,8 @@ export default function WeedControlDashboardPage() {
           setTimelineData([]);
         }
       } else if (locRes.length > 0) {
-        // Auto-select first location on initial load
-        handleSelectLocation(locRes[0]);
+        // Auto-select first location on initial load without scrolling
+        handleSelectLocation(locRes[0], false);
       }
     } catch (err) {
       console.error("Gagal memuat data utama:", err);
@@ -210,7 +218,7 @@ export default function WeedControlDashboardPage() {
     setMainFilter(defaultMain);
   };
 
-  // Handle Local Location Filter Change (Umur / Wilayah / Search)
+  // Handle Local Location Filter Change (Umur default 1)
   const handleLocalFilterChange = (newLocal: {
     umur: number[] | "all";
     wilayah: string[] | "all";
@@ -219,7 +227,7 @@ export default function WeedControlDashboardPage() {
     setLocalFilter(newLocal);
   };
 
-  // Handle Click on Umur in Trend Chart/Table -> Filter Location table to that umur & scroll
+  // Handle Click on Umur in Trend Chart -> Filter Location table to that umur & scroll
   const handleSelectUmurFromTrend = useCallback(
     (umur: number) => {
       setLocalFilter({
@@ -232,16 +240,38 @@ export default function WeedControlDashboardPage() {
     []
   );
 
-  // Smooth scroll effect after locations finish loading
+  // Smooth scroll effect after data finishes loading
   useEffect(() => {
-    if (pendingScrollTarget === "location" && !loadingLocations) {
+    if (!pendingScrollTarget) return;
+
+    if (
+      pendingScrollTarget === "detail" &&
+      !loadingDetail &&
+      !loadingActivityCost &&
+      !loadingTimeline
+    ) {
       const timer = setTimeout(() => {
-        scrollToElement("location-list-section");
+        scrollToElement("location-detail-section");
         setPendingScrollTarget(null);
-      }, 100);
+      }, 80);
       return () => clearTimeout(timer);
     }
-  }, [pendingScrollTarget, loadingLocations, scrollToElement]);
+
+    if (pendingScrollTarget === "location" && !loadingLocations) {
+      const timer = setTimeout(() => {
+        scrollToElement("location-analysis-section");
+        setPendingScrollTarget(null);
+      }, 80);
+      return () => clearTimeout(timer);
+    }
+  }, [
+    pendingScrollTarget,
+    loadingDetail,
+    loadingActivityCost,
+    loadingTimeline,
+    loadingLocations,
+    scrollToElement,
+  ]);
 
   return (
     <div className="min-h-screen bg-[#F7F9F7] text-[#17231B] flex flex-col font-sans selection:bg-[#16823B] selection:text-white">
@@ -267,8 +297,6 @@ export default function WeedControlDashboardPage() {
           <TrendCostCard
             data={trendData}
             loading={loadingTrend}
-            selectedAktivitas={mainFilter.aktivitas}
-            selectedStatus={mainFilter.status}
             onSelectUmur={handleSelectUmurFromTrend}
           />
         </section>
@@ -278,7 +306,7 @@ export default function WeedControlDashboardPage() {
           <LocationListCard
             locations={locations}
             selectedLocation={selectedLocation}
-            onSelectLocation={handleSelectLocation}
+            onSelectLocation={(loc) => handleSelectLocation(loc, true)}
             umurList={umurList}
             wilayahList={wilayahList}
             selectedUmur={localFilter.umur}
@@ -288,8 +316,8 @@ export default function WeedControlDashboardPage() {
           />
         </section>
 
-        {/* Section 4: Detail Lokasi Card */}
-        <section>
+        {/* Section 4: Detail Lokasi Card (Scroll Target) */}
+        <section id="location-detail-section" className="scroll-mt-28">
           <LocationDetailCard
             location={locationDetail || selectedLocation}
             loading={loadingDetail}
