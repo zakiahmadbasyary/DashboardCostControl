@@ -1,8 +1,16 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { MainFilterState } from "@/types/dashboard";
-import { Filter, RotateCcw, Check, X, SlidersHorizontal } from "lucide-react";
+import {
+  Filter,
+  RotateCcw,
+  Check,
+  X,
+  SlidersHorizontal,
+  Search,
+  ChevronDown,
+} from "lucide-react";
 
 interface MainFilterProps {
   filters: MainFilterState;
@@ -24,10 +32,43 @@ export default function MainFilter({
   const [localFilters, setLocalFilters] = useState<MainFilterState>(filters);
   const [isOpen, setIsOpen] = useState(false);
 
+  // Searchable combobox states for Aktivitas (Desktop)
+  const [isActivityOpen, setIsActivityOpen] = useState(false);
+  const [activitySearch, setActivitySearch] = useState("");
+  const activityRef = useRef<HTMLDivElement>(null);
+  const searchInputRef = useRef<HTMLInputElement>(null);
+
+  // Searchable state for Aktivitas (Mobile)
+  const [mobileActivitySearch, setMobileActivitySearch] = useState("");
+
   // Sync state if external filters change
-  React.useEffect(() => {
+  useEffect(() => {
     setLocalFilters(filters);
   }, [filters]);
+
+  // Click outside to close desktop activity dropdown
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (
+        activityRef.current &&
+        !activityRef.current.contains(e.target as Node)
+      ) {
+        setIsActivityOpen(false);
+        setActivitySearch("");
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  // Auto focus search input when dropdown opens
+  useEffect(() => {
+    if (isActivityOpen) {
+      setTimeout(() => {
+        searchInputRef.current?.focus();
+      }, 50);
+    }
+  }, [isActivityOpen]);
 
   const handleChange = (key: keyof MainFilterState, value: string) => {
     const updated = { ...localFilters, [key]: value };
@@ -41,6 +82,9 @@ export default function MainFilter({
       status: "NS",
     };
     setLocalFilters(defaultFilters);
+    setActivitySearch("");
+    setMobileActivitySearch("");
+    setIsActivityOpen(false);
     onResetFilters();
   };
 
@@ -50,6 +94,15 @@ export default function MainFilter({
   const activeCount =
     (localFilters.aktivitas !== "Total Aktivitas" ? 1 : 0) +
     (localFilters.status !== "NS" ? 1 : 0);
+
+  // Filter activities by search query
+  const filteredActivities = activities.filter((act) =>
+    act.toLowerCase().includes(activitySearch.toLowerCase())
+  );
+
+  const filteredMobileActivities = activities.filter((act) =>
+    act.toLowerCase().includes(mobileActivitySearch.toLowerCase())
+  );
 
   return (
     <>
@@ -67,24 +120,89 @@ export default function MainFilter({
 
         {/* Selects Grid & Reset Button Sejajar */}
         <div className="flex-1 flex flex-col sm:flex-row sm:items-end gap-2 sm:gap-2.5">
-          {/* 1. Filter Aktivitas */}
-          <div className="flex-1 flex flex-col gap-0.5">
+          {/* 1. Filter Aktivitas (Searchable Dropdown) */}
+          <div className="flex-1 flex flex-col gap-0.5 relative" ref={activityRef}>
             <label className="text-[10px] font-semibold text-[#5F6B63] uppercase tracking-wide">
               Aktivitas
             </label>
-            <select
-              value={localFilters.aktivitas}
-              onChange={(e) => handleChange("aktivitas", e.target.value)}
+
+            {/* Trigger Button */}
+            <button
+              type="button"
+              onClick={() => setIsActivityOpen(!isActivityOpen)}
               disabled={loading}
               suppressHydrationWarning
-              className="w-full bg-[#F7F9F7] border border-[#DDE5DF] rounded-lg px-2.5 py-1.5 text-xs text-[#17231B] focus:outline-none focus:border-[#16823B] transition-colors cursor-pointer"
+              className="w-full bg-[#F7F9F7] border border-[#DDE5DF] hover:border-[#16823B] focus:border-[#16823B] rounded-lg px-2.5 py-1.5 text-xs text-[#17231B] flex items-center justify-between transition-colors cursor-pointer h-[31px]"
             >
-              {activities.map((act) => (
-                <option key={act} value={act}>
-                  {act}
-                </option>
-              ))}
-            </select>
+              <span className="truncate pr-2 font-normal">
+                {localFilters.aktivitas}
+              </span>
+              <ChevronDown
+                className={`w-3.5 h-3.5 text-[#5F6B63] shrink-0 transition-transform ${
+                  isActivityOpen ? "rotate-180" : ""
+                }`}
+              />
+            </button>
+
+            {/* Popover Dropdown Searchable Menu */}
+            {isActivityOpen && (
+              <div className="absolute left-0 top-full mt-1 w-full min-w-[280px] sm:min-w-[340px] bg-white border border-[#DDE5DF] rounded-xl shadow-xl p-2.5 z-40 animate-in fade-in zoom-in-95 duration-150">
+                {/* Search Input Box */}
+                <div className="relative mb-2">
+                  <Search className="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-[#89938D]" />
+                  <input
+                    ref={searchInputRef}
+                    type="text"
+                    placeholder="Cari aktivitas..."
+                    value={activitySearch}
+                    onChange={(e) => setActivitySearch(e.target.value)}
+                    className="w-full bg-[#F7F9F7] border border-[#DDE5DF] rounded-lg pl-8 pr-7 py-1.5 text-xs text-[#17231B] placeholder-[#89938D] focus:outline-none focus:border-[#16823B] transition-colors"
+                  />
+                  {activitySearch && (
+                    <button
+                      onClick={() => setActivitySearch("")}
+                      className="absolute right-2 top-1/2 -translate-y-1/2 text-[#89938D] hover:text-[#17231B] cursor-pointer"
+                    >
+                      <X className="w-3.5 h-3.5" />
+                    </button>
+                  )}
+                </div>
+
+                {/* Filtered Options List */}
+                <div className="max-h-56 overflow-y-auto flex flex-col gap-0.5 pr-0.5">
+                  {filteredActivities.length === 0 ? (
+                    <p className="py-4 text-center text-xs text-[#89938D]">
+                      Tidak ada aktivitas yang cocok
+                    </p>
+                  ) : (
+                    filteredActivities.map((act) => {
+                      const isSelected = localFilters.aktivitas === act;
+                      return (
+                        <button
+                          key={act}
+                          type="button"
+                          onClick={() => {
+                            handleChange("aktivitas", act);
+                            setIsActivityOpen(false);
+                            setActivitySearch("");
+                          }}
+                          className={`w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg text-xs text-left transition-colors cursor-pointer ${
+                            isSelected
+                              ? "bg-[#16823B]/10 text-[#16823B] font-bold"
+                              : "text-[#17231B] hover:bg-[#F7F9F7]"
+                          }`}
+                        >
+                          <span className="truncate pr-2">{act}</span>
+                          {isSelected && (
+                            <Check className="w-3.5 h-3.5 text-[#16823B] shrink-0" />
+                          )}
+                        </button>
+                      );
+                    })
+                  )}
+                </div>
+              </div>
+            )}
           </div>
 
           {/* 2. Filter Status */}
@@ -97,7 +215,7 @@ export default function MainFilter({
               onChange={(e) => handleChange("status", e.target.value)}
               disabled={loading}
               suppressHydrationWarning
-              className="w-full bg-[#F7F9F7] border border-[#DDE5DF] rounded-lg px-2.5 py-1.5 text-xs text-[#17231B] focus:outline-none focus:border-[#16823B] transition-colors cursor-pointer"
+              className="w-full bg-[#F7F9F7] border border-[#DDE5DF] rounded-lg px-2.5 py-1.5 text-xs text-[#17231B] focus:outline-none focus:border-[#16823B] transition-colors cursor-pointer h-[31px]"
             >
               {statuses.map((st) => (
                 <option key={st.value} value={st.value}>
@@ -182,22 +300,58 @@ export default function MainFilter({
 
             {/* Selects Body */}
             <div className="flex flex-col gap-3.5">
-              {/* Aktivitas */}
+              {/* Aktivitas dengan Search Box */}
               <div>
                 <label className="block text-xs font-bold text-[#17231B] mb-1.5 uppercase tracking-wide">
                   Aktivitas
                 </label>
-                <select
-                  value={localFilters.aktivitas}
-                  onChange={(e) => handleChange("aktivitas", e.target.value)}
-                  className="w-full bg-[#F7F9F7] border border-[#DDE5DF] rounded-xl px-3 py-2.5 text-xs text-[#17231B] focus:outline-none focus:border-[#16823B] transition-colors"
-                >
-                  {activities.map((act) => (
-                    <option key={act} value={act}>
-                      {act}
-                    </option>
-                  ))}
-                </select>
+                <div className="relative mb-2">
+                  <Search className="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-[#89938D]" />
+                  <input
+                    type="text"
+                    placeholder="Cari nama aktivitas..."
+                    value={mobileActivitySearch}
+                    onChange={(e) => setMobileActivitySearch(e.target.value)}
+                    className="w-full bg-[#F7F9F7] border border-[#DDE5DF] rounded-xl pl-8 pr-7 py-2 text-xs text-[#17231B] placeholder-[#89938D] focus:outline-none focus:border-[#16823B] transition-colors"
+                  />
+                  {mobileActivitySearch && (
+                    <button
+                      onClick={() => setMobileActivitySearch("")}
+                      className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[#89938D] hover:text-[#17231B]"
+                    >
+                      <X className="w-3.5 h-3.5" />
+                    </button>
+                  )}
+                </div>
+
+                <div className="max-h-48 overflow-y-auto rounded-xl border border-[#DDE5DF] p-1 flex flex-col gap-0.5 bg-[#F7F9F7]">
+                  {filteredMobileActivities.length === 0 ? (
+                    <p className="py-3 text-center text-xs text-[#89938D]">
+                      Tidak ada aktivitas yang cocok
+                    </p>
+                  ) : (
+                    filteredMobileActivities.map((act) => {
+                      const isSelected = localFilters.aktivitas === act;
+                      return (
+                        <button
+                          key={act}
+                          type="button"
+                          onClick={() => handleChange("aktivitas", act)}
+                          className={`w-full flex items-center justify-between px-2.5 py-2 rounded-lg text-xs text-left transition-colors cursor-pointer ${
+                            isSelected
+                              ? "bg-white text-[#16823B] font-bold shadow-2xs border border-[#16823B]/20"
+                              : "text-[#17231B] hover:bg-white"
+                          }`}
+                        >
+                          <span className="truncate pr-2">{act}</span>
+                          {isSelected && (
+                            <Check className="w-3.5 h-3.5 text-[#16823B] shrink-0" />
+                          )}
+                        </button>
+                      );
+                    })
+                  )}
+                </div>
               </div>
 
               {/* Status */}

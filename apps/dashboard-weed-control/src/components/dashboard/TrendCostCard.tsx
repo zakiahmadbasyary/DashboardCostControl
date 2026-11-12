@@ -256,12 +256,6 @@ export default function TrendCostCard({
             </ResponsiveContainer>
           </div>
           <div className="flex items-center justify-between text-[11px] text-[#5F6B63] pt-2 border-t border-[#DDE5DF]/60">
-            <div className="flex items-center gap-1.5">
-              <Sparkles className="w-3.5 h-3.5 text-[#16823B]" />
-              <span>
-                Tip: <strong>Arahkan kursor dan klik pada batang umur</strong> untuk langsung memfilter tabel lokasi di bawah ke umur tersebut.
-              </span>
-            </div>
             <span className="font-mono text-[10px]">Satuan: Rp / Ha</span>
           </div>
         </div>
