@@ -4,8 +4,6 @@ import React, { useState, useEffect } from "react";
 import { TimelineItem, LocationItem } from "@/types/dashboard";
 import {
   Clock,
-  ChevronLeft,
-  ChevronRight,
   Search,
   AlertCircle,
   FlaskConical,
@@ -30,12 +28,9 @@ export default function TimelineCard({
   loading,
 }: TimelineCardProps) {
   const [searchQuery, setSearchQuery] = useState("");
-  const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 10;
 
-  // Reset pagination on location change
+  // Reset search on location change
   useEffect(() => {
-    setCurrentPage(1);
     setSearchQuery("");
   }, [selectedLocation]);
 
@@ -65,10 +60,6 @@ export default function TimelineCard({
     });
   }, [sortedTimeline, searchQuery]);
 
-  const totalPages = Math.max(1, Math.ceil(filteredTimeline.length / itemsPerPage));
-  const startIndex = (currentPage - 1) * itemsPerPage;
-  const paginatedTimeline = filteredTimeline.slice(startIndex, startIndex + itemsPerPage);
-
   if (!selectedLocation) {
     return (
       <div className="bg-white border border-dashed border-[#DDE5DF] rounded-2xl p-6 text-center shadow-xs">
@@ -87,7 +78,7 @@ export default function TimelineCard({
 
   return (
     <div className="bg-white border border-[#DDE5DF] rounded-2xl p-5 sm:p-6 shadow-xs flex flex-col gap-4">
-      {/* Header Bar (Tanpa Tombol Export Excel) */}
+      {/* Header Bar */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-[#DDE5DF]/70">
         <div className="flex items-center gap-2.5">
           <div className="p-2 rounded-xl bg-[#16823B]/10 text-[#16823B] shrink-0">
@@ -116,17 +107,14 @@ export default function TimelineCard({
               type="text"
               placeholder="Cari aktivitas..."
               value={searchQuery}
-              onChange={(e) => {
-                setSearchQuery(e.target.value);
-                setCurrentPage(1);
-              }}
+              onChange={(e) => setSearchQuery(e.target.value)}
               className="bg-[#F7F9F7] border border-[#DDE5DF] rounded-lg pl-8 pr-3 py-1.5 text-xs text-[#17231B] placeholder-[#89938D] focus:outline-none focus:border-[#16823B] w-48 sm:w-56 transition-colors"
             />
           </div>
         </div>
       </div>
 
-      {/* Table Area */}
+      {/* Table Area (Maksimal 8 data tampak, selebihnya scroll vertikal) */}
       {loading ? (
         <div className="py-12 flex flex-col items-center justify-center">
           <div className="w-6 h-6 border-2 border-[#16823B] border-t-transparent rounded-full animate-spin mb-2" />
@@ -142,9 +130,9 @@ export default function TimelineCard({
         </div>
       ) : (
         <>
-          <div className="overflow-x-auto rounded-xl border border-[#DDE5DF]">
+          <div className="overflow-x-auto rounded-xl border border-[#DDE5DF] max-h-[350px] overflow-y-auto">
             <table className="w-full text-xs text-left whitespace-nowrap">
-              <thead className="bg-[#F7F9F7] text-[#17231B] uppercase font-bold border-b border-[#DDE5DF]">
+              <thead className="bg-[#F7F9F7] text-[#17231B] uppercase font-bold border-b border-[#DDE5DF] sticky top-0 z-10 shadow-2xs">
                 <tr>
                   <th className="py-2.5 px-3">Aktivitas</th>
                   <th className="py-2.5 px-3">Tgl Realisasi</th>
@@ -160,7 +148,7 @@ export default function TimelineCard({
                 </tr>
               </thead>
               <tbody className="divide-y divide-[#DDE5DF]/60">
-                {paginatedTimeline.map((item) => (
+                {filteredTimeline.map((item) => (
                   <tr key={item.id} className="hover:bg-[#F7F9F7] transition-colors">
                     <td className="py-2.5 px-3 font-semibold text-[#17231B]">
                       {item.aktivitas}
@@ -230,39 +218,16 @@ export default function TimelineCard({
             </table>
           </div>
 
-          {/* Pagination Controls */}
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-3 border-t border-[#DDE5DF]/80 text-xs text-[#5F6B63]">
+          {/* Table Summary Footer */}
+          <div className="flex items-center justify-between text-xs text-[#5F6B63] pt-2 border-t border-[#DDE5DF]/80">
             <span>
-              Menampilkan <strong className="text-[#17231B]">{startIndex + 1}</strong> -{" "}
-              <strong className="text-[#17231B]">
-                {Math.min(startIndex + itemsPerPage, filteredTimeline.length)}
-              </strong>{" "}
-              dari <strong className="text-[#16823B] font-bold">{filteredTimeline.length}</strong> transaksi
+              Menampilkan <strong className="text-[#16823B] font-bold">{filteredTimeline.length}</strong> transaksi
             </span>
-
-            <div className="flex items-center gap-1.5">
-              <button
-                disabled={currentPage === 1}
-                onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
-                className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg border border-[#DDE5DF] bg-white text-[#17231B] hover:bg-[#F7F9F7] disabled:opacity-40 disabled:cursor-not-allowed text-xs font-semibold transition-colors cursor-pointer"
-              >
-                <ChevronLeft className="w-3.5 h-3.5" />
-                <span>Sebelumnya</span>
-              </button>
-
-              <span className="px-2.5 py-1 text-xs font-bold text-[#16823B] bg-[#16823B]/10 rounded-lg border border-[#16823B]/20">
-                {currentPage} / {totalPages}
+            {filteredTimeline.length > 8 && (
+              <span className="text-[11px] text-[#89938D]">
+                * Scroll ke bawah pada tabel untuk melihat data lainnya
               </span>
-
-              <button
-                disabled={currentPage === totalPages}
-                onClick={() => setCurrentPage((prev) => Math.min(totalPages, prev + 1))}
-                className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg border border-[#DDE5DF] bg-white text-[#17231B] hover:bg-[#F7F9F7] disabled:opacity-40 disabled:cursor-not-allowed text-xs font-semibold transition-colors cursor-pointer"
-              >
-                <span>Selanjutnya</span>
-                <ChevronRight className="w-3.5 h-3.5" />
-              </button>
-            </div>
+            )}
           </div>
         </>
       )}
