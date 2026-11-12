@@ -12,11 +12,9 @@ import {
 import {
   Search,
   X,
-  Layers,
   FileSpreadsheet,
   Activity,
   Tractor,
-  Boxes,
   ChevronLeft,
   ChevronRight,
   RefreshCw,
@@ -28,48 +26,41 @@ interface TabMeta {
   label: string;
   icon: typeof Tractor;
   description: string;
+  badge: string;
 }
 
 const TABS: TabMeta[] = [
   {
-    key: "mastersheet",
-    label: "Mastersheet Lokasi",
+    key: "lokasi",
+    label: "Data Lokasi",
     icon: Tractor,
-    description: "Daftar master petak perkebunan per lokasi (Primary Key lokasi unik).",
+    description: "Tampilan persis kolom berkas Excel Data Lokasi: Mastersheet petak ditambah kolom umur (Umur 1 s/d Umur 20).",
+    badge: "Mastersheet + Umur 1-20",
   },
   {
-    key: "cost_umur",
-    label: "Biaya Umur (1-20)",
-    icon: Layers,
-    description: "Rincian biaya umur hasil transformasi wide-to-long dari kolom Umur 1 s/d 20.",
-  },
-  {
-    key: "data_timeline",
+    key: "timeline",
     label: "Data Timeline",
     icon: FileSpreadsheet,
-    description: "Transaksi realisasi kegiatan lapangan per petak lokasi, mendukung umur negatif.",
+    description: "Tampilan persis kolom berkas Excel Data Timeline: Transaksi realisasi ditambah kolom kuantitas bahan kimia dinamis.",
+    badge: "Timeline + Bahan Kimia",
   },
   {
-    key: "data_material",
-    label: "Detail Material Herbisida",
-    icon: Boxes,
-    description: "Rincian kuantitas aplikasi bahan herbisida/pestisida kimia dari kolom material dinamis.",
-  },
-  {
-    key: "data_aktivitas",
-    label: "Data Rekap Aktivitas",
+    key: "aktivitas",
+    label: "Data Aktivitas",
     icon: Activity,
-    description: "Rekap transaksi aktivitas lapangan lengkap dengan denormalisasi wilayah, status, luas, dan kelas.",
+    description: "Tampilan persis kolom berkas Excel Data Aktivitas: Rekap transaksi lengkap dengan status, wilayah, luas, kelas, biaya, dan grup aktivitas.",
+    badge: "Rekap Transaksi Aktivitas",
   },
 ];
 
 export default function AdminPreviewPage() {
-  const [activeTab, setActiveTab] = useState<WeedControlTab>("mastersheet");
+  const [activeTab, setActiveTab] = useState<WeedControlTab>("lokasi");
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [page, setPage] = useState<number>(1);
   const [limit] = useState<number>(50);
 
   const [tableData, setTableData] = useState<Record<string, any>[]>([]);
+  const [materialColumns, setMaterialColumns] = useState<string[]>([]);
   const [totalRecords, setTotalRecords] = useState<number>(0);
   const [totalPages, setTotalPages] = useState<number>(1);
   const [loading, setLoading] = useState<boolean>(true);
@@ -81,6 +72,7 @@ export default function AdminPreviewPage() {
       setTableData(res.data || []);
       setTotalRecords(res.total || 0);
       setTotalPages(res.totalPages || 1);
+      setMaterialColumns(res.materialColumns || []);
     } catch (err) {
       console.error("Error loading preview:", err);
     } finally {
@@ -100,16 +92,19 @@ export default function AdminPreviewPage() {
 
   const currentTabMeta = TABS.find((t) => t.key === activeTab)!;
 
+  // 20 Kolom Umur untuk Data Lokasi Excel
+  const umurList = Array.from({ length: 20 }, (_, i) => i + 1);
+
   return (
     <div className="space-y-6 font-sans">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-xl sm:text-2xl font-extrabold text-[#17231B] flex items-center gap-2">
-            <span>Preview Database Weed Control</span>
+            <span>Preview Data Weed Control</span>
           </h1>
           <p className="text-xs sm:text-sm text-[#5F6B63] mt-1">
-            Lihat dan verifikasi 5 tabel data Weed Control yang tersimpan di PostgreSQL.
+            Data preview disesuaikan persis seperti struktur kolom pada 3 file Excel sumber: <strong>Data Lokasi</strong>, <strong>Data Timeline</strong>, dan <strong>Data Aktivitas</strong>.
           </p>
         </div>
 
@@ -123,8 +118,8 @@ export default function AdminPreviewPage() {
         </button>
       </div>
 
-      {/* Tabs Navigation */}
-      <div className="border-b border-[#DDE5DF] flex items-center gap-1 overflow-x-auto pb-px">
+      {/* Tabs Navigation (3 Tab Sesuai 3 File Excel) */}
+      <div className="border-b border-[#DDE5DF] flex items-center gap-2 overflow-x-auto pb-px">
         {TABS.map((tab) => {
           const Icon = tab.icon;
           const isActive = activeTab === tab.key;
@@ -132,14 +127,21 @@ export default function AdminPreviewPage() {
             <button
               key={tab.key}
               onClick={() => handleTabChange(tab.key)}
-              className={`flex items-center gap-2 px-4 py-2.5 text-xs sm:text-sm font-bold border-b-2 whitespace-nowrap transition-all cursor-pointer ${
+              className={`flex items-center gap-2.5 px-4 py-3 text-xs sm:text-sm font-bold border-b-2 whitespace-nowrap transition-all cursor-pointer ${
                 isActive
-                  ? "border-[#16823B] text-[#16823B] bg-white rounded-t-xl"
+                  ? "border-[#16823B] text-[#16823B] bg-white rounded-t-xl shadow-xs"
                   : "border-transparent text-[#5F6B63] hover:text-[#17231B] hover:bg-white/50"
               }`}
             >
-              <Icon className="w-4 h-4" />
+              <Icon className="w-4 h-4 shrink-0" />
               <span>{tab.label}</span>
+              <span
+                className={`text-[10px] px-2 py-0.5 rounded-full font-semibold ${
+                  isActive ? "bg-[#16823B]/10 text-[#16823B]" : "bg-gray-100 text-gray-500"
+                }`}
+              >
+                {tab.badge}
+              </span>
             </button>
           );
         })}
@@ -152,11 +154,17 @@ export default function AdminPreviewPage() {
           <span>{currentTabMeta.description}</span>
         </div>
 
-        <div className="relative w-full md:w-72">
+        <div className="relative w-full md:w-80">
           <Search className="w-4 h-4 text-[#89938D] absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
           <input
             type="text"
-            placeholder="Cari lokasi / aktivitas / material..."
+            placeholder={
+              activeTab === "lokasi"
+                ? "Cari lokasi / wilayah / jenis / status..."
+                : activeTab === "timeline"
+                ? "Cari lokasi / aktivitas / nama bahan kimia..."
+                : "Cari lokasi / aktivitas / kode / grup..."
+            }
             value={searchQuery}
             onChange={(e) => {
               setSearchQuery(e.target.value);
@@ -180,72 +188,89 @@ export default function AdminPreviewPage() {
 
       {/* Main Table Container */}
       <div className="bg-white border border-[#DDE5DF] rounded-2xl shadow-xs overflow-hidden">
-        <div className="overflow-x-auto max-h-[560px] scrollbar-thin">
-          <table className="w-full text-xs text-left">
+        <div className="overflow-x-auto max-h-[620px] scrollbar-thin">
+          <table className="w-full text-xs text-left border-collapse">
             <thead className="bg-[#F7F9F7] text-[#17231B] uppercase font-bold border-b border-[#DDE5DF] sticky top-0 z-10 shadow-2xs">
-              {activeTab === "mastersheet" && (
+              {/* ========================================================================= */}
+              {/* 1. HEADER DATA LOKASI (Kolom Excel Mastersheet + Umur 1..20) */}
+              {/* ========================================================================= */}
+              {activeTab === "lokasi" && (
                 <tr>
-                  <th className="py-3 px-3.5">Lokasi (PK)</th>
-                  <th className="py-3 px-3">Wilayah</th>
-                  <th className="py-3 px-3">Status</th>
-                  <th className="py-3 px-3 text-right">Luas (Ha)</th>
-                  <th className="py-3 px-3">Jenis</th>
-                  <th className="py-3 px-3">Kelas</th>
-                  <th className="py-3 px-3">Mulai Rawat</th>
-                  <th className="py-3 px-3">Mulai Tanam</th>
-                  <th className="py-3 px-3 text-right">Umur</th>
-                  <th className="py-3 px-3.5 text-right">Total Cost</th>
+                  <th className="py-3 px-3.5 sticky left-0 bg-[#F7F9F7] z-20 border-r border-[#DDE5DF]">Lokasi</th>
+                  <th className="py-3 px-3 whitespace-nowrap">Status</th>
+                  <th className="py-3 px-3 whitespace-nowrap">Wilayah</th>
+                  <th className="py-3 px-3 text-right whitespace-nowrap">Luas (Ha)</th>
+                  <th className="py-3 px-3 whitespace-nowrap">Jenis</th>
+                  <th className="py-3 px-2.5 whitespace-nowrap">Kelas</th>
+                  <th className="py-3 px-3 whitespace-nowrap">Mulai Rawat</th>
+                  <th className="py-3 px-3 whitespace-nowrap">Mulai Tanam</th>
+                  <th className="py-3 px-3 whitespace-nowrap">Forcing Std</th>
+                  <th className="py-3 px-3 whitespace-nowrap">Real Forcing</th>
+                  <th className="py-3 px-3 whitespace-nowrap">Selesai Panen</th>
+                  <th className="py-3 px-2.5 text-center whitespace-nowrap">Umur Forcing</th>
+                  <th className="py-3 px-2.5 text-center whitespace-nowrap">Umur</th>
+                  <th className="py-3 px-3.5 text-right whitespace-nowrap bg-emerald-50/60 text-[#16823B] border-r border-[#DDE5DF]">Total Cost</th>
+                  {umurList.map((u) => (
+                    <th key={u} className="py-3 px-3 text-right whitespace-nowrap bg-gray-50/80 text-[#5F6B63]">
+                      Umur {u}
+                    </th>
+                  ))}
                 </tr>
               )}
 
-              {activeTab === "cost_umur" && (
+              {/* ========================================================================= */}
+              {/* 2. HEADER DATA TIMELINE (Kolom Excel Timeline + Kolom Bahan Kimia Dinamis) */}
+              {/* ========================================================================= */}
+              {activeTab === "timeline" && (
                 <tr>
-                  <th className="py-3 px-3.5">ID</th>
-                  <th className="py-3 px-3.5">Lokasi (FK)</th>
-                  <th className="py-3 px-3 text-center">Umur</th>
-                  <th className="py-3 px-3.5 text-right">Biaya (Rp)</th>
-                  <th className="py-3 px-3.5">Updated At</th>
+                  <th className="py-3 px-3.5 sticky left-0 bg-[#F7F9F7] z-20 border-r border-[#DDE5DF]">Lokasi</th>
+                  <th className="py-3 px-3 whitespace-nowrap">Awal Rawat</th>
+                  <th className="py-3 px-4 min-w-[200px]">Aktivitas</th>
+                  <th className="py-3 px-3 whitespace-nowrap">Tgl Realisasi</th>
+                  <th className="py-3 px-2.5 text-center whitespace-nowrap">Umur</th>
+                  <th className="py-3 px-3 text-right whitespace-nowrap">Hasil</th>
+                  <th className="py-3 px-2.5 text-center whitespace-nowrap">UOM</th>
+                  <th className="py-3 px-3 text-right whitespace-nowrap">TK</th>
+                  <th className="py-3 px-3 text-right whitespace-nowrap">Kapasitas/TK</th>
+                  <th className="py-3 px-3.5 text-right whitespace-nowrap bg-emerald-50/60 text-[#16823B]">Total Cost</th>
+                  <th className="py-3 px-3 text-right whitespace-nowrap">Upah</th>
+                  <th className="py-3 px-3 text-right whitespace-nowrap">Charge</th>
+                  <th className="py-3 px-3.5 text-right whitespace-nowrap border-r border-[#DDE5DF] bg-amber-50/50 text-amber-900">
+                    Material (Biaya)
+                  </th>
+                  {materialColumns.map((matName) => (
+                    <th
+                      key={matName}
+                      className="py-3 px-3 text-right whitespace-nowrap bg-blue-50/40 text-blue-900 font-semibold"
+                      title={`Kuantitas bahan kimia ${matName}`}
+                    >
+                      {matName}
+                    </th>
+                  ))}
                 </tr>
               )}
 
-              {activeTab === "data_timeline" && (
+              {/* ========================================================================= */}
+              {/* 3. HEADER DATA AKTIVITAS (Kolom Excel Rekap Transaksi Denormalisasi) */}
+              {/* ========================================================================= */}
+              {activeTab === "aktivitas" && (
                 <tr>
-                  <th className="py-3 px-3.5">ID</th>
-                  <th className="py-3 px-3.5">Lokasi</th>
-                  <th className="py-3 px-3.5">Aktivitas</th>
-                  <th className="py-3 px-3">Tgl Realisasi</th>
-                  <th className="py-3 px-2.5 text-center">Umur</th>
-                  <th className="py-3 px-2.5 text-right">Hasil</th>
-                  <th className="py-3 px-2.5 text-right">TK</th>
-                  <th className="py-3 px-3 text-right">Upah (Rp)</th>
-                  <th className="py-3 px-3 text-right">Material (Rp)</th>
-                  <th className="py-3 px-3.5 text-right">Total Cost (Rp)</th>
-                </tr>
-              )}
-
-              {activeTab === "data_material" && (
-                <tr>
-                  <th className="py-3 px-3.5">ID</th>
-                  <th className="py-3 px-3.5">Timeline ID (FK)</th>
-                  <th className="py-3 px-4">Nama Material</th>
-                  <th className="py-3 px-4 text-right">Kuantitas</th>
-                  <th className="py-3 px-3.5">Created At</th>
-                </tr>
-              )}
-
-              {activeTab === "data_aktivitas" && (
-                <tr>
-                  <th className="py-3 px-3">Lokasi</th>
-                  <th className="py-3 px-2.5">Wilayah</th>
-                  <th className="py-3 px-2.5">Status</th>
-                  <th className="py-3 px-2.5 text-right">Luas</th>
-                  <th className="py-3 px-2.5">Kode</th>
-                  <th className="py-3 px-3.5">Aktivitas</th>
-                  <th className="py-3 px-3">Activity Group</th>
-                  <th className="py-3 px-3 text-right">Upah</th>
-                  <th className="py-3 px-3 text-right">Material</th>
-                  <th className="py-3 px-3.5 text-right">Biaya</th>
-                  <th className="py-3 px-3 text-right">Biaya/Ha</th>
+                  <th className="py-3 px-3.5 sticky left-0 bg-[#F7F9F7] z-20 border-r border-[#DDE5DF]">Lokasi</th>
+                  <th className="py-3 px-3 whitespace-nowrap">Status</th>
+                  <th className="py-3 px-3 whitespace-nowrap">Wilayah</th>
+                  <th className="py-3 px-3 text-right whitespace-nowrap">Luas (Ha)</th>
+                  <th className="py-3 px-2.5 whitespace-nowrap">Kelas</th>
+                  <th className="py-3 px-3 font-mono whitespace-nowrap">Kode</th>
+                  <th className="py-3 px-4 min-w-[220px]">Aktivitas</th>
+                  <th className="py-3 px-3.5 text-right whitespace-nowrap bg-emerald-50/60 text-[#16823B]">Biaya (Total)</th>
+                  <th className="py-3 px-3.5 text-right whitespace-nowrap text-emerald-800">Biaya/Ha</th>
+                  <th className="py-3 px-3 text-right whitespace-nowrap">Upah</th>
+                  <th className="py-3 px-3 text-right whitespace-nowrap">Charge</th>
+                  <th className="py-3 px-3 text-right whitespace-nowrap">Material</th>
+                  <th className="py-3 px-3 text-right whitespace-nowrap">Bibit</th>
+                  <th className="py-3 px-3 text-right whitespace-nowrap">Hasil</th>
+                  <th className="py-3 px-2.5 text-center whitespace-nowrap">UOM</th>
+                  <th className="py-3 px-3.5 whitespace-nowrap font-semibold text-[#16823B]">Activity Group</th>
                 </tr>
               )}
             </thead>
@@ -253,96 +278,151 @@ export default function AdminPreviewPage() {
             <tbody className="divide-y divide-[#DDE5DF]/60">
               {loading ? (
                 <tr>
-                  <td colSpan={10} className="py-16 text-center text-xs text-[#5F6B63]">
+                  <td
+                    colSpan={
+                      activeTab === "lokasi"
+                        ? 14 + umurList.length
+                        : activeTab === "timeline"
+                        ? 13 + materialColumns.length
+                        : 16
+                    }
+                    className="py-16 text-center text-xs text-[#5F6B63]"
+                  >
                     <div className="w-6 h-6 border-2 border-[#16823B] border-t-transparent rounded-full animate-spin mx-auto mb-2" />
                     Memuat data tabel...
                   </td>
                 </tr>
               ) : tableData.length === 0 ? (
                 <tr>
-                  <td colSpan={10} className="py-16 text-center text-xs text-[#5F6B63]">
+                  <td
+                    colSpan={
+                      activeTab === "lokasi"
+                        ? 14 + umurList.length
+                        : activeTab === "timeline"
+                        ? 13 + materialColumns.length
+                        : 16
+                    }
+                    className="py-16 text-center text-xs text-[#5F6B63]"
+                  >
                     Tidak ada data pada tabel <strong>{currentTabMeta.label}</strong>.
                   </td>
                 </tr>
               ) : (
                 tableData.map((row, idx) => (
                   <tr key={idx} className="hover:bg-[#F7F9F7] text-[#17231B] transition-colors">
-                    {activeTab === "mastersheet" && (
+                    {/* ========================================================================= */}
+                    {/* 1. BARIS DATA LOKASI */}
+                    {/* ========================================================================= */}
+                    {activeTab === "lokasi" && (
                       <>
-                        <td className="py-2.5 px-3.5 font-bold font-mono text-[#16823B]">{row.lokasi}</td>
-                        <td className="py-2.5 px-3 font-semibold">{row.wilayah || "-"}</td>
-                        <td className="py-2.5 px-3">{row.status || "-"}</td>
-                        <td className="py-2.5 px-3 text-right font-mono">{formatDecimal2(row.luas)}</td>
-                        <td className="py-2.5 px-3">{row.jenis || "-"}</td>
-                        <td className="py-2.5 px-3">{row.kelas || "-"}</td>
-                        <td className="py-2.5 px-3">{formatDateShort(row.mulaiRawat)}</td>
-                        <td className="py-2.5 px-3">{formatDateShort(row.mulaiTanam)}</td>
-                        <td className="py-2.5 px-3 text-right font-mono">{row.umur ?? "-"}</td>
-                        <td className="py-2.5 px-3.5 text-right font-mono font-bold text-[#16823B]">
+                        <td className="py-2.5 px-3.5 font-bold font-mono text-[#16823B] sticky left-0 bg-white group-hover:bg-[#F7F9F7] z-10 border-r border-[#DDE5DF]">
+                          {row.lokasi}
+                        </td>
+                        <td className="py-2.5 px-3 whitespace-nowrap">{row.status || "-"}</td>
+                        <td className="py-2.5 px-3 whitespace-nowrap font-medium">{row.wilayah || "-"}</td>
+                        <td className="py-2.5 px-3 text-right font-mono whitespace-nowrap">{formatDecimal2(row.luas)}</td>
+                        <td className="py-2.5 px-3 whitespace-nowrap">{row.jenis || "-"}</td>
+                        <td className="py-2.5 px-2.5 whitespace-nowrap">{row.kelas || "-"}</td>
+                        <td className="py-2.5 px-3 whitespace-nowrap text-[#5F6B63]">{formatDateShort(row.mulaiRawat)}</td>
+                        <td className="py-2.5 px-3 whitespace-nowrap text-[#5F6B63]">{formatDateShort(row.mulaiTanam)}</td>
+                        <td className="py-2.5 px-3 whitespace-nowrap text-[#5F6B63]">{formatDateShort(row.forcingStandar)}</td>
+                        <td className="py-2.5 px-3 whitespace-nowrap text-[#5F6B63]">{formatDateShort(row.realForcing)}</td>
+                        <td className="py-2.5 px-3 whitespace-nowrap text-[#5F6B63]">{formatDateShort(row.selesaiPanen)}</td>
+                        <td className="py-2.5 px-2.5 text-center font-mono whitespace-nowrap">{row.umurForcing ?? "-"}</td>
+                        <td className="py-2.5 px-2.5 text-center font-mono whitespace-nowrap font-semibold">{row.umur ?? "-"}</td>
+                        <td className="py-2.5 px-3.5 text-right font-mono font-bold text-[#16823B] whitespace-nowrap bg-emerald-50/30 border-r border-[#DDE5DF]">
                           {formatCurrencyRp(row.totalCost)}
                         </td>
+                        {umurList.map((u) => {
+                          const cost = row.costUmurMap?.[u];
+                          return (
+                            <td
+                              key={u}
+                              className={`py-2.5 px-3 text-right font-mono whitespace-nowrap ${
+                                cost !== undefined && cost !== null
+                                  ? "text-[#17231B] font-medium"
+                                  : "text-gray-300"
+                              }`}
+                            >
+                              {cost !== undefined && cost !== null ? formatCurrencyRp(cost) : "-"}
+                            </td>
+                          );
+                        })}
                       </>
                     )}
 
-                    {activeTab === "cost_umur" && (
+                    {/* ========================================================================= */}
+                    {/* 2. BARIS DATA TIMELINE */}
+                    {/* ========================================================================= */}
+                    {activeTab === "timeline" && (
                       <>
-                        <td className="py-2.5 px-3.5 font-mono text-gray-500">{String(row.id)}</td>
-                        <td className="py-2.5 px-3.5 font-bold font-mono text-[#16823B]">{row.lokasi}</td>
-                        <td className="py-2.5 px-3 text-center font-bold font-mono">{row.umur}</td>
-                        <td className="py-2.5 px-3.5 text-right font-mono font-bold text-[#16823B]">
-                          {formatCurrencyRp(row.cost)}
+                        <td className="py-2.5 px-3.5 font-bold font-mono text-[#16823B] sticky left-0 bg-white z-10 border-r border-[#DDE5DF]">
+                          {row.lokasi}
                         </td>
-                        <td className="py-2.5 px-3.5 text-gray-500">{formatDateShort(row.updatedAt)}</td>
-                      </>
-                    )}
-
-                    {activeTab === "data_timeline" && (
-                      <>
-                        <td className="py-2.5 px-3.5 font-mono text-gray-500">{String(row.id)}</td>
-                        <td className="py-2.5 px-3.5 font-bold font-mono text-[#16823B]">{row.lokasi}</td>
-                        <td className="py-2.5 px-3.5 font-medium">{row.aktivitas || "-"}</td>
-                        <td className="py-2.5 px-3">{formatDateShort(row.tanggalRealisasi)}</td>
-                        <td className="py-2.5 px-2.5 text-center font-mono font-bold">
+                        <td className="py-2.5 px-3 whitespace-nowrap text-[#5F6B63]">{formatDateShort(row.awalRawat)}</td>
+                        <td className="py-2.5 px-4 font-medium text-[#17231B] min-w-[200px]">{row.aktivitas || "-"}</td>
+                        <td className="py-2.5 px-3 whitespace-nowrap text-[#5F6B63]">{formatDateShort(row.tanggalRealisasi)}</td>
+                        <td className="py-2.5 px-2.5 text-center font-mono font-bold whitespace-nowrap">
                           {row.umur !== null ? row.umur : "-"}
                         </td>
-                        <td className="py-2.5 px-2.5 text-right font-mono">{formatDecimal4(row.hasil)}</td>
-                        <td className="py-2.5 px-2.5 text-right font-mono">{formatDecimal4(row.tk)}</td>
-                        <td className="py-2.5 px-3 text-right font-mono">{formatCurrencyRp(row.upah)}</td>
-                        <td className="py-2.5 px-3 text-right font-mono">{formatCurrencyRp(row.material)}</td>
-                        <td className="py-2.5 px-3.5 text-right font-mono font-bold text-[#16823B]">
+                        <td className="py-2.5 px-3 text-right font-mono whitespace-nowrap">{formatDecimal4(row.hasil)}</td>
+                        <td className="py-2.5 px-2.5 text-center whitespace-nowrap font-medium">{row.uom || "-"}</td>
+                        <td className="py-2.5 px-3 text-right font-mono whitespace-nowrap">{formatDecimal4(row.tk)}</td>
+                        <td className="py-2.5 px-3 text-right font-mono whitespace-nowrap">{formatDecimal4(row.kapasitasPerTk)}</td>
+                        <td className="py-2.5 px-3.5 text-right font-mono font-bold text-[#16823B] whitespace-nowrap bg-emerald-50/30">
                           {formatCurrencyRp(row.totalCost)}
                         </td>
-                      </>
-                    )}
-
-                    {activeTab === "data_material" && (
-                      <>
-                        <td className="py-2.5 px-3.5 font-mono text-gray-500">{String(row.id)}</td>
-                        <td className="py-2.5 px-3.5 font-mono font-bold text-[#16823B]">{String(row.timelineId)}</td>
-                        <td className="py-2.5 px-4 font-bold">{row.namaMaterial}</td>
-                        <td className="py-2.5 px-4 text-right font-mono font-bold text-[#16823B]">
-                          {formatDecimal4(row.quantity)}
+                        <td className="py-2.5 px-3 text-right font-mono whitespace-nowrap">{formatCurrencyRp(row.upah)}</td>
+                        <td className="py-2.5 px-3 text-right font-mono whitespace-nowrap">{formatCurrencyRp(row.charge)}</td>
+                        <td className="py-2.5 px-3.5 text-right font-mono font-semibold whitespace-nowrap border-r border-[#DDE5DF] bg-amber-50/20 text-amber-900">
+                          {formatCurrencyRp(row.material)}
                         </td>
-                        <td className="py-2.5 px-3.5 text-gray-500">{formatDateShort(row.createdAt)}</td>
+                        {materialColumns.map((matName) => {
+                          const qty = row.materialsMap?.[matName];
+                          return (
+                            <td
+                              key={matName}
+                              className={`py-2.5 px-3 text-right font-mono whitespace-nowrap ${
+                                qty !== undefined && qty !== null
+                                  ? "text-blue-900 font-semibold bg-blue-50/15"
+                                  : "text-gray-300"
+                              }`}
+                            >
+                              {qty !== undefined && qty !== null ? formatDecimal4(qty) : "-"}
+                            </td>
+                          );
+                        })}
                       </>
                     )}
 
-                    {activeTab === "data_aktivitas" && (
+                    {/* ========================================================================= */}
+                    {/* 3. BARIS DATA AKTIVITAS */}
+                    {/* ========================================================================= */}
+                    {activeTab === "aktivitas" && (
                       <>
-                        <td className="py-2.5 px-3 font-bold font-mono text-[#16823B]">{row.lokasi}</td>
-                        <td className="py-2.5 px-2.5 font-semibold">{row.wilayah || "-"}</td>
-                        <td className="py-2.5 px-2.5">{row.status || "-"}</td>
-                        <td className="py-2.5 px-2.5 text-right font-mono">{formatDecimal2(row.luas)}</td>
-                        <td className="py-2.5 px-2.5 font-mono font-medium">{row.kode || "-"}</td>
-                        <td className="py-2.5 px-3.5 font-medium">{row.aktivitas || "-"}</td>
-                        <td className="py-2.5 px-3 font-semibold text-[#16823B]">{row.activityGroup || "-"}</td>
-                        <td className="py-2.5 px-3 text-right font-mono">{formatCurrencyRp(row.upah)}</td>
-                        <td className="py-2.5 px-3 text-right font-mono">{formatCurrencyRp(row.material)}</td>
-                        <td className="py-2.5 px-3.5 text-right font-mono font-bold text-[#16823B]">
+                        <td className="py-2.5 px-3.5 font-bold font-mono text-[#16823B] sticky left-0 bg-white z-10 border-r border-[#DDE5DF]">
+                          {row.lokasi}
+                        </td>
+                        <td className="py-2.5 px-3 whitespace-nowrap">{row.status || "-"}</td>
+                        <td className="py-2.5 px-3 whitespace-nowrap font-medium">{row.wilayah || "-"}</td>
+                        <td className="py-2.5 px-3 text-right font-mono whitespace-nowrap">{formatDecimal2(row.luas)}</td>
+                        <td className="py-2.5 px-2.5 whitespace-nowrap">{row.kelas || "-"}</td>
+                        <td className="py-2.5 px-3 font-mono font-medium whitespace-nowrap">{row.kode || "-"}</td>
+                        <td className="py-2.5 px-4 font-medium text-[#17231B] min-w-[220px]">{row.aktivitas || "-"}</td>
+                        <td className="py-2.5 px-3.5 text-right font-mono font-bold text-[#16823B] whitespace-nowrap bg-emerald-50/30">
                           {formatCurrencyRp(row.biaya)}
                         </td>
-                        <td className="py-2.5 px-3 text-right font-mono font-medium">
+                        <td className="py-2.5 px-3.5 text-right font-mono font-semibold text-emerald-800 whitespace-nowrap">
                           {formatCurrencyRp(row.biayaPerHa)}
+                        </td>
+                        <td className="py-2.5 px-3 text-right font-mono whitespace-nowrap">{formatCurrencyRp(row.upah)}</td>
+                        <td className="py-2.5 px-3 text-right font-mono whitespace-nowrap">{formatCurrencyRp(row.charge)}</td>
+                        <td className="py-2.5 px-3 text-right font-mono whitespace-nowrap">{formatCurrencyRp(row.material)}</td>
+                        <td className="py-2.5 px-3 text-right font-mono whitespace-nowrap">{formatCurrencyRp(row.bibit)}</td>
+                        <td className="py-2.5 px-3 text-right font-mono whitespace-nowrap">{formatDecimal4(row.hasil)}</td>
+                        <td className="py-2.5 px-2.5 text-center whitespace-nowrap font-medium">{row.uom || "-"}</td>
+                        <td className="py-2.5 px-3.5 whitespace-nowrap font-semibold text-[#16823B]">
+                          {row.activityGroup || "-"}
                         </td>
                       </>
                     )}
@@ -390,4 +470,3 @@ export default function AdminPreviewPage() {
     </div>
   );
 }
-

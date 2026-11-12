@@ -17,5 +17,6 @@ export interface PreviewTableResponse {
   page: number;
   limit: number;
   totalPages: number;
+  materialColumns?: string[];
+  maxUmur?: number;
 }
-

@@ -1,15 +1,10 @@
 import { PreviewTableResponse } from "@/types/sourceData";
 
-export type WeedControlTab =
-  | "mastersheet"
-  | "cost_umur"
-  | "data_timeline"
-  | "data_material"
-  | "data_aktivitas";
+export type WeedControlTab = "lokasi" | "timeline" | "aktivitas";
 
 export const previewService = {
   async getPreviewData(
-    tab: WeedControlTab,
+    tab: WeedControlTab | string,
     page = 1,
     limit = 50,
     search = ""
@@ -33,4 +28,3 @@ export const previewService = {
     return json;
   },
 };
-
