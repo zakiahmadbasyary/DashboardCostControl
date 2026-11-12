@@ -1,255 +1,335 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import DashboardHeader from "@/components/dashboard/DashboardHeader";
-import {
-  Tractor,
-  Droplets,
-  DollarSign,
-  TrendingUp,
-  Calendar,
-  Layers,
-  ArrowUpRight,
-  ShieldCheck,
-  CheckCircle2,
-  FileSpreadsheet,
-  Clock,
-  Sparkles,
-  BarChart3,
-  MapPin,
-} from "lucide-react";
-import { getDashboardNavConfig } from "@dashboard/shared-ui";
+import MainFilter from "@/components/dashboard/MainFilter";
+import TrendCostCard from "@/components/dashboard/TrendCostCard";
+import LocationListCard from "@/components/dashboard/LocationListCard";
+import LocationDetailCard from "@/components/dashboard/LocationDetailCard";
+import ActivityAndCostCard from "@/components/dashboard/ActivityAndCostCard";
+import TimelineCard from "@/components/dashboard/TimelineCard";
+import MaterialModal from "@/components/dashboard/MaterialModal";
 
-export default function DashboardWeedControlPage() {
-  const { adminUrl } = getDashboardNavConfig();
-  const currentYear = new Date().getFullYear();
-  const [selectedYear, setSelectedYear] = useState<number>(currentYear);
+import {
+  MainFilterState,
+  TrendDataPoint,
+  LocationItem,
+  LocationDetail,
+  ActivityCostItem,
+  AgeCostDataPoint,
+  TimelineItem,
+} from "@/types/dashboard";
+import { weedDashboardService } from "@/services/weedDashboardService";
+
+export default function WeedControlDashboardPage() {
+  // 1. Filter Options (Loaded from API)
+  const [activitiesOptions, setActivitiesOptions] = useState<string[]>([
+    "Total Aktivitas",
+  ]);
+  const [statusesOptions, setStatusesOptions] = useState<
+    Array<{ value: string; label: string }>
+  >([
+    { value: "NS", label: "NS (NSFC & NSSC)" },
+    { value: "NSFC", label: "NSFC" },
+    { value: "NSSC", label: "NSSC" },
+    { value: "all", label: "Semua Status" },
+  ]);
+  const [wilayahList, setWilayahList] = useState<string[]>([
+    "AW01",
+    "AW02",
+    "AW03",
+    "AW04",
+    "AW05",
+    "AW06",
+    "AW07",
+  ]);
+  const [umurList, setUmurList] = useState<number[]>([]);
+
+  // 2. Global Main Filter State (Freeze header)
+  const [mainFilter, setMainFilter] = useState<MainFilterState>({
+    aktivitas: "Total Aktivitas",
+    status: "NS",
+  });
+
+  // 3. Local Filter State (Only affects Location List Card)
+  const [localFilter, setLocalFilter] = useState<{
+    umur: number[] | "all";
+    wilayah: string[] | "all";
+    search: string;
+  }>({
+    umur: "all",
+    wilayah: "all",
+    search: "",
+  });
+
+  // 4. Data States
+  const [trendData, setTrendData] = useState<TrendDataPoint[]>([]);
+  const [locations, setLocations] = useState<LocationItem[]>([]);
+  const [selectedLocation, setSelectedLocation] = useState<LocationItem | null>(null);
+  const [locationDetail, setLocationDetail] = useState<LocationDetail | null>(null);
+
+  // Downstream Data for selected location
+  const [activitiesData, setActivitiesData] = useState<ActivityCostItem[]>([]);
+  const [chartData, setChartData] = useState<AgeCostDataPoint[]>([]);
+  const [timelineData, setTimelineData] = useState<TimelineItem[]>([]);
+
+  // Popup Modal Material
+  const [selectedTimelineId, setSelectedTimelineId] = useState<string | null>(null);
+
+  // 5. Loading States
+  const [loadingFilters, setLoadingFilters] = useState<boolean>(true);
+  const [loadingTrend, setLoadingTrend] = useState<boolean>(true);
+  const [loadingLocations, setLoadingLocations] = useState<boolean>(true);
+  const [loadingDetail, setLoadingDetail] = useState<boolean>(false);
+  const [loadingActivityCost, setLoadingActivityCost] = useState<boolean>(false);
+  const [loadingTimeline, setLoadingTimeline] = useState<boolean>(false);
+
+  // 6. Smooth Scroll Target
+  const [pendingScrollTarget, setPendingScrollTarget] = useState<"location" | null>(null);
+
+  const scrollToElement = useCallback((id: string) => {
+    const el = document.getElementById(id);
+    if (el) {
+      el.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  }, []);
+
+  // Fetch filter options on mount
+  useEffect(() => {
+    let isMounted = true;
+    weedDashboardService
+      .getFilters()
+      .then((res) => {
+        if (!isMounted) return;
+        if (res.activities) setActivitiesOptions(res.activities);
+        if (res.statuses) setStatusesOptions(res.statuses);
+        if (res.wilayah && res.wilayah.length > 0) setWilayahList(res.wilayah);
+        if (res.umurList) setUmurList(res.umurList);
+      })
+      .catch((err) => {
+        console.error("Gagal memuat filter options:", err);
+      })
+      .finally(() => {
+        if (isMounted) setLoadingFilters(false);
+      });
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  // Handle Location selection -> Fetch Detail, Activity+Cost, and Timeline
+  const handleSelectLocation = useCallback(async (loc: LocationItem) => {
+    setSelectedLocation(loc);
+    setLoadingDetail(true);
+    setLoadingActivityCost(true);
+    setLoadingTimeline(true);
+
+    try {
+      const [detailRes, actCostRes, timelineRes] = await Promise.all([
+        weedDashboardService.getLocationDetail(loc.lokasi),
+        weedDashboardService.getActivityAndCost(loc.lokasi),
+        weedDashboardService.getTimeline(loc.lokasi),
+      ]);
+
+      setLocationDetail(detailRes);
+      setActivitiesData(actCostRes.activities || []);
+      setChartData(actCostRes.chartData || []);
+      setTimelineData(timelineRes || []);
+    } catch (err) {
+      console.error("Gagal memuat data hilir lokasi:", err);
+    } finally {
+      setLoadingDetail(false);
+      setLoadingActivityCost(false);
+      setLoadingTimeline(false);
+    }
+  }, []);
+
+  // Fetch Trend and Locations when Main Filter changes
+  const fetchMainData = useCallback(async () => {
+    setLoadingTrend(true);
+    setLoadingLocations(true);
+
+    try {
+      const [trendRes, locRes] = await Promise.all([
+        weedDashboardService.getTrendData(mainFilter),
+        weedDashboardService.getLocations(mainFilter, localFilter),
+      ]);
+
+      setTrendData(trendRes);
+      setLocations(locRes);
+
+      // Check if current selected location is still present in new results
+      if (selectedLocation) {
+        const stillPresent = locRes.find((l) => l.lokasi === selectedLocation.lokasi);
+        if (stillPresent) {
+          // Update selected location reference
+          setSelectedLocation(stillPresent);
+        } else {
+          // Jika lokasi terpilih tidak lagi sesuai filter, kosongkan pilihan sesuai PRD
+          setSelectedLocation(null);
+          setLocationDetail(null);
+          setActivitiesData([]);
+          setChartData([]);
+          setTimelineData([]);
+        }
+      } else if (locRes.length > 0) {
+        // Auto-select first location on initial load
+        handleSelectLocation(locRes[0]);
+      }
+    } catch (err) {
+      console.error("Gagal memuat data utama:", err);
+    } finally {
+      setLoadingTrend(false);
+      setLoadingLocations(false);
+    }
+  }, [mainFilter, localFilter, selectedLocation, handleSelectLocation]);
+
+  useEffect(() => {
+    let isMounted = true;
+    Promise.resolve().then(() => {
+      if (isMounted) {
+        fetchMainData();
+      }
+    });
+    return () => {
+      isMounted = false;
+    };
+  }, [mainFilter, localFilter]);
+
+  // Handle Main Filter Apply & Reset
+  const handleApplyMainFilter = (newFilter: MainFilterState) => {
+    setMainFilter(newFilter);
+  };
+
+  const handleResetMainFilter = () => {
+    const defaultMain: MainFilterState = {
+      aktivitas: "Total Aktivitas",
+      status: "NS",
+    };
+    setMainFilter(defaultMain);
+  };
+
+  // Handle Local Location Filter Change (Umur / Wilayah / Search)
+  const handleLocalFilterChange = (newLocal: {
+    umur: number[] | "all";
+    wilayah: string[] | "all";
+    search: string;
+  }) => {
+    setLocalFilter(newLocal);
+  };
+
+  // Handle Click on Umur in Trend Chart/Table -> Filter Location table to that umur & scroll
+  const handleSelectUmurFromTrend = useCallback(
+    (umur: number) => {
+      setLocalFilter({
+        umur: [umur],
+        wilayah: "all",
+        search: "",
+      });
+      setPendingScrollTarget("location");
+    },
+    []
+  );
+
+  // Smooth scroll effect after locations finish loading
+  useEffect(() => {
+    if (pendingScrollTarget === "location" && !loadingLocations) {
+      const timer = setTimeout(() => {
+        scrollToElement("location-list-section");
+        setPendingScrollTarget(null);
+      }, 100);
+      return () => clearTimeout(timer);
+    }
+  }, [pendingScrollTarget, loadingLocations, scrollToElement]);
 
   return (
     <div className="min-h-screen bg-[#F7F9F7] text-[#17231B] flex flex-col font-sans selection:bg-[#16823B] selection:text-white">
-      {/* 1. Header with Left Mini Sidebar (w-16) & Top Navbar matching Dashboard WIP */}
+      {/* 1. Header (Navbar + Left Sidebar matching WIP) */}
       <DashboardHeader />
 
-      {/* 2. Main Content Container (offset md:ml-16 to accommodate left mini-sidebar) */}
-      <main className="flex-1 w-full md:w-[calc(100%-4rem)] md:ml-16 px-4 sm:px-6 lg:px-8 py-6 sm:py-8 flex flex-col gap-6">
-        
-        {/* Hero / Module Header Card */}
-        <section className="bg-white rounded-2xl border border-[#DDE5DF] p-6 sm:p-8 shadow-xs relative overflow-hidden">
-          <div className="absolute top-0 right-0 w-80 h-80 bg-gradient-to-bl from-[#EAF3EC] via-[#F8FAF9] to-transparent rounded-bl-full pointer-events-none -z-0" />
-          
-          <div className="relative z-10 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
-            <div className="space-y-3 max-w-2xl">
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#EAF3EC] border border-[#CBE0D1] text-[#16823B] text-xs font-bold">
-                <Tractor className="w-3.5 h-3.5 text-[#16823B]" />
-                <span>Plantation Operations • Weed Control Ecosystem</span>
-              </div>
-              
-              <h1 className="text-2xl sm:text-3xl font-extrabold text-[#17231B] tracking-tight">
-                Monitoring & Evaluasi Biaya Weed Control
-              </h1>
-              
-              <p className="text-sm sm:text-base text-[#5F6B63] leading-relaxed">
-                Pemantauan komprehensif efektivitas pengendalian gulma, aplikasi herbisida, penggunaan tenaga kerja,
-                dan pengendalian biaya per hektar di seluruh wilayah perkebunan Great Giant Foods (GGF).
-              </p>
-            </div>
-
-            {/* Quick Action & Year Selector */}
-            <div className="flex flex-wrap items-center gap-3 shrink-0">
-              <div className="flex items-center gap-2 bg-[#F8FAF9] border border-[#DDE5DF] px-3 py-2 rounded-xl text-xs sm:text-sm font-semibold text-[#2C3830]">
-                <Calendar className="w-4 h-4 text-[#16823B]" />
-                <span>Tahun:</span>
-                <select
-                  value={selectedYear}
-                  onChange={(e) => setSelectedYear(Number(e.target.value))}
-                  className="bg-transparent font-bold text-[#16823B] focus:outline-none cursor-pointer"
-                >
-                  <option value={currentYear}>{currentYear}</option>
-                  <option value={currentYear - 1}>{currentYear - 1}</option>
-                </select>
-              </div>
-
-              <a
-                href={adminUrl}
-                className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-[#16823B] hover:bg-[#126B30] text-white font-bold text-xs sm:text-sm transition-all shadow-xs"
-              >
-                <FileSpreadsheet className="w-4 h-4 text-emerald-200" />
-                <span>Upload Data Weed Control</span>
-                <ArrowUpRight className="w-3.5 h-3.5" />
-              </a>
-            </div>
-          </div>
+      {/* 2. Main Content Container */}
+      <main className="flex-1 w-full md:w-[calc(100%-4rem)] md:ml-16 px-4 sm:px-6 lg:px-8 py-6 sm:py-8 flex flex-col gap-8">
+        {/* Main Filter Section (Sticky / Freeze Header) */}
+        <section className="sticky top-20 z-20 bg-[#F7F9F7] py-2 -my-2">
+          <MainFilter
+            filters={mainFilter}
+            activities={activitiesOptions}
+            statuses={statusesOptions}
+            onApplyFilters={handleApplyMainFilter}
+            onResetFilters={handleResetMainFilter}
+            loading={loadingTrend || loadingLocations}
+          />
         </section>
 
-        {/* KPI Preview Cards */}
-        <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          <div className="bg-white rounded-2xl border border-[#DDE5DF] p-5 shadow-xs flex flex-col justify-between">
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-bold text-[#5F6B63] uppercase tracking-wider">
-                Total Biaya Weed Control
-              </span>
-              <div className="w-8 h-8 rounded-xl bg-[#EAF3EC] text-[#16823B] flex items-center justify-center">
-                <DollarSign className="w-4 h-4" />
-              </div>
-            </div>
-            <div className="mt-4">
-              <div className="text-2xl font-black text-[#17231B] tracking-tight">
-                Rp --
-              </div>
-              <div className="text-xs text-[#89938D] mt-1 flex items-center gap-1.5">
-                <Clock className="w-3.5 h-3.5 text-amber-500" />
-                <span>Menunggu integrasi data</span>
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-white rounded-2xl border border-[#DDE5DF] p-5 shadow-xs flex flex-col justify-between">
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-bold text-[#5F6B63] uppercase tracking-wider">
-                Total Luas Aplikasi
-              </span>
-              <div className="w-8 h-8 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center">
-                <Layers className="w-4 h-4" />
-              </div>
-            </div>
-            <div className="mt-4">
-              <div className="text-2xl font-black text-[#17231B] tracking-tight">
-                -- Ha
-              </div>
-              <div className="text-xs text-[#89938D] mt-1 flex items-center gap-1.5">
-                <MapPin className="w-3.5 h-3.5 text-blue-500" />
-                <span>Cakupan PG 1 & PG Wilayah</span>
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-white rounded-2xl border border-[#DDE5DF] p-5 shadow-xs flex flex-col justify-between">
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-bold text-[#5F6B63] uppercase tracking-wider">
-                Biaya Rata-Rata / Ha
-              </span>
-              <div className="w-8 h-8 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center">
-                <TrendingUp className="w-4 h-4" />
-              </div>
-            </div>
-            <div className="mt-4">
-              <div className="text-2xl font-black text-[#17231B] tracking-tight">
-                Rp -- / Ha
-              </div>
-              <div className="text-xs text-[#89938D] mt-1 flex items-center gap-1.5">
-                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" />
-                <span>Target efisiensi cost/Ha</span>
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-white rounded-2xl border border-[#DDE5DF] p-5 shadow-xs flex flex-col justify-between">
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-bold text-[#5F6B63] uppercase tracking-wider">
-                Aplikasi Herbisida
-              </span>
-              <div className="w-8 h-8 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center">
-                <Droplets className="w-4 h-4" />
-              </div>
-            </div>
-            <div className="mt-4">
-              <div className="text-2xl font-black text-[#17231B] tracking-tight">
-                -- Liter
-              </div>
-              <div className="text-xs text-[#89938D] mt-1 flex items-center gap-1.5">
-                <Sparkles className="w-3.5 h-3.5 text-amber-500" />
-                <span>Material herbisida & aditif</span>
-              </div>
-            </div>
-          </div>
+        {/* Section 2: Trend Cost Weed Control Card */}
+        <section>
+          <TrendCostCard
+            data={trendData}
+            loading={loadingTrend}
+            selectedAktivitas={mainFilter.aktivitas}
+            selectedStatus={mainFilter.status}
+            onSelectUmur={handleSelectUmurFromTrend}
+          />
         </section>
 
-        {/* Development & Architecture Blueprint Section */}
-        <section className="bg-white rounded-2xl border border-[#DDE5DF] p-6 sm:p-8 shadow-xs space-y-6">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-5 border-b border-[#EAEFEB]">
-            <div>
-              <h2 className="text-lg sm:text-xl font-bold text-[#17231B] flex items-center gap-2">
-                <BarChart3 className="w-5 h-5 text-[#16823B]" />
-                <span>Rencana Analisis Modul Weed Control</span>
-              </h2>
-              <p className="text-xs sm:text-sm text-[#5F6B63] mt-0.5">
-                Modul ini siap dikembangkan dengan fitur visualisasi dan kalkulasi sesuai standar AgroMetric.
-              </p>
-            </div>
-            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 text-[#16823B] border border-emerald-200 text-xs font-bold self-start sm:self-auto">
-              <ShieldCheck className="w-4 h-4" />
-              <span>Navbar & Sidebar Terintegrasi</span>
-            </span>
-          </div>
-
-          {/* Planned Features Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="p-4 rounded-xl border border-[#EAEFEB] bg-[#F8FAF9] space-y-2.5">
-              <div className="w-8 h-8 rounded-lg bg-[#EAF3EC] text-[#16823B] flex items-center justify-center font-bold text-sm">
-                1
-              </div>
-              <h3 className="font-bold text-sm text-[#17231B]">
-                Komparasi Antar PG & Wilayah
-              </h3>
-              <p className="text-xs text-[#5F6B63] leading-relaxed">
-                Pembandingan tren biaya weed control bulanan antar PG (PG1, PG2, PG3) serta matriks detail per wilayah (AW01 - AW07).
-              </p>
-            </div>
-
-            <div className="p-4 rounded-xl border border-[#EAEFEB] bg-[#F8FAF9] space-y-2.5">
-              <div className="w-8 h-8 rounded-lg bg-[#EAF3EC] text-[#16823B] flex items-center justify-center font-bold text-sm">
-                2
-              </div>
-              <h3 className="font-bold text-sm text-[#17231B]">
-                Breakdown Material & Labour
-              </h3>
-              <p className="text-xs text-[#5F6B63] leading-relaxed">
-                Analisis proporsi biaya herbisida kimiawi versus upah tenaga kerja (TK) dan efisiensi pengoperasian traktor boom sprayer.
-              </p>
-            </div>
-
-            <div className="p-4 rounded-xl border border-[#EAEFEB] bg-[#F8FAF9] space-y-2.5">
-              <div className="w-8 h-8 rounded-lg bg-[#EAF3EC] text-[#16823B] flex items-center justify-center font-bold text-sm">
-                3
-              </div>
-              <h3 className="font-bold text-sm text-[#17231B]">
-                Tabel Evaluasi Lokasi & Plot
-              </h3>
-              <p className="text-xs text-[#5F6B63] leading-relaxed">
-                Tabel drilldown per lokasi plot kebun, mencakup varietas, tanggal aplikasi, dosis liter/Ha, dan realisasi biaya aktual.
-              </p>
-            </div>
-          </div>
-
-          {/* Quick Setup Notice */}
-          <div className="p-4 rounded-xl bg-[#EAF3EC]/60 border border-[#CBE0D1] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-            <div className="space-y-1">
-              <div className="font-bold text-xs sm:text-sm text-[#16823B] flex items-center gap-1.5">
-                <Sparkles className="w-4 h-4" />
-                <span>Langkah Selanjutnya: Skema Database & Upload Excel</span>
-              </div>
-              <p className="text-xs text-[#5F6B63]">
-                Siapkan skema tabel Prisma / PostgreSQL dan file template Excel weed control untuk mengaktifkan kalkulasi otomatis.
-              </p>
-            </div>
-
-            <a
-              href={adminUrl}
-              className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-white border border-[#CBE0D1] hover:bg-[#F8FAF9] text-[#16823B] font-bold text-xs transition-all shadow-2xs shrink-0"
-            >
-              <span>Buka Admin Central</span>
-              <ArrowUpRight className="w-3.5 h-3.5" />
-            </a>
-          </div>
+        {/* Section 3: List Lokasi per Wilayah Card */}
+        <section>
+          <LocationListCard
+            locations={locations}
+            selectedLocation={selectedLocation}
+            onSelectLocation={handleSelectLocation}
+            umurList={umurList}
+            wilayahList={wilayahList}
+            selectedUmur={localFilter.umur}
+            selectedWilayah={localFilter.wilayah}
+            onFilterChange={handleLocalFilterChange}
+            loading={loadingLocations}
+          />
         </section>
 
+        {/* Section 4: Detail Lokasi Card */}
+        <section>
+          <LocationDetailCard
+            location={locationDetail || selectedLocation}
+            loading={loadingDetail}
+          />
+        </section>
+
+        {/* Section 5: Aktivitas dan Cost Card (35% Left Table + 65% Right Combo Chart) */}
+        <section>
+          <ActivityAndCostCard
+            selectedLocation={selectedLocation}
+            activities={activitiesData}
+            chartData={chartData}
+            loading={loadingActivityCost}
+          />
+        </section>
+
+        {/* Section 6: Timeline Aktivitas Card */}
+        <section>
+          <TimelineCard
+            selectedLocation={selectedLocation}
+            timeline={timelineData}
+            onOpenMaterialModal={(timelineId) => setSelectedTimelineId(timelineId)}
+            loading={loadingTimeline}
+          />
+        </section>
       </main>
 
-      {/* 3. Footer matching Dashboard WIP */}
-      <footer className="border-t border-[#DDE5DF] bg-white py-6 text-center text-xs text-[#5F6B63] mt-auto">
+      {/* Section 7: Material Modal Popup */}
+      <MaterialModal
+        timelineId={selectedTimelineId}
+        onClose={() => setSelectedTimelineId(null)}
+      />
+
+      {/* Footer matching WIP style */}
+      <footer className="border-t border-[#DDE5DF] bg-white py-6 text-center text-xs text-[#5F6B63] mt-12">
         <div className="w-full md:w-[calc(100%-4rem)] md:ml-16 px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-2">
           <span>© 2026 Great Giant Foods (GGF).</span>
-          <span className="font-semibold text-[#16823B]">Integrated Database System • PostgreSQL & Prisma Engine</span>
+          <span className="font-semibold text-[#16823B]">
+            Weed Control Ecosystem • PostgreSQL & Prisma Engine
+          </span>
         </div>
       </footer>
     </div>
