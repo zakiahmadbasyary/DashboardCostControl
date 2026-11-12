@@ -327,9 +327,10 @@ export default function AdminUploadPage() {
         <button
           type="button"
           onClick={() => setResetModalCategory("all")}
-          className="px-4 py-2 rounded-xl bg-red-600 hover:bg-red-700 text-white font-bold text-xs sm:text-sm transition-all shadow-xs cursor-pointer shrink-0"
+          className="inline-flex items-center gap-2 px-4 py-2 rounded-xl border border-red-200 bg-red-50/60 hover:bg-red-100/80 text-red-700 font-semibold text-xs sm:text-sm transition-colors cursor-pointer shrink-0"
         >
-          Reset Seluruh Data
+          <Trash2 className="w-4 h-4 text-red-600" />
+          <span>Reset Seluruh Data</span>
         </button>
       </div>
 
