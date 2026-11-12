@@ -1,7 +1,7 @@
 // Helper Formatter Indonesia untuk Dashboard Weed Control
 
 export function formatCurrencyRp(val: number | null | undefined): string {
-  if (val === null || val === undefined || isNaN(val)) return "-";
+  if (val === null || val === undefined || isNaN(val) || val === 0) return "-";
   return new Intl.NumberFormat("id-ID", {
     style: "currency",
     currency: "IDR",
@@ -14,7 +14,7 @@ export function formatNumberId(
   decimals = 0,
   fixedDecimals = false
 ): string {
-  if (val === null || val === undefined || isNaN(val)) return "-";
+  if (val === null || val === undefined || isNaN(val) || val === 0) return "-";
   return new Intl.NumberFormat("id-ID", {
     minimumFractionDigits: fixedDecimals ? decimals : 0,
     maximumFractionDigits: decimals,
@@ -22,7 +22,7 @@ export function formatNumberId(
 }
 
 export function formatDecimal2(val: number | null | undefined): string {
-  if (val === null || val === undefined || isNaN(val)) return "-";
+  if (val === null || val === undefined || isNaN(val) || val === 0) return "-";
   return new Intl.NumberFormat("id-ID", {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
@@ -30,7 +30,7 @@ export function formatDecimal2(val: number | null | undefined): string {
 }
 
 export function formatDecimal4(val: number | null | undefined): string {
-  if (val === null || val === undefined || isNaN(val)) return "-";
+  if (val === null || val === undefined || isNaN(val) || val === 0) return "-";
   return new Intl.NumberFormat("id-ID", {
     minimumFractionDigits: 0,
     maximumFractionDigits: 4,
@@ -42,7 +42,7 @@ export function formatRatioId(
   decimals = 2,
   suffix = ""
 ): string {
-  if (val === null || val === undefined || isNaN(val)) return "-";
+  if (val === null || val === undefined || isNaN(val) || val === 0) return "-";
   const numStr = new Intl.NumberFormat("id-ID", {
     minimumFractionDigits: 0,
     maximumFractionDigits: decimals,

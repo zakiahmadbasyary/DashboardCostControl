@@ -328,23 +328,22 @@ export default function AdminPreviewPage() {
                         <td className="py-2.5 px-3 whitespace-nowrap text-[#5F6B63]">{formatDateShort(row.forcingStandar)}</td>
                         <td className="py-2.5 px-3 whitespace-nowrap text-[#5F6B63]">{formatDateShort(row.realForcing)}</td>
                         <td className="py-2.5 px-3 whitespace-nowrap text-[#5F6B63]">{formatDateShort(row.selesaiPanen)}</td>
-                        <td className="py-2.5 px-2.5 text-center font-mono whitespace-nowrap">{row.umurForcing ?? "-"}</td>
-                        <td className="py-2.5 px-2.5 text-center font-mono whitespace-nowrap font-semibold">{row.umur ?? "-"}</td>
+                        <td className="py-2.5 px-2.5 text-center font-mono whitespace-nowrap">{row.umurForcing || "-"}</td>
+                        <td className="py-2.5 px-2.5 text-center font-mono whitespace-nowrap font-semibold">{row.umur || "-"}</td>
                         <td className="py-2.5 px-3.5 text-right font-mono font-bold text-[#16823B] whitespace-nowrap bg-emerald-50/30 border-r border-[#DDE5DF]">
                           {formatCurrencyRp(row.totalCost)}
                         </td>
                         {umurList.map((u) => {
                           const cost = row.costUmurMap?.[u];
+                          const hasValue = cost !== undefined && cost !== null && cost !== 0;
                           return (
                             <td
                               key={u}
                               className={`py-2.5 px-3 text-right font-mono whitespace-nowrap ${
-                                cost !== undefined && cost !== null
-                                  ? "text-[#17231B] font-medium"
-                                  : "text-gray-300"
+                                hasValue ? "text-[#17231B] font-medium" : "text-gray-300"
                               }`}
                             >
-                              {cost !== undefined && cost !== null ? formatCurrencyRp(cost) : "-"}
+                              {hasValue ? formatCurrencyRp(cost) : "-"}
                             </td>
                           );
                         })}
@@ -363,7 +362,7 @@ export default function AdminPreviewPage() {
                         <td className="py-2.5 px-4 font-medium text-[#17231B] min-w-[200px]">{row.aktivitas || "-"}</td>
                         <td className="py-2.5 px-3 whitespace-nowrap text-[#5F6B63]">{formatDateShort(row.tanggalRealisasi)}</td>
                         <td className="py-2.5 px-2.5 text-center font-mono font-bold whitespace-nowrap">
-                          {row.umur !== null ? row.umur : "-"}
+                          {row.umur !== null && row.umur !== undefined && row.umur !== 0 ? row.umur : "-"}
                         </td>
                         <td className="py-2.5 px-3 text-right font-mono whitespace-nowrap">{formatDecimal4(row.hasil)}</td>
                         <td className="py-2.5 px-2.5 text-center whitespace-nowrap font-medium">{row.uom || "-"}</td>
@@ -379,16 +378,17 @@ export default function AdminPreviewPage() {
                         </td>
                         {materialColumns.map((matName) => {
                           const qty = row.materialsMap?.[matName];
+                          const hasQty = qty !== undefined && qty !== null && qty !== 0;
                           return (
                             <td
                               key={matName}
                               className={`py-2.5 px-3 text-right font-mono whitespace-nowrap ${
-                                qty !== undefined && qty !== null
+                                hasQty
                                   ? "text-blue-900 font-semibold bg-blue-50/15"
                                   : "text-gray-300"
                               }`}
                             >
-                              {qty !== undefined && qty !== null ? formatDecimal4(qty) : "-"}
+                              {hasQty ? formatDecimal4(qty) : "-"}
                             </td>
                           );
                         })}
