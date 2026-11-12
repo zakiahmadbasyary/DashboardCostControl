@@ -364,10 +364,16 @@ export default function AdminPreviewPage() {
                         <td className="py-2.5 px-2.5 text-center font-mono font-bold whitespace-nowrap">
                           {row.umur !== null && row.umur !== undefined && row.umur !== 0 ? row.umur : "-"}
                         </td>
-                        <td className="py-2.5 px-3 text-right font-mono whitespace-nowrap">{formatDecimal4(row.hasil)}</td>
+                        <td className="py-2.5 px-3 text-right font-mono whitespace-nowrap" title={row.hasil !== null && row.hasil !== undefined ? `Nilai asli: ${row.hasil}` : undefined}>
+                          {formatDecimal2(row.hasil)}
+                        </td>
                         <td className="py-2.5 px-2.5 text-center whitespace-nowrap font-medium">{row.uom || "-"}</td>
-                        <td className="py-2.5 px-3 text-right font-mono whitespace-nowrap">{formatDecimal4(row.tk)}</td>
-                        <td className="py-2.5 px-3 text-right font-mono whitespace-nowrap">{formatDecimal4(row.kapasitasPerTk)}</td>
+                        <td className="py-2.5 px-3 text-right font-mono whitespace-nowrap" title={row.tk !== null && row.tk !== undefined ? `Nilai asli: ${row.tk}` : undefined}>
+                          {formatDecimal2(row.tk)}
+                        </td>
+                        <td className="py-2.5 px-3 text-right font-mono whitespace-nowrap" title={row.kapasitasPerTk !== null && row.kapasitasPerTk !== undefined ? `Nilai asli: ${row.kapasitasPerTk}` : undefined}>
+                          {formatDecimal2(row.kapasitasPerTk)}
+                        </td>
                         <td className="py-2.5 px-3.5 text-right font-mono font-bold text-[#16823B] whitespace-nowrap bg-emerald-50/30">
                           {formatCurrencyRp(row.totalCost)}
                         </td>
@@ -382,13 +388,14 @@ export default function AdminPreviewPage() {
                           return (
                             <td
                               key={matName}
+                              title={hasQty ? `Nilai asli: ${qty}` : undefined}
                               className={`py-2.5 px-3 text-right font-mono whitespace-nowrap ${
                                 hasQty
                                   ? "text-blue-900 font-semibold bg-blue-50/15"
                                   : "text-gray-300"
                               }`}
                             >
-                              {hasQty ? formatDecimal4(qty) : "-"}
+                              {hasQty ? formatDecimal2(qty) : "-"}
                             </td>
                           );
                         })}
@@ -419,7 +426,9 @@ export default function AdminPreviewPage() {
                         <td className="py-2.5 px-3 text-right font-mono whitespace-nowrap">{formatCurrencyRp(row.charge)}</td>
                         <td className="py-2.5 px-3 text-right font-mono whitespace-nowrap">{formatCurrencyRp(row.material)}</td>
                         <td className="py-2.5 px-3 text-right font-mono whitespace-nowrap">{formatCurrencyRp(row.bibit)}</td>
-                        <td className="py-2.5 px-3 text-right font-mono whitespace-nowrap">{formatDecimal4(row.hasil)}</td>
+                        <td className="py-2.5 px-3 text-right font-mono whitespace-nowrap" title={row.hasil !== null && row.hasil !== undefined ? `Nilai asli: ${row.hasil}` : undefined}>
+                          {formatDecimal2(row.hasil)}
+                        </td>
                         <td className="py-2.5 px-2.5 text-center whitespace-nowrap font-medium">{row.uom || "-"}</td>
                         <td className="py-2.5 px-3.5 whitespace-nowrap font-semibold text-[#16823B]">
                           {row.activityGroup || "-"}
