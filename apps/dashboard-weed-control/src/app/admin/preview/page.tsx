@@ -140,7 +140,7 @@ export default function AdminPreviewPage() {
                   isActive ? "bg-[#16823B]/10 text-[#16823B]" : "bg-gray-100 text-gray-500"
                 }`}
               >
-                {tab.badge}
+                {/* {tab.badge} */}
               </span>
             </button>
           );
