@@ -208,7 +208,7 @@ export default function LocationAnalysis({
   const paginatedLocations = locations.slice(startIndex, startIndex + itemsPerPage);
 
   return (
-    <div id="location-analysis-section" className="bg-white border border-[#DDE5DF] rounded-2xl p-5 shadow-xs scroll-mt-24">
+    <div id="location-analysis-section" className="bg-white border border-[#DDE5DF] rounded-2xl p-5 shadow-xs scroll-mt-36 sm:scroll-mt-48">
       {/* Header & Sub-Filters Bar */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
         <div className="flex items-center gap-2">

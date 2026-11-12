@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import DashboardHeader from "@/components/dashboard/DashboardHeader";
 import GlobalFilters from "@/components/dashboard/GlobalFilters";
 import TrendCard from "@/components/dashboard/TrendCard";
@@ -50,24 +50,66 @@ export default function PublicDashboardPage() {
   const [loadingGroupCosts, setLoadingGroupCosts] = useState<boolean>(false);
   const [loadingActivities, setLoadingActivities] = useState<boolean>(false);
 
-  // Handle Location selection -> Fetch Group Costs
-  const handleSelectLocation = useCallback(async (loc: LocationData) => {
-    setSelectedLocation(loc);
-    setSelectedGroupCost(null);
-    setActivities([]);
-    setLoadingGroupCosts(true);
+  // Smooth scroll helper dengan offset akurat di bawah header sticky & filter utama
+  const scrollToElement = useCallback((id: string) => {
+    const el = document.getElementById(id);
+    if (!el) return;
 
-    try {
-      const gcRes = await dashboardService.getGroupCosts(loc.lokasi);
-      setGroupCosts(gcRes);
-    } catch (err) {
-      console.error("Error fetching group costs:", err);
-    } finally {
-      setLoadingGroupCosts(false);
+    const scrollTop =
+      window.scrollY || window.pageYOffset || document.documentElement.scrollTop;
+    const elTop = el.getBoundingClientRect().top + scrollTop;
+    let offset = typeof window !== "undefined" && window.innerWidth < 640 ? 68 : 84;
+
+    // Khusus scroll ke Analisis Lokasi dari grafik Trend Cost:
+    // Tambahkan tinggi Filter Utama yang sedang sticky / freeze agar tabel Analisis Lokasi tidak tertutup
+    if (id === "location-analysis-section") {
+      const filterEl = document.getElementById("global-filters-section");
+      const filterHeight = filterEl ? filterEl.getBoundingClientRect().height : 85;
+      offset += filterHeight + 16;
     }
+
+    const targetY = Math.max(0, elTop - offset);
+
+    window.scrollTo({
+      top: targetY,
+      behavior: "smooth",
+    });
   }, []);
 
+  // Handle Location selection -> Fetch Group Costs
+  const handleSelectLocation = useCallback(
+    async (loc: LocationData, shouldScroll: boolean = false) => {
+      setSelectedLocation(loc);
+      setSelectedGroupCost(null);
+      setActivities([]);
+      setLoadingGroupCosts(true);
+
+      if (shouldScroll) {
+        setPendingScrollTarget("detail");
+      }
+
+      try {
+        const gcRes = await dashboardService.getGroupCosts(loc.lokasi);
+        setGroupCosts(gcRes);
+      } catch (err) {
+        console.error("Error fetching group costs:", err);
+      } finally {
+        setLoadingGroupCosts(false);
+      }
+    },
+    []
+  );
+
+  // Ref to track selectedLocation without triggering fetchDashboardData re-runs
+  const selectedLocationRef = useRef<LocationData | null>(selectedLocation);
+  useEffect(() => {
+    selectedLocationRef.current = selectedLocation;
+  }, [selectedLocation]);
+
   const fetchDashboardData = useCallback(async () => {
+    setLoadingTrend(true);
+    setLoadingLocations(true);
+
     try {
       const [trendRes, locRes] = await Promise.all([
         dashboardService.getTrendData(globalFilters),
@@ -77,14 +119,15 @@ export default function PublicDashboardPage() {
       setTrendData(trendRes);
       setLocations(locRes);
 
+      const currentSelected = selectedLocationRef.current;
       // Reset downstream selections if selected location is no longer in filtered list
-      if (selectedLocation && !locRes.some((l) => l.idLokasi === selectedLocation.idLokasi)) {
+      if (currentSelected && !locRes.some((l) => l.idLokasi === currentSelected.idLokasi)) {
         setSelectedLocation(null);
         setGroupCosts([]);
         setSelectedGroupCost(null);
         setActivities([]);
-      } else if (!selectedLocation && locRes.length > 0) {
-        handleSelectLocation(locRes[0]);
+      } else if (!currentSelected && locRes.length > 0) {
+        handleSelectLocation(locRes[0], false);
       }
     } catch (err) {
       console.error("Error fetching dashboard data:", err);
@@ -92,14 +135,12 @@ export default function PublicDashboardPage() {
       setLoadingTrend(false);
       setLoadingLocations(false);
     }
-  }, [globalFilters, locationFilters, selectedLocation, handleSelectLocation]);
+  }, [globalFilters, locationFilters, handleSelectLocation]);
 
   useEffect(() => {
     let isMounted = true;
     Promise.resolve().then(() => {
       if (isMounted) {
-        setLoadingTrend(true);
-        setLoadingLocations(true);
         fetchDashboardData();
       }
     });
@@ -131,15 +172,8 @@ export default function PublicDashboardPage() {
     setGlobalFilters(newFilters);
   };
 
-  // ── PENDING SCROLL TARGET STATE (DIRECT SETELAH LOAD DATA SELESAI) ──
-  const [pendingScrollTarget, setPendingScrollTarget] = useState<"location" | null>(null);
-
-  const scrollToElement = useCallback((id: string) => {
-    const el = document.getElementById(id);
-    if (el) {
-      el.scrollIntoView({ behavior: "smooth", block: "start" });
-    }
-  }, []);
+  // ── PENDING SCROLL TARGET STATE (SETELAH LOAD DATA LOKASI / DETAIL SELESAI) ──
+  const [pendingScrollTarget, setPendingScrollTarget] = useState<"location" | "detail" | null>(null);
 
   // Handle click on Umur in Trend Chart/Table -> Filter Location Table for clicked Umur & all Wilayah, then scroll down
   const handleSelectUmurFromTrend = useCallback(
@@ -164,9 +198,18 @@ export default function PublicDashboardPage() {
     [locationFilters, loadingLocations, scrollToElement]
   );
 
-  // Effect: Menjalankan Smooth Scroll tepat ketika proses load data lokasi telah selesai
+  // Effect: Menjalankan Smooth Scroll tepat ketika proses load data selesai
   useEffect(() => {
     if (!pendingScrollTarget) return;
+
+    if (pendingScrollTarget === "detail" && !loadingGroupCosts) {
+      // Jeda 80ms untuk memastikan data group costs selesai dirender ke DOM
+      const timer = setTimeout(() => {
+        scrollToElement("location-detail-section");
+        setPendingScrollTarget(null);
+      }, 80);
+      return () => clearTimeout(timer);
+    }
 
     if (pendingScrollTarget === "location" && !loadingLocations) {
       // Jeda singkat (80ms) untuk memastikan browser selesai me-render baris tabel lokasi
@@ -176,7 +219,7 @@ export default function PublicDashboardPage() {
       }, 80);
       return () => clearTimeout(timer);
     }
-  }, [pendingScrollTarget, loadingLocations, scrollToElement]);
+  }, [pendingScrollTarget, loadingGroupCosts, loadingLocations, scrollToElement]);
 
   return (
     <div className="min-h-screen bg-[#F7F9F7] text-[#17231B] flex flex-col font-sans">
@@ -186,12 +229,15 @@ export default function PublicDashboardPage() {
       {/* Main Container */}
       <main className="flex-1 w-full md:w-[calc(100%-4rem)] md:ml-16 px-4 sm:px-6 lg:px-8 py-8 flex flex-col gap-8">
         {/* Global Filters Section (Sticky / Freeze) */}
-        <section className="sticky top-20 z-20 bg-[#F7F9F7] py-2 -my-2">
+        <section
+          id="global-filters-section"
+          className="sticky top-20 z-20 bg-[#F7F9F7] py-2 -my-2"
+        >
           <GlobalFilters initialFilters={globalFilters} onApplyFilters={handleApplyGlobalFilters} />
         </section>
 
         {/* Trend Section (Unified Chart & Table Card) */}
-        <section>
+        <section className="relative z-0 isolate">
           <TrendCard
             data={trendData}
             loading={loadingTrend}
@@ -200,24 +246,31 @@ export default function PublicDashboardPage() {
         </section>
 
         {/* Location Analysis Section */}
-        <section>
+        <section className="relative z-0 isolate">
           <LocationAnalysis
             locations={locations}
             selectedLocation={selectedLocation}
             locationFilters={locationFilters}
             onFilterChange={setLocationFilters}
-            onSelectLocation={handleSelectLocation}
+            onSelectLocation={(loc) => handleSelectLocation(loc, true)}
             loading={loadingLocations}
           />
         </section>
 
-        {/* Location Detail Card Section (WIP Data) */}
-        <section>
+        {/* Location Detail Card Section (Sticky / Freeze replacing GlobalFilters on Desktop/Tablet, normal scroll on Mobile) */}
+        <section
+          id="location-detail-section"
+          className={`scroll-mt-16 sm:scroll-mt-20 ${
+            selectedLocation
+              ? "sm:sticky sm:top-20 sm:z-30 sm:bg-[#F7F9F7] sm:py-2 sm:-my-2"
+              : ""
+          }`}
+        >
           <LocationDetailCard selectedLocation={selectedLocation} />
         </section>
 
         {/* Downstream Cascading Section: Group Cost -> Activity */}
-        <section className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
+        <section className="relative z-0 isolate grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
           <GroupCostTable
             selectedLocation={selectedLocation}
             groupCosts={groupCosts}

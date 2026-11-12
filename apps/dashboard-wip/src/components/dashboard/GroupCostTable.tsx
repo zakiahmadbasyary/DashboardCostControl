@@ -32,7 +32,7 @@ export default function GroupCostTable({
 
   if (!selectedLocation) {
     return (
-      <div className="bg-white border border-[#DDE5DF] rounded-2xl p-6 shadow-xs h-full flex flex-col items-center justify-center text-center">
+      <div className="bg-white border border-[#DDE5DF] rounded-2xl p-6 shadow-xs h-full min-h-[360px] flex flex-col items-center justify-center text-center">
         <div className="p-3 rounded-full bg-[#F7F9F7] border border-[#DDE5DF] text-[#89938D] mb-3">
           <AlertCircle className="w-6 h-6" />
         </div>
@@ -62,23 +62,23 @@ export default function GroupCostTable({
         </div>
 
         {loading ? (
-          <div className="py-8 text-center">
+          <div className="py-8 text-center min-h-[220px] flex flex-col items-center justify-center">
             <div className="w-5 h-5 border-2 border-[#16823B] border-t-transparent rounded-full animate-spin mx-auto mb-2" />
             <p className="text-xs text-[#5F6B63]">Memuat Group Cost...</p>
           </div>
         ) : sortedGroupCosts.length === 0 ? (
-          <div className="p-6 text-center bg-[#F7F9F7] rounded-xl border border-dashed border-[#DDE5DF]">
+          <div className="p-6 text-center bg-[#F7F9F7] rounded-xl border border-dashed border-[#DDE5DF] min-h-[220px] flex items-center justify-center">
             <p className="text-xs text-[#5F6B63]">Tidak ada data Group Cost untuk lokasi ini.</p>
           </div>
         ) : (
-          <div className="overflow-x-auto rounded-xl border border-[#DDE5DF]">
-            <table className="w-full text-xs text-left">
-              <thead className="bg-[#F7F9F7] text-[#17231B] uppercase font-bold border-b border-[#DDE5DF]">
+          <div className="overflow-x-auto overflow-y-auto max-h-[280px] rounded-xl border border-[#DDE5DF]">
+            <table className="w-full text-xs text-left border-collapse">
+              <thead className="bg-[#F7F9F7] text-[#17231B] uppercase font-bold border-b border-[#DDE5DF] sticky top-0 z-10 shadow-2xs">
                 <tr>
-                  <th className="py-2.5 px-3">Group Cost</th>
-                  <th className="py-2.5 px-3 text-right">Cost / Ha (Rp)</th>
-                  <th className="py-2.5 px-3 text-right">SBT (Rp)</th>
-                  <th className="py-2.5 px-3 text-center">Status</th>
+                  <th className="py-2.5 px-3 bg-[#F7F9F7]">Group Cost</th>
+                  <th className="py-2.5 px-3 text-right bg-[#F7F9F7]">Cost / Ha (Rp)</th>
+                  <th className="py-2.5 px-3 text-right bg-[#F7F9F7]">SBT (Rp)</th>
+                  <th className="py-2.5 px-3 text-center bg-[#F7F9F7]">Status</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-[#DDE5DF]/60">
@@ -131,7 +131,11 @@ export default function GroupCostTable({
         <span className="font-semibold text-[#17231B]">
           Total Cost / Ha: <span className="font-extrabold text-[#16823B]">Rp {totalCostHa.toLocaleString("id-ID")}</span>
         </span>
-        {selectedGroupCost && <span className="font-semibold text-[#16823B]">Terpilih: {selectedGroupCost.groupCost}</span>}
+        {selectedGroupCost ? (
+          <span className="font-semibold text-[#16823B]">Terpilih: {selectedGroupCost.groupCost}</span>
+        ) : (
+          <span className="text-[#89938D]">{sortedGroupCosts.length} Group Cost</span>
+        )}
       </div>
     </div>
   );
