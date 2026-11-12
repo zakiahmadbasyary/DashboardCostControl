@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import { MainFilterState } from "@/types/dashboard";
-import { Filter, RotateCcw, Check, X, SlidersHorizontal, Tractor } from "lucide-react";
+import { Filter, RotateCcw, Check, X, SlidersHorizontal } from "lucide-react";
 
 interface MainFilterProps {
   filters: MainFilterState;
@@ -22,7 +22,7 @@ export default function MainFilter({
   loading,
 }: MainFilterProps) {
   const [localFilters, setLocalFilters] = useState<MainFilterState>(filters);
-  const [mobileOpen, setMobileOpen] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
 
   // Sync state if external filters change
   React.useEffect(() => {
@@ -36,11 +36,20 @@ export default function MainFilter({
   };
 
   const handleReset = () => {
+    const defaultFilters: MainFilterState = {
+      aktivitas: "Total Aktivitas",
+      status: "NS",
+    };
+    setLocalFilters(defaultFilters);
     onResetFilters();
   };
 
   const isFiltered =
     localFilters.aktivitas !== "Total Aktivitas" || localFilters.status !== "NS";
+
+  const activeCount =
+    (localFilters.aktivitas !== "Total Aktivitas" ? 1 : 0) +
+    (localFilters.status !== "NS" ? 1 : 0);
 
   return (
     <>
@@ -56,18 +65,19 @@ export default function MainFilter({
           </span>
         </div>
 
-        {/* Dropdowns */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 flex-1 gap-2.5">
+        {/* Selects Grid & Reset Button Sejajar */}
+        <div className="flex-1 flex flex-col sm:flex-row sm:items-end gap-2 sm:gap-2.5">
           {/* 1. Filter Aktivitas */}
-          <div className="flex flex-col gap-0.5">
-            <label className="text-[10px] font-bold text-[#5F6B63] uppercase tracking-wide">
+          <div className="flex-1 flex flex-col gap-0.5">
+            <label className="text-[10px] font-semibold text-[#5F6B63] uppercase tracking-wide">
               Aktivitas
             </label>
             <select
               value={localFilters.aktivitas}
               onChange={(e) => handleChange("aktivitas", e.target.value)}
               disabled={loading}
-              className="w-full bg-[#F7F9F7] border border-[#DDE5DF] rounded-lg px-2.5 py-1.5 text-xs text-[#17231B] font-medium focus:outline-none focus:border-[#16823B] transition-colors cursor-pointer"
+              suppressHydrationWarning
+              className="w-full bg-[#F7F9F7] border border-[#DDE5DF] rounded-lg px-2.5 py-1.5 text-xs text-[#17231B] focus:outline-none focus:border-[#16823B] transition-colors cursor-pointer"
             >
               {activities.map((act) => (
                 <option key={act} value={act}>
@@ -78,15 +88,16 @@ export default function MainFilter({
           </div>
 
           {/* 2. Filter Status */}
-          <div className="flex flex-col gap-0.5">
-            <label className="text-[10px] font-bold text-[#5F6B63] uppercase tracking-wide">
-              Status Tanaman
+          <div className="w-full sm:w-56 lg:w-64 flex flex-col gap-0.5">
+            <label className="text-[10px] font-semibold text-[#5F6B63] uppercase tracking-wide">
+              Status
             </label>
             <select
               value={localFilters.status}
               onChange={(e) => handleChange("status", e.target.value)}
               disabled={loading}
-              className="w-full bg-[#F7F9F7] border border-[#DDE5DF] rounded-lg px-2.5 py-1.5 text-xs text-[#17231B] font-medium focus:outline-none focus:border-[#16823B] transition-colors cursor-pointer"
+              suppressHydrationWarning
+              className="w-full bg-[#F7F9F7] border border-[#DDE5DF] rounded-lg px-2.5 py-1.5 text-xs text-[#17231B] focus:outline-none focus:border-[#16823B] transition-colors cursor-pointer"
             >
               {statuses.map((st) => (
                 <option key={st.value} value={st.value}>
@@ -95,73 +106,91 @@ export default function MainFilter({
               ))}
             </select>
           </div>
-        </div>
 
-        {/* Actions Button (Reset) */}
-        <div className="flex items-center gap-2 shrink-0 pt-3 lg:pt-0 border-t lg:border-t-0 border-[#DDE5DF]/60">
-          <button
-            onClick={handleReset}
-            disabled={loading || !isFiltered}
-            title="Reset ke Total Aktivitas & Status NS"
-            className="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg border border-[#DDE5DF] hover:bg-[#F7F9F7] active:bg-[#EAEFEB] text-xs font-semibold text-[#5F6B63] hover:text-[#17231B] transition-all disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
-          >
-            <RotateCcw className="w-3.5 h-3.5" />
-            <span>Reset</span>
-          </button>
+          {/* 3. Tombol Reset Sejajar dengan Kolom Pilihan Filter */}
+          <div className="flex flex-col gap-0.5 justify-end shrink-0">
+            <button
+              onClick={handleReset}
+              disabled={loading || !isFiltered}
+              title="Reset ke Total Aktivitas & Status NS"
+              suppressHydrationWarning
+              className="inline-flex items-center justify-center gap-1 px-3 py-1.5 rounded-lg border border-[#DDE5DF] text-[#5F6B63] hover:bg-[#F7F9F7] text-xs font-semibold transition-colors disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer h-[31px]"
+            >
+              <RotateCcw className="w-3.5 h-3.5" />
+              <span>Reset</span>
+            </button>
+          </div>
         </div>
       </div>
 
-      {/* ================= MOBILE FILTER BAR (< sm:) ================= */}
-      <div className="flex sm:hidden items-center justify-between bg-white border border-[#DDE5DF] rounded-xl p-3 shadow-xs">
-        <div className="flex items-center gap-2">
-          <div className="p-1.5 rounded-lg bg-[#FCE27A] text-[#17231B] border border-[#E5C959]">
-            <Filter className="w-3.5 h-3.5" />
-          </div>
-          <div>
-            <h4 className="font-bold text-xs text-[#17231B] uppercase tracking-wider">
-              Filter Utama
-            </h4>
-            <p className="text-[10px] text-[#5F6B63]">
-              {localFilters.aktivitas} • {localFilters.status}
-            </p>
-          </div>
-        </div>
-
+      {/* ================= MOBILE COMPACT BUTTON TRIGGER (< sm) ================= */}
+      <div className="sm:hidden">
         <button
-          onClick={() => setMobileOpen(true)}
-          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#16823B] text-white text-xs font-bold"
+          onClick={() => setIsOpen(true)}
+          className="w-full bg-white border border-[#DDE5DF] rounded-xl p-3 shadow-xs flex items-center justify-between text-xs text-[#17231B] font-bold cursor-pointer active:scale-98 transition-all"
         >
-          <SlidersHorizontal className="w-3.5 h-3.5" />
-          <span>Atur Filter</span>
+          <div className="flex items-center gap-2">
+            <div className="p-1.5 rounded-lg bg-[#16823B]/10 text-[#16823B]">
+              <Filter className="w-4 h-4" />
+            </div>
+            <span>Filter Utama Dashboard</span>
+            {activeCount > 0 && (
+              <span className="w-5 h-5 rounded-full bg-[#16823B] text-white text-[10px] flex items-center justify-center font-bold">
+                {activeCount}
+              </span>
+            )}
+          </div>
+          <div className="flex items-center gap-1.5 text-xs font-bold text-[#16823B] bg-[#16823B]/10 px-2.5 py-1 rounded-lg border border-[#16823B]/20">
+            <span>Filter</span>
+            <SlidersHorizontal className="w-3.5 h-3.5" />
+          </div>
         </button>
       </div>
 
-      {/* Mobile Drawer */}
-      {mobileOpen && (
-        <div className="fixed inset-0 z-50 flex items-end bg-black/40 backdrop-blur-xs sm:hidden animate-in fade-in">
-          <div className="w-full bg-white rounded-t-2xl p-5 shadow-2xl flex flex-col gap-4 max-h-[85vh] overflow-y-auto">
+      {/* ================= MOBILE POP-UP FILTER MODAL ================= */}
+      {isOpen && (
+        <div
+          className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/60 backdrop-blur-xs animate-in fade-in duration-200"
+          onClick={() => setIsOpen(false)}
+        >
+          <div
+            className="bg-white w-full max-w-lg rounded-t-2xl sm:rounded-2xl p-5 shadow-2xl flex flex-col gap-4 border border-[#DDE5DF] max-h-[90vh] overflow-y-auto animate-in slide-in-from-bottom-4 duration-300"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Modal Header */}
             <div className="flex items-center justify-between pb-3 border-b border-[#DDE5DF]">
-              <div className="flex items-center gap-2">
-                <div className="p-1.5 rounded-lg bg-[#FCE27A] text-[#17231B]">
+              <div className="flex items-center gap-2.5">
+                <div className="p-2 rounded-xl bg-[#16823B]/10 text-[#16823B]">
                   <Filter className="w-4 h-4" />
                 </div>
-                <h3 className="font-extrabold text-sm text-[#17231B]">Filter Dashboard</h3>
+                <div>
+                  <h3 className="font-bold text-sm text-[#17231B] uppercase tracking-wider">
+                    Filter Utama Dashboard
+                  </h3>
+                  <p className="text-[11px] text-[#5F6B63]">
+                    Pilih filter untuk memperbarui data dashboard
+                  </p>
+                </div>
               </div>
               <button
-                onClick={() => setMobileOpen(false)}
-                className="p-1 rounded-lg text-[#5F6B63] hover:bg-[#F7F9F7]"
+                onClick={() => setIsOpen(false)}
+                className="p-1.5 rounded-lg text-[#5F6B63] hover:text-[#17231B] hover:bg-[#F7F9F7] transition-colors cursor-pointer"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
 
-            <div className="flex flex-col gap-3">
-              <div className="flex flex-col gap-1">
-                <label className="text-xs font-bold text-[#17231B]">Aktivitas</label>
+            {/* Selects Body */}
+            <div className="flex flex-col gap-3.5">
+              {/* Aktivitas */}
+              <div>
+                <label className="block text-xs font-bold text-[#17231B] mb-1.5 uppercase tracking-wide">
+                  Aktivitas
+                </label>
                 <select
                   value={localFilters.aktivitas}
                   onChange={(e) => handleChange("aktivitas", e.target.value)}
-                  className="w-full bg-[#F7F9F7] border border-[#DDE5DF] rounded-lg p-2.5 text-xs text-[#17231B] font-medium"
+                  className="w-full bg-[#F7F9F7] border border-[#DDE5DF] rounded-xl px-3 py-2.5 text-xs text-[#17231B] focus:outline-none focus:border-[#16823B] transition-colors"
                 >
                   {activities.map((act) => (
                     <option key={act} value={act}>
@@ -171,12 +200,15 @@ export default function MainFilter({
                 </select>
               </div>
 
-              <div className="flex flex-col gap-1">
-                <label className="text-xs font-bold text-[#17231B]">Status Tanaman</label>
+              {/* Status */}
+              <div>
+                <label className="block text-xs font-bold text-[#17231B] mb-1.5 uppercase tracking-wide">
+                  Status
+                </label>
                 <select
                   value={localFilters.status}
                   onChange={(e) => handleChange("status", e.target.value)}
-                  className="w-full bg-[#F7F9F7] border border-[#DDE5DF] rounded-lg p-2.5 text-xs text-[#17231B] font-medium"
+                  className="w-full bg-[#F7F9F7] border border-[#DDE5DF] rounded-xl px-3 py-2.5 text-xs text-[#17231B] focus:outline-none focus:border-[#16823B] transition-colors"
                 >
                   {statuses.map((st) => (
                     <option key={st.value} value={st.value}>
@@ -187,21 +219,24 @@ export default function MainFilter({
               </div>
             </div>
 
-            <div className="flex items-center gap-2 pt-3 border-t border-[#DDE5DF]">
+            {/* Modal Footer Actions */}
+            <div className="flex items-center justify-between gap-3 pt-3 border-t border-[#DDE5DF] mt-1">
               <button
                 onClick={() => {
                   handleReset();
-                  setMobileOpen(false);
+                  setIsOpen(false);
                 }}
-                className="flex-1 py-2 rounded-lg border border-[#DDE5DF] text-xs font-bold text-[#5F6B63]"
+                className="inline-flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl border border-[#DDE5DF] text-[#5F6B63] hover:bg-[#F7F9F7] text-xs font-semibold transition-colors cursor-pointer w-1/3"
               >
-                Reset
+                <RotateCcw className="w-3.5 h-3.5" />
+                <span>Reset</span>
               </button>
               <button
-                onClick={() => setMobileOpen(false)}
-                className="flex-1 py-2 rounded-lg bg-[#16823B] text-white text-xs font-bold"
+                onClick={() => setIsOpen(false)}
+                className="inline-flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl bg-[#16823B] hover:bg-[#0B6B32] text-white text-xs font-bold transition-all shadow-xs active:scale-95 cursor-pointer w-2/3"
               >
-                Tutup
+                <Check className="w-3.5 h-3.5" />
+                <span>Terapkan Filter</span>
               </button>
             </div>
           </div>
@@ -210,4 +245,3 @@ export default function MainFilter({
     </>
   );
 }
-
