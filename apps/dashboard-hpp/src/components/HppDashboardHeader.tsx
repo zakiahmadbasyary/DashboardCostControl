@@ -175,7 +175,7 @@ export default function HppDashboardHeader() {
       {/* ========================================================= */}
       {/* 2. TOP NAVBAR                                             */}
       {/* ========================================================= */}
-      <header className="sticky top-0 z-30 bg-white border-b border-[#DDE5DF] shadow-2xs w-full font-sans">
+      <header className="sticky top-0 z-40 bg-white border-b border-[#DDE5DF] shadow-2xs w-full font-sans">
         <div className="w-full md:w-[calc(100%-4rem)] md:ml-16 px-4 sm:px-6 lg:px-8">
           <div className="h-16 sm:h-20 flex items-center justify-between gap-2 sm:gap-4">
             

@@ -2,13 +2,14 @@
 
 import React, { useState, useEffect } from "react";
 import {
-  FileText,
+  FileSpreadsheet,
+  MapPin,
+  Ruler,
+  Sprout,
+  Award,
+  Calendar,
   Layers,
   Activity,
-  Calendar,
-  Sprout,
-  ChevronRight,
-  ChevronLeft,
   CheckCircle2,
   X,
   ArrowUp,
@@ -58,12 +59,6 @@ export default function HppLocationDetailDrilldown({
   onClose,
 }: HppLocationDetailDrilldownProps) {
   const [selectedGroup, setSelectedGroup] = useState<string | null>(null);
-  const [aktCurrentPage, setAktCurrentPage] = useState<number>(1);
-  const AKT_ITEMS_PER_PAGE = 20;
-
-  useEffect(() => {
-    setAktCurrentPage(1);
-  }, [selectedGroup, lokasiCode]);
 
   const formatCurrency = (val: number | null | undefined) => {
     if (val === null || val === undefined) return "-";
@@ -210,156 +205,186 @@ export default function HppLocationDetailDrilldown({
       return costPerHaB - costPerHaA;
     });
 
-  const totalAktPages = Math.ceil(filteredAktivitas.length / AKT_ITEMS_PER_PAGE) || 1;
-  const startAktIndex = (aktCurrentPage - 1) * AKT_ITEMS_PER_PAGE;
-  const paginatedAktivitas = filteredAktivitas.slice(startAktIndex, startAktIndex + AKT_ITEMS_PER_PAGE);
+  const totalAktivitasCostHa = filteredAktivitas.reduce(
+    (acc, act) => acc + (luasPanen > 0 ? Number(act.biaya || 0) / luasPanen : 0),
+    0
+  );
 
   return (
     <div className="space-y-6" suppressHydrationWarning>
       
       {/* ------------------------------------------------------------- */}
-      {/* SECTION 11: DETAIL LOKASI HEADER CARD                         */}
+      {/* SECTION 11: DETAIL LOKASI HEADER CARD (Sticky / Freeze on Desktop, Normal on Mobile) */}
       {/* ------------------------------------------------------------- */}
-      <div className="bg-white rounded-2xl border border-[#DDE5DF] shadow-2xs overflow-hidden">
-        <div className="p-4 sm:p-5 bg-gradient-to-r from-[#16823B] to-[#0B6B32] text-white flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-          <div className="flex items-center gap-3">
-            <div className="p-3 bg-white/10 backdrop-blur-md rounded-xl border border-white/20">
-              <FileText className="w-6 h-6 text-[#A8D437]" />
+      <div className="sm:sticky sm:top-20 sm:z-30 sm:bg-[#F7F9F7] sm:py-2 sm:-my-2">
+        <div className="bg-white border border-[#DDE5DF] rounded-2xl overflow-hidden shadow-sm animate-in fade-in duration-200">
+          {/* 1. Top Banner Header (Hijau) */}
+          <div className="bg-[#16823B] px-4 py-3 sm:px-5 sm:py-3.5 text-white flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div className="flex items-center gap-3">
+              <div className="p-2 rounded-xl bg-white/20 text-white flex items-center justify-center shrink-0">
+                <FileSpreadsheet className="w-4 h-4 sm:w-5 sm:h-5" />
+              </div>
+              <div>
+                <div className="flex items-center gap-2 flex-wrap">
+                  <h4 className="font-bold text-sm sm:text-base text-white">
+                    Detail Profil Lokasi {displayLokasi}
+                  </h4>
+                </div>
+                <p className="text-[11px] sm:text-xs text-emerald-100 font-normal mt-0.5 hidden sm:block">
+                  Profil komprehensif bibit, pemetaan luas, dan jadwal panen dari database HPP
+                </p>
+              </div>
             </div>
-            <div>
-              <div className="flex items-center gap-2">
-                <h2 className="text-xl font-black tracking-tight">Detail Lokasi {displayLokasi}</h2>
-                <span className="px-2 py-0.5 rounded bg-[#A8D437] text-[#0B6B32] font-black text-xs">
-                  Wilayah {wilayah}
+
+            {/* Right side info pill & Close button */}
+            <div className="flex items-center gap-2 flex-wrap self-start sm:self-center">
+              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/10 border border-white/25 text-xs font-medium text-white shrink-0">
+                <span>🌱</span>
+                <span>
+                  Wilayah <strong className="font-semibold">{wilayah}</strong> • Kelas:{" "}
+                  <strong className="font-semibold capitalize">{kelasBibit}</strong>
                 </span>
               </div>
-              <p className="text-xs text-[#E8F3EA] mt-0.5 font-medium">
-                Profil komprehensif bibit, pemetaan luas, dan jadwal panen
-              </p>
+
+              {onClose && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    onClose();
+                    setTimeout(() => {
+                      const tableEl = document.getElementById("daftar-lokasi-section");
+                      if (tableEl) {
+                        const yOffset = -185;
+                        const y = tableEl.getBoundingClientRect().top + window.pageYOffset + yOffset;
+                        window.scrollTo({ top: Math.max(0, y), behavior: "smooth" });
+                      }
+                    }, 50);
+                  }}
+                  className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/20 hover:bg-white/30 text-white text-xs font-semibold transition-all cursor-pointer border border-white/25 shadow-2xs"
+                  title="Tutup Detail & Kembali ke Tabel"
+                >
+                  <ArrowUp className="w-3.5 h-3.5" />
+                  <span className="hidden sm:inline">Tutup Detail</span>
+                  <X className="w-3.5 h-3.5 sm:hidden" />
+                </button>
+              )}
             </div>
           </div>
 
-          <div className="flex items-center gap-2">
-            <div className="flex items-center gap-2 text-xs font-bold bg-white/15 px-3 py-1.5 rounded-xl border border-white/20">
-              <Sprout className="w-4 h-4 text-[#A8D437]" />
-              <span className="capitalize">{jenisBibit}</span>
-              <span>•</span>
-              <span className="capitalize">Kelas: {kelasBibit}</span>
+          {/* 2. 7 Core Detail Tiles Grid (Berdampingan Langsung Sampingnya & Ketebalan Ringan) */}
+          <div className="p-2.5 sm:p-3 bg-[#F7F9F7]/60 border-t border-[#DDE5DF]">
+            <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 divide-y sm:divide-y-0 lg:divide-x divide-[#DDE5DF] gap-y-2 lg:gap-y-0 items-center">
+              {/* 1. Lokasi */}
+              <div className="flex items-center gap-1.5 px-2 sm:px-2.5 whitespace-nowrap">
+                <span className="text-[11px] text-[#5F6B63] font-medium flex items-center gap-1">
+                  <MapPin className="w-3 h-3 text-[#16823B]" /> Lokasi :
+                </span>
+                <span className="text-xs sm:text-[13px] font-semibold text-[#16823B] truncate" title={displayLokasi}>
+                  {displayLokasi}
+                </span>
+              </div>
+
+              {/* 2. Jenis Bibit */}
+              <div className="flex items-center gap-1.5 px-2 sm:px-2.5 whitespace-nowrap">
+                <span className="text-[11px] text-[#5F6B63] font-medium flex items-center gap-1">
+                  <Sprout className="w-3 h-3 text-[#16823B]" /> Jenis :
+                </span>
+                <span className="text-xs sm:text-[13px] font-semibold text-[#16823B] capitalize truncate" title={jenisBibit}>
+                  {jenisBibit}
+                </span>
+              </div>
+
+              {/* 3. Kelas Bibit */}
+              <div className="flex items-center gap-1.5 px-2 sm:px-2.5 whitespace-nowrap">
+                <span className="text-[11px] text-[#5F6B63] font-medium flex items-center gap-1">
+                  <Award className="w-3 h-3 text-[#16823B]" /> Kelas :
+                </span>
+                <span className="text-xs sm:text-[13px] font-medium text-[#17231B] capitalize truncate" title={kelasBibit}>
+                  {kelasBibit}
+                </span>
+              </div>
+
+              {/* 4. Luas Aktif */}
+              <div className="flex items-center gap-1.5 px-2 sm:px-2.5 whitespace-nowrap">
+                <span className="text-[11px] text-[#5F6B63] font-medium flex items-center gap-1">
+                  <Ruler className="w-3 h-3 text-[#16823B]" /> Luas Aktif :
+                </span>
+                <span className="text-xs sm:text-[13px] font-medium text-[#17231B] truncate">
+                  {formatNumber(luasAktif)} Ha
+                </span>
+              </div>
+
+              {/* 5. Luas Panen */}
+              <div className="flex items-center gap-1.5 px-2 sm:px-2.5 whitespace-nowrap">
+                <span className="text-[11px] text-[#5F6B63] font-medium flex items-center gap-1">
+                  <Ruler className="w-3 h-3 text-[#16823B]" /> Luas Panen :
+                </span>
+                <span className="text-xs sm:text-[13px] font-semibold text-[#16823B] truncate">
+                  {formatNumber(luasPanen)} Ha
+                </span>
+              </div>
+
+              {/* 6. Forcing (Ren / Real) */}
+              <div className="flex items-center gap-1.5 px-2 sm:px-2.5 whitespace-nowrap">
+                <span className="text-[11px] text-[#5F6B63] font-medium flex items-center gap-1">
+                  <Calendar className="w-3 h-3 text-[#16823B]" /> Forcing :
+                </span>
+                <span className="text-xs sm:text-[12px] font-semibold text-purple-900 truncate" title={`${rencanaForcing} / ${realForcing}`}>
+                  {rencanaForcing} / {realForcing}
+                </span>
+              </div>
+
+              {/* 7. Selesai Panen */}
+              <div className="flex items-center gap-1.5 px-2 sm:px-2.5 whitespace-nowrap">
+                <span className="text-[11px] text-[#5F6B63] font-medium flex items-center gap-1">
+                  <Calendar className="w-3 h-3 text-[#16823B]" /> Panen :
+                </span>
+                <span className="text-xs sm:text-[12px] font-semibold text-[#16823B] truncate" title={selesaiPanen}>
+                  {selesaiPanen}
+                </span>
+              </div>
             </div>
-
-            {onClose && (
-              <button
-                type="button"
-                onClick={() => {
-                  onClose();
-                  setTimeout(() => {
-                    const tableEl = document.getElementById("daftar-lokasi-section");
-                    if (tableEl) {
-                      const yOffset = -185;
-                      const y = tableEl.getBoundingClientRect().top + window.pageYOffset + yOffset;
-                      window.scrollTo({ top: Math.max(0, y), behavior: "smooth" });
-                    }
-                  }, 50);
-                }}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/20 hover:bg-white/30 text-white text-xs font-bold transition-all cursor-pointer border border-white/20 shadow-2xs"
-                title="Tutup Detail & Kembali ke Tabel"
-              >
-                <ArrowUp className="w-3.5 h-3.5" />
-                <span className="hidden sm:inline">Tutup Detail</span>
-                <X className="w-3.5 h-3.5 sm:hidden" />
-              </button>
-            )}
           </div>
-        </div>
-
-        {/* Info Grid Cards - Single row on desktop */}
-        <div className="p-4 sm:p-5 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-7 gap-3 bg-[#F8FAF9]">
-          
-          <div className="p-3 bg-white rounded-xl border border-[#E0E8E2] shadow-2xs">
-            <span className="text-[10px] font-bold text-[#5F6B63] uppercase tracking-wider block">Lokasi</span>
-            <span className="text-base font-black text-[#17231B] block truncate" title={displayLokasi}>{displayLokasi}</span>
-          </div>
-
-          <div className="p-3 bg-white rounded-xl border border-[#E0E8E2] shadow-2xs">
-            <span className="text-[10px] font-bold text-[#5F6B63] uppercase tracking-wider block">Jenis Bibit</span>
-            <span className="text-sm font-extrabold text-[#16823B] capitalize block truncate">{jenisBibit}</span>
-          </div>
-
-          <div className="p-3 bg-white rounded-xl border border-[#E0E8E2] shadow-2xs">
-            <span className="text-[10px] font-bold text-[#5F6B63] uppercase tracking-wider block">Kelas Bibit</span>
-            <span className="text-sm font-extrabold text-[#2C3830] capitalize block truncate">{kelasBibit}</span>
-          </div>
-
-          <div className="p-3 bg-white rounded-xl border border-[#E0E8E2] shadow-2xs">
-            <span className="text-[10px] font-bold text-[#5F6B63] uppercase tracking-wider block">Luas Aktif</span>
-            <span className="text-sm font-extrabold text-[#17231B] block truncate">{formatNumber(luasAktif)} Ha</span>
-          </div>
-
-          <div className="p-3 bg-white rounded-xl border border-[#E0E8E2] shadow-2xs">
-            <span className="text-[10px] font-bold text-[#5F6B63] uppercase tracking-wider block">Luas Panen</span>
-            <span className="text-sm font-extrabold text-[#16823B] block truncate">{formatNumber(luasPanen)} Ha</span>
-          </div>
-
-          <div className="p-3 bg-white rounded-xl border border-[#E0E8E2] shadow-2xs">
-            <span className="text-[10px] font-bold text-[#5F6B63] uppercase tracking-wider block flex items-center gap-1">
-              <Calendar className="w-3 h-3 text-purple-600 shrink-0" />
-              <span className="truncate">Forcing (Ren / Real)</span>
-            </span>
-            <span className="text-xs font-bold text-purple-900 block truncate" title={`${rencanaForcing} / ${realForcing}`}>
-              {rencanaForcing} / {realForcing}
-            </span>
-          </div>
-
-          <div className="p-3 bg-white rounded-xl border border-[#E0E8E2] shadow-2xs">
-            <span className="text-[10px] font-bold text-[#5F6B63] uppercase tracking-wider block flex items-center gap-1">
-              <Calendar className="w-3 h-3 text-[#16823B] shrink-0" />
-              <span className="truncate">Selesai Panen</span>
-            </span>
-            <span className="text-xs font-bold text-[#16823B] block truncate" title={selesaiPanen}>
-              {selesaiPanen}
-            </span>
-          </div>
-
         </div>
       </div>
 
       {/* ------------------------------------------------------------- */}
       {/* SECTION 12 & 13: GROUP COST & AKTIVITAS TABLES (SIDE-BY-SIDE) */}
       {/* ------------------------------------------------------------- */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 relative z-0 isolate">
 
         {/* ----------------------------------------------------------- */}
         {/* LEFT COLUMN: TABEL GROUP COST LOKASI                        */}
         {/* ----------------------------------------------------------- */}
-        <div className="bg-white border border-[#DDE5DF] rounded-2xl p-5 shadow-xs flex flex-col justify-between">
+        <div className="bg-white border border-[#DDE5DF] rounded-2xl p-3.5 sm:p-5 shadow-xs flex flex-col justify-between">
           <div>
-            <div className="flex items-center justify-between mb-4 pb-3 border-b border-[#DDE5DF]">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 sm:gap-4 mb-3 sm:mb-4 pb-2.5 sm:pb-3 border-b border-[#DDE5DF]">
               <div className="flex items-center gap-2">
-                <div className="p-2 rounded-lg bg-[#16823B]/10 text-[#16823B] shrink-0">
+                <div className="p-1.5 sm:p-2 rounded-lg bg-[#16823B]/10 text-[#16823B] shrink-0">
                   <Layers className="w-4 h-4" />
                 </div>
                 <div>
-                  <h3 className="font-bold text-base text-[#17231B]">
+                  <h3 className="font-bold text-sm sm:text-base text-[#17231B]">
                     Group Cost ({displayLokasi})
                   </h3>
-                  <p className="text-xs text-[#5F6B63]">
+                  <p className="text-[11px] sm:text-xs text-[#5F6B63]">
                     Kelompok biaya &amp; anggaran budget
                   </p>
                 </div>
               </div>
-              <span className="text-xs font-bold text-[#16823B] bg-[#16823B]/10 px-2.5 py-1 rounded-lg border border-[#16823B]/20 shrink-0">
+              <span className="text-[10.5px] sm:text-xs font-bold text-[#16823B] bg-[#16823B]/10 px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-lg border border-[#16823B]/20 self-start sm:self-auto shrink-0">
                 Klik Group untuk Filter Aktivitas
               </span>
             </div>
 
-            <div className="overflow-x-auto rounded-xl border border-[#DDE5DF]">
-              <table className="w-full text-xs text-left">
-                <thead className="bg-[#F7F9F7] text-[#17231B] uppercase font-bold border-b border-[#DDE5DF]">
+            <div className="overflow-x-auto overflow-y-auto max-h-[250px] sm:max-h-[280px] rounded-xl border border-[#DDE5DF]">
+              <table className="w-full text-[11px] sm:text-xs text-left border-collapse min-w-[360px] sm:min-w-full">
+                <thead className="bg-[#F7F9F7] text-[#17231B] uppercase font-bold border-b border-[#DDE5DF] sticky top-0 z-10 shadow-2xs">
                   <tr>
-                    <th className="py-2.5 px-3">Group Cost</th>
-                    <th className="py-2.5 px-3 text-right">Cost / Ha (Rp)</th>
-                    <th className="py-2.5 px-3 text-right">Budget (Rp)</th>
-                    <th className="py-2.5 px-3 text-center">Status Select</th>
+                    <th className="py-2 sm:py-2.5 px-2 sm:px-3 bg-[#F7F9F7]">Group Cost</th>
+                    <th className="py-2 sm:py-2.5 px-2 sm:px-3 text-right bg-[#F7F9F7]">Cost / Ha (Rp)</th>
+                    <th className="py-2 sm:py-2.5 px-2 sm:px-3 text-right bg-[#F7F9F7]">Budget (Rp)</th>
+                    <th className="py-2 sm:py-2.5 px-2 sm:px-3 text-center bg-[#F7F9F7]">Status</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-[#DDE5DF]/60">
@@ -372,25 +397,25 @@ export default function HppLocationDetailDrilldown({
                         : "hover:bg-[#F7F9F7] text-[#17231B] font-bold"
                     }`}
                   >
-                    <td className="py-2.5 px-3">
+                    <td className="py-2 sm:py-2.5 px-2 sm:px-3">
                       <div className="flex items-center gap-1.5">
-                        <span className="px-2 py-0.5 rounded bg-[#16823B] text-white font-bold text-[10px] shrink-0">
+                        <span className="px-1.5 sm:px-2 py-0.5 rounded bg-[#16823B] text-white font-bold text-[9.5px] sm:text-[10px] shrink-0">
                           ZN (Direct)
                         </span>
-                        <span className="font-bold text-[#16823B] uppercase tracking-wide">
+                        <span className="font-bold text-[#16823B] uppercase tracking-wide truncate">
                           Direct Cost
                         </span>
                       </div>
                     </td>
-                    <td className="py-2.5 px-3 text-right font-mono font-bold text-[#16823B]">
+                    <td className="py-2 sm:py-2.5 px-2 sm:px-3 text-right font-mono font-bold text-[#16823B]">
                       {formatNumber(costPerHaDirect, 0)}
                     </td>
-                    <td className="py-2.5 px-3 text-right font-mono font-semibold text-[#5F6B63]">
+                    <td className="py-2 sm:py-2.5 px-2 sm:px-3 text-right font-mono font-semibold text-[#5F6B63]">
                       {budgetValDirect !== null ? formatNumber(budgetValDirect, 0) : "-"}
                     </td>
-                    <td className="py-2.5 px-3 text-center">
+                    <td className="py-2 sm:py-2.5 px-2 sm:px-3 text-center">
                       {activeGroup === "direct_cost" || activeGroup === "ZN" ? (
-                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-[#16823B] text-white text-[10px] font-bold">
+                        <span className="inline-flex items-center gap-1 px-1.5 sm:px-2 py-0.5 rounded-full bg-[#16823B] text-white text-[9.5px] sm:text-[10px] font-bold">
                           <CheckCircle2 className="w-3 h-3" /> Selected
                         </span>
                       ) : (
@@ -422,31 +447,31 @@ export default function HppLocationDetailDrilldown({
                           }`}
                         >
                           {/* Group Cost */}
-                          <td className="py-2.5 px-3">
+                          <td className="py-2 sm:py-2.5 px-2 sm:px-3">
                             <div className="flex items-center gap-1.5">
-                              <span className="px-1.5 py-0.5 rounded bg-[#16823B]/10 text-[#16823B] font-bold text-[10px] border border-[#16823B]/20 shrink-0">
+                              <span className="px-1.5 py-0.5 rounded bg-[#16823B]/10 text-[#16823B] font-bold text-[9.5px] sm:text-[10px] border border-[#16823B]/20 shrink-0">
                                 {gc.group}
                               </span>
-                              <span className="font-bold text-[#17231B] truncate max-w-[140px]" title={gc.descGroup}>
+                              <span className="font-bold text-[#17231B] truncate max-w-[100px] sm:max-w-[140px]" title={gc.descGroup}>
                                 {gc.descGroup}
                               </span>
                             </div>
                           </td>
 
                           {/* Cost / Ha */}
-                          <td className="py-2.5 px-3 text-right font-mono font-bold text-[#16823B]">
+                          <td className="py-2 sm:py-2.5 px-2 sm:px-3 text-right font-mono font-bold text-[#16823B]">
                             {formatNumber(gc.costPerHa, 0)}
                           </td>
 
                           {/* Budget */}
-                          <td className="py-2.5 px-3 text-right font-mono text-[#5F6B63]">
+                          <td className="py-2 sm:py-2.5 px-2 sm:px-3 text-right font-mono text-[#5F6B63]">
                             {hasBudget ? formatNumber(gc.budgetVal, 0) : "-"}
                           </td>
 
                           {/* Status Select Column */}
-                          <td className="py-2.5 px-3 text-center">
+                          <td className="py-2 sm:py-2.5 px-2 sm:px-3 text-center">
                             {isGroupSelected ? (
-                              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-[#16823B] text-white text-[10px] font-bold">
+                              <span className="inline-flex items-center gap-1 px-1.5 sm:px-2 py-0.5 rounded-full bg-[#16823B] text-white text-[9.5px] sm:text-[10px] font-bold">
                                 <CheckCircle2 className="w-3 h-3" /> Selected
                               </span>
                             ) : (
@@ -467,25 +492,25 @@ export default function HppLocationDetailDrilldown({
                         : "hover:bg-amber-50/50 text-[#17231B] font-bold"
                     }`}
                   >
-                    <td className="py-2.5 px-3">
+                    <td className="py-2 sm:py-2.5 px-2 sm:px-3">
                       <div className="flex items-center gap-1.5">
-                        <span className="px-2 py-0.5 rounded bg-amber-600 text-white font-bold text-[10px] shrink-0">
+                        <span className="px-1.5 sm:px-2 py-0.5 rounded bg-amber-600 text-white font-bold text-[9.5px] sm:text-[10px] shrink-0">
                           ZW (Indirect)
                         </span>
-                        <span className="font-bold text-amber-900 uppercase tracking-wide">
+                        <span className="font-bold text-amber-900 uppercase tracking-wide truncate">
                           Indirect Cost
                         </span>
                       </div>
                     </td>
-                    <td className="py-2.5 px-3 text-right font-mono font-bold text-amber-800">
+                    <td className="py-2 sm:py-2.5 px-2 sm:px-3 text-right font-mono font-bold text-amber-800">
                       {formatNumber(costPerHaIndirect, 0)}
                     </td>
-                    <td className="py-2.5 px-3 text-right font-mono text-[#5F6B63]">
+                    <td className="py-2 sm:py-2.5 px-2 sm:px-3 text-right font-mono text-[#5F6B63]">
                       {budgetValIndirect !== null ? formatNumber(budgetValIndirect, 0) : "-"}
                     </td>
-                    <td className="py-2.5 px-3 text-center">
+                    <td className="py-2 sm:py-2.5 px-2 sm:px-3 text-center">
                       {activeGroup === "indirect_cost" || activeGroup === "ZW" ? (
-                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-700 text-white text-[10px] font-bold">
+                        <span className="inline-flex items-center gap-1 px-1.5 sm:px-2 py-0.5 rounded-full bg-amber-700 text-white text-[9.5px] sm:text-[10px] font-bold">
                           <CheckCircle2 className="w-3 h-3" /> Selected
                         </span>
                       ) : (
@@ -498,7 +523,7 @@ export default function HppLocationDetailDrilldown({
             </div>
           </div>
 
-          <div className="mt-4 pt-3 border-t border-[#DDE5DF] text-xs text-[#5F6B63] flex justify-between items-center">
+          <div className="mt-3 sm:mt-4 pt-2.5 sm:pt-3 border-t border-[#DDE5DF] text-[11px] sm:text-xs text-[#5F6B63] flex flex-wrap justify-between items-center gap-1.5">
             <span>Menampilkan {groupCostList.length} kelompok biaya</span>
             {selectedGroup && <span className="font-semibold text-[#16823B]">Terpilih: {selectedGroup}</span>}
           </div>
@@ -507,58 +532,58 @@ export default function HppLocationDetailDrilldown({
         {/* ----------------------------------------------------------- */}
         {/* RIGHT COLUMN: TABEL AKTIVITAS                               */}
         {/* ----------------------------------------------------------- */}
-        <div className="bg-white border border-[#DDE5DF] rounded-2xl p-5 shadow-xs flex flex-col justify-between">
+        <div className="bg-white border border-[#DDE5DF] rounded-2xl p-3.5 sm:p-5 shadow-xs flex flex-col justify-between">
           <div>
-            <div className="flex items-center justify-between mb-4 pb-3 border-b border-[#DDE5DF]">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 sm:gap-4 mb-3 sm:mb-4 pb-2.5 sm:pb-3 border-b border-[#DDE5DF]">
               <div className="flex items-center gap-2">
-                <div className="p-2 rounded-lg bg-[#16823B]/10 text-[#16823B] shrink-0">
+                <div className="p-1.5 sm:p-2 rounded-lg bg-[#16823B]/10 text-[#16823B] shrink-0">
                   <Activity className="w-4 h-4" />
                 </div>
                 <div>
-                  <h3 className="font-bold text-base text-[#17231B]">
+                  <h3 className="font-bold text-sm sm:text-base text-[#17231B]">
                     Aktivitas Lapangan
                   </h3>
-                  <p className="text-xs text-[#5F6B63]">
+                  <p className="text-[11px] sm:text-xs text-[#5F6B63]">
                     {activeGroup ? `Filter Aktivitas: Group ${activeGroup}` : "Semua Aktivitas Pekerjaan"}
                   </p>
                 </div>
               </div>
 
               {activeGroup && (
-                <span className="text-xs font-bold text-[#16823B] bg-[#16823B]/10 px-2.5 py-1 rounded-lg border border-[#16823B]/20 shrink-0">
+                <span className="text-[10.5px] sm:text-xs font-bold text-[#16823B] bg-[#16823B]/10 px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-lg border border-[#16823B]/20 self-start sm:self-auto shrink-0">
                   Group {activeGroup}
                 </span>
               )}
             </div>
 
-            <div className="overflow-x-auto rounded-xl border border-[#DDE5DF]">
-              <table className="w-full text-xs text-left">
-                <thead className="bg-[#F7F9F7] text-[#17231B] uppercase font-bold border-b border-[#DDE5DF]">
+            <div className="overflow-x-auto overflow-y-auto max-h-[250px] sm:max-h-[280px] rounded-xl border border-[#DDE5DF]">
+              <table className="w-full text-[11px] sm:text-xs text-left border-collapse">
+                <thead className="bg-[#F7F9F7] text-[#17231B] uppercase font-bold border-b border-[#DDE5DF] sticky top-0 z-10 shadow-2xs">
                   <tr>
-                    <th className="py-2.5 px-3">Nama Aktivitas</th>
-                    <th className="py-2.5 px-3 text-right">Cost / Ha (Rp)</th>
+                    <th className="py-2 sm:py-2.5 px-2.5 sm:px-3 bg-[#F7F9F7]">Nama Aktivitas</th>
+                    <th className="py-2 sm:py-2.5 px-2.5 sm:px-3 text-right bg-[#F7F9F7] whitespace-nowrap">Cost / Ha (Rp)</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-[#DDE5DF]/60 text-[#17231B]">
                   {filteredAktivitas.length === 0 ? (
                     <tr>
-                      <td colSpan={2} className="py-8 text-center text-[#89938D] font-medium">
+                      <td colSpan={2} className="py-6 sm:py-8 text-center text-[#89938D] font-medium text-xs">
                         Belum ada aktivitas untuk lokasi dan group cost yang dipilih.
                       </td>
                     </tr>
                   ) : (
-                    paginatedAktivitas.map((act) => {
+                    filteredAktivitas.map((act) => {
                       const costPerHa = luasPanen > 0 ? Number(act.biaya || 0) / luasPanen : 0;
 
                       return (
                         <tr key={act.idAktivitas} className="hover:bg-[#F7F9F7] transition-colors">
                           {/* Nama Aktivitas */}
-                          <td className="py-2.5 px-3 font-medium text-[#17231B]">
+                          <td className="py-2 sm:py-2.5 px-2.5 sm:px-3 font-medium text-[#17231B] leading-snug">
                             {act.aktivitas}
                           </td>
 
                           {/* Cost / Ha */}
-                          <td className="py-2.5 px-3 text-right font-mono font-bold text-[#16823B]">
+                          <td className="py-2 sm:py-2.5 px-2.5 sm:px-3 text-right font-mono font-bold text-[#16823B] whitespace-nowrap">
                             {formatNumber(costPerHa, 0)}
                           </td>
                         </tr>
@@ -570,42 +595,14 @@ export default function HppLocationDetailDrilldown({
             </div>
           </div>
 
-          {/* Footer info & Pagination */}
-          <div className="mt-4 pt-3 border-t border-[#DDE5DF] text-xs text-[#5F6B63] flex flex-col sm:flex-row justify-between items-center gap-2">
-            <span>
-              Menampilkan {filteredAktivitas.length === 0 ? 0 : startAktIndex + 1} - {Math.min(startAktIndex + AKT_ITEMS_PER_PAGE, filteredAktivitas.length)} dari {filteredAktivitas.length} aktivitas
+          {/* Footer info matching WIP */}
+          <div className="mt-3 sm:mt-4 pt-2.5 sm:pt-3 border-t border-[#DDE5DF] text-[11px] sm:text-xs text-[#5F6B63] flex flex-wrap justify-between items-center gap-1.5">
+            <span>Total {filteredAktivitas.length} aktivitas terdaftar</span>
+            <span className="font-semibold text-[#17231B]">
+              Total Cost / Ha: <span className="font-bold text-[#16823B]">Rp {formatNumber(totalAktivitasCostHa, 0)}</span>
             </span>
-
-            {totalAktPages > 1 && (
-              <div className="flex items-center gap-1.5">
-                <button
-                  onClick={() => setAktCurrentPage((prev) => Math.max(prev - 1, 1))}
-                  disabled={aktCurrentPage === 1}
-                  className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg border border-[#DDE5DF] bg-white text-[#17231B] hover:bg-[#F7F9F7] disabled:opacity-40 disabled:cursor-not-allowed text-xs font-semibold transition-colors cursor-pointer"
-                  title="Halaman Sebelumnya"
-                >
-                  <ChevronLeft className="w-3.5 h-3.5" />
-                  <span>Prev</span>
-                </button>
-
-                <span className="px-2.5 py-1 text-xs font-bold text-[#16823B] bg-[#16823B]/10 rounded-lg border border-[#16823B]/20">
-                  {aktCurrentPage} / {totalAktPages}
-                </span>
-
-                <button
-                  onClick={() => setAktCurrentPage((prev) => Math.min(prev + 1, totalAktPages))}
-                  disabled={aktCurrentPage === totalAktPages}
-                  className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg border border-[#DDE5DF] bg-white text-[#17231B] hover:bg-[#F7F9F7] disabled:opacity-40 disabled:cursor-not-allowed text-xs font-semibold transition-colors cursor-pointer"
-                  title="Halaman Selanjutnya"
-                >
-                  <span>Next</span>
-                  <ChevronRight className="w-3.5 h-3.5" />
-                </button>
-              </div>
-            )}
           </div>
         </div>
-
       </div>
 
     </div>

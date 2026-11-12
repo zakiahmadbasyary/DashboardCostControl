@@ -84,8 +84,9 @@ export default function DashboardHPPPage() {
     setTimeout(() => {
       const el = document.getElementById("detail-drilldown-section");
       if (el) {
-        // Offset aman (-185px) agar detail tidak tertutup oleh sticky header (80px) + sticky main filter (~75px)
-        const yOffset = -185;
+        // Offset aman di bawah sticky header (64px mobile, 80px desktop)
+        const isMobile = window.innerWidth < 640;
+        const yOffset = isMobile ? -70 : -85;
         const y = el.getBoundingClientRect().top + window.pageYOffset + yOffset;
         window.scrollTo({ top: Math.max(0, y), behavior: "smooth" });
       }
@@ -505,7 +506,7 @@ export default function DashboardHPPPage() {
         )}
 
         {/* PRD Section 6: Sticky Freeze Filter Utama Toolbar */}
-        <section className="sticky top-20 z-30 font-sans" suppressHydrationWarning>
+        <section className="sticky top-16 sm:top-20 z-20 font-sans" suppressHydrationWarning>
           <HppMainFilters
             filters={filters}
             onChangeFilter={handleFilterChange}
@@ -515,7 +516,7 @@ export default function DashboardHPPPage() {
         </section>
 
         {/* PRD Section 8 & 9: Trend HPP Pine PG1 & HPP Per Wilayah Charts */}
-        <section suppressHydrationWarning>
+        <section className="relative z-0 isolate" suppressHydrationWarning>
           <HppTrendAndWilayahCharts
             trendData={trendData}
             ytdPoint={ytdPoint}
@@ -528,7 +529,7 @@ export default function DashboardHPPPage() {
         </section>
 
         {/* PRD Section 10: Daftar Lokasi Table */}
-        <section id="daftar-lokasi-section" className="scroll-mt-48 sm:scroll-mt-52" suppressHydrationWarning>
+        <section id="daftar-lokasi-section" className="relative z-0 isolate scroll-mt-48 sm:scroll-mt-52" suppressHydrationWarning>
           <HppLokasiTable
             data={filteredLokasiList}
             loading={loading}
@@ -544,7 +545,7 @@ export default function DashboardHPPPage() {
         {selectedLokasiCode && (
           <section
             id="detail-drilldown-section"
-            className="pt-2 animate-in fade-in duration-300 scroll-mt-48 sm:scroll-mt-52"
+            className="pt-2 animate-in fade-in duration-300 scroll-mt-16 sm:scroll-mt-20"
             suppressHydrationWarning
           >
             <HppLocationDetailDrilldown
