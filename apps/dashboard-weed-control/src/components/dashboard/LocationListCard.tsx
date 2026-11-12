@@ -75,7 +75,7 @@ export default function LocationListCard({
 
   const umurLabel = `${currentUmur} Bulan`;
 
-  // Group locations by Wilayah
+  // Group locations by Wilayah, diurutkan dari cost/ha terbesar ke terkecil (Descending)
   const locationsByRegion = React.useMemo(() => {
     const map: Record<string, LocationItem[]> = {};
     for (const reg of REGIONS) {
@@ -87,6 +87,14 @@ export default function LocationListCard({
       } else {
         map[loc.wilayah] = [loc];
       }
+    }
+    // Urutkan setiap tabel wilayah dari cost/ha terbesar ke terkecil
+    for (const reg of REGIONS) {
+      map[reg].sort((a, b) => {
+        const diff = (b.costHa ?? 0) - (a.costHa ?? 0);
+        if (diff !== 0) return diff;
+        return a.lokasi.localeCompare(b.lokasi);
+      });
     }
     return map;
   }, [locations]);

@@ -76,108 +76,112 @@ export default function LocationDetailCard({
 
   return (
     <div className="bg-white border border-[#DDE5DF] rounded-2xl overflow-hidden shadow-sm animate-in fade-in duration-200">
-      {/* Top Banner Header */}
-      <div className="bg-[#16823B] px-4 py-3 sm:py-3.5 sm:px-5 text-white flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+      {/* 1. Top Banner Header (Hijau) */}
+      <div className="bg-[#16823B] px-4 py-3 sm:px-5 sm:py-3.5 text-white flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div className="flex items-center gap-3">
           <div className="p-2 rounded-xl bg-white/20 text-white flex items-center justify-center shrink-0">
             <FileSpreadsheet className="w-4 h-4 sm:w-5 sm:h-5" />
           </div>
           <div>
             <div className="flex items-center gap-2 flex-wrap">
-              <h4 className="font-extrabold text-sm sm:text-base text-white">
+              <h4 className="font-bold text-sm sm:text-base text-white">
                 Detail Profil Lokasi {location.lokasi}
               </h4>
-              <span className="px-2.5 py-0.5 rounded-full bg-[#A8D437] text-[#17231B] font-extrabold text-xs shadow-2xs">
-                Wilayah {location.wilayah}
-              </span>
-              <span className="px-2.5 py-0.5 rounded-full bg-white/20 text-white font-bold text-xs border border-white/30">
-                Status: {location.status}
-              </span>
             </div>
-            <p className="text-[11px] sm:text-xs text-emerald-100 font-medium mt-0.5 hidden sm:block">
+            <p className="text-[11px] sm:text-xs text-emerald-100 font-normal mt-0.5 hidden sm:block">
               Rincian profil master kebun, atribut bibit, dan umur tanaman dari database Weed Control
             </p>
           </div>
         </div>
 
         {/* Right side info pill */}
-        <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/10 border border-white/25 text-xs font-semibold text-white shrink-0 self-start sm:self-center">
+        <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/10 border border-white/25 text-xs font-medium text-white shrink-0 self-start sm:self-center">
           <span>🌱</span>
           <span>
-            Kelas: <strong>{kelasLabel}</strong>
+            Kelas: <strong className="font-semibold">{kelasLabel}</strong>
           </span>
         </div>
       </div>
 
-      {/* 7 Core Detail Tiles Grid */}
-      <div className="p-3 bg-[#F7F9F7]/60 grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-2.5">
-        {/* 1. Lokasi */}
-        <div className="bg-white border border-[#DDE5DF] rounded-xl p-2.5 sm:p-3 shadow-2xs flex flex-col justify-between">
-          <span className="text-[9.5px] font-bold text-[#89938D] uppercase tracking-wider mb-1 flex items-center gap-1">
-            <MapPin className="w-3 h-3 text-[#16823B]" /> LOKASI
-          </span>
-          <span className="text-sm sm:text-base font-extrabold text-[#17231B]">{location.lokasi}</span>
-        </div>
+      {/* 2. 7 Core Detail Tiles Grid (Berdampingan Langsung Sampingnya & Ketebalan Ringan) */}
+      <div className="p-2.5 sm:p-3 bg-[#F7F9F7]/60 border-t border-[#DDE5DF]">
+        <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 divide-y sm:divide-y-0 lg:divide-x divide-[#DDE5DF] gap-y-2 lg:gap-y-0 items-center">
+          {/* 1. Lokasi */}
+          <div className="flex items-center gap-1.5 px-2 sm:px-2.5 whitespace-nowrap">
+            <span className="text-[11px] text-[#5F6B63] font-medium flex items-center gap-1">
+              <MapPin className="w-3 h-3 text-[#16823B]" /> Lokasi :
+            </span>
+            <span className="text-xs sm:text-[13px] font-semibold text-[#16823B]">
+              {location.lokasi}
+            </span>
+          </div>
 
-        {/* 2. Status */}
-        <div className="bg-white border border-[#DDE5DF] rounded-xl p-2.5 sm:p-3 shadow-2xs flex flex-col justify-between">
-          <span className="text-[9.5px] font-bold text-[#89938D] uppercase tracking-wider mb-1 block">
-            STATUS
-          </span>
-          <span className="inline-block px-2 py-0.5 text-xs font-extrabold rounded-md bg-[#16823B]/10 text-[#16823B] border border-[#16823B]/20 w-fit">
-            {location.status || "-"}
-          </span>
-        </div>
+          {/* 2. Status */}
+          <div className="flex items-center gap-1.5 px-2 sm:px-2.5 whitespace-nowrap">
+            <span className="text-[11px] text-[#5F6B63] font-medium">
+              Status :
+            </span>
+            <span className="px-1.5 py-0.5 text-[11px] font-medium rounded bg-[#16823B]/10 text-[#16823B] border border-[#16823B]/20">
+              {location.status || "-"}
+            </span>
+          </div>
 
-        {/* 3. Wilayah */}
-        <div className="bg-white border border-[#DDE5DF] rounded-xl p-2.5 sm:p-3 shadow-2xs flex flex-col justify-between">
-          <span className="text-[9.5px] font-bold text-[#89938D] uppercase tracking-wider mb-1 flex items-center gap-1">
-            <Tag className="w-3 h-3 text-[#16823B]" /> WILAYAH
-          </span>
-          <span className="text-sm sm:text-base font-extrabold text-[#17231B]">{location.wilayah}</span>
-        </div>
+          {/* 3. Wilayah */}
+          <div className="flex items-center gap-1.5 px-2 sm:px-2.5 whitespace-nowrap">
+            <span className="text-[11px] text-[#5F6B63] font-medium flex items-center gap-1">
+              <Tag className="w-3 h-3 text-[#16823B]" /> Wilayah :
+            </span>
+            <span className="text-xs sm:text-[13px] font-medium text-[#17231B]">
+              {location.wilayah}
+            </span>
+          </div>
 
-        {/* 4. Luas (Ha) */}
-        <div className="bg-white border border-[#DDE5DF] rounded-xl p-2.5 sm:p-3 shadow-2xs flex flex-col justify-between">
-          <span className="text-[9.5px] font-bold text-[#89938D] uppercase tracking-wider mb-1 flex items-center gap-1">
-            <Ruler className="w-3 h-3 text-[#16823B]" /> LUAS (HA)
-          </span>
-          <span className="text-sm sm:text-base font-extrabold text-[#17231B]">
-            {formatDecimal2(location.luas)}
-          </span>
-        </div>
+          {/* 4. Luas */}
+          <div className="flex items-center gap-1.5 px-2 sm:px-2.5 whitespace-nowrap">
+            <span className="text-[11px] text-[#5F6B63] font-medium flex items-center gap-1">
+              <Ruler className="w-3 h-3 text-[#16823B]" /> Luas :
+            </span>
+            <span className="text-xs sm:text-[13px] font-medium text-[#17231B]">
+              {formatDecimal2(location.luas)} Ha
+            </span>
+          </div>
 
-        {/* 5. Jenis Bibit */}
-        <div className="bg-white border border-[#DDE5DF] rounded-xl p-2.5 sm:p-3 shadow-2xs flex flex-col justify-between">
-          <span className="text-[9.5px] font-bold text-[#89938D] uppercase tracking-wider mb-1 flex items-center gap-1">
-            <Sprout className="w-3 h-3 text-[#16823B]" /> JENIS
-          </span>
-          <span className="text-xs sm:text-sm font-extrabold text-[#17231B] truncate" title={jenisLabel}>
-            {jenisLabel}
-          </span>
-        </div>
+          {/* 5. Jenis */}
+          <div className="flex items-center gap-1.5 px-2 sm:px-2.5 whitespace-nowrap">
+            <span className="text-[11px] text-[#5F6B63] font-medium flex items-center gap-1">
+              <Sprout className="w-3 h-3 text-[#16823B]" /> Jenis :
+            </span>
+            <span
+              className="text-xs sm:text-[13px] font-medium text-[#17231B] truncate max-w-[100px]"
+              title={jenisLabel}
+            >
+              {jenisLabel}
+            </span>
+          </div>
 
-        {/* 6. Kelas Bibit */}
-        <div className="bg-white border border-[#DDE5DF] rounded-xl p-2.5 sm:p-3 shadow-2xs flex flex-col justify-between">
-          <span className="text-[9.5px] font-bold text-[#89938D] uppercase tracking-wider mb-1 flex items-center gap-1">
-            <Award className="w-3 h-3 text-[#16823B]" /> KELAS
-          </span>
-          <span className="text-xs sm:text-sm font-extrabold text-[#17231B]">
-            {kelasLabel}
-          </span>
-        </div>
+          {/* 6. Kelas */}
+          <div className="flex items-center gap-1.5 px-2 sm:px-2.5 whitespace-nowrap">
+            <span className="text-[11px] text-[#5F6B63] font-medium flex items-center gap-1">
+              <Award className="w-3 h-3 text-[#16823B]" /> Kelas :
+            </span>
+            <span className="text-xs sm:text-[13px] font-medium text-[#17231B]">
+              {kelasLabel}
+            </span>
+          </div>
 
-        {/* 7. Umur Saat Ini */}
-        <div className="bg-white border border-[#DDE5DF] rounded-xl p-2.5 sm:p-3 shadow-2xs flex flex-col justify-between">
-          <span className="text-[9.5px] font-bold text-[#89938D] uppercase tracking-wider mb-1 flex items-center gap-1">
-            <Clock className="w-3 h-3 text-[#16823B]" /> UMUR
-          </span>
-          <span className="text-sm sm:text-base font-extrabold text-[#16823B]">
-            {location.umur !== null && location.umur !== undefined ? `${location.umur} Bulan` : "-"}
-          </span>
+          {/* 7. Umur */}
+          <div className="flex items-center gap-1.5 px-2 sm:px-2.5 whitespace-nowrap">
+            <span className="text-[11px] text-[#5F6B63] font-medium flex items-center gap-1">
+              <Clock className="w-3 h-3 text-[#16823B]" /> Umur :
+            </span>
+            <span className="text-xs sm:text-[13px] font-semibold text-[#16823B]">
+              {location.umur !== null && location.umur !== undefined
+                ? `${location.umur} Bulan`
+                : "-"}
+            </span>
+          </div>
         </div>
       </div>
     </div>
   );
 }
-

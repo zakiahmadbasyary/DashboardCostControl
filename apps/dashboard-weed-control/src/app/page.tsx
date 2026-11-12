@@ -316,12 +316,12 @@ export default function WeedControlDashboardPage() {
           />
         </section>
 
-        {/* Section 4: Detail Lokasi Card (Sticky / Freeze replacing MainFilter when selected) */}
+        {/* Section 4: Detail Lokasi Card (Sticky / Freeze replacing MainFilter on Desktop/Tablet, normal scroll on Mobile) */}
         <section
           id="location-detail-section"
           className={`scroll-mt-16 sm:scroll-mt-20 ${
             selectedLocation || locationDetail
-              ? "sticky top-16 sm:top-20 z-20 bg-[#F7F9F7] py-2 -my-2"
+              ? "sm:sticky sm:top-20 sm:z-20 sm:bg-[#F7F9F7] sm:py-2 sm:-my-2"
               : ""
           }`}
         >

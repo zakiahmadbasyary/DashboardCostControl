@@ -19,8 +19,8 @@ export async function GET(req: NextRequest) {
     const rows = await prisma.dataTimeline.findMany({
       where: { lokasi },
       orderBy: [
-        { tanggalRealisasi: "desc" },
-        { id: "desc" },
+        { tanggalRealisasi: "asc" },
+        { id: "asc" },
       ],
       include: {
         _count: {

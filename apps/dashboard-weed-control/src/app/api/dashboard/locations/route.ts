@@ -88,7 +88,7 @@ export async function GET(req: NextRequest) {
           AND ${umurCondition}
           AND ${wilayahCondition}
           AND ${searchCondition}
-        ORDER BY m.wilayah ASC, m.lokasi ASC;
+        ORDER BY m.wilayah ASC, cost_per_ha DESC, m.lokasi ASC;
       `);
 
       items = rows.map((r) => ({
@@ -139,7 +139,7 @@ export async function GET(req: NextRequest) {
           AND ${wilayahCondition}
           AND ${searchCondition}
         GROUP BY m.lokasi, m.wilayah, m.umur, m.luas, m.status, m.jenis, m.kelas
-        ORDER BY m.wilayah ASC, m.lokasi ASC;
+        ORDER BY m.wilayah ASC, cost_per_ha DESC, m.lokasi ASC;
       `);
 
       items = rows.map((r) => ({
