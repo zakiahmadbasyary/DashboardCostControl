@@ -23,6 +23,8 @@ import {
   Save,
   Trash2,
   Lock,
+  Copy,
+  Check,
 } from "lucide-react";
 import { formatCurrencyRp, formatNumberId } from "@/lib/formatters";
 
@@ -117,6 +119,70 @@ export default function CapexAdminPreviewPage() {
   const [submitting, setSubmitting] = useState<boolean>(false);
   const [formError, setFormError] = useState<string | null>(null);
   const [toastMessage, setToastMessage] = useState<{ text: string; type: "success" | "error" } | null>(null);
+
+  // State for Copy Cost Center feedback
+  const [copiedKode, setCopiedKode] = useState<string | null>(null);
+
+  // Copy single cost center code
+  const handleCopyCostCenter = async (code: string) => {
+    if (!code) return;
+    try {
+      if (navigator?.clipboard?.writeText) {
+        await navigator.clipboard.writeText(code);
+      } else {
+        const textArea = document.createElement("textarea");
+        textArea.value = code;
+        textArea.style.position = "fixed";
+        textArea.style.opacity = "0";
+        document.body.appendChild(textArea);
+        textArea.focus();
+        textArea.select();
+        document.execCommand("copy");
+        document.body.removeChild(textArea);
+      }
+      setCopiedKode(code);
+      setTimeout(() => {
+        setCopiedKode((prev) => (prev === code ? null : prev));
+      }, 1800);
+    } catch (err) {
+      console.error("Gagal menyalin kode:", err);
+    }
+  };
+
+  // Copy all cost center codes currently listed
+  const handleCopyAllCostCenters = async () => {
+    const allCodes = tableData
+      .map((r) => String(r.kodeCostCenter ?? r.kode_cost_center ?? "").trim())
+      .filter(Boolean);
+    if (allCodes.length === 0) return;
+    const uniqueCodes = Array.from(new Set(allCodes));
+    const textToCopy = uniqueCodes.join("\n");
+    try {
+      if (navigator?.clipboard?.writeText) {
+        await navigator.clipboard.writeText(textToCopy);
+      } else {
+        const textArea = document.createElement("textarea");
+        textArea.value = textToCopy;
+        textArea.style.position = "fixed";
+        textArea.style.opacity = "0";
+        document.body.appendChild(textArea);
+        textArea.focus();
+        textArea.select();
+        document.execCommand("copy");
+        document.body.removeChild(textArea);
+      }
+      setCopiedKode("__ALL__");
+      setToastMessage({
+        text: `Berhasil menyalin ${uniqueCodes.length} kode Cost Center ke clipboard!`,
+        type: "success",
+      });
+      setTimeout(() => {
+        setCopiedKode((prev) => (prev === "__ALL__" ? null : prev));
+      }, 2000);
+    } catch (err) {
+      console.error("Gagal menyalin semua kode:", err);
+    }
+  };
 
   // Modal State for Reset Data
   const [resetModalOpen, setResetModalOpen] = useState<boolean>(false);
@@ -567,6 +633,38 @@ export default function CapexAdminPreviewPage() {
 
     const colLower = colName.toLowerCase();
 
+    // Khusus Tab Master Cost Center: Kolom kode cost center bisa langsung di-copy dalam sekali klik!
+    if (
+      activeTab === "cost_center" &&
+      (colLower === "kodecostcenter" || colLower === "kode_cost_center")
+    ) {
+      const codeStr = String(cellVal).trim();
+      const isCopied = copiedKode === codeStr;
+
+      return (
+        <button
+          type="button"
+          onClick={() => handleCopyCostCenter(codeStr)}
+          className={`group/btn inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-mono font-bold transition-all cursor-pointer select-none border text-left shadow-2xs active:scale-95 ${
+            isCopied
+              ? "bg-emerald-50 text-emerald-700 border-emerald-300 ring-2 ring-emerald-200"
+              : "bg-[#F8FAF9] text-[#17231B] border-[#DDE5DF] hover:bg-[#EAF3EC] hover:text-[#16823B] hover:border-[#16823B]/30"
+          }`}
+          title="Klik untuk menyalin kode Cost Center ini"
+        >
+          <span>{codeStr}</span>
+          {isCopied ? (
+            <span className="inline-flex items-center gap-1 text-[10px] font-sans font-semibold text-emerald-700">
+              <Check className="w-3.5 h-3.5 text-emerald-600 animate-in zoom-in" />
+              <span>Tersalin!</span>
+            </span>
+          ) : (
+            <Copy className="w-3.5 h-3.5 text-[#89938D] group-hover/btn:text-[#16823B] transition-colors" />
+          )}
+        </button>
+      );
+    }
+
     // Kolom kode approver, kode, nomor, id, atau teks identitas TIDAK BOLEH dikonversi ke tanggal
     const isExplicitTextCode =
       colLower.includes("kode") ||
@@ -848,6 +946,11 @@ export default function CapexAdminPreviewPage() {
                     )}
                     {columnKeys.map((col) => {
                       const isNum = isCurrencyOrNumber(col, tableData[0]?.[col]);
+                      const isCostCenterCol =
+                        activeTab === "cost_center" &&
+                        (col.toLowerCase() === "kodecostcenter" ||
+                          col.toLowerCase() === "kode_cost_center");
+
                       return (
                         <th
                           key={col}
@@ -855,7 +958,33 @@ export default function CapexAdminPreviewPage() {
                             isNum ? "text-right" : "text-left"
                           }`}
                         >
-                          {col}
+                          <div className="inline-flex items-center gap-2">
+                            <span>{col}</span>
+                            {isCostCenterCol && tableData.length > 0 && (
+                              <button
+                                type="button"
+                                onClick={handleCopyAllCostCenters}
+                                className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] normal-case font-medium transition-all cursor-pointer shadow-2xs active:scale-95 ${
+                                  copiedKode === "__ALL__"
+                                    ? "bg-emerald-100 text-emerald-800 border border-emerald-300 font-bold"
+                                    : "bg-white hover:bg-emerald-50 text-[#16823B] border border-[#D5E7DA] hover:border-emerald-300"
+                                }`}
+                                title="Salin semua kode Cost Center pada halaman ini"
+                              >
+                                {copiedKode === "__ALL__" ? (
+                                  <>
+                                    <Check className="w-3 h-3 text-emerald-700" />
+                                    <span>Tersalin Semua!</span>
+                                  </>
+                                ) : (
+                                  <>
+                                    <Copy className="w-3 h-3 text-[#16823B]" />
+                                    <span>Copy Semua</span>
+                                  </>
+                                )}
+                              </button>
+                            )}
+                          </div>
                         </th>
                       );
                     })}
