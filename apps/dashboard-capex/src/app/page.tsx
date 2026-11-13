@@ -33,6 +33,7 @@ export default function DashboardCapexPage() {
   const [selectedCapex, setSelectedCapex] = useState<CapexItem | null>(null);
 
   const [approvers, setApprovers] = useState<UserApproverItem[]>([]);
+  const [lastCreatedUpdate, setLastCreatedUpdate] = useState<string | null>(null);
 
   // ─── LOADING & ERROR STATES ─────────────────────────────────────────────────
   const [loadingFilters, setLoadingFilters] = useState(true);
@@ -54,6 +55,9 @@ export default function DashboardCapexPage() {
         setKategoris(json.data.kategoris || []);
         setCostCenters(json.data.costCenters || []);
         setStatusList(json.data.statusCapexList || []);
+        if (json.data.lastCreatedUpdate) {
+          setLastCreatedUpdate(json.data.lastCreatedUpdate);
+        }
       }
     } catch (err) {
       console.error("Gagal memuat filter opsi:", err);
@@ -249,6 +253,7 @@ export default function DashboardCapexPage() {
       <CapexDashboardHeader
         activeSection={activeSection}
         onSelectSection={handleSelectSubNav}
+        lastUpdated={lastCreatedUpdate}
       />
 
       {/* ── MAIN CONTENT ── */}

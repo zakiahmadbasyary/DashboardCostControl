@@ -93,6 +93,29 @@ export async function GET() {
       }
     });
 
+    // 6. Get latest upload timestamp for 'created' data
+    let lastCreatedUpdate: string | null = null;
+    try {
+      const latestUpload = await prisma.uploadLog.findFirst({
+        where: { category: "created" },
+        orderBy: { uploadedAt: "desc" },
+        select: { uploadedAt: true },
+      });
+      if (latestUpload?.uploadedAt) {
+        lastCreatedUpdate = latestUpload.uploadedAt.toISOString();
+      } else {
+        const latestTotal = await prisma.total.findFirst({
+          orderBy: { updatedAt: "desc" },
+          select: { updatedAt: true },
+        });
+        if (latestTotal?.updatedAt) {
+          lastCreatedUpdate = latestTotal.updatedAt.toISOString();
+        }
+      }
+    } catch (e) {
+      console.warn("Could not retrieve last created upload log:", e);
+    }
+
     return NextResponse.json({
       success: true,
       data: {
@@ -101,6 +124,7 @@ export async function GET() {
         statusCapexList,
         tahuns,
         costCenterMap,
+        lastCreatedUpdate,
       },
     });
   } catch (error: unknown) {

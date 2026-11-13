@@ -934,6 +934,20 @@ export async function POST(request: NextRequest) {
       }
     }
 
+    // 4. Catat riwayat upload ke tabel upload_log untuk tracking update data
+    try {
+      await prisma.uploadLog.create({
+        data: {
+          category,
+          fileName: file.name || `${categoryTitle}.xlsx`,
+          rowCount: importedCount,
+          uploadedAt: new Date(),
+        },
+      });
+    } catch (logErr) {
+      console.warn("Gagal mencatat upload_log:", logErr);
+    }
+
     return NextResponse.json({
       success: true,
       message: `Berhasil mengunggah ${importedCount} data ${categoryTitle}.${reconMessage}`,

@@ -21,7 +21,9 @@ import {
   Boxes,
   Gauge,
   UserCheck,
+  Calendar,
 } from "lucide-react";
+import { formatDateIndo } from "@/lib/formatters";
 
 // Icon mapping for each dashboard module
 const MODULE_ICONS: Record<string, React.ElementType> = {
@@ -42,16 +44,40 @@ export type CapexSectionTab = "capex" | "approver";
 interface CapexDashboardHeaderProps {
   activeSection?: CapexSectionTab;
   onSelectSection?: (section: CapexSectionTab) => void;
+  lastUpdated?: string | Date | null;
 }
 
 export default function CapexDashboardHeader({
   activeSection = "capex",
   onSelectSection,
+  lastUpdated,
 }: CapexDashboardHeaderProps = {}) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [internalLastUpdated, setInternalLastUpdated] = useState<string | null>(null);
   const { portalUrl, adminUrl, navItems } = getDashboardNavConfig();
+
+  // If lastUpdated is not provided via prop, fetch it as fallback
+  useEffect(() => {
+    if (lastUpdated !== undefined) return;
+    let isMounted = true;
+    fetch("/api/capex/filters")
+      .then((res) => res.json())
+      .then((json) => {
+        if (isMounted && json.success && json.data?.lastCreatedUpdate) {
+          setInternalLastUpdated(json.data.lastCreatedUpdate);
+        }
+      })
+      .catch((err) => {
+        console.warn("Gagal memuat info terakhir update data:", err);
+      });
+    return () => {
+      isMounted = false;
+    };
+  }, [lastUpdated]);
+
+  const effectiveLastUpdated = lastUpdated ?? internalLastUpdated;
 
   // Handle ESC key & lock body scroll when desktop expanded sidebar is open
   useEffect(() => {
@@ -209,6 +235,16 @@ export default function CapexDashboardHeader({
                 <span className="text-[11px] sm:text-sm text-[#5F6B63] hidden sm:block font-medium leading-tight mt-0.5">
                   Dashboard Cost Control
                 </span>
+                {effectiveLastUpdated && (
+                  <div className="flex items-center gap-1.5 text-[10px] sm:text-[11px] text-[#65736B] font-medium leading-tight mt-0.5 truncate">
+                    <Calendar className="w-3 h-3 text-[#16823B] shrink-0" />
+                    <span className="hidden sm:inline">Terakhir update:</span>
+                    <span className="sm:hidden">Update:</span>
+                    <span className="font-semibold text-[#2C3830]">
+                      {formatDateIndo(effectiveLastUpdated)}
+                    </span>
+                  </div>
+                )}
               </div>
             </a>
 

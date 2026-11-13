@@ -75,17 +75,46 @@ export function calculateUnitPrice(
 /**
  * Format tanggal Indonesia
  */
-export function formatDateIndo(dateStr: string | null | undefined): string {
+export function formatDateIndo(dateStr: string | Date | null | undefined): string {
   if (!dateStr) return "—";
   try {
-    const d = new Date(dateStr);
-    if (isNaN(d.getTime())) return dateStr;
+    const d = typeof dateStr === "string" ? new Date(dateStr) : dateStr;
+    if (isNaN(d.getTime())) return String(dateStr);
     return d.toLocaleDateString("id-ID", {
       day: "numeric",
       month: "short",
       year: "numeric",
     });
   } catch {
-    return dateStr;
+    return String(dateStr);
   }
 }
+
+/**
+ * Format tanggal dan waktu Indonesia lengkap dengan jam (WIB)
+ * Contoh: "02 Nov 2026, 15:34 WIB"
+ */
+export function formatDateTimeIndo(dateStr: string | Date | null | undefined): string {
+  if (!dateStr) return "—";
+  try {
+    const d = typeof dateStr === "string" ? new Date(dateStr) : dateStr;
+    if (isNaN(d.getTime())) return String(dateStr);
+
+    const dateFormatted = d.toLocaleDateString("id-ID", {
+      day: "numeric",
+      month: "short",
+      year: "numeric",
+    });
+
+    const timeFormatted = d.toLocaleTimeString("id-ID", {
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: false,
+    }).replace(".", ":");
+
+    return `${dateFormatted}, ${timeFormatted} WIB`;
+  } catch {
+    return String(dateStr);
+  }
+}
+

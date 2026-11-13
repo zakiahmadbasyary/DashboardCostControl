@@ -239,3 +239,19 @@ model Total {
 
   @@map("total")
 }
+
+// ─────────────────────────────────────────────
+// AUDIT & LOG
+// ─────────────────────────────────────────────
+
+/// Riwayat log aktivitas upload data per kategori
+model UploadLog {
+  id         BigInt   @id @default(autoincrement()) @map("id")
+  category   String   @map("category") // 'created', 'budget', 'po', dll
+  fileName   String?  @map("file_name")
+  rowCount   Int      @default(0) @map("row_count")
+  uploadedAt DateTime @default(now()) @map("uploaded_at")
+
+  @@index([category, uploadedAt])
+  @@map("upload_log")
+}
