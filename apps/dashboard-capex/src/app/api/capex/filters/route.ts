@@ -93,27 +93,38 @@ export async function GET() {
       }
     });
 
-    // 6. Get latest upload timestamp for 'created' data
+    // 6. Get latest upload timestamp for 'created' data (Tangguh untuk VPS & Lokal)
     let lastCreatedUpdate: string | null = null;
+
+    // Prioritas 1: Ambil dari total.updatedAt (selalu ada di DB VPS)
     try {
-      const latestUpload = await prisma.uploadLog.findFirst({
-        where: { category: "created" },
-        orderBy: { uploadedAt: "desc" },
-        select: { uploadedAt: true },
+      const latestTotal = await prisma.total.findFirst({
+        orderBy: { updatedAt: "desc" },
+        select: { updatedAt: true },
       });
-      if (latestUpload?.uploadedAt) {
-        lastCreatedUpdate = latestUpload.uploadedAt.toISOString();
-      } else {
-        const latestTotal = await prisma.total.findFirst({
-          orderBy: { updatedAt: "desc" },
-          select: { updatedAt: true },
-        });
-        if (latestTotal?.updatedAt) {
-          lastCreatedUpdate = latestTotal.updatedAt.toISOString();
-        }
+      if (latestTotal?.updatedAt) {
+        lastCreatedUpdate = latestTotal.updatedAt.toISOString();
       }
     } catch (e) {
-      console.warn("Could not retrieve last created upload log:", e);
+      console.warn("Could not retrieve timestamp from total:", e);
+    }
+
+    // Prioritas 2: Cek upload_log jika tabelnya sudah ada
+    if (!lastCreatedUpdate) {
+      try {
+        if ((prisma as any).uploadLog) {
+          const latestUpload = await (prisma as any).uploadLog.findFirst({
+            where: { category: "created" },
+            orderBy: { uploadedAt: "desc" },
+            select: { uploadedAt: true },
+          });
+          if (latestUpload?.uploadedAt) {
+            lastCreatedUpdate = latestUpload.uploadedAt.toISOString();
+          }
+        }
+      } catch {
+        // Abaikan jika tabel upload_log belum ada di DB VPS
+      }
     }
 
     return NextResponse.json({
