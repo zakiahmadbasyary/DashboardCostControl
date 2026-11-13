@@ -62,15 +62,15 @@ export default function CapexDashboardHeader({
   useEffect(() => {
     if (lastUpdated !== undefined) return;
     let isMounted = true;
-    fetch("/api/capex/filters")
+    fetch("/api/capex/last-update")
       .then((res) => res.json())
       .then((json) => {
-        if (isMounted && json.success && json.data?.lastCreatedUpdate) {
-          setInternalLastUpdated(json.data.lastCreatedUpdate);
+        if (isMounted && json.success && json.lastUpdated) {
+          setInternalLastUpdated(json.lastUpdated);
         }
       })
       .catch((err) => {
-        console.warn("Gagal memuat info terakhir update data:", err);
+        console.warn("Gagal memuat info terakhir update data created CAPEX:", err);
       });
     return () => {
       isMounted = false;

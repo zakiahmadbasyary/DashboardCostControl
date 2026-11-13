@@ -43,6 +43,19 @@ export default function DashboardCapexPage() {
   const [errorCapex, setErrorCapex] = useState<string | null>(null);
   const [errorApprovers, setErrorApprovers] = useState<string | null>(null);
 
+  // ─── 0. FETCH LAST UPDATE DATA CREATED ──────────────────────────────────────
+  const fetchLastUpdate = useCallback(async () => {
+    try {
+      const res = await fetch("/api/capex/last-update");
+      const json = await res.json();
+      if (json.success && json.lastUpdated) {
+        setLastCreatedUpdate(json.lastUpdated);
+      }
+    } catch (err) {
+      console.warn("Gagal memuat last update data created:", err);
+    }
+  }, []);
+
   // ─── 1. FETCH FILTER OPTIONS ────────────────────────────────────────────────
   const fetchFilters = useCallback(async () => {
     try {
@@ -149,10 +162,11 @@ export default function DashboardCapexPage() {
 
   // ─── LIFECYCLE ──────────────────────────────────────────────────────────────
   useEffect(() => {
+    fetchLastUpdate();
     fetchFilters();
     fetchApprovers();
     fetchAllCapex();
-  }, [fetchFilters, fetchApprovers, fetchAllCapex]);
+  }, [fetchLastUpdate, fetchFilters, fetchApprovers, fetchAllCapex]);
 
   useEffect(() => {
     fetchCapexList(appliedFilters);
