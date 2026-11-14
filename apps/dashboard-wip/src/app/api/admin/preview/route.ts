@@ -106,6 +106,7 @@ export async function GET(request: NextRequest) {
         ? {
             OR: [
               { lokasi: { contains: search, mode: "insensitive" as const } },
+              { kode: { contains: search, mode: "insensitive" as const } },
               { aktivitas: { contains: search, mode: "insensitive" as const } },
               { groupCost: { contains: search, mode: "insensitive" as const } },
               { keteranganGroupCost: { contains: search, mode: "insensitive" as const } },
@@ -127,6 +128,7 @@ export async function GET(request: NextRequest) {
       data = rawList.map((item) => ({
         idAktivitas: item.idAktivitas,
         lokasi: item.lokasi,
+        kode: item.kode || "",
         aktivitas: item.aktivitas,
         groupCost: item.groupCost,
         keteranganGroupCost: item.keteranganGroupCost || "",
@@ -137,6 +139,69 @@ export async function GET(request: NextRequest) {
         kelasBibit: item.masterSheet?.kelasBibit || "",
       }));
       total = rawCount;
+    } else if (table === "history_aktivitas" || table === "historyaktivitas") {
+      const where = search
+        ? {
+            OR: [
+              { rowLabels: { contains: search, mode: "insensitive" as const } },
+              { lokasi: { contains: search, mode: "insensitive" as const } },
+              { kodeAktifitas: { contains: search, mode: "insensitive" as const } },
+              { deskripsi: { contains: search, mode: "insensitive" as const } },
+              { actCostGroup: { contains: search, mode: "insensitive" as const } },
+            ],
+          }
+        : {};
+
+      [data, total] = await Promise.all([
+        prisma.historyAktivitas.findMany({
+          where,
+          skip,
+          take: limit,
+          orderBy: { rowLabels: "asc" },
+        }),
+        prisma.historyAktivitas.count({ where }),
+      ]);
+    } else if (table === "kelengkapan") {
+      const where = search
+        ? {
+            OR: [
+              { rowLabels: { contains: search, mode: "insensitive" as const } },
+              { kodeBahan: { contains: search, mode: "insensitive" as const } },
+              { deskripsiBahan: { contains: search, mode: "insensitive" as const } },
+              { group: { contains: search, mode: "insensitive" as const } },
+            ],
+          }
+        : {};
+
+      [data, total] = await Promise.all([
+        prisma.kelengkapan.findMany({
+          where,
+          skip,
+          take: limit,
+          orderBy: { id: "asc" },
+        }),
+        prisma.kelengkapan.count({ where }),
+      ]);
+    } else if (table === "akum_bahan" || table === "akumbahan") {
+      const where = search
+        ? {
+            OR: [
+              { lokasi: { contains: search, mode: "insensitive" as const } },
+              { kodeMaterial: { contains: search, mode: "insensitive" as const } },
+              { deskripsiMaterial: { contains: search, mode: "insensitive" as const } },
+            ],
+          }
+        : {};
+
+      [data, total] = await Promise.all([
+        prisma.akumBahan.findMany({
+          where,
+          skip,
+          take: limit,
+          orderBy: { id: "asc" },
+        }),
+        prisma.akumBahan.count({ where }),
+      ]);
     }
 
     const totalPages = Math.ceil(total / limit) || 1;

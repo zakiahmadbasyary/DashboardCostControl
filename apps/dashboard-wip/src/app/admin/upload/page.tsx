@@ -11,16 +11,22 @@ export default function AdminUploadPage() {
     "Data SBT": null,
     "Data Lokasi": null,
     "Data Aktivitas": null,
+    "History Aktivitas": null,
+    Kelengkapan: null,
+    "Akumulasi Bahan": null,
   });
 
   const [resetModalCategory, setResetModalCategory] = useState<DataSourceCategory | null>(null);
   const [resetting, setResetting] = useState<boolean>(false);
 
-  const fileInputRefs = {
+  const fileInputRefs: Record<DataSourceCategory, React.RefObject<HTMLInputElement | null>> = {
     MasterSheet: useRef<HTMLInputElement | null>(null),
     "Data SBT": useRef<HTMLInputElement | null>(null),
     "Data Lokasi": useRef<HTMLInputElement | null>(null),
     "Data Aktivitas": useRef<HTMLInputElement | null>(null),
+    "History Aktivitas": useRef<HTMLInputElement | null>(null),
+    Kelengkapan: useRef<HTMLInputElement | null>(null),
+    "Akumulasi Bahan": useRef<HTMLInputElement | null>(null),
   };
 
   const handleFileChange = async (category: DataSourceCategory, e: React.ChangeEvent<HTMLInputElement>) => {
@@ -49,6 +55,9 @@ export default function AdminUploadPage() {
     if (category === "Data SBT") categoryKey = "sbt";
     if (category === "Data Lokasi") categoryKey = "lokasi";
     if (category === "Data Aktivitas") categoryKey = "aktivitas";
+    if (category === "History Aktivitas") categoryKey = "history_aktivitas";
+    if (category === "Kelengkapan") categoryKey = "kelengkapan";
+    if (category === "Akumulasi Bahan") categoryKey = "akum_bahan";
 
     window.open(`/api/admin/template?category=${categoryKey}`, "_blank");
   };
@@ -117,6 +126,24 @@ export default function AdminUploadPage() {
       desc: "Upload rincian pekerjaan aktivitas lapangan dan biaya operasional.",
       sampleFile: "DataAktivitas.xlsx",
     },
+    {
+      title: "History Aktivitas",
+      step: 5,
+      desc: "Upload jurnal transaksi harian aktivitas per tanggal realisasi dan lokasi.",
+      sampleFile: "historyAktivitas.xlsx",
+    },
+    {
+      title: "Kelengkapan",
+      step: 6,
+      desc: "Upload rincian alokasi sumber daya (tenaga kerja, bahan, dan alat) per transaksi.",
+      sampleFile: "kelengkapan.xlsx",
+    },
+    {
+      title: "Akumulasi Bahan",
+      step: 7,
+      desc: "Upload akumulasi pemakaian material dan bahan per blok lokasi.",
+      sampleFile: "akumBahan.xlsx",
+    },
   ];
 
   return (
@@ -125,7 +152,7 @@ export default function AdminUploadPage() {
       <div>
         <h1 className="text-xl font-extrabold text-[#17231B]">Upload Data Sumber Excel</h1>
         <p className="text-xs text-[#5F6B63] mt-1">
-          Unggah file Excel 4 Data Source (MasterSheet, SBT, Lokasi, dan Aktivitas) untuk memperbarui database PostgreSQL.
+          Unggah file Excel 7 Data Source (MasterSheet, SBT, Lokasi, Aktivitas, History, Kelengkapan, dan Akumulasi Bahan) untuk memperbarui database PostgreSQL.
         </p>
       </div>
 
@@ -135,7 +162,7 @@ export default function AdminUploadPage() {
         <div className="space-y-1">
           <p className="font-bold text-[#16823B]">Urutan Unggah File yang Direkomendasikan:</p>
           <p className="text-[#5F6B63]">
-            1. <strong>MasterSheet</strong> (Master Lokasi) &rarr; 2. <strong>Data SBT</strong> (Acuan SBT) &rarr; 3. <strong>Data Lokasi</strong> &rarr; 4. <strong>Data Aktivitas</strong>.
+            1. <strong>MasterSheet</strong> (Master Lokasi) &rarr; 2. <strong>Data SBT</strong> (Acuan SBT) &rarr; 3. <strong>Data Lokasi</strong> &rarr; 4. <strong>Data Aktivitas</strong> &rarr; 5. <strong>History Aktivitas</strong> &rarr; 6. <strong>Kelengkapan</strong> &rarr; 7. <strong>Akumulasi Bahan</strong>.
           </p>
           <p className="text-[11px] text-[#5F6B63]">
             * Anda dapat mengunduh <strong>Template Excel</strong> pada setiap kartu di bawah. Riwayat tersimpan maks 3 file terbaru, dan tersedia tombol <strong>Reset Data Tabel</strong> jika ingin mengosongkan tabel.
@@ -143,8 +170,8 @@ export default function AdminUploadPage() {
         </div>
       </div>
 
-      {/* Grid of 4 Upload Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+      {/* Grid of 7 Upload Cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
         {uploadCards.map((card) => {
           const currentProgress = progressState[card.title];
           const isUploading = currentProgress?.status === "uploading" || currentProgress?.status === "validating";

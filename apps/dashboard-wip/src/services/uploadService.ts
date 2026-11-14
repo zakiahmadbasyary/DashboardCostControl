@@ -1,6 +1,13 @@
 import { UploadProgress } from "@/types/sourceData";
 
-export type DataSourceCategory = "MasterSheet" | "Data SBT" | "Data Lokasi" | "Data Aktivitas";
+export type DataSourceCategory =
+  | "MasterSheet"
+  | "Data SBT"
+  | "Data Lokasi"
+  | "Data Aktivitas"
+  | "History Aktivitas"
+  | "Kelengkapan"
+  | "Akumulasi Bahan";
 
 export const uploadService = {
   async uploadSourceFile(
@@ -15,6 +22,9 @@ export const uploadService = {
     if (category === "Data SBT") categoryKey = "sbt";
     if (category === "Data Lokasi") categoryKey = "lokasi";
     if (category === "Data Aktivitas") categoryKey = "aktivitas";
+    if (category === "History Aktivitas") categoryKey = "history_aktivitas";
+    if (category === "Kelengkapan") categoryKey = "kelengkapan";
+    if (category === "Akumulasi Bahan") categoryKey = "akum_bahan";
 
     // Phase 1: Uploading
     onProgress({
@@ -90,6 +100,9 @@ export const uploadService = {
     if (category === "Data SBT") categoryKey = "sbt";
     if (category === "Data Lokasi") categoryKey = "lokasi";
     if (category === "Data Aktivitas") categoryKey = "aktivitas";
+    if (category === "History Aktivitas") categoryKey = "history_aktivitas";
+    if (category === "Kelengkapan") categoryKey = "kelengkapan";
+    if (category === "Akumulasi Bahan") categoryKey = "akum_bahan";
 
     try {
       const res = await fetch("/api/admin/reset", {

@@ -26,6 +26,18 @@ export async function POST(request: NextRequest) {
       categoryTitle = "Data Aktivitas";
       const res = await prisma.aktivitas.deleteMany();
       deletedCount = res.count;
+    } else if (category === "history_aktivitas" || category === "historyaktivitas") {
+      categoryTitle = "History Aktivitas";
+      const res = await prisma.historyAktivitas.deleteMany();
+      deletedCount = res.count;
+    } else if (category === "kelengkapan") {
+      categoryTitle = "Kelengkapan";
+      const res = await prisma.kelengkapan.deleteMany();
+      deletedCount = res.count;
+    } else if (category === "akum_bahan" || category === "akumbahan") {
+      categoryTitle = "Akumulasi Bahan";
+      const res = await prisma.akumBahan.deleteMany();
+      deletedCount = res.count;
     } else {
       return NextResponse.json(
         { success: false, message: `Kategori '${category}' tidak valid.` },

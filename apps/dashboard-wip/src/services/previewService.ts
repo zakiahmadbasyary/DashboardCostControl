@@ -1,3 +1,12 @@
+export type PreviewTableType =
+  | "mastersheet"
+  | "lokasi"
+  | "sbt"
+  | "aktivitas"
+  | "history_aktivitas"
+  | "kelengkapan"
+  | "akum_bahan";
+
 export interface PreviewResponse<T = Record<string, unknown>> {
   data: T[];
   total: number;
@@ -8,7 +17,7 @@ export interface PreviewResponse<T = Record<string, unknown>> {
 
 export const previewService = {
   async getTableData<T = Record<string, unknown>>(
-    table: "mastersheet" | "lokasi" | "sbt" | "aktivitas",
+    table: PreviewTableType,
     search = "",
     page = 1,
     limit = 50

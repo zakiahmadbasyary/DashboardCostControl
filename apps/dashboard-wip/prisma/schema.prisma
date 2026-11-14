@@ -22,6 +22,7 @@ model MasterSheet {
 
   lokasiDetails Lokasi[]
   aktivitasList Aktivitas[]
+  akumBahanList AkumBahan[]
 
   @@map("mastersheet")
 }
@@ -65,6 +66,7 @@ model Lokasi {
 model Aktivitas {
   idAktivitas         Int         @id @default(autoincrement()) @map("id_aktivitas")
   lokasi              String      @map("lokasi")
+  kode                String?     @map("kode")
   aktivitas           String      @map("aktivitas")
   groupCost           String      @map("group_cost")
   keteranganGroupCost String?     @map("keterangan_group_cost")
@@ -74,5 +76,62 @@ model Aktivitas {
 
   masterSheet MasterSheet @relation(fields: [lokasi], references: [lokasi], onDelete: Cascade)
 
+  @@index([lokasi, kode, groupCost])
   @@map("aktivitas")
+}
+
+model HistoryAktivitas {
+  rowLabels        String      @id @map("row_labels")
+  tanggalRealisasi Int         @map("tanggal_realisasi")
+  lokasi           String      @map("lokasi")
+  kodeAktifitas    String      @map("kode_aktifitas")
+  deskripsi        String      @map("deskripsi")
+  actCostGroup     String      @map("act_cost_group")
+  satuanHasil      String?     @map("satuan_hasil")
+  costCharge       Float       @default(0) @map("cost_charge")
+  hasilCharge      Float       @default(0) @map("hasil_charge")
+  costMaterial     Float       @default(0) @map("cost_material")
+  hasilMaterial    Float       @default(0) @map("hasil_material")
+  costUpah         Float       @default(0) @map("cost_upah")
+  hasilUpah        Float       @default(0) @map("hasil_upah")
+  costTotal        Float       @default(0) @map("cost_total")
+  hasilTotal       Float       @default(0) @map("hasil_total")
+  createdAt        DateTime    @default(now()) @map("created_at")
+  updatedAt        DateTime    @updatedAt @map("updated_at")
+
+  @@index([lokasi, kodeAktifitas, actCostGroup])
+  @@index([lokasi])
+  @@map("history_aktivitas")
+}
+
+model Kelengkapan {
+  id             Int         @id @default(autoincrement()) @map("id")
+  rowLabels      String      @map("row_labels")
+  group          String      @default("") @map("group")
+  kodeBahan      String      @map("kode_bahan")
+  deskripsiBahan String?     @map("deskripsi_bahan")
+  satuanHasil    String?     @map("satuan_hasil")
+  sumHasil       Float       @default(0) @map("sum_hasil")
+  sumResource    Float       @default(0) @map("sum_resource")
+  sumBiaya       Float       @default(0) @map("sum_biaya")
+  createdAt      DateTime    @default(now()) @map("created_at")
+  updatedAt      DateTime    @updatedAt @map("updated_at")
+
+  @@index([rowLabels])
+  @@map("kelengkapan")
+}
+
+model AkumBahan {
+  id                Int         @id @default(autoincrement()) @map("id")
+  lokasi            String      @map("lokasi")
+  kodeMaterial      String      @map("kode_material")
+  deskripsiMaterial String      @map("deskripsi_material")
+  quantity          Float       @default(0) @map("quantity")
+  createdAt         DateTime    @default(now()) @map("created_at")
+  updatedAt         DateTime    @updatedAt @map("updated_at")
+
+  masterSheet MasterSheet @relation(fields: [lokasi], references: [lokasi], onDelete: Cascade)
+
+  @@index([lokasi])
+  @@map("akum_bahan")
 }

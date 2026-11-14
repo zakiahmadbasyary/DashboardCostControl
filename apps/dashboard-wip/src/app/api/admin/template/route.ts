@@ -15,6 +15,12 @@ export async function GET(request: NextRequest) {
       fileName = "DataLokasi.xlsx";
     } else if (category === "aktivitas") {
       fileName = "DataAktivitas.xlsx";
+    } else if (category === "history_aktivitas" || category === "historyaktivitas") {
+      fileName = "historyAktivitas.xlsx";
+    } else if (category === "kelengkapan") {
+      fileName = "kelengkapan.xlsx";
+    } else if (category === "akum_bahan" || category === "akumbahan") {
+      fileName = "akumBahan.xlsx";
     } else {
       return NextResponse.json({ success: false, message: `Kategori '${category}' tidak dikenal.` }, { status: 400 });
     }

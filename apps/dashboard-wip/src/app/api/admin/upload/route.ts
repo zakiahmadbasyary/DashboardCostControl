@@ -327,9 +327,11 @@ export async function POST(request: NextRequest) {
 
           const groupCostCode = String(getVal(row, ["group_cost", "GroupCost", "Group", "group cost"]) || "").trim();
           const ketGroupCost = String(getVal(row, ["keterangan_group_cost", "Keterangan Group Cost", "Keterangan_Group_Cost"]) || "").trim();
+          const kode = String(getVal(row, ["kode", "Kode", "Kode Aktifitas", "kode_aktifitas", "Kode Aktivitas", "kode aktivitas"]) || "").trim();
 
           return {
             lokasi: lokasiCode,
+            kode: kode || undefined,
             aktivitas,
             groupCost: groupCostCode || ketGroupCost || "General",
             keteranganGroupCost: ketGroupCost || undefined,
@@ -352,6 +354,180 @@ export async function POST(request: NextRequest) {
           for (let i = 0; i < parsedRows.length; i += chunkSize) {
             const chunk = parsedRows.slice(i, i + chunkSize);
             await tx.aktivitas.createMany({
+              data: chunk,
+            });
+          }
+        },
+        { maxWait: 15000, timeout: 60000 }
+      );
+
+      importedCount = parsedRows.length;
+    } else if (category === "history_aktivitas" || category === "historyaktivitas") {
+      categoryTitle = "History Aktivitas";
+
+      const parsedRows = rawRows
+        .map((row) => {
+          const rowLabels = String(getVal(row, ["Row Labels", "row_labels", "row labels", "RowLabels", "Row Label"]) || "").trim();
+          if (!rowLabels) return null;
+
+          const lokasi = String(getVal(row, ["lokasi", "Lokasi"]) || "").trim();
+          const kodeAktifitas = String(getVal(row, ["Kode Aktifitas", "kode_aktifitas", "Kode Aktivitas", "kode aktivitas", "Kode", "kode"]) || "").trim();
+          const deskripsi = String(getVal(row, ["Deskripsi", "deskripsi", "Aktivitas", "aktivitas"]) || "").trim();
+          const actCostGroup = String(getVal(row, ["Act Cost Group", "act_cost_group", "Act Cost group", "Group Cost", "group_cost", "Group", "group"]) || "").trim();
+
+          const tanggalRaw = getVal(row, ["Tanggal Realisasi", "tanggal_realisasi", "Tanggal", "tanggal"]);
+          let tanggalRealisasi = 0;
+          if (typeof tanggalRaw === "number") {
+            tanggalRealisasi = Math.floor(tanggalRaw);
+          } else if (tanggalRaw) {
+            const parsedNum = Number(tanggalRaw);
+            if (!isNaN(parsedNum)) {
+              tanggalRealisasi = Math.floor(parsedNum);
+            } else {
+              const d = new Date(String(tanggalRaw));
+              if (!isNaN(d.getTime())) {
+                tanggalRealisasi = Math.floor(d.getTime() / 86400000) + 25569;
+              }
+            }
+          }
+
+          return {
+            rowLabels,
+            tanggalRealisasi,
+            lokasi,
+            kodeAktifitas,
+            deskripsi,
+            actCostGroup,
+            satuanHasil: String(getVal(row, ["Satuan Hasil", "satuan_hasil", "UoM", "uom"]) || "").trim() || null,
+            costCharge: Number(getVal(row, ["Cost Charge", "cost_charge", "Cost charge"])) || 0,
+            hasilCharge: Number(getVal(row, ["Hasil Charge", "hasil_charge", "Hasil charge"])) || 0,
+            costMaterial: Number(getVal(row, ["Cost Material", "cost_material", "Cost material"])) || 0,
+            hasilMaterial: Number(getVal(row, ["Hasil Material", "hasil_material", "Hasil material"])) || 0,
+            costUpah: Number(getVal(row, ["Cost Upah", "cost_upah", "Cost upah"])) || 0,
+            hasilUpah: Number(getVal(row, ["Hasil Upah", "hasil_upah", "Hasil upah"])) || 0,
+            costTotal: Number(getVal(row, ["Cost Total", "cost_total", "Total Cost", "total_cost", "Biaya", "biaya"])) || 0,
+            hasilTotal: Number(getVal(row, ["Hasil Total", "hasil_total", "Total Hasil", "total_hasil"])) || 0,
+          };
+        })
+        .filter((item): item is NonNullable<typeof item> => item !== null);
+
+      if (parsedRows.length === 0) {
+        return NextResponse.json(
+          { success: false, message: "Kolom wajib 'Row Labels' tidak ditemukan atau semua data kosong." },
+          { status: 400 }
+        );
+      }
+
+      // Deduplicate by rowLabels
+      const uniqueMap = new Map<string, typeof parsedRows[0]>();
+      parsedRows.forEach((r) => uniqueMap.set(r.rowLabels, r));
+      const uniqueHistory = Array.from(uniqueMap.values());
+
+      await prisma.$transaction(
+        async (tx) => {
+          await tx.historyAktivitas.deleteMany();
+          const chunkSize = 1000;
+          for (let i = 0; i < uniqueHistory.length; i += chunkSize) {
+            const chunk = uniqueHistory.slice(i, i + chunkSize);
+            await tx.historyAktivitas.createMany({
+              data: chunk,
+            });
+          }
+        },
+        { maxWait: 15000, timeout: 60000 }
+      );
+
+      importedCount = uniqueHistory.length;
+    } else if (category === "kelengkapan") {
+      categoryTitle = "Kelengkapan";
+
+      const parsedRows = rawRows
+        .map((row) => {
+          const rowLabels = String(getVal(row, ["Row Labels", "row_labels", "row labels", "RowLabels", "Row Label"]) || "").trim();
+          const kodeBahan = String(getVal(row, ["Kode Bahan/Alat/Lainlain", "kode_bahan", "Kode Bahan", "Kode Material", "kode_material", "Kode", "kode"]) || "").trim();
+          if (!rowLabels || !kodeBahan) return null;
+
+          return {
+            rowLabels,
+            group: String(getVal(row, ["Group", "group", "Group Cost", "group_cost"]) || "").trim(),
+            kodeBahan,
+            deskripsiBahan: String(getVal(row, ["Deskripsi Bahan/Alat/Lainlain", "deskripsi_bahan", "Deskripsi Bahan", "Deskripsi Material", "deskripsi_material", "Deskripsi"]) || "").trim() || null,
+            satuanHasil: String(getVal(row, ["Satuan Hasil", "satuan_hasil", "UoM", "uom"]) || "").trim() || null,
+            sumHasil: Number(getVal(row, ["Sum of Hasil", "sum_hasil", "Hasil", "hasil"])) || 0,
+            sumResource: Number(getVal(row, ["Sum of Resource Bahan/Alat", "sum_resource", "Resource", "resource", "Quantity", "quantity"])) || 0,
+            sumBiaya: Number(getVal(row, ["Sum of Total Realisasi Biaya", "sum_biaya", "Total Realisasi Biaya", "biaya", "Biaya", "Cost", "cost"])) || 0,
+          };
+        })
+        .filter((item): item is NonNullable<typeof item> => item !== null);
+
+      if (parsedRows.length === 0) {
+        return NextResponse.json(
+          { success: false, message: "Kolom wajib 'Row Labels' dan 'Kode Bahan/Alat/Lainlain' tidak ditemukan atau data kosong." },
+          { status: 400 }
+        );
+      }
+
+      await prisma.$transaction(
+        async (tx) => {
+          await tx.kelengkapan.deleteMany();
+          const chunkSize = 1000;
+          for (let i = 0; i < parsedRows.length; i += chunkSize) {
+            const chunk = parsedRows.slice(i, i + chunkSize);
+            await tx.kelengkapan.createMany({
+              data: chunk,
+            });
+          }
+        },
+        { maxWait: 15000, timeout: 60000 }
+      );
+
+      importedCount = parsedRows.length;
+    } else if (category === "akum_bahan" || category === "akumbahan") {
+      categoryTitle = "Akumulasi Bahan";
+
+      const masterSheets = await prisma.masterSheet.findMany({
+        select: { lokasi: true },
+      });
+
+      if (masterSheets.length === 0) {
+        return NextResponse.json(
+          { success: false, message: "Data MasterSheet belum tersedia di database. Silakan unggah MasterSheet terlebih dahulu (Langkah 1)." },
+          { status: 400 }
+        );
+      }
+
+      const msSet = new Set(masterSheets.map((m) => m.lokasi));
+
+      const parsedRows = rawRows
+        .map((row) => {
+          const lokasiCode = String(getVal(row, ["lokasi", "Lokasi"]) || "").trim();
+          const kodeMaterial = String(getVal(row, ["Kode Material", "kode_material", "Kode Bahan", "kode_bahan", "Kode", "kode"]) || "").trim();
+          if (!lokasiCode || !kodeMaterial) return null;
+          if (!msSet.has(lokasiCode)) return null; // Skip if location is not in MasterSheet
+
+          return {
+            lokasi: lokasiCode,
+            kodeMaterial,
+            deskripsiMaterial: String(getVal(row, ["Deskripsi Material", "deskripsi_material", "Deskripsi Bahan", "deskripsi_bahan", "Deskripsi", "deskripsi"]) || "").trim(),
+            quantity: Number(getVal(row, ["Quantity", "quantity", "Qty", "qty", "Jumlah", "jumlah"])) || 0,
+          };
+        })
+        .filter((item): item is NonNullable<typeof item> => item !== null);
+
+      if (parsedRows.length === 0) {
+        return NextResponse.json(
+          { success: false, message: "Semua baris akumulasi bahan tidak mencocokkan MasterSheet atau data kosong." },
+          { status: 400 }
+        );
+      }
+
+      await prisma.$transaction(
+        async (tx) => {
+          await tx.akumBahan.deleteMany();
+          const chunkSize = 1000;
+          for (let i = 0; i < parsedRows.length; i += chunkSize) {
+            const chunk = parsedRows.slice(i, i + chunkSize);
+            await tx.akumBahan.createMany({
               data: chunk,
             });
           }
