@@ -17,6 +17,13 @@ export async function GET(request: NextRequest) {
     const cleanLokasi = rawLokasi ? rawLokasi.replace("LOC-", "").slice(0, 50) : undefined;
     const gcVariants = groupCost && groupCost !== "all" ? getGroupCostVariants(groupCost) : [];
 
+    // Ambil daftar kode aktivitas yang sedang disembunyikan (isActive = true)
+    const activeExcludes = await prisma.excludedActivity.findMany({
+      where: { isActive: true },
+      select: { kodeAktivitas: true },
+    });
+    const excludedCodes = activeExcludes.map((e) => e.kodeAktivitas);
+
     const actMatches = await prisma.aktivitas.findMany({
       where: {
         ...(gcVariants.length > 0
@@ -29,6 +36,9 @@ export async function GET(request: NextRequest) {
           : {}),
         ...(cleanLokasi && cleanLokasi !== "all"
           ? { lokasi: cleanLokasi }
+          : {}),
+        ...(excludedCodes.length > 0
+          ? { kode: { notIn: excludedCodes } }
           : {}),
       },
       include: {

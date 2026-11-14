@@ -41,6 +41,19 @@ export async function GET(request: NextRequest) {
       }));
     }
 
+    // Ambil daftar kode aktivitas yang sedang disembunyikan (isActive = true)
+    const activeExcludes = await prisma.excludedActivity.findMany({
+      where: { isActive: true },
+      select: { kodeAktivitas: true },
+    });
+    const excludedCodes = activeExcludes.map((e) => e.kodeAktivitas);
+
+    if (excludedCodes.length > 0) {
+      where.kodeAktifitas = {
+        notIn: excludedCodes,
+      };
+    }
+
     const historyItems = await prisma.historyAktivitas.findMany({
       where,
       orderBy: {

@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { UploadCloud, Eye, LogOut, LayoutDashboard, Menu, X, Shield } from "lucide-react";
+import { UploadCloud, Eye, LogOut, LayoutDashboard, Menu, X, Shield, Ban } from "lucide-react";
 
 export default function AdminSidebar() {
   const pathname = usePathname();
@@ -25,6 +25,7 @@ export default function AdminSidebar() {
   const navItems = [
     { label: "Upload Data Excel", href: "/admin/upload", icon: UploadCloud },
     { label: "Preview Data", href: "/admin/preview", icon: Eye },
+    { label: "Blacklist Aktivitas", href: "/admin/blacklist", icon: Ban },
   ];
 
   const sidebarContent = (
