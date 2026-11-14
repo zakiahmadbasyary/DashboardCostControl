@@ -55,6 +55,23 @@ export function getZnDetail(gcName: string | null | undefined): { znCode: string
     return { znCode: codeKey, description: desc };
   }
 
+  // 1. Exact match check against ZN_NAME_MAP
+  if (ZN_NAME_MAP[lower] !== undefined) {
+    const num = ZN_NAME_MAP[lower];
+    const codeKey = `ZN${num < 10 ? '0' + num : num}`;
+    return { znCode: codeKey, description: ZN_CODE_TO_NAME[codeKey] || raw };
+  }
+
+  // 2. Match longer keys first to prevent shorter substrings (like "road and drainage") from matching prematurely
+  const sortedKeys = Object.keys(ZN_NAME_MAP).sort((a, b) => b.length - a.length);
+  for (const name of sortedKeys) {
+    if (lower.includes(name)) {
+      const num = ZN_NAME_MAP[name];
+      const codeKey = `ZN${num < 10 ? '0' + num : num}`;
+      return { znCode: codeKey, description: ZN_CODE_TO_NAME[codeKey] || raw };
+    }
+  }
+
   for (const [codeKey, desc] of Object.entries(ZN_CODE_TO_NAME)) {
     if (lower === desc.toLowerCase() || lower.includes(desc.toLowerCase())) {
       return { znCode: codeKey, description: desc };

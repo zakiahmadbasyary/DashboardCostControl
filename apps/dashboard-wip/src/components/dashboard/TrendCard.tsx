@@ -110,7 +110,7 @@ const CustomTooltip = ({ active, payload, label, onSelectUmur }: CustomTooltipPr
 };
 
 export default function TrendCard({ data, loading, onSelectUmur }: TrendCardProps) {
-  const [activeTab, setActiveTab] = useState<"all" | "chart" | "table">("all");
+  const [activeTab, setActiveTab] = useState<"all" | "chart" | "table">("chart");
 
   // Transpose data to region -> ages 0..21
   const regionRows = REGIONS.map((region) => {

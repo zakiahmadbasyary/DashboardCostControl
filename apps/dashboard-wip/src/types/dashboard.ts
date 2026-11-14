@@ -53,3 +53,41 @@ export interface ActivityData {
   status?: string;
   wilayah?: string;
 }
+
+export interface HistoryActivityData {
+  rowLabels: string;
+  tanggalRealisasi: number;
+  lokasi: string;
+  kodeAktifitas: string;
+  deskripsi: string;
+  actCostGroup: string;
+  satuanHasil?: string | null;
+  costCharge: number;
+  hasilCharge: number;
+  costMaterial: number;
+  hasilMaterial: number;
+  costUpah: number;
+  hasilUpah: number;
+  costTotal: number;
+  hasilTotal: number;
+}
+
+export interface KelengkapanData {
+  id: number;
+  rowLabels: string;
+  group: string;
+  kodeBahan: string;
+  deskripsiBahan?: string | null;
+  satuanHasil?: string | null;
+  sumHasil: number;
+  sumResource: number;
+  sumBiaya: number;
+}
+
+export interface AkumBahanData {
+  id: number;
+  lokasi: string;
+  kodeMaterial: string;
+  deskripsiMaterial: string;
+  quantity: number;
+}

@@ -5,6 +5,9 @@ import {
   LocationData,
   GroupCostData,
   ActivityData,
+  HistoryActivityData,
+  KelengkapanData,
+  AkumBahanData,
 } from "@/types/dashboard";
 
 export const dashboardService = {
@@ -115,6 +118,76 @@ export const dashboardService = {
       }
     } catch (error) {
       console.error("API call /api/dashboard/activities failed:", error);
+    }
+
+    return [];
+  },
+
+  async getHistoryActivities(lokasi: string, groupCost?: string): Promise<HistoryActivityData[]> {
+    try {
+      if (!lokasi) return [];
+
+      const params = new URLSearchParams({ lokasi });
+      if (groupCost && groupCost !== "all" && groupCost !== "Semua") {
+        params.set("groupCost", groupCost);
+      }
+
+      const res = await fetch(`/api/dashboard/history-activities?${params.toString()}`, {
+        cache: "no-store",
+      });
+
+      if (res.ok) {
+        const json = await res.json();
+        if (json.success && Array.isArray(json.data)) {
+          return json.data;
+        }
+      }
+    } catch (error) {
+      console.error("API call /api/dashboard/history-activities failed:", error);
+    }
+
+    return [];
+  },
+
+  async getKelengkapan(rowLabels: string): Promise<KelengkapanData[]> {
+    try {
+      if (!rowLabels) return [];
+
+      const params = new URLSearchParams({ rowLabels });
+      const res = await fetch(`/api/dashboard/kelengkapan?${params.toString()}`, {
+        cache: "no-store",
+      });
+
+      if (res.ok) {
+        const json = await res.json();
+        if (json.success && Array.isArray(json.data)) {
+          return json.data;
+        }
+      }
+    } catch (error) {
+      console.error("API call /api/dashboard/kelengkapan failed:", error);
+    }
+
+    return [];
+  },
+
+  async getAkumBahan(lokasi: string): Promise<AkumBahanData[]> {
+    try {
+      if (!lokasi) return [];
+
+      const params = new URLSearchParams({ lokasi });
+      const res = await fetch(`/api/dashboard/akum-bahan?${params.toString()}`, {
+        cache: "no-store",
+      });
+
+      if (res.ok) {
+        const json = await res.json();
+        if (json.success && Array.isArray(json.data)) {
+          return json.data;
+        }
+      }
+    } catch (error) {
+      console.error("API call /api/dashboard/akum-bahan failed:", error);
     }
 
     return [];

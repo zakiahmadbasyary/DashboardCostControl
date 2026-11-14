@@ -8,6 +8,8 @@ import LocationAnalysis from "@/components/dashboard/LocationAnalysis";
 import LocationDetailCard from "@/components/dashboard/LocationDetailCard";
 import GroupCostTable from "@/components/dashboard/GroupCostTable";
 import ActivityTable from "@/components/dashboard/ActivityTable";
+import ActivityDetailCard from "@/components/dashboard/ActivityDetailCard";
+import AkumBahanCard from "@/components/dashboard/AkumBahanCard";
 
 import {
   DashboardFilter,
@@ -16,6 +18,9 @@ import {
   LocationData,
   GroupCostData,
   ActivityData,
+  HistoryActivityData,
+  KelengkapanData,
+  AkumBahanData,
 } from "@/types/dashboard";
 import { dashboardService } from "@/services/dashboardService";
 
@@ -43,6 +48,17 @@ export default function PublicDashboardPage() {
   const [selectedGroupCost, setSelectedGroupCost] = useState<GroupCostData | null>(null);
 
   const [activities, setActivities] = useState<ActivityData[]>([]);
+
+  // History Aktivitas, Kelengkapan, & Akumulasi Bahan states
+  const [historyActivities, setHistoryActivities] = useState<HistoryActivityData[]>([]);
+  const [selectedHistory, setSelectedHistory] = useState<HistoryActivityData | null>(null);
+  const [loadingHistory, setLoadingHistory] = useState<boolean>(false);
+
+  const [kelengkapan, setKelengkapan] = useState<KelengkapanData[]>([]);
+  const [loadingKelengkapan, setLoadingKelengkapan] = useState<boolean>(false);
+
+  const [akumBahan, setAkumBahan] = useState<AkumBahanData[]>([]);
+  const [loadingAkumBahan, setLoadingAkumBahan] = useState<boolean>(false);
 
   // Loading states
   const [loadingTrend, setLoadingTrend] = useState<boolean>(true);
@@ -76,35 +92,98 @@ export default function PublicDashboardPage() {
     });
   }, []);
 
-  // Handle Location selection -> Fetch Group Costs
+  // Ref to track selectedLocation without triggering fetchDashboardData re-runs
+  const selectedLocationRef = useRef<LocationData | null>(selectedLocation);
+  useEffect(() => {
+    selectedLocationRef.current = selectedLocation;
+  }, [selectedLocation]);
+
+  // Handle History Aktivitas selection -> Fetch Kelengkapan
+  const handleSelectHistory = useCallback(async (item: HistoryActivityData) => {
+    setSelectedHistory(item);
+    setLoadingKelengkapan(true);
+    try {
+      const kelRes = await dashboardService.getKelengkapan(item.rowLabels);
+      setKelengkapan(kelRes);
+    } catch (err) {
+      console.error("Error fetching kelengkapan:", err);
+      setKelengkapan([]);
+    } finally {
+      setLoadingKelengkapan(false);
+    }
+  }, []);
+
+  // Handle Group Cost selection -> Fetch Activities & History Aktivitas
+  const handleSelectGroupCost = useCallback(
+    async (gc: GroupCostData, overrideLocCode?: string) => {
+      setSelectedGroupCost(gc);
+      setLoadingActivities(true);
+      setLoadingHistory(true);
+      setSelectedHistory(null);
+      setKelengkapan([]);
+
+      const locCode = overrideLocCode || selectedLocationRef.current?.lokasi || selectedLocationRef.current?.idLokasi || "";
+
+      try {
+        const [actRes, histRes] = await Promise.all([
+          dashboardService.getActivities(gc.groupCost, locCode),
+          dashboardService.getHistoryActivities(locCode, gc.groupCost),
+        ]);
+        setActivities(actRes);
+        setHistoryActivities(histRes);
+
+        // Otomatis pilih item history pertama jika data tersedia
+        if (histRes && histRes.length > 0) {
+          handleSelectHistory(histRes[0]);
+        }
+      } catch (err) {
+        console.error("Error fetching activities / history:", err);
+      } finally {
+        setLoadingActivities(false);
+        setLoadingHistory(false);
+      }
+    },
+    [handleSelectHistory]
+  );
+
+  // Handle Location selection -> Fetch Group Costs & Akumulasi Bahan
   const handleSelectLocation = useCallback(
     async (loc: LocationData, shouldScroll: boolean = false) => {
       setSelectedLocation(loc);
+      selectedLocationRef.current = loc;
       setSelectedGroupCost(null);
       setActivities([]);
+      setHistoryActivities([]);
+      setSelectedHistory(null);
+      setKelengkapan([]);
       setLoadingGroupCosts(true);
+      setLoadingAkumBahan(true);
 
       if (shouldScroll) {
         setPendingScrollTarget("detail");
       }
 
       try {
-        const gcRes = await dashboardService.getGroupCosts(loc.lokasi);
+        const [gcRes, akumRes] = await Promise.all([
+          dashboardService.getGroupCosts(loc.lokasi),
+          dashboardService.getAkumBahan(loc.lokasi),
+        ]);
         setGroupCosts(gcRes);
+        setAkumBahan(akumRes);
+
+        // Otomatis pilih group cost pertama jika data tersedia
+        if (gcRes && gcRes.length > 0) {
+          handleSelectGroupCost(gcRes[0], loc.lokasi);
+        }
       } catch (err) {
-        console.error("Error fetching group costs:", err);
+        console.error("Error fetching group costs / akum bahan:", err);
       } finally {
         setLoadingGroupCosts(false);
+        setLoadingAkumBahan(false);
       }
     },
-    []
+    [handleSelectGroupCost]
   );
-
-  // Ref to track selectedLocation without triggering fetchDashboardData re-runs
-  const selectedLocationRef = useRef<LocationData | null>(selectedLocation);
-  useEffect(() => {
-    selectedLocationRef.current = selectedLocation;
-  }, [selectedLocation]);
 
   const fetchDashboardData = useCallback(async () => {
     setLoadingTrend(true);
@@ -126,6 +205,10 @@ export default function PublicDashboardPage() {
         setGroupCosts([]);
         setSelectedGroupCost(null);
         setActivities([]);
+        setHistoryActivities([]);
+        setSelectedHistory(null);
+        setKelengkapan([]);
+        setAkumBahan([]);
       } else if (!currentSelected && locRes.length > 0) {
         handleSelectLocation(locRes[0], false);
       }
@@ -148,24 +231,6 @@ export default function PublicDashboardPage() {
       isMounted = false;
     };
   }, [fetchDashboardData]);
-
-  // Handle Group Cost selection -> Fetch Activities
-  const handleSelectGroupCost = async (gc: GroupCostData) => {
-    setSelectedGroupCost(gc);
-    setLoadingActivities(true);
-
-    try {
-      const actRes = await dashboardService.getActivities(
-        gc.groupCost,
-        selectedLocation?.lokasi || selectedLocation?.idLokasi
-      );
-      setActivities(actRes);
-    } catch (err) {
-      console.error("Error fetching activities:", err);
-    } finally {
-      setLoadingActivities(false);
-    }
-  };
 
   // Handle Global Filters application
   const handleApplyGlobalFilters = (newFilters: DashboardFilter) => {
@@ -284,6 +349,29 @@ export default function PublicDashboardPage() {
             selectedLocation={selectedLocation}
             activities={activities}
             loading={loadingActivities}
+          />
+        </section>
+
+        {/* Section Detail Aktivitas (History Aktivitas & Kelengkapan) */}
+        <section className="relative z-0 isolate">
+          <ActivityDetailCard
+            selectedLocation={selectedLocation}
+            selectedGroupCost={selectedGroupCost}
+            historyActivities={historyActivities}
+            loadingHistory={loadingHistory}
+            selectedHistory={selectedHistory}
+            onSelectHistory={handleSelectHistory}
+            kelengkapan={kelengkapan}
+            loadingKelengkapan={loadingKelengkapan}
+          />
+        </section>
+
+        {/* Section Akumulasi Bahan */}
+        <section className="relative z-0 isolate">
+          <AkumBahanCard
+            selectedLocation={selectedLocation}
+            data={akumBahan}
+            loading={loadingAkumBahan}
           />
         </section>
       </main>
