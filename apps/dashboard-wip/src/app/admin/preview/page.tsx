@@ -38,6 +38,24 @@ export default function AdminPreviewPage() {
     return date.toLocaleDateString("id-ID", { day: "2-digit", month: "short", year: "numeric" });
   };
 
+  // Helper to format text: empty, null, or "0" -> "-"
+  const formatText = (val: unknown): string => {
+    if (val === null || val === undefined) return "-";
+    const s = String(val).trim();
+    if (s === "" || s === "-" || s.toLowerCase() === "null" || s.toLowerCase() === "undefined") return "-";
+    return s;
+  };
+
+  // Helper to format number: 0, NaN, or null -> "-"
+  const formatNumber = (val: unknown, decimals = 0): string => {
+    if (val === null || val === undefined) return "-";
+    const num = Number(val);
+    if (isNaN(num) || num === 0) return "-";
+    return num.toLocaleString("id-ID", {
+      maximumFractionDigits: decimals,
+    });
+  };
+
   // Reset page when tab or search changes
   const handleTabChange = (tab: TabType) => {
     setActiveTab(tab);
@@ -331,40 +349,46 @@ export default function AdminPreviewPage() {
                     {tableData.map((item, idx) => (
                       <tr key={idx} className="hover:bg-[#16823B]/5 transition-colors">
                         <td className="py-2.5 px-3 font-mono text-[11px] text-[#16823B] font-bold whitespace-nowrap">
-                          {String(item.rowLabels ?? "")}
+                          {formatText(item.rowLabels)}
                         </td>
                         <td className="py-2.5 px-3 font-medium whitespace-nowrap">
-                          {formatExcelDate(item.tanggalRealisasi)}
-                          <span className="text-[10px] text-[#89938D] ml-1 font-mono">({String(item.tanggalRealisasi ?? "")})</span>
+                          {item.tanggalRealisasi && Number(item.tanggalRealisasi) > 0 ? (
+                            <>
+                              {formatExcelDate(item.tanggalRealisasi)}
+                              <span className="text-[10px] text-[#89938D] ml-1 font-mono">({String(item.tanggalRealisasi)})</span>
+                            </>
+                          ) : (
+                            "-"
+                          )}
                         </td>
-                        <td className="py-2.5 px-3 font-bold whitespace-nowrap">{String(item.lokasi ?? "")}</td>
-                        <td className="py-2.5 px-3 font-mono text-[11px] text-[#5F6B63] whitespace-nowrap">{String(item.kodeAktifitas ?? "")}</td>
-                        <td className="py-2.5 px-3 font-semibold whitespace-nowrap">{String(item.deskripsi ?? "")}</td>
-                        <td className="py-2.5 px-3 font-mono text-[11px] font-bold text-[#16823B] whitespace-nowrap">{String(item.actCostGroup ?? "")}</td>
-                        <td className="py-2.5 px-3 text-[#5F6B63] whitespace-nowrap">{String(item.satuanHasil ?? "-")}</td>
+                        <td className="py-2.5 px-3 font-bold whitespace-nowrap">{formatText(item.lokasi)}</td>
+                        <td className="py-2.5 px-3 font-mono text-[11px] text-[#5F6B63] whitespace-nowrap">{formatText(item.kodeAktifitas)}</td>
+                        <td className="py-2.5 px-3 font-semibold whitespace-nowrap">{formatText(item.deskripsi)}</td>
+                        <td className="py-2.5 px-3 font-mono text-[11px] font-bold text-[#16823B] whitespace-nowrap">{formatText(item.actCostGroup)}</td>
+                        <td className="py-2.5 px-3 text-[#5F6B63] whitespace-nowrap">{formatText(item.satuanHasil)}</td>
                         <td className="py-2.5 px-3 text-right font-mono whitespace-nowrap">
-                          {Number(item.costCharge ?? 0).toLocaleString("id-ID")}
-                        </td>
-                        <td className="py-2.5 px-3 text-right font-mono whitespace-nowrap">
-                          {Number(item.hasilCharge ?? 0).toLocaleString("id-ID", { maximumFractionDigits: 2 })}
-                        </td>
-                        <td className="py-2.5 px-3 text-right font-mono whitespace-nowrap">
-                          {Number(item.costMaterial ?? 0).toLocaleString("id-ID")}
-                        </td>
-                        <td className="py-2.5 px-3 text-right font-mono whitespace-nowrap">
-                          {Number(item.hasilMaterial ?? 0).toLocaleString("id-ID", { maximumFractionDigits: 2 })}
+                          {formatNumber(item.costCharge)}
                         </td>
                         <td className="py-2.5 px-3 text-right font-mono whitespace-nowrap">
-                          {Number(item.costUpah ?? 0).toLocaleString("id-ID")}
+                          {formatNumber(item.hasilCharge, 2)}
                         </td>
                         <td className="py-2.5 px-3 text-right font-mono whitespace-nowrap">
-                          {Number(item.hasilUpah ?? 0).toLocaleString("id-ID", { maximumFractionDigits: 2 })}
+                          {formatNumber(item.costMaterial)}
+                        </td>
+                        <td className="py-2.5 px-3 text-right font-mono whitespace-nowrap">
+                          {formatNumber(item.hasilMaterial, 2)}
+                        </td>
+                        <td className="py-2.5 px-3 text-right font-mono whitespace-nowrap">
+                          {formatNumber(item.costUpah)}
+                        </td>
+                        <td className="py-2.5 px-3 text-right font-mono whitespace-nowrap">
+                          {formatNumber(item.hasilUpah, 2)}
                         </td>
                         <td className="py-2.5 px-3 text-right font-mono font-bold text-[#16823B] whitespace-nowrap">
-                          {Number(item.costTotal ?? 0).toLocaleString("id-ID")}
+                          {formatNumber(item.costTotal)}
                         </td>
                         <td className="py-2.5 px-3 text-right font-mono whitespace-nowrap">
-                          {Number(item.hasilTotal ?? 0).toLocaleString("id-ID", { maximumFractionDigits: 2 })}
+                          {formatNumber(item.hasilTotal, 2)}
                         </td>
                       </tr>
                     ))}
@@ -393,20 +417,20 @@ export default function AdminPreviewPage() {
                     {tableData.map((item, idx) => (
                       <tr key={idx} className="hover:bg-[#16823B]/5 transition-colors">
                         <td className="py-2.5 px-3 font-mono text-[11px] text-[#16823B] font-bold whitespace-nowrap">
-                          {String(item.rowLabels ?? "")}
+                          {formatText(item.rowLabels)}
                         </td>
-                        <td className="py-2.5 px-3 font-medium whitespace-nowrap">{String(item.group ?? "-")}</td>
-                        <td className="py-2.5 px-3 font-mono text-[11px] font-bold text-[#5F6B63] whitespace-nowrap">{String(item.kodeBahan ?? "")}</td>
-                        <td className="py-2.5 px-3 whitespace-nowrap">{item.deskripsiBahan ? String(item.deskripsiBahan) : "-"}</td>
-                        <td className="py-2.5 px-3 text-[#5F6B63] whitespace-nowrap">{String(item.satuanHasil ?? "-")}</td>
+                        <td className="py-2.5 px-3 font-medium whitespace-nowrap">{formatText(item.group)}</td>
+                        <td className="py-2.5 px-3 font-mono text-[11px] font-bold text-[#5F6B63] whitespace-nowrap">{formatText(item.kodeBahan)}</td>
+                        <td className="py-2.5 px-3 whitespace-nowrap">{formatText(item.deskripsiBahan)}</td>
+                        <td className="py-2.5 px-3 text-[#5F6B63] whitespace-nowrap">{formatText(item.satuanHasil)}</td>
                         <td className="py-2.5 px-3 text-right font-mono whitespace-nowrap">
-                          {Number(item.sumHasil ?? 0).toLocaleString("id-ID", { maximumFractionDigits: 2 })}
+                          {formatNumber(item.sumHasil, 2)}
                         </td>
                         <td className="py-2.5 px-3 text-right font-mono whitespace-nowrap">
-                          {Number(item.sumResource ?? 0).toLocaleString("id-ID", { maximumFractionDigits: 2 })}
+                          {formatNumber(item.sumResource, 2)}
                         </td>
                         <td className="py-2.5 px-3 text-right font-mono font-bold text-[#16823B] whitespace-nowrap">
-                          {Number(item.sumBiaya ?? 0).toLocaleString("id-ID")}
+                          {formatNumber(item.sumBiaya)}
                         </td>
                       </tr>
                     ))}
@@ -430,11 +454,11 @@ export default function AdminPreviewPage() {
                   <tbody className="divide-y divide-[#DDE5DF]/60 text-[#17231B]">
                     {tableData.map((item, idx) => (
                       <tr key={idx} className="hover:bg-[#16823B]/5 transition-colors">
-                        <td className="py-2.5 px-3 font-bold whitespace-nowrap">{String(item.lokasi ?? "")}</td>
-                        <td className="py-2.5 px-3 font-mono text-[11px] font-bold text-[#16823B] whitespace-nowrap">{String(item.kodeMaterial ?? "")}</td>
-                        <td className="py-2.5 px-3 font-semibold whitespace-nowrap">{String(item.deskripsiMaterial ?? "")}</td>
+                        <td className="py-2.5 px-3 font-bold whitespace-nowrap">{formatText(item.lokasi)}</td>
+                        <td className="py-2.5 px-3 font-mono text-[11px] font-bold text-[#16823B] whitespace-nowrap">{formatText(item.kodeMaterial)}</td>
+                        <td className="py-2.5 px-3 font-semibold whitespace-nowrap">{formatText(item.deskripsiMaterial)}</td>
                         <td className="py-2.5 px-3 text-right font-mono font-bold text-[#17231B] whitespace-nowrap">
-                          {Number(item.quantity ?? 0).toLocaleString("id-ID", { maximumFractionDigits: 2 })}
+                          {formatNumber(item.quantity, 2)}
                         </td>
                       </tr>
                     ))}
