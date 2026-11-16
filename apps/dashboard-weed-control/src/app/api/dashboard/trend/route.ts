@@ -48,7 +48,7 @@ export async function GET(req: NextRequest) {
             THEN (SUM(m.total_cost) / SUM(m.luas))::float 
             ELSE NULL 
           END AS cost_per_ha
-        FROM weed_control.mastersheet m
+        FROM mastersheet m
         WHERE m.wilayah IS NOT NULL 
           AND m.umur IS NOT NULL
           AND ${statusCondition}
@@ -75,8 +75,8 @@ export async function GET(req: NextRequest) {
             m.umur,
             m.luas,
             SUM(da.biaya) AS total_biaya
-          FROM weed_control.data_aktivitas da
-          JOIN weed_control.mastersheet m ON da.lokasi = m.lokasi
+          FROM data_aktivitas da
+          JOIN mastersheet m ON da.lokasi = m.lokasi
           WHERE da.aktivitas = '${escapedAktivitas}'
             AND m.wilayah IS NOT NULL
             AND m.umur IS NOT NULL

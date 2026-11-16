@@ -83,7 +83,7 @@ export async function GET(req: NextRequest) {
             WHEN COALESCE(m.luas, 0) > 0 THEN (m.total_cost / m.luas)::float 
             ELSE 0 
           END AS cost_per_ha
-        FROM weed_control.mastersheet m
+        FROM mastersheet m
         WHERE ${statusCondition}
           AND ${umurCondition}
           AND ${wilayahCondition}
@@ -131,8 +131,8 @@ export async function GET(req: NextRequest) {
             WHEN COALESCE(m.luas, 0) > 0 THEN (SUM(da.biaya) / m.luas)::float 
             ELSE 0 
           END AS cost_per_ha
-        FROM weed_control.data_aktivitas da
-        JOIN weed_control.mastersheet m ON da.lokasi = m.lokasi
+        FROM data_aktivitas da
+        JOIN mastersheet m ON da.lokasi = m.lokasi
         WHERE da.aktivitas = '${escapedAktivitas}'
           AND ${statusCondition}
           AND ${umurCondition}

@@ -36,7 +36,7 @@ export async function GET(req: NextRequest) {
       SELECT 
         da.aktivitas,
         COALESCE(SUM(da.biaya), 0)::float AS total_biaya
-      FROM weed_control.data_aktivitas da
+      FROM data_aktivitas da
       WHERE da.lokasi = '${escapedLokasi}'
         AND da.aktivitas IS NOT NULL
       GROUP BY da.aktivitas

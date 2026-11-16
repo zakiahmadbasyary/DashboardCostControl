@@ -373,7 +373,7 @@ export default function AdminDashboardPage() {
       url: weedControlUrl,
       adminUrl: `${weedControlUrl}/admin`,
       icon: Tractor,
-      isHosted: false,
+      isHosted: true,
     },
     {
       code: "irigasi",

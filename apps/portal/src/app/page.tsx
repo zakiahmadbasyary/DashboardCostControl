@@ -82,7 +82,7 @@ export default function PortalHomePage() {
       url: weedControlUrl,
       icon: Tractor,
       badge: "Pemeliharaan",
-      isHosted: false,
+      isHosted: true,
     },
     {
       id: "irigasi",
