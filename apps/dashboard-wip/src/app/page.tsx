@@ -85,6 +85,14 @@ export default function PublicDashboardPage() {
       offset += filterHeight + 16;
     }
 
+    // Khusus scroll ke Detail Aktivitas:
+    // Tambahkan tinggi Location Detail sticky agar tidak menutupi bagian atas tabel Detail Aktivitas
+    if (id === "activity-detail-section") {
+      const stickyLocEl = document.getElementById("location-detail-section");
+      const locHeight = stickyLocEl ? stickyLocEl.getBoundingClientRect().height : 70;
+      offset += locHeight + 16;
+    }
+
     const targetY = Math.max(0, elTop - offset);
 
     window.scrollTo({
@@ -220,6 +228,7 @@ export default function PublicDashboardPage() {
       }
 
       setSelectedActivity(act);
+      setPendingScrollTarget("activity-detail");
 
       // Find first matching history item
       const matches = historyActivities.filter((h) => isActivityMatch(act, h));
@@ -294,7 +303,7 @@ export default function PublicDashboardPage() {
   };
 
   // ── PENDING SCROLL TARGET STATE (SETELAH LOAD DATA LOKASI / DETAIL SELESAI) ──
-  const [pendingScrollTarget, setPendingScrollTarget] = useState<"location" | "detail" | null>(null);
+  const [pendingScrollTarget, setPendingScrollTarget] = useState<"location" | "detail" | "activity-detail" | null>(null);
 
   // Handle click on Umur in Trend Chart/Table -> Filter Location Table for clicked Umur & all Wilayah, then scroll down
   const handleSelectUmurFromTrend = useCallback(
@@ -340,7 +349,16 @@ export default function PublicDashboardPage() {
       }, 80);
       return () => clearTimeout(timer);
     }
-  }, [pendingScrollTarget, loadingGroupCosts, loadingLocations, scrollToElement]);
+
+    if (pendingScrollTarget === "activity-detail" && !loadingKelengkapan && !loadingHistory) {
+      // Jeda 80ms untuk memastikan data riwayat & kelengkapan selesai dirender ke DOM
+      const timer = setTimeout(() => {
+        scrollToElement("activity-detail-section");
+        setPendingScrollTarget(null);
+      }, 80);
+      return () => clearTimeout(timer);
+    }
+  }, [pendingScrollTarget, loadingGroupCosts, loadingLocations, loadingKelengkapan, loadingHistory, scrollToElement]);
 
   return (
     <div className="min-h-screen bg-[#F7F9F7] text-[#17231B] flex flex-col font-sans">
@@ -411,7 +429,7 @@ export default function PublicDashboardPage() {
         </section>
 
         {/* Section Detail Aktivitas (History Aktivitas & Kelengkapan) */}
-        <section className="relative z-0 isolate">
+        <section id="activity-detail-section" className="relative z-0 isolate scroll-mt-24 sm:scroll-mt-28">
           <ActivityDetailCard
             selectedLocation={selectedLocation}
             selectedGroupCost={selectedGroupCost}
