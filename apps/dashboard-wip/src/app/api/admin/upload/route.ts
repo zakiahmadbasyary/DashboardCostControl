@@ -5,7 +5,17 @@ import * as path from "path";
 import { storage } from "@/lib/storage";
 import { getAdminSessionFromRequest } from "@/lib/auth";
 
-const MAX_FILE_SIZE_BYTES = 15 * 1024 * 1024; // 15MB Limit
+// Extended timeout and dynamic execution for massive bulk imports (up to 5 minutes)
+export const maxDuration = 300;
+export const dynamic = "force-dynamic";
+
+const MAX_FILE_SIZE_BYTES = 50 * 1024 * 1024; // 50MB Limit (synchronized with Nginx client_max_body_size)
+
+// Standard robust transaction configuration for large datasets (up to 5 minutes)
+const TRANSACTION_CONFIG = {
+  maxWait: 60000,  // Wait up to 60 seconds to acquire DB connection
+  timeout: 300000, // Wait up to 300 seconds (5 minutes) for transaction completion
+};
 
 export async function POST(request: NextRequest) {
   try {
@@ -19,7 +29,7 @@ export async function POST(request: NextRequest) {
 
     if (file.size > MAX_FILE_SIZE_BYTES) {
       return NextResponse.json(
-        { success: false, message: "Ukuran file terlalu besar. Batas maksimal ukuran file adalah 15 MB." },
+        { success: false, message: "Ukuran file terlalu besar. Batas maksimal ukuran file adalah 50 MB." },
         { status: 400 }
       );
     }
@@ -34,11 +44,11 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // 1. Read file buffer & parse Excel
+    // 1. Read file buffer & parse Excel with memory-optimized dense sheet option
     const arrayBuffer = await file.arrayBuffer();
     const buffer = Buffer.from(arrayBuffer);
 
-    const workbook = XLSX.read(buffer, { type: "buffer" });
+    const workbook = XLSX.read(buffer, { type: "buffer", dense: true });
     const firstSheetName = workbook.SheetNames[0];
     if (!firstSheetName) {
       return NextResponse.json({ success: false, message: "File Excel kosong atau tidak memiliki sheet." }, { status: 400 });
@@ -115,7 +125,7 @@ export async function POST(request: NextRequest) {
       await prisma.$transaction(
         async (tx) => {
           await tx.masterSheet.deleteMany();
-          const chunkSize = 1000;
+          const chunkSize = 3000;
           for (let i = 0; i < uniqueMasterSheets.length; i += chunkSize) {
             const chunk = uniqueMasterSheets.slice(i, i + chunkSize);
             await tx.masterSheet.createMany({
@@ -123,7 +133,7 @@ export async function POST(request: NextRequest) {
             });
           }
         },
-        { maxWait: 15000, timeout: 60000 }
+        TRANSACTION_CONFIG
       );
 
       importedCount = uniqueMasterSheets.length;
@@ -163,7 +173,7 @@ export async function POST(request: NextRequest) {
       await prisma.$transaction(
         async (tx) => {
           await tx.sbt.deleteMany();
-          const chunkSize = 1000;
+          const chunkSize = 3000;
           for (let i = 0; i < uniqueSbts.length; i += chunkSize) {
             const chunk = uniqueSbts.slice(i, i + chunkSize);
             await tx.sbt.createMany({
@@ -171,7 +181,7 @@ export async function POST(request: NextRequest) {
             });
           }
         },
-        { maxWait: 15000, timeout: 60000 }
+        TRANSACTION_CONFIG
       );
 
       importedCount = uniqueSbts.length;
@@ -290,7 +300,7 @@ export async function POST(request: NextRequest) {
       await prisma.$transaction(
         async (tx) => {
           await tx.lokasi.deleteMany();
-          const chunkSize = 1000;
+          const chunkSize = 3000;
           for (let i = 0; i < parsedRows.length; i += chunkSize) {
             const chunk = parsedRows.slice(i, i + chunkSize);
             await tx.lokasi.createMany({
@@ -298,7 +308,7 @@ export async function POST(request: NextRequest) {
             });
           }
         },
-        { maxWait: 15000, timeout: 60000 }
+        TRANSACTION_CONFIG
       );
 
       importedCount = parsedRows.length;
@@ -350,7 +360,7 @@ export async function POST(request: NextRequest) {
       await prisma.$transaction(
         async (tx) => {
           await tx.aktivitas.deleteMany();
-          const chunkSize = 1000;
+          const chunkSize = 3000;
           for (let i = 0; i < parsedRows.length; i += chunkSize) {
             const chunk = parsedRows.slice(i, i + chunkSize);
             await tx.aktivitas.createMany({
@@ -358,7 +368,7 @@ export async function POST(request: NextRequest) {
             });
           }
         },
-        { maxWait: 15000, timeout: 60000 }
+        TRANSACTION_CONFIG
       );
 
       importedCount = parsedRows.length;
@@ -426,7 +436,7 @@ export async function POST(request: NextRequest) {
       await prisma.$transaction(
         async (tx) => {
           await tx.historyAktivitas.deleteMany();
-          const chunkSize = 1000;
+          const chunkSize = 2500;
           for (let i = 0; i < uniqueHistory.length; i += chunkSize) {
             const chunk = uniqueHistory.slice(i, i + chunkSize);
             await tx.historyAktivitas.createMany({
@@ -434,7 +444,7 @@ export async function POST(request: NextRequest) {
             });
           }
         },
-        { maxWait: 15000, timeout: 60000 }
+        TRANSACTION_CONFIG
       );
 
       importedCount = uniqueHistory.length;
@@ -470,7 +480,7 @@ export async function POST(request: NextRequest) {
       await prisma.$transaction(
         async (tx) => {
           await tx.kelengkapan.deleteMany();
-          const chunkSize = 1000;
+          const chunkSize = 3000;
           for (let i = 0; i < parsedRows.length; i += chunkSize) {
             const chunk = parsedRows.slice(i, i + chunkSize);
             await tx.kelengkapan.createMany({
@@ -478,7 +488,7 @@ export async function POST(request: NextRequest) {
             });
           }
         },
-        { maxWait: 15000, timeout: 60000 }
+        TRANSACTION_CONFIG
       );
 
       importedCount = parsedRows.length;
@@ -524,7 +534,7 @@ export async function POST(request: NextRequest) {
       await prisma.$transaction(
         async (tx) => {
           await tx.akumBahan.deleteMany();
-          const chunkSize = 1000;
+          const chunkSize = 3000;
           for (let i = 0; i < parsedRows.length; i += chunkSize) {
             const chunk = parsedRows.slice(i, i + chunkSize);
             await tx.akumBahan.createMany({
@@ -532,7 +542,7 @@ export async function POST(request: NextRequest) {
             });
           }
         },
-        { maxWait: 15000, timeout: 60000 }
+        TRANSACTION_CONFIG
       );
 
       importedCount = parsedRows.length;
@@ -550,8 +560,17 @@ export async function POST(request: NextRequest) {
     });
   } catch (error: unknown) {
     console.error("Error in upload API route:", error);
+    const errorMessage = error instanceof Error ? error.message : String(error);
+
+    let userMessage = "Gagal memproses import data karena kesalahan server internal. Silakan periksa format file Anda.";
+    if (errorMessage.toLowerCase().includes("timeout") || errorMessage.toLowerCase().includes("timed out")) {
+      userMessage = "Proses penyimpanan melebihi batas waktu (Database Timeout). Silakan coba lagi atau gunakan file CSV untuk performa lebih cepat.";
+    } else if (errorMessage.toLowerCase().includes("unique constraint") || errorMessage.toLowerCase().includes("duplicate key")) {
+      userMessage = `Terdapat duplikasi data pada kolom unik: ${errorMessage}`;
+    }
+
     return NextResponse.json(
-      { success: false, message: "Gagal memproses import data karena kesalahan server internal. Silakan periksa format file Anda." },
+      { success: false, message: userMessage },
       { status: 500 }
     );
   }
