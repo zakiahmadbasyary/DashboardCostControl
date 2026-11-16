@@ -190,28 +190,35 @@ export default function AdminPreviewPage() {
       <div className="bg-white border border-[#DDE5DF] rounded-2xl shadow-xs overflow-hidden">
         <div className="overflow-x-auto max-h-[620px] scrollbar-thin">
           <table className="w-full text-xs text-left border-collapse">
-            <thead className="bg-[#F7F9F7] text-[#17231B] uppercase font-bold border-b border-[#DDE5DF] sticky top-0 z-10 shadow-2xs">
+            <thead className="bg-[#F7F9F7] text-[#17231B] uppercase font-bold border-b border-[#DDE5DF]">
               {/* ========================================================================= */}
               {/* 1. HEADER DATA LOKASI (Kolom Excel Mastersheet + Umur 1..20) */}
               {/* ========================================================================= */}
               {activeTab === "lokasi" && (
                 <tr>
-                  <th className="py-3 px-3.5 sticky left-0 bg-[#F7F9F7] z-20 border-r border-[#DDE5DF]">Lokasi</th>
-                  <th className="py-3 px-3 whitespace-nowrap">Status</th>
-                  <th className="py-3 px-3 whitespace-nowrap">Wilayah</th>
-                  <th className="py-3 px-3 text-right whitespace-nowrap">Luas (Ha)</th>
-                  <th className="py-3 px-3 whitespace-nowrap">Jenis</th>
-                  <th className="py-3 px-2.5 whitespace-nowrap">Kelas</th>
-                  <th className="py-3 px-3 whitespace-nowrap">Mulai Rawat</th>
-                  <th className="py-3 px-3 whitespace-nowrap">Mulai Tanam</th>
-                  <th className="py-3 px-3 whitespace-nowrap">Forcing Std</th>
-                  <th className="py-3 px-3 whitespace-nowrap">Real Forcing</th>
-                  <th className="py-3 px-3 whitespace-nowrap">Selesai Panen</th>
-                  <th className="py-3 px-2.5 text-center whitespace-nowrap">Umur Forcing</th>
-                  <th className="py-3 px-2.5 text-center whitespace-nowrap">Umur</th>
-                  <th className="py-3 px-3.5 text-right whitespace-nowrap bg-emerald-50/60 text-[#16823B] border-r border-[#DDE5DF]">Total Cost</th>
+                  <th className="py-3 px-3.5 sticky top-0 left-0 bg-[#F7F9F7] z-30 border-r border-b border-[#DDE5DF] whitespace-nowrap">
+                    Lokasi
+                  </th>
+                  <th className="py-3 px-3 sticky top-0 z-20 bg-[#F7F9F7] border-b border-[#DDE5DF] whitespace-nowrap">Status</th>
+                  <th className="py-3 px-3 sticky top-0 z-20 bg-[#F7F9F7] border-b border-[#DDE5DF] whitespace-nowrap">Wilayah</th>
+                  <th className="py-3 px-3 text-right sticky top-0 z-20 bg-[#F7F9F7] border-b border-[#DDE5DF] whitespace-nowrap">Luas (Ha)</th>
+                  <th className="py-3 px-3 sticky top-0 z-20 bg-[#F7F9F7] border-b border-[#DDE5DF] whitespace-nowrap">Jenis</th>
+                  <th className="py-3 px-2.5 sticky top-0 z-20 bg-[#F7F9F7] border-b border-[#DDE5DF] whitespace-nowrap">Kelas</th>
+                  <th className="py-3 px-3 sticky top-0 z-20 bg-[#F7F9F7] border-b border-[#DDE5DF] whitespace-nowrap">Mulai Rawat</th>
+                  <th className="py-3 px-3 sticky top-0 z-20 bg-[#F7F9F7] border-b border-[#DDE5DF] whitespace-nowrap">Mulai Tanam</th>
+                  <th className="py-3 px-3 sticky top-0 z-20 bg-[#F7F9F7] border-b border-[#DDE5DF] whitespace-nowrap">Forcing Std</th>
+                  <th className="py-3 px-3 sticky top-0 z-20 bg-[#F7F9F7] border-b border-[#DDE5DF] whitespace-nowrap">Real Forcing</th>
+                  <th className="py-3 px-3 sticky top-0 z-20 bg-[#F7F9F7] border-b border-[#DDE5DF] whitespace-nowrap">Selesai Panen</th>
+                  <th className="py-3 px-2.5 text-center sticky top-0 z-20 bg-[#F7F9F7] border-b border-[#DDE5DF] whitespace-nowrap">Umur Forcing</th>
+                  <th className="py-3 px-2.5 text-center sticky top-0 z-20 bg-[#F7F9F7] border-b border-[#DDE5DF] whitespace-nowrap">Umur</th>
+                  <th className="py-3 px-3.5 text-right whitespace-nowrap sticky top-0 z-20 border-b border-[#DDE5DF] bg-[#ECFDF5] text-[#16823B] border-r">
+                    Total Cost
+                  </th>
                   {umurList.map((u) => (
-                    <th key={u} className="py-3 px-3 text-right whitespace-nowrap bg-gray-50/80 text-[#5F6B63]">
+                    <th
+                      key={u}
+                      className="py-3 px-3 text-right whitespace-nowrap sticky top-0 z-20 border-b border-[#DDE5DF] bg-[#F9FAFB] text-[#5F6B63]"
+                    >
                       Umur {u}
                     </th>
                   ))}
@@ -223,25 +230,29 @@ export default function AdminPreviewPage() {
               {/* ========================================================================= */}
               {activeTab === "timeline" && (
                 <tr>
-                  <th className="py-3 px-3.5 sticky left-0 bg-[#F7F9F7] z-20 border-r border-[#DDE5DF]">Lokasi</th>
-                  <th className="py-3 px-3 whitespace-nowrap">Awal Rawat</th>
-                  <th className="py-3 px-4 min-w-[200px]">Aktivitas</th>
-                  <th className="py-3 px-3 whitespace-nowrap">Tgl Realisasi</th>
-                  <th className="py-3 px-2.5 text-center whitespace-nowrap">Umur</th>
-                  <th className="py-3 px-3 text-right whitespace-nowrap">Hasil</th>
-                  <th className="py-3 px-2.5 text-center whitespace-nowrap">UOM</th>
-                  <th className="py-3 px-3 text-right whitespace-nowrap">TK</th>
-                  <th className="py-3 px-3 text-right whitespace-nowrap">Kapasitas/TK</th>
-                  <th className="py-3 px-3.5 text-right whitespace-nowrap bg-emerald-50/60 text-[#16823B]">Total Cost</th>
-                  <th className="py-3 px-3 text-right whitespace-nowrap">Upah</th>
-                  <th className="py-3 px-3 text-right whitespace-nowrap">Charge</th>
-                  <th className="py-3 px-3.5 text-right whitespace-nowrap border-r border-[#DDE5DF] bg-amber-50/50 text-amber-900">
+                  <th className="py-3 px-3.5 sticky top-0 left-0 bg-[#F7F9F7] z-30 border-r border-b border-[#DDE5DF] whitespace-nowrap">
+                    Lokasi
+                  </th>
+                  <th className="py-3 px-3 sticky top-0 z-20 bg-[#F7F9F7] border-b border-[#DDE5DF] whitespace-nowrap">Awal Rawat</th>
+                  <th className="py-3 px-4 min-w-[200px] sticky top-0 z-20 bg-[#F7F9F7] border-b border-[#DDE5DF]">Aktivitas</th>
+                  <th className="py-3 px-3 sticky top-0 z-20 bg-[#F7F9F7] border-b border-[#DDE5DF] whitespace-nowrap">Tgl Realisasi</th>
+                  <th className="py-3 px-2.5 text-center sticky top-0 z-20 bg-[#F7F9F7] border-b border-[#DDE5DF] whitespace-nowrap">Umur</th>
+                  <th className="py-3 px-3 text-right sticky top-0 z-20 bg-[#F7F9F7] border-b border-[#DDE5DF] whitespace-nowrap">Hasil</th>
+                  <th className="py-3 px-2.5 text-center sticky top-0 z-20 bg-[#F7F9F7] border-b border-[#DDE5DF] whitespace-nowrap">UOM</th>
+                  <th className="py-3 px-3 text-right sticky top-0 z-20 bg-[#F7F9F7] border-b border-[#DDE5DF] whitespace-nowrap">TK</th>
+                  <th className="py-3 px-3 text-right sticky top-0 z-20 bg-[#F7F9F7] border-b border-[#DDE5DF] whitespace-nowrap">Kapasitas/TK</th>
+                  <th className="py-3 px-3.5 text-right whitespace-nowrap sticky top-0 z-20 border-b border-[#DDE5DF] bg-[#ECFDF5] text-[#16823B]">
+                    Total Cost
+                  </th>
+                  <th className="py-3 px-3 text-right sticky top-0 z-20 bg-[#F7F9F7] border-b border-[#DDE5DF] whitespace-nowrap">Upah</th>
+                  <th className="py-3 px-3 text-right sticky top-0 z-20 bg-[#F7F9F7] border-b border-[#DDE5DF] whitespace-nowrap">Charge</th>
+                  <th className="py-3 px-3.5 text-right whitespace-nowrap border-r border-b border-[#DDE5DF] sticky top-0 z-20 bg-[#FFFBEB] text-amber-900">
                     Material (Biaya)
                   </th>
                   {materialColumns.map((matName) => (
                     <th
                       key={matName}
-                      className="py-3 px-3 text-right whitespace-nowrap bg-blue-50/40 text-blue-900 font-semibold"
+                      className="py-3 px-3 text-right whitespace-nowrap sticky top-0 z-20 border-b border-[#DDE5DF] bg-[#EFF6FF] text-blue-900 font-semibold"
                       title={`Kuantitas bahan kimia ${matName}`}
                     >
                       {matName}
@@ -255,22 +266,30 @@ export default function AdminPreviewPage() {
               {/* ========================================================================= */}
               {activeTab === "aktivitas" && (
                 <tr>
-                  <th className="py-3 px-3.5 sticky left-0 bg-[#F7F9F7] z-20 border-r border-[#DDE5DF]">Lokasi</th>
-                  <th className="py-3 px-3 whitespace-nowrap">Status</th>
-                  <th className="py-3 px-3 whitespace-nowrap">Wilayah</th>
-                  <th className="py-3 px-3 text-right whitespace-nowrap">Luas (Ha)</th>
-                  <th className="py-3 px-2.5 whitespace-nowrap">Kelas</th>
-                  <th className="py-3 px-3 font-mono whitespace-nowrap">Kode</th>
-                  <th className="py-3 px-4 min-w-[220px]">Aktivitas</th>
-                  <th className="py-3 px-3.5 text-right whitespace-nowrap bg-emerald-50/60 text-[#16823B]">Biaya (Total)</th>
-                  <th className="py-3 px-3.5 text-right whitespace-nowrap text-emerald-800">Biaya/Ha</th>
-                  <th className="py-3 px-3 text-right whitespace-nowrap">Upah</th>
-                  <th className="py-3 px-3 text-right whitespace-nowrap">Charge</th>
-                  <th className="py-3 px-3 text-right whitespace-nowrap">Material</th>
-                  <th className="py-3 px-3 text-right whitespace-nowrap">Bibit</th>
-                  <th className="py-3 px-3 text-right whitespace-nowrap">Hasil</th>
-                  <th className="py-3 px-2.5 text-center whitespace-nowrap">UOM</th>
-                  <th className="py-3 px-3.5 whitespace-nowrap font-semibold text-[#16823B]">Activity Group</th>
+                  <th className="py-3 px-3.5 sticky top-0 left-0 bg-[#F7F9F7] z-30 border-r border-b border-[#DDE5DF] whitespace-nowrap">
+                    Lokasi
+                  </th>
+                  <th className="py-3 px-3 sticky top-0 z-20 bg-[#F7F9F7] border-b border-[#DDE5DF] whitespace-nowrap">Status</th>
+                  <th className="py-3 px-3 sticky top-0 z-20 bg-[#F7F9F7] border-b border-[#DDE5DF] whitespace-nowrap">Wilayah</th>
+                  <th className="py-3 px-3 text-right sticky top-0 z-20 bg-[#F7F9F7] border-b border-[#DDE5DF] whitespace-nowrap">Luas (Ha)</th>
+                  <th className="py-3 px-2.5 sticky top-0 z-20 bg-[#F7F9F7] border-b border-[#DDE5DF] whitespace-nowrap">Kelas</th>
+                  <th className="py-3 px-3 font-mono sticky top-0 z-20 bg-[#F7F9F7] border-b border-[#DDE5DF] whitespace-nowrap">Kode</th>
+                  <th className="py-3 px-4 min-w-[220px] sticky top-0 z-20 bg-[#F7F9F7] border-b border-[#DDE5DF]">Aktivitas</th>
+                  <th className="py-3 px-3.5 text-right whitespace-nowrap sticky top-0 z-20 border-b border-[#DDE5DF] bg-[#ECFDF5] text-[#16823B]">
+                    Biaya (Total)
+                  </th>
+                  <th className="py-3 px-3.5 text-right whitespace-nowrap sticky top-0 z-20 border-b border-[#DDE5DF] bg-[#F7F9F7] text-emerald-800">
+                    Biaya/Ha
+                  </th>
+                  <th className="py-3 px-3 text-right sticky top-0 z-20 bg-[#F7F9F7] border-b border-[#DDE5DF] whitespace-nowrap">Upah</th>
+                  <th className="py-3 px-3 text-right sticky top-0 z-20 bg-[#F7F9F7] border-b border-[#DDE5DF] whitespace-nowrap">Charge</th>
+                  <th className="py-3 px-3 text-right sticky top-0 z-20 bg-[#F7F9F7] border-b border-[#DDE5DF] whitespace-nowrap">Material</th>
+                  <th className="py-3 px-3 text-right sticky top-0 z-20 bg-[#F7F9F7] border-b border-[#DDE5DF] whitespace-nowrap">Bibit</th>
+                  <th className="py-3 px-3 text-right sticky top-0 z-20 bg-[#F7F9F7] border-b border-[#DDE5DF] whitespace-nowrap">Hasil</th>
+                  <th className="py-3 px-2.5 text-center sticky top-0 z-20 bg-[#F7F9F7] border-b border-[#DDE5DF] whitespace-nowrap">UOM</th>
+                  <th className="py-3 px-3.5 whitespace-nowrap font-semibold sticky top-0 z-20 border-b border-[#DDE5DF] bg-[#F7F9F7] text-[#16823B]">
+                    Activity Group
+                  </th>
                 </tr>
               )}
             </thead>
@@ -309,13 +328,13 @@ export default function AdminPreviewPage() {
                 </tr>
               ) : (
                 tableData.map((row, idx) => (
-                  <tr key={idx} className="hover:bg-[#F7F9F7] text-[#17231B] transition-colors">
+                  <tr key={idx} className="group hover:bg-[#F7F9F7] text-[#17231B] transition-colors">
                     {/* ========================================================================= */}
                     {/* 1. BARIS DATA LOKASI */}
                     {/* ========================================================================= */}
                     {activeTab === "lokasi" && (
                       <>
-                        <td className="py-2.5 px-3.5 font-bold font-mono text-[#16823B] sticky left-0 bg-white group-hover:bg-[#F7F9F7] z-10 border-r border-[#DDE5DF]">
+                        <td className="py-2.5 px-3.5 font-bold font-mono text-[#16823B] sticky left-0 bg-white group-hover:bg-[#F7F9F7] z-10 border-r border-[#DDE5DF] whitespace-nowrap">
                           {row.lokasi}
                         </td>
                         <td className="py-2.5 px-3 whitespace-nowrap">{row.status || "-"}</td>
@@ -355,7 +374,7 @@ export default function AdminPreviewPage() {
                     {/* ========================================================================= */}
                     {activeTab === "timeline" && (
                       <>
-                        <td className="py-2.5 px-3.5 font-bold font-mono text-[#16823B] sticky left-0 bg-white z-10 border-r border-[#DDE5DF]">
+                        <td className="py-2.5 px-3.5 font-bold font-mono text-[#16823B] sticky left-0 bg-white group-hover:bg-[#F7F9F7] z-10 border-r border-[#DDE5DF] whitespace-nowrap">
                           {row.lokasi}
                         </td>
                         <td className="py-2.5 px-3 whitespace-nowrap text-[#5F6B63]">{formatDateShort(row.awalRawat)}</td>
@@ -407,7 +426,7 @@ export default function AdminPreviewPage() {
                     {/* ========================================================================= */}
                     {activeTab === "aktivitas" && (
                       <>
-                        <td className="py-2.5 px-3.5 font-bold font-mono text-[#16823B] sticky left-0 bg-white z-10 border-r border-[#DDE5DF]">
+                        <td className="py-2.5 px-3.5 font-bold font-mono text-[#16823B] sticky left-0 bg-white group-hover:bg-[#F7F9F7] z-10 border-r border-[#DDE5DF] whitespace-nowrap">
                           {row.lokasi}
                         </td>
                         <td className="py-2.5 px-3 whitespace-nowrap">{row.status || "-"}</td>
