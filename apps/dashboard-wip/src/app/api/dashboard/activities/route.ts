@@ -64,6 +64,7 @@ export async function GET(request: NextRequest) {
         const rawGc = item.keteranganGroupCost || item.groupCost || "";
         return {
           idAktivitas: `ACT-${item.idAktivitas}`,
+          kode: item.kode || undefined,
           aktivitas: item.aktivitas,
           kelas: item.masterSheet?.kelasBibit || "Regular",
           kelasBibit: item.masterSheet?.kelasBibit || "Regular",

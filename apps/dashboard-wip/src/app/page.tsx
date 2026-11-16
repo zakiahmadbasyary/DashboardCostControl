@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useCallback, useRef, useMemo } from "react";
 import DashboardHeader from "@/components/dashboard/DashboardHeader";
 import GlobalFilters from "@/components/dashboard/GlobalFilters";
 import TrendCard from "@/components/dashboard/TrendCard";
@@ -48,6 +48,7 @@ export default function PublicDashboardPage() {
   const [selectedGroupCost, setSelectedGroupCost] = useState<GroupCostData | null>(null);
 
   const [activities, setActivities] = useState<ActivityData[]>([]);
+  const [selectedActivity, setSelectedActivity] = useState<ActivityData | null>(null);
 
   // History Aktivitas, Kelengkapan, & Akumulasi Bahan states
   const [historyActivities, setHistoryActivities] = useState<HistoryActivityData[]>([]);
@@ -117,6 +118,7 @@ export default function PublicDashboardPage() {
   const handleSelectGroupCost = useCallback(
     async (gc: GroupCostData, overrideLocCode?: string) => {
       setSelectedGroupCost(gc);
+      setSelectedActivity(null);
       setLoadingActivities(true);
       setLoadingHistory(true);
       setSelectedHistory(null);
@@ -152,6 +154,7 @@ export default function PublicDashboardPage() {
       setSelectedLocation(loc);
       selectedLocationRef.current = loc;
       setSelectedGroupCost(null);
+      setSelectedActivity(null);
       setActivities([]);
       setHistoryActivities([]);
       setSelectedHistory(null);
@@ -185,6 +188,58 @@ export default function PublicDashboardPage() {
     [handleSelectGroupCost]
   );
 
+  // Helper to match activity with history activity (by kode or name)
+  const isActivityMatch = useCallback((act: ActivityData, h: HistoryActivityData) => {
+    if (act.kode && h.kodeAktifitas && act.kode.trim().toLowerCase() === h.kodeAktifitas.trim().toLowerCase()) {
+      return true;
+    }
+    if (act.aktivitas && h.deskripsi) {
+      const a = act.aktivitas.trim().toLowerCase();
+      const d = h.deskripsi.trim().toLowerCase();
+      return a === d || d.includes(a) || a.includes(d);
+    }
+    return false;
+  }, []);
+
+  // Filtered History Activities based on selectedActivity (drill-down filter)
+  const displayedHistoryActivities = useMemo(() => {
+    if (!selectedActivity) return historyActivities;
+    return historyActivities.filter((h) => isActivityMatch(selectedActivity, h));
+  }, [historyActivities, selectedActivity, isActivityMatch]);
+
+  // Handle Activity selection -> Filter History Activities & auto-select first matching history
+  const handleSelectActivity = useCallback(
+    (act: ActivityData) => {
+      // Toggle off if clicking the already selected activity
+      if (selectedActivity?.idAktivitas === act.idAktivitas) {
+        setSelectedActivity(null);
+        if (historyActivities.length > 0) {
+          handleSelectHistory(historyActivities[0]);
+        }
+        return;
+      }
+
+      setSelectedActivity(act);
+
+      // Find first matching history item
+      const matches = historyActivities.filter((h) => isActivityMatch(act, h));
+      if (matches.length > 0) {
+        handleSelectHistory(matches[0]);
+      } else {
+        setSelectedHistory(null);
+        setKelengkapan([]);
+      }
+    },
+    [selectedActivity, historyActivities, isActivityMatch, handleSelectHistory]
+  );
+
+  const handleClearActivityFilter = useCallback(() => {
+    setSelectedActivity(null);
+    if (historyActivities.length > 0) {
+      handleSelectHistory(historyActivities[0]);
+    }
+  }, [historyActivities, handleSelectHistory]);
+
   const fetchDashboardData = useCallback(async () => {
     setLoadingTrend(true);
     setLoadingLocations(true);
@@ -204,6 +259,7 @@ export default function PublicDashboardPage() {
         setSelectedLocation(null);
         setGroupCosts([]);
         setSelectedGroupCost(null);
+        setSelectedActivity(null);
         setActivities([]);
         setHistoryActivities([]);
         setSelectedHistory(null);
@@ -349,6 +405,8 @@ export default function PublicDashboardPage() {
             selectedLocation={selectedLocation}
             activities={activities}
             loading={loadingActivities}
+            selectedActivity={selectedActivity}
+            onSelectActivity={handleSelectActivity}
           />
         </section>
 
@@ -357,12 +415,14 @@ export default function PublicDashboardPage() {
           <ActivityDetailCard
             selectedLocation={selectedLocation}
             selectedGroupCost={selectedGroupCost}
-            historyActivities={historyActivities}
+            historyActivities={displayedHistoryActivities}
             loadingHistory={loadingHistory}
             selectedHistory={selectedHistory}
             onSelectHistory={handleSelectHistory}
             kelengkapan={kelengkapan}
             loadingKelengkapan={loadingKelengkapan}
+            selectedActivityFilter={selectedActivity}
+            onClearActivityFilter={handleClearActivityFilter}
           />
         </section>
 

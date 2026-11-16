@@ -41,6 +41,7 @@ export interface GroupCostData {
 
 export interface ActivityData {
   idAktivitas: string;
+  kode?: string;
   aktivitas: string;
   kelas: string;
   kelasBibit?: string;

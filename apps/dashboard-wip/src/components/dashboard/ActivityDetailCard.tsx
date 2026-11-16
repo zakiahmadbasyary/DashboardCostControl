@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { HistoryActivityData, KelengkapanData, LocationData, GroupCostData } from "@/types/dashboard";
+import { HistoryActivityData, KelengkapanData, LocationData, GroupCostData, ActivityData } from "@/types/dashboard";
 import { FileText, Calendar, Layers, Wrench, Package, Users, AlertCircle } from "lucide-react";
 
 interface ActivityDetailCardProps {
@@ -13,6 +13,8 @@ interface ActivityDetailCardProps {
   onSelectHistory: (item: HistoryActivityData) => void;
   kelengkapan: KelengkapanData[];
   loadingKelengkapan?: boolean;
+  selectedActivityFilter?: ActivityData | null;
+  onClearActivityFilter?: () => void;
 }
 
 export default function ActivityDetailCard({
@@ -24,6 +26,8 @@ export default function ActivityDetailCard({
   onSelectHistory,
   kelengkapan,
   loadingKelengkapan,
+  selectedActivityFilter,
+  onClearActivityFilter,
 }: ActivityDetailCardProps) {
   const [useLuas, setUseLuas] = useState<"lokasi" | "hasil">("lokasi");
 
@@ -146,12 +150,27 @@ export default function ActivityDetailCard({
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 items-start">
         {/* LEFT COLUMN: History Aktivitas Table */}
         <div className="flex flex-col gap-2">
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between flex-wrap gap-2">
             <span className="text-xs font-bold text-[#17231B] flex items-center gap-1.5">
               <Calendar className="w-3.5 h-3.5 text-[#16823B]" />
               Riwayat Transaksi Aktivitas ({historyActivities.length} data)
             </span>
-            <span className="text-[10px] text-[#89938D]">Urut tanggal terlama &rarr; terbaru</span>
+            {selectedActivityFilter ? (
+              <div className="flex items-center gap-1.5">
+                <span className="text-[10px] px-2 py-0.5 rounded-full bg-[#16823B]/10 text-[#16823B] font-bold border border-[#16823B]/20 truncate max-w-[170px]" title={selectedActivityFilter.aktivitas}>
+                  Filter: {selectedActivityFilter.aktivitas}
+                </span>
+                <button
+                  onClick={onClearActivityFilter}
+                  className="text-[10px] text-[#89938D] hover:text-[#17231B] underline cursor-pointer"
+                  title="Hapus filter aktivitas"
+                >
+                  Tampilkan Semua
+                </button>
+              </div>
+            ) : (
+              <span className="text-[10px] text-[#89938D]">Urut tanggal terlama &rarr; terbaru</span>
+            )}
           </div>
 
           {loadingHistory ? (
@@ -162,10 +181,24 @@ export default function ActivityDetailCard({
           ) : historyActivities.length === 0 ? (
             <div className="p-8 text-center bg-[#F7F9F7] rounded-xl border border-dashed border-[#DDE5DF]">
               <AlertCircle className="w-5 h-5 text-[#89938D] mx-auto mb-1.5" />
-              <p className="text-xs font-semibold text-[#5F6B63]">Belum ada riwayat aktivitas</p>
-              <p className="text-[10px] text-[#89938D] mt-0.5">
-                Tidak ada data history untuk Group {selectedGroupCost.groupCost} di lokasi {selectedLocation.lokasi}.
+              <p className="text-xs font-semibold text-[#5F6B63]">
+                {selectedActivityFilter
+                  ? `Tidak ada riwayat untuk aktivitas "${selectedActivityFilter.aktivitas}"`
+                  : "Belum ada riwayat aktivitas"}
               </p>
+              <p className="text-[10px] text-[#89938D] mt-0.5">
+                {selectedActivityFilter
+                  ? `Tidak ditemukan catatan transaksi untuk aktivitas ini di lokasi ${selectedLocation.lokasi}.`
+                  : `Tidak ada data history untuk Group ${selectedGroupCost.groupCost} di lokasi ${selectedLocation.lokasi}.`}
+              </p>
+              {selectedActivityFilter && (
+                <button
+                  onClick={onClearActivityFilter}
+                  className="mt-2.5 inline-block text-xs text-[#16823B] font-bold underline cursor-pointer"
+                >
+                  Tampilkan Semua Riwayat Group Cost
+                </button>
+              )}
             </div>
           ) : (
             <div className="overflow-x-auto overflow-y-auto max-h-[360px] rounded-xl border border-[#DDE5DF] shadow-2xs scrollbar-thin">

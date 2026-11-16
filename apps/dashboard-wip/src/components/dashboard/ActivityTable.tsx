@@ -8,6 +8,8 @@ interface ActivityTableProps {
   selectedLocation?: LocationData | null;
   activities: ActivityData[];
   loading?: boolean;
+  selectedActivity?: ActivityData | null;
+  onSelectActivity?: (activity: ActivityData) => void;
 }
 
 export default function ActivityTable({
@@ -15,6 +17,8 @@ export default function ActivityTable({
   selectedLocation,
   activities,
   loading,
+  selectedActivity,
+  onSelectActivity,
 }: ActivityTableProps) {
   if (!selectedGroupCost) {
     return (
@@ -35,7 +39,7 @@ export default function ActivityTable({
   return (
     <div className="bg-white border border-[#DDE5DF] rounded-2xl p-5 shadow-xs h-full flex flex-col justify-between">
       <div>
-        <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-2">
             <div className="p-2 rounded-lg bg-[#16823B]/10 text-[#16823B]">
               <ListChecks className="w-4 h-4" />
@@ -47,11 +51,28 @@ export default function ActivityTable({
                 {selectedLocation && (
                   <> di Lokasi <span className="font-bold text-[#16823B]">{selectedLocation.lokasi}</span></>
                 )}{" "}
-                (Cost/Ha dalam Rp = Cost ÷ Luas)
+                (Cost/Ha = Cost ÷ Luas) • <span className="text-[#16823B] font-semibold">Klik baris untuk memfilter riwayat</span>
               </p>
             </div>
           </div>
         </div>
+
+        {/* Filter Indicator Banner */}
+        {selectedActivity && (
+          <div className="flex items-center justify-between bg-[#16823B]/10 border border-[#16823B]/20 rounded-xl px-3 py-1.5 text-xs text-[#16823B] mb-2.5">
+            <span className="flex items-center gap-1.5 truncate">
+              <span className="w-2 h-2 rounded-full bg-[#16823B] shrink-0 animate-pulse" />
+              Menyaring Riwayat: <strong className="truncate">{selectedActivity.aktivitas}</strong>
+            </span>
+            <button
+              onClick={() => onSelectActivity?.(selectedActivity)}
+              className="text-[11px] underline font-bold hover:text-[#11672E] cursor-pointer shrink-0 ml-2"
+              title="Batal memfilter riwayat"
+            >
+              Tampilkan Semua
+            </button>
+          </div>
+        )}
 
         {loading ? (
           <div className="py-8 text-center min-h-[220px] flex flex-col items-center justify-center">
@@ -78,17 +99,36 @@ export default function ActivityTable({
               <tbody className="divide-y divide-[#DDE5DF]/60 text-[#17231B]">
                 {[...activities]
                   .sort((a, b) => b.costHa - a.costHa)
-                  .map((item) => (
-                    <tr key={item.idAktivitas} className="hover:bg-[#F7F9F7] transition-colors">
-                      <td className="py-2.5 px-3 font-medium">{item.aktivitas}</td>
-                      <td className="py-2.5 px-3 text-right font-mono text-[#5F6B63]">
-                        {item.luas}
-                      </td>
-                      <td className="py-2.5 px-3 text-right font-mono font-bold text-[#16823B]">
-                        {item.costHa.toLocaleString("id-ID")}
-                      </td>
-                    </tr>
-                  ))}
+                  .map((item) => {
+                    const isSelected = selectedActivity?.idAktivitas === item.idAktivitas;
+                    return (
+                      <tr
+                        key={item.idAktivitas}
+                        onClick={() => onSelectActivity?.(item)}
+                        className={`cursor-pointer transition-all select-none ${
+                          isSelected
+                            ? "bg-[#16823B]/10 font-bold text-[#16823B] border-l-4 border-l-[#16823B]"
+                            : "hover:bg-[#16823B]/5 text-[#17231B]"
+                        }`}
+                        title="Klik untuk memfilter Riwayat Transaksi Aktivitas"
+                      >
+                        <td className="py-2.5 px-3">
+                          <div className="flex items-center gap-1.5">
+                            {isSelected && (
+                              <span className="w-1.5 h-1.5 rounded-full bg-[#16823B] shrink-0" />
+                            )}
+                            <span className="truncate">{item.aktivitas}</span>
+                          </div>
+                        </td>
+                        <td className="py-2.5 px-3 text-right font-mono text-[#5F6B63]">
+                          {item.luas}
+                        </td>
+                        <td className={`py-2.5 px-3 text-right font-mono font-bold ${isSelected ? "text-[#16823B]" : "text-[#16823B]"}`}>
+                          {item.costHa.toLocaleString("id-ID")}
+                        </td>
+                      </tr>
+                    );
+                  })}
               </tbody>
             </table>
           </div>
