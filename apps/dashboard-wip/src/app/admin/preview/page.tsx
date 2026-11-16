@@ -52,6 +52,7 @@ export default function AdminPreviewPage() {
     const num = Number(val);
     if (isNaN(num) || num === 0) return "-";
     return num.toLocaleString("id-ID", {
+      minimumFractionDigits: decimals,
       maximumFractionDigits: decimals,
     });
   };
@@ -458,7 +459,7 @@ export default function AdminPreviewPage() {
                         <td className="py-2.5 px-3 font-mono text-[11px] font-bold text-[#16823B] whitespace-nowrap">{formatText(item.kodeMaterial)}</td>
                         <td className="py-2.5 px-3 font-semibold whitespace-nowrap">{formatText(item.deskripsiMaterial)}</td>
                         <td className="py-2.5 px-3 text-right font-mono font-bold text-[#17231B] whitespace-nowrap">
-                          {formatNumber(item.quantity, 2)}
+                          {formatNumber(item.quantity, 1)}
                         </td>
                       </tr>
                     ))}

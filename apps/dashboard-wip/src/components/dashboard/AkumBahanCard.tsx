@@ -135,8 +135,11 @@ export default function AkumBahanCard({ selectedLocation, data, loading }: AkumB
                               {item.deskripsiMaterial || item.kodeMaterial || "-"}
                             </td>
                             <td className="py-1.5 px-2.5 text-right font-mono font-bold text-[#16823B] text-[11px] whitespace-nowrap">
-                              {item.quantity && item.quantity > 0
-                                ? item.quantity.toLocaleString("id-ID", { maximumFractionDigits: 2 })
+                              {item.quantity !== undefined && item.quantity !== null && item.quantity > 0
+                                ? item.quantity.toLocaleString("id-ID", {
+                                    minimumFractionDigits: 1,
+                                    maximumFractionDigits: 1,
+                                  })
                                 : "-"}
                             </td>
                           </tr>
