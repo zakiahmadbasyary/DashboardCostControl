@@ -7,6 +7,7 @@ import {
   Search,
   AlertCircle,
   FlaskConical,
+  X,
 } from "lucide-react";
 import {
   formatCurrencyRp,
@@ -19,6 +20,8 @@ interface TimelineCardProps {
   timeline: TimelineItem[];
   onOpenMaterialModal: (timelineId: string) => void;
   loading?: boolean;
+  selectedActivity?: string | null;
+  onResetActivityFilter?: () => void;
 }
 
 export default function TimelineCard({
@@ -26,6 +29,8 @@ export default function TimelineCard({
   timeline,
   onOpenMaterialModal,
   loading,
+  selectedActivity,
+  onResetActivityFilter,
 }: TimelineCardProps) {
   const [searchQuery, setSearchQuery] = useState("");
 
@@ -47,18 +52,24 @@ export default function TimelineCard({
     });
   }, [timeline]);
 
-  // Client-side search filtering
+  // Client-side search & activity filtering
   const filteredTimeline = React.useMemo(() => {
-    if (!searchQuery.trim()) return sortedTimeline;
+    let result = sortedTimeline;
+    if (selectedActivity) {
+      result = result.filter(
+        (item) => item.aktivitas.toLowerCase() === selectedActivity.toLowerCase()
+      );
+    }
+    if (!searchQuery.trim()) return result;
     const q = searchQuery.toLowerCase();
-    return sortedTimeline.filter((item) => {
+    return result.filter((item) => {
       return (
         item.aktivitas.toLowerCase().includes(q) ||
         (item.uom && item.uom.toLowerCase().includes(q)) ||
         (item.tanggalRealisasi && item.tanggalRealisasi.toLowerCase().includes(q))
       );
     });
-  }, [sortedTimeline, searchQuery]);
+  }, [sortedTimeline, selectedActivity, searchQuery]);
 
   if (!selectedLocation) {
     return (
@@ -92,6 +103,21 @@ export default function TimelineCard({
               <span className="px-2.5 py-0.5 rounded-full bg-[#EAF3EC] text-[#16823B] font-bold text-xs border border-[#CBE0D1]">
                 Lokasi: {selectedLocation.lokasi}
               </span>
+              {selectedActivity && (
+                <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-[#16823B] text-white font-semibold text-xs shadow-xs">
+                  <span>Aktivitas: {selectedActivity}</span>
+                  {onResetActivityFilter && (
+                    <button
+                      type="button"
+                      onClick={onResetActivityFilter}
+                      className="hover:bg-white/20 rounded-full p-0.5 transition-colors cursor-pointer"
+                      title="Tampilkan semua aktivitas"
+                    >
+                      <X className="w-3 h-3" />
+                    </button>
+                  )}
+                </span>
+              )}
             </div>
             <p className="text-xs text-[#5F6B63] mt-0.5">
               Riwayat lengkap aplikasi lapangan, tenaga kerja, upah, charge, dan pemakaian bahan kimia
@@ -123,10 +149,21 @@ export default function TimelineCard({
       ) : filteredTimeline.length === 0 ? (
         <div className="py-8 text-center bg-[#F7F9F7] rounded-xl border border-dashed border-[#DDE5DF]">
           <p className="text-xs text-[#5F6B63]">
-            {searchQuery
+            {selectedActivity
+              ? `Tidak ada transaksi timeline untuk aktivitas "${selectedActivity}".`
+              : searchQuery
               ? "Tidak ada transaksi yang cocok dengan pencarian."
               : "Belum ada riwayat aktivitas untuk lokasi ini."}
           </p>
+          {selectedActivity && onResetActivityFilter && (
+            <button
+              type="button"
+              onClick={onResetActivityFilter}
+              className="mt-2.5 inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-semibold bg-[#16823B] text-white hover:bg-[#126930] transition-colors cursor-pointer"
+            >
+              <span>Tampilkan Semua Aktivitas</span>
+            </button>
+          )}
         </div>
       ) : (
         <>

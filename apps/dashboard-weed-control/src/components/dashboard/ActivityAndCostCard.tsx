@@ -13,7 +13,7 @@ import {
   Legend,
 } from "recharts";
 import { ActivityCostItem, AgeCostDataPoint, LocationItem } from "@/types/dashboard";
-import { Layers, TrendingUp, AlertCircle, Sparkles } from "lucide-react";
+import { Layers, TrendingUp, AlertCircle, Sparkles, X } from "lucide-react";
 import { formatCurrencyRp, formatDecimal2 } from "@/lib/formatters";
 
 interface ActivityAndCostCardProps {
@@ -21,6 +21,8 @@ interface ActivityAndCostCardProps {
   activities: ActivityCostItem[];
   chartData: AgeCostDataPoint[];
   loading?: boolean;
+  selectedActivity?: string | null;
+  onSelectActivity?: (activityName: string) => void;
 }
 
 interface CustomComboTooltipProps {
@@ -74,6 +76,8 @@ export default function ActivityAndCostCard({
   activities,
   chartData,
   loading,
+  selectedActivity,
+  onSelectActivity,
 }: ActivityAndCostCardProps) {
   if (!selectedLocation) {
     return (
@@ -126,35 +130,62 @@ export default function ActivityAndCostCard({
               <p className="text-xs text-[#5F6B63]">Tidak ada rincian aktivitas untuk lokasi ini.</p>
             </div>
           ) : (
-            <div className="overflow-x-auto rounded-xl border border-[#DDE5DF] max-h-[375px] overflow-y-auto">
+            <div className="overflow-x-auto rounded-xl border border-[#DDE5DF] max-h-[375px] overflow-y-auto scrollbar-thin">
               <table className="w-full text-xs text-left">
-                <thead className="bg-[#F7F9F7] text-[#17231B] uppercase font-bold border-b border-[#DDE5DF] sticky top-0 z-10">
+                <thead className="bg-[#F7F9F7] text-[#17231B] uppercase font-bold border-b border-[#DDE5DF] sticky top-0 z-10 shadow-2xs">
                   <tr>
                     <th className="py-2.5 px-3">Aktivitas</th>
-                    <th className="py-2.5 px-3 text-right">Total Biaya</th>
-                    <th className="py-2.5 px-3 text-right">Cost / Ha</th>
+                    <th className="py-2.5 px-3 text-right whitespace-nowrap">Total Biaya</th>
+                    <th className="py-2.5 px-3 text-right whitespace-nowrap">Cost / Ha</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-[#DDE5DF]/60">
-                  {activities.map((item, idx) => (
-                    <tr key={idx} className="hover:bg-[#F7F9F7] transition-colors">
-                      <td className="py-2 px-3 font-semibold text-[#17231B]">{item.aktivitas}</td>
-                      <td className="py-2 px-3 text-right font-mono text-[#5F6B63]">
-                        {formatCurrencyRp(item.totalBiaya)}
-                      </td>
-                      <td className="py-2 px-3 text-right font-mono font-bold text-[#16823B]">
-                        {formatCurrencyRp(item.costHa)}
-                      </td>
-                    </tr>
-                  ))}
+                  {activities.map((item, idx) => {
+                    const isSelected = selectedActivity === item.aktivitas;
+                    return (
+                      <tr
+                        key={idx}
+                        onClick={() => onSelectActivity?.(item.aktivitas)}
+                        className={`transition-colors cursor-pointer group ${
+                          isSelected
+                            ? "bg-[#EAF3EC] border-l-4 border-[#16823B]"
+                            : "hover:bg-[#F7F9F7]"
+                        }`}
+                        title={`Klik untuk melihat timeline aktivitas ${item.aktivitas}`}
+                      >
+                        <td className="py-2.5 px-3 font-semibold text-[#17231B]">
+                          <div className="flex items-center gap-1.5">
+                            {isSelected && (
+                              <span className="w-1.5 h-1.5 rounded-full bg-[#16823B] shrink-0 animate-pulse" />
+                            )}
+                            <span
+                              className={
+                                isSelected
+                                  ? "text-[#16823B] font-bold"
+                                  : "group-hover:text-[#16823B] transition-colors"
+                              }
+                            >
+                              {item.aktivitas}
+                            </span>
+                          </div>
+                        </td>
+                        <td className="py-2.5 px-3 text-right font-mono text-[#5F6B63] whitespace-nowrap">
+                          {formatCurrencyRp(item.totalBiaya)}
+                        </td>
+                        <td className="py-2.5 px-3 text-right font-mono font-bold text-[#16823B] whitespace-nowrap">
+                          {formatCurrencyRp(item.costHa)}
+                        </td>
+                      </tr>
+                    );
+                  })}
                 </tbody>
                 <tfoot className="bg-[#F7F9F7] font-bold text-[#17231B] border-t-2 border-[#DDE5DF] sticky bottom-0">
                   <tr>
-                    <td className="py-2 px-3 uppercase text-[11px]">Total ({activities.length})</td>
-                    <td className="py-2 px-3 text-right font-mono text-[#17231B]">
+                    <td className="py-2.5 px-3 uppercase text-[11px]">Total ({activities.length})</td>
+                    <td className="py-2.5 px-3 text-right font-mono text-[#17231B] whitespace-nowrap">
                       {formatCurrencyRp(totalBiayaSemuaAktivitas)}
                     </td>
-                    <td className="py-2 px-3 text-right font-mono text-[#16823B]">
+                    <td className="py-2.5 px-3 text-right font-mono text-[#16823B] whitespace-nowrap">
                       {formatCurrencyRp(totalCostHaSemuaAktivitas)}
                     </td>
                   </tr>
@@ -166,6 +197,16 @@ export default function ActivityAndCostCard({
 
         <div className="text-[10px] text-[#89938D] mt-3 pt-2 border-t border-[#DDE5DF]/60 flex items-center justify-between">
           <span>{activities.length} Aktivitas</span>
+          {selectedActivity && onSelectActivity && (
+            <button
+              type="button"
+              onClick={() => onSelectActivity(selectedActivity)}
+              className="text-[#16823B] hover:underline font-semibold flex items-center gap-1 cursor-pointer"
+            >
+              <span>Reset Filter ({selectedActivity})</span>
+              <X className="w-3 h-3" />
+            </button>
+          )}
         </div>
       </div>
 

@@ -117,8 +117,11 @@ export const weedDashboardService = {
     return json.data;
   },
 
-  async getTimeline(lokasi: string): Promise<TimelineItem[]> {
+  async getTimeline(lokasi: string, aktivitas?: string): Promise<TimelineItem[]> {
     const params = new URLSearchParams({ lokasi });
+    if (aktivitas) {
+      params.append("aktivitas", aktivitas);
+    }
     const res = await fetch(`/api/dashboard/timeline?${params.toString()}`, {
       cache: "no-store",
     });

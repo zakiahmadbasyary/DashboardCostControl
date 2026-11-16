@@ -8,6 +8,7 @@ export async function GET(req: NextRequest) {
   try {
     const { searchParams } = new URL(req.url);
     const lokasi = (searchParams.get("lokasi") || "").trim();
+    const aktivitas = (searchParams.get("aktivitas") || "").trim();
 
     if (!lokasi) {
       return NextResponse.json(
@@ -16,8 +17,13 @@ export async function GET(req: NextRequest) {
       );
     }
 
+    const whereClause: { lokasi: string; aktivitas?: string } = { lokasi };
+    if (aktivitas) {
+      whereClause.aktivitas = aktivitas;
+    }
+
     const rows = await prisma.dataTimeline.findMany({
-      where: { lokasi },
+      where: whereClause,
       orderBy: [
         { tanggalRealisasi: "asc" },
         { id: "asc" },

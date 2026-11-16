@@ -72,6 +72,7 @@ export default function WeedControlDashboardPage() {
   const [activitiesData, setActivitiesData] = useState<ActivityCostItem[]>([]);
   const [chartData, setChartData] = useState<AgeCostDataPoint[]>([]);
   const [timelineData, setTimelineData] = useState<TimelineItem[]>([]);
+  const [selectedActivity, setSelectedActivity] = useState<string | null>(null);
 
   // Popup Modal Material
   const [selectedTimelineId, setSelectedTimelineId] = useState<string | null>(null);
@@ -84,9 +85,9 @@ export default function WeedControlDashboardPage() {
   const [loadingActivityCost, setLoadingActivityCost] = useState<boolean>(false);
   const [loadingTimeline, setLoadingTimeline] = useState<boolean>(false);
 
-  // 6. Smooth Scroll Target ("detail" atau "location")
+  // 6. Smooth Scroll Target ("detail", "location", atau "timeline")
   const [pendingScrollTarget, setPendingScrollTarget] = useState<
-    "location" | "detail" | null
+    "location" | "detail" | "timeline" | null
   >(null);
 
   const scrollToElement = useCallback((id: string) => {
@@ -124,6 +125,7 @@ export default function WeedControlDashboardPage() {
   const handleSelectLocation = useCallback(
     async (loc: LocationItem, shouldScroll: boolean = false) => {
       setSelectedLocation(loc);
+      setSelectedActivity(null);
       setLoadingDetail(true);
       setLoadingActivityCost(true);
       setLoadingTimeline(true);
@@ -176,6 +178,7 @@ export default function WeedControlDashboardPage() {
         } else {
           // Jika lokasi terpilih tidak lagi sesuai filter, kosongkan pilihan sesuai PRD
           setSelectedLocation(null);
+          setSelectedActivity(null);
           setLocationDetail(null);
           setActivitiesData([]);
           setChartData([]);
@@ -240,6 +243,59 @@ export default function WeedControlDashboardPage() {
     []
   );
 
+  // Handle Click Action on Rincian Aktivitas -> Filter Timeline by that activity & smooth scroll after data loaded
+  const handleSelectActivity = useCallback(
+    async (activityName: string) => {
+      if (!selectedLocation) return;
+
+      // Jika klik aktivitas yang sedang aktif terpilih, toggle/reset kembali ke semua
+      if (selectedActivity === activityName) {
+        setSelectedActivity(null);
+        setLoadingTimeline(true);
+        try {
+          const res = await weedDashboardService.getTimeline(selectedLocation.lokasi);
+          setTimelineData(res || []);
+        } catch (err) {
+          console.error("Gagal memuat timeline:", err);
+        } finally {
+          setLoadingTimeline(false);
+        }
+        return;
+      }
+
+      setSelectedActivity(activityName);
+      setLoadingTimeline(true);
+      setPendingScrollTarget("timeline");
+
+      try {
+        const res = await weedDashboardService.getTimeline(
+          selectedLocation.lokasi,
+          activityName
+        );
+        setTimelineData(res || []);
+      } catch (err) {
+        console.error("Gagal memuat timeline aktivitas:", err);
+      } finally {
+        setLoadingTimeline(false);
+      }
+    },
+    [selectedLocation, selectedActivity]
+  );
+
+  const handleResetActivityFilter = useCallback(async () => {
+    if (!selectedLocation) return;
+    setSelectedActivity(null);
+    setLoadingTimeline(true);
+    try {
+      const res = await weedDashboardService.getTimeline(selectedLocation.lokasi);
+      setTimelineData(res || []);
+    } catch (err) {
+      console.error("Gagal reset filter timeline:", err);
+    } finally {
+      setLoadingTimeline(false);
+    }
+  }, [selectedLocation]);
+
   // Smooth scroll effect after data finishes loading
   useEffect(() => {
     if (!pendingScrollTarget) return;
@@ -262,6 +318,14 @@ export default function WeedControlDashboardPage() {
         scrollToElement("location-analysis-section");
         setPendingScrollTarget(null);
       }, 80);
+      return () => clearTimeout(timer);
+    }
+
+    if (pendingScrollTarget === "timeline" && !loadingTimeline) {
+      const timer = setTimeout(() => {
+        scrollToElement("timeline-activity-section");
+        setPendingScrollTarget(null);
+      }, 100);
       return () => clearTimeout(timer);
     }
   }, [
@@ -338,16 +402,23 @@ export default function WeedControlDashboardPage() {
             activities={activitiesData}
             chartData={chartData}
             loading={loadingActivityCost}
+            selectedActivity={selectedActivity}
+            onSelectActivity={handleSelectActivity}
           />
         </section>
 
         {/* Section 6: Timeline Aktivitas Card */}
-        <section className="relative z-0 isolate">
+        <section
+          id="timeline-activity-section"
+          className="relative z-0 isolate scroll-mt-24 sm:scroll-mt-[200px]"
+        >
           <TimelineCard
             selectedLocation={selectedLocation}
             timeline={timelineData}
             onOpenMaterialModal={(timelineId) => setSelectedTimelineId(timelineId)}
             loading={loadingTimeline}
+            selectedActivity={selectedActivity}
+            onResetActivityFilter={handleResetActivityFilter}
           />
         </section>
       </main>
