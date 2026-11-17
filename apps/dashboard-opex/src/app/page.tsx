@@ -224,7 +224,7 @@ export default function DashboardOpexPage() {
     [selectedPeriod, loadingCostCenters, scrollToElement]
   );
 
-  // 2. Direct dari Daftar Cost Center ke Card Detail Cost Element & Aktivitas Riil
+  // 2. Direct dari Daftar Cost Center ke Card Detail Cost Element & Aktivitas Real
   const handleCostCenterSelect = useCallback(
     (costcenter: string) => {
       if (costcenter === selectedCostCenter && !loadingCostElements) {
@@ -367,7 +367,7 @@ export default function DashboardOpexPage() {
             <div>
               <h3 className="text-sm font-extrabold text-[#17231B] uppercase tracking-wider flex items-center gap-2">
                 <span className="w-2.5 h-2.5 rounded-full bg-[#16823B]" />
-                Detail Cost Element & Aktivitas Riil — PG1 ({selectedPeriodLabel})
+                Detail Cost Element & Aktivitas Real — PG1 ({selectedPeriodLabel})
               </h3>
               <p className="text-xs text-[#5F6B63] mt-0.5">
                 Pilih akun Cost Element di kiri untuk menelusuri transaksi pekerjaan pada Cost Center{" "}
@@ -388,7 +388,7 @@ export default function DashboardOpexPage() {
               onSelectCostCenter={handleCostCenterSelect}
             />
 
-            {/* Card Kanan: Tabel Aktivitas Riil */}
+            {/* Card Kanan: Tabel Aktivitas Reall */}
             <CostElementActivityTable
               selectedCostCenter={selectedCostCenter}
               selectedCe2={selectedCe2}
