@@ -201,8 +201,8 @@ export default function LocationListCard({
                     </span>
                   </div>
 
-                  {/* Table with max 10 rows visible, scrollable if > 10 */}
-                  <div className="max-h-[310px] overflow-y-auto">
+                  {/* Table with max 5 rows visible, scrollable if > 5 */}
+                  <div className="max-h-[168px] overflow-y-auto">
                     {regLocs.length === 0 ? (
                       <div className="py-6 px-1 text-center text-[10px] text-[#89938D]">
                         Tidak ada data

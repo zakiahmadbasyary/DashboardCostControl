@@ -30,7 +30,12 @@ export async function GET(req: NextRequest) {
         },
       }),
       prisma.dataMaterial.findMany({
-        where: { timelineId },
+        where: {
+          timelineId,
+          quantity: {
+            gt: 0,
+          },
+        },
         orderBy: [
           { quantity: "desc" },
           { namaMaterial: "asc" },

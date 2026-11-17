@@ -65,7 +65,12 @@ export default function MaterialModal({
   if (!timelineId) return null;
 
   const timelineInfo = data?.timeline;
-  const materials = data?.materials || [];
+  // Filter hanya material yang memiliki nilai (> 0, bukan 0, bukan null, bukan "-")
+  const materials = (data?.materials || []).filter((mat) => {
+    if (mat.quantity === null || mat.quantity === undefined) return false;
+    const val = typeof mat.quantity === "number" ? mat.quantity : parseFloat(String(mat.quantity));
+    return !isNaN(val) && val > 0;
+  });
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-xs p-4 animate-in fade-in duration-150">
@@ -122,7 +127,7 @@ export default function MaterialModal({
           ) : materials.length === 0 ? (
             <div className="p-8 text-center bg-[#F7F9F7] rounded-xl border border-dashed border-[#DDE5DF]">
               <p className="text-xs text-[#5F6B63]">
-                Tidak ada data bahan kimia tersimpan untuk transaksi ini.
+                Tidak ada data bahan kimia atau material dengan nilai tercatat untuk transaksi ini.
               </p>
             </div>
           ) : (
@@ -170,7 +175,7 @@ export default function MaterialModal({
               </div>
 
               <p className="text-[10px] text-[#89938D] text-right">
-                Menampilkan {materials.length} material kimia terdaftar
+                Menampilkan {materials.length} material yang diaplikasikan
               </p>
             </div>
           )}
