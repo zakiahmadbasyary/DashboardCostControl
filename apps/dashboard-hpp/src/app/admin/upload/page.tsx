@@ -137,7 +137,7 @@ export default function HppAdminUploadPage() {
             1. <strong>MasterSheet</strong> (Master Lokasi) &rarr; 2. <strong>Data Budget</strong> (Acuan Budget) &rarr; 3. <strong>Data Lokasi HPP</strong> &rarr; 4. <strong>Data Aktivitas HPP</strong>.
           </p>
           <p className="text-[11px] text-[#5F6B63]">
-            * Sistem upload menggunakan metode <strong>Pembaruan Inkremental</strong>: Data MasterSheet &amp; Budget diperbarui/ditambahkan berdasarkan ID unik (upsert), sedangkan Data Lokasi &amp; Aktivitas akan selalu ditambahkan sebagai data baru. Gunakan tombol <strong>Reset Data</strong> jika ingin mengosongkan tabel tertentu.
+            * Sistem upload menggunakan metode <strong>Sinkronisasi Bersih (Skema B)</strong>: Jika mengunggah file untuk bulan/siklus yang sudah ada, data lama pada periode tersebut otomatis digantikan secara bersih dengan data baru (bebas risiko duplikasi/data membengkak). Data bulan-bulan lainnya tetap aman tersimpan.
           </p>
         </div>
       </div>

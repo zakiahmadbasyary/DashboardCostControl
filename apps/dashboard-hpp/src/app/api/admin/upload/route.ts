@@ -328,38 +328,38 @@ export async function POST(req: Request) {
         }
       }
 
-      // Insert each location row with resolved budget
+      // Resolve missing budgets before insert
       for (const item of itemsToInsert) {
-        try {
-          let targetIdBudget = item.idBudget;
-          const budgetKey = `${item.periode}_${item.group}_${item.status}`;
+        let targetIdBudget = item.idBudget;
+        const budgetKey = `${item.periode}_${item.group}_${item.status}`;
 
-          if (!targetIdBudget) {
-            if (budgetCache.has(budgetKey)) {
-              targetIdBudget = budgetCache.get(budgetKey)!;
-            } else {
-              const matchedBudget = await prisma.budget.findFirst({
-                where: { periode: item.periode, group: item.group, status: item.status },
-              });
-              if (matchedBudget) {
-                targetIdBudget = matchedBudget.idBudget;
-              } else {
-                targetIdBudget = limitStr(`B_AUTO_${item.group}_${item.status}_P${item.periode}`, 20);
-                await prisma.budget.upsert({
-                  where: { idBudget: targetIdBudget },
-                  update: {},
-                  create: {
-                    idBudget: targetIdBudget,
-                    group: item.group,
-                    status: item.status,
-                    periode: item.periode,
-                    budget: 0,
-                  },
-                });
-              }
-              budgetCache.set(budgetKey, targetIdBudget);
-            }
+        if (!targetIdBudget) {
+          if (budgetCache.has(budgetKey)) {
+            targetIdBudget = budgetCache.get(budgetKey)!;
           } else {
+            const matchedBudget = await prisma.budget.findFirst({
+              where: { periode: item.periode, group: item.group, status: item.status },
+            });
+            if (matchedBudget) {
+              targetIdBudget = matchedBudget.idBudget;
+            } else {
+              targetIdBudget = limitStr(`B_AUTO_${item.group}_${item.status}_P${item.periode}`, 20);
+              await prisma.budget.upsert({
+                where: { idBudget: targetIdBudget },
+                update: {},
+                create: {
+                  idBudget: targetIdBudget,
+                  group: item.group,
+                  status: item.status,
+                  periode: item.periode,
+                  budget: 0,
+                },
+              });
+            }
+            budgetCache.set(budgetKey, targetIdBudget);
+          }
+        } else {
+          if (!budgetCache.has(targetIdBudget)) {
             const existBudget = await prisma.budget.findUnique({
               where: { idBudget: targetIdBudget },
             });
@@ -374,35 +374,47 @@ export async function POST(req: Request) {
                 },
               });
             }
+            budgetCache.set(targetIdBudget, targetIdBudget);
           }
+        }
 
-          await prisma.lokasiHPP.create({
-            data: {
-              idLokasiHpp: item.idLokasiHpp,
-              idMaster: item.idMaster,
-              lokasi: item.lokasi,
-              wilayah: item.wilayah,
-              idBudget: targetIdBudget,
-              periode: item.periode,
-              tahun: item.tahun,
-              tanggalRawat: item.tanggalRawat,
-              status: item.status,
-              jenisBibit: item.jenisBibit,
-              kelasBibit: item.kelasBibit,
-              qtyPanen: item.qtyPanen,
-              luasPanen: item.luasPanen,
-              luasAktif: item.luasAktif,
-              group: item.group,
-              descGroup: item.descGroup,
-              jenisBiaya: item.jenisBiaya,
-              biaya: item.biaya,
-            },
-          });
-          count++;
-        } catch (e) {
-          console.error(`lokasiHPP insert error for ${item.idLokasiHpp}:`, e);
+        item.idBudget = targetIdBudget;
+      }
+
+      // SKEMA B: Kumpulkan periode & tahun unik yang ada di file Excel yang baru diupload
+      const targetPeriods = new Map<string, { periode: number; tahun: number }>();
+      for (const item of itemsToInsert) {
+        const t = item.tahun || new Date().getFullYear();
+        const p = item.periode;
+        const key = `${t}_${p}`;
+        if (!targetPeriods.has(key)) {
+          targetPeriods.set(key, { periode: p, tahun: t });
         }
       }
+
+      // Jalankan transaksi sinkronisasi bersih Skema B (Hapus data lama khusus periode terkait, lalu bulk insert)
+      await prisma.$transaction(
+        async (tx) => {
+          for (const tp of Array.from(targetPeriods.values())) {
+            await tx.lokasiHPP.deleteMany({
+              where: {
+                periode: tp.periode,
+                tahun: tp.tahun,
+              },
+            });
+          }
+
+          const BATCH_SIZE = 1000;
+          for (let b = 0; b < itemsToInsert.length; b += BATCH_SIZE) {
+            const slice = itemsToInsert.slice(b, b + BATCH_SIZE);
+            const res = await tx.lokasiHPP.createMany({
+              data: slice,
+            });
+            count += res.count;
+          }
+        },
+        { timeout: 60000 }
+      );
     } else if (category === "aktivitas") {
       const itemsToInsert: any[] = [];
       const timeKey = Date.now().toString(36);
@@ -497,20 +509,39 @@ export async function POST(req: Request) {
         }
       }
 
-      // Insert each activity row
-      for (const item of itemsToInsert) {
-        try {
-          await prisma.aktivitasHPP.create({ data: item });
-          count++;
-        } catch (e) {
-          console.error(`aktivitasHPP insert error for ${item.idAktivitas}:`, e);
-        }
-      }
+      // SKEMA B: Kumpulkan idMaster unik di file Excel yang baru diupload
+      const incomingIdMasters = Array.from(new Set(itemsToInsert.map((item) => item.idMaster).filter(Boolean)));
+
+      // Jalankan transaksi sinkronisasi bersih Skema B (Hapus data aktivitas lama khusus idMaster terkait, lalu bulk insert)
+      await prisma.$transaction(
+        async (tx) => {
+          if (incomingIdMasters.length > 0) {
+            const CHUNK_DELETE = 1000;
+            for (let i = 0; i < incomingIdMasters.length; i += CHUNK_DELETE) {
+              await tx.aktivitasHPP.deleteMany({
+                where: {
+                  idMaster: { in: incomingIdMasters.slice(i, i + CHUNK_DELETE) },
+                },
+              });
+            }
+          }
+
+          const BATCH_SIZE = 1000;
+          for (let b = 0; b < itemsToInsert.length; b += BATCH_SIZE) {
+            const slice = itemsToInsert.slice(b, b + BATCH_SIZE);
+            const res = await tx.aktivitasHPP.createMany({
+              data: slice,
+            });
+            count += res.count;
+          }
+        },
+        { timeout: 60000 }
+      );
     }
 
     return NextResponse.json({
       status: "success",
-      message: `Berhasil memproses & menambahkan/memperbarui ${count} baris data ${category} di database PostgreSQL.`,
+      message: `Berhasil memproses & menyinkronkan (Skema B) ${count} baris data ${category} di database PostgreSQL.`,
       count,
     });
   } catch (error: any) {
