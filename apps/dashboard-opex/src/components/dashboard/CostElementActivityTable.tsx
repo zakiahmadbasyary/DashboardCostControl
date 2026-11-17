@@ -54,7 +54,7 @@ export default function CostElementActivityTable({
         </div>
         <h4 className="font-bold text-sm text-[#17231B]">Pilih Cost Element</h4>
         <p className="text-xs text-[#5F6B63] mt-1 max-w-xs leading-relaxed">
-          Silakan klik salah satu akun pada tabel <strong>Cost Element (CE2)</strong> di samping untuk menelusuri pekerjaan/aktivitas riil dari dokumen transaksi.
+          Silakan klik salah satu akun pada tabel <strong>Cost Element (CE2)</strong> di samping untuk menelusuri pekerjaan/aktivitas real dari dokumen transaksi.
         </p>
       </div>
     );
@@ -71,7 +71,7 @@ export default function CostElementActivityTable({
             </div>
             <div>
               <h4 className="font-bold text-sm text-[#17231B]">
-                Aktivitas Riil Lapangan
+                Aktivitas Real Lapangan
               </h4>
               <p className="text-[11px] text-[#5F6B63]">
                 Catatan transaksi untuk <strong className="text-[#16823B]">{selectedCostCenter}</strong> · <strong className="text-[#16823B]">{selectedCe2}</strong>
@@ -155,11 +155,10 @@ export default function CostElementActivityTable({
                       key={pgNum}
                       type="button"
                       onClick={() => setCurrentPage(pgNum)}
-                      className={`w-6 h-6 rounded-lg text-xs font-bold transition-all cursor-pointer ${
-                        currentPage === pgNum
+                      className={`w-6 h-6 rounded-lg text-xs font-bold transition-all cursor-pointer ${currentPage === pgNum
                           ? "bg-[#16823B] text-white shadow-xs"
                           : "bg-white border border-[#DDE5DF] text-[#5F6B63] hover:bg-[#F8FAF9]"
-                      }`}
+                        }`}
                     >
                       {pgNum}
                     </button>
