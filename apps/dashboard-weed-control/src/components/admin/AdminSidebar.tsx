@@ -3,13 +3,23 @@
 import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { UploadCloud, Eye, LayoutDashboard, Menu, X, Shield, Tractor } from "lucide-react";
+import { UploadCloud, Eye, LayoutDashboard, Menu, X, Shield, Tractor, LogOut } from "lucide-react";
 
 export default function AdminSidebar() {
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
 
   const adminBaseUrl = process.env.NEXT_PUBLIC_ADMIN_URL || "http://localhost:3005";
+
+  const handleLogout = async () => {
+    try {
+      await fetch("/api/auth/logout", { method: "POST" });
+    } catch (e) {
+      console.error(e);
+    } finally {
+      window.location.href = `${adminBaseUrl}/dashboard`;
+    }
+  };
 
   const navItems = [
     { label: "Upload Data Excel", href: "/admin/upload", icon: UploadCloud },
@@ -96,6 +106,13 @@ export default function AdminSidebar() {
           <LayoutDashboard className="w-4.5 h-4.5 text-[#16823B] shrink-0" />
           <span>Kembali ke Dashboard</span>
         </Link>
+        <button
+          onClick={handleLogout}
+          className="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs sm:text-sm font-bold text-rose-600 hover:bg-rose-50 transition-colors cursor-pointer"
+        >
+          <LogOut className="w-4.5 h-4.5 shrink-0" />
+          <span>Keluar (Logout)</span>
+        </button>
         <div className="pt-1.5 text-center text-[11px] text-[#89938D]">
           © 2026 Great Giant Foods
         </div>
