@@ -95,7 +95,6 @@ export default function ActivityAndCostCard({
     );
   }
 
-  const totalBiayaSemuaAktivitas = activities.reduce((acc, curr) => acc + curr.totalBiaya, 0);
   const totalCostHaSemuaAktivitas = activities.reduce((acc, curr) => acc + curr.costHa, 0);
 
   return (
@@ -135,7 +134,6 @@ export default function ActivityAndCostCard({
                 <thead className="bg-[#F7F9F7] text-[#17231B] uppercase font-bold border-b border-[#DDE5DF] sticky top-0 z-10 shadow-2xs">
                   <tr>
                     <th className="py-2.5 px-3">Aktivitas</th>
-                    <th className="py-2.5 px-3 text-right whitespace-nowrap">Total Biaya</th>
                     <th className="py-2.5 px-3 text-right whitespace-nowrap">Cost / Ha</th>
                   </tr>
                 </thead>
@@ -169,9 +167,6 @@ export default function ActivityAndCostCard({
                             </span>
                           </div>
                         </td>
-                        <td className="py-2.5 px-3 text-right font-mono text-[#5F6B63] whitespace-nowrap">
-                          {formatCurrencyRp(item.totalBiaya)}
-                        </td>
                         <td className="py-2.5 px-3 text-right font-mono font-bold text-[#16823B] whitespace-nowrap">
                           {formatCurrencyRp(item.costHa)}
                         </td>
@@ -182,9 +177,6 @@ export default function ActivityAndCostCard({
                 <tfoot className="bg-[#F7F9F7] font-bold text-[#17231B] border-t-2 border-[#DDE5DF] sticky bottom-0">
                   <tr>
                     <td className="py-2.5 px-3 uppercase text-[11px]">Total ({activities.length})</td>
-                    <td className="py-2.5 px-3 text-right font-mono text-[#17231B] whitespace-nowrap">
-                      {formatCurrencyRp(totalBiayaSemuaAktivitas)}
-                    </td>
                     <td className="py-2.5 px-3 text-right font-mono text-[#16823B] whitespace-nowrap">
                       {formatCurrencyRp(totalCostHaSemuaAktivitas)}
                     </td>

@@ -24,6 +24,8 @@ interface TimelineCardProps {
   onResetActivityFilter?: () => void;
 }
 
+type AreaBasis = "lokasi" | "hasil";
+
 export default function TimelineCard({
   selectedLocation,
   timeline,
@@ -33,6 +35,7 @@ export default function TimelineCard({
   onResetActivityFilter,
 }: TimelineCardProps) {
   const [searchQuery, setSearchQuery] = useState("");
+  const [areaBasis, setAreaBasis] = useState<AreaBasis>("lokasi");
 
   // Reset search on location change
   useEffect(() => {
@@ -87,6 +90,35 @@ export default function TimelineCard({
     );
   }
 
+  const getDivisor = (item: TimelineItem): number | null => {
+    if (areaBasis === "lokasi") {
+      return selectedLocation.luas > 0 ? selectedLocation.luas : null;
+    }
+    return item.hasil !== null && item.hasil !== undefined && item.hasil > 0 ? item.hasil : null;
+  };
+
+  const calcCostPerArea = (
+    value: number | null | undefined,
+    divisor: number | null
+  ): number | null => {
+    if (value === null || value === undefined || divisor === null || divisor <= 0) {
+      return null;
+    }
+    return value / divisor;
+  };
+
+  const buildCostTooltip = (
+    rawVal: number | null | undefined,
+    divisor: number | null
+  ): string | undefined => {
+    if (rawVal === null || rawVal === undefined || rawVal === 0) return undefined;
+    const basisLabel =
+      areaBasis === "lokasi"
+        ? `Luas Lokasi (${formatDecimal2(selectedLocation.luas)} Ha)`
+        : `Luas Hasil (${divisor ? formatDecimal2(divisor) : "0"})`;
+    return `Biaya asli: ${formatCurrencyRp(rawVal)} ÷ ${basisLabel}`;
+  };
+
   return (
     <div className="bg-white border border-[#DDE5DF] rounded-2xl p-5 sm:p-6 shadow-xs flex flex-col gap-4">
       {/* Header Bar */}
@@ -125,8 +157,40 @@ export default function TimelineCard({
           </div>
         </div>
 
-        {/* Search Input Box */}
-        <div className="flex items-center gap-2 self-start sm:self-center">
+        {/* Filter Luas & Search Input Box */}
+        <div className="flex flex-wrap items-center gap-2 self-start sm:self-center">
+          {/* Segmented Toggle: Luas Lokasi vs Luas Hasil */}
+          <div
+            className="inline-flex items-center bg-[#F7F9F7] border border-[#DDE5DF] rounded-lg p-0.5"
+            role="group"
+            aria-label="Filter basis pembagi luas"
+          >
+            <button
+              type="button"
+              onClick={() => setAreaBasis("lokasi")}
+              className={`px-2.5 py-1 rounded-md text-xs font-semibold transition-all cursor-pointer ${
+                areaBasis === "lokasi"
+                  ? "bg-[#16823B] text-white shadow-2xs"
+                  : "text-[#5F6B63] hover:text-[#17231B]"
+              }`}
+              title={`Bagi biaya dengan Luas Lokasi (${formatDecimal2(selectedLocation.luas)} Ha)`}
+            >
+              Luas Lokasi
+            </button>
+            <button
+              type="button"
+              onClick={() => setAreaBasis("hasil")}
+              className={`px-2.5 py-1 rounded-md text-xs font-semibold transition-all cursor-pointer ${
+                areaBasis === "hasil"
+                  ? "bg-[#16823B] text-white shadow-2xs"
+                  : "text-[#5F6B63] hover:text-[#17231B]"
+              }`}
+              title="Bagi biaya dengan Luas Hasil pada masing-masing baris transaksi"
+            >
+              Luas Hasil
+            </button>
+          </div>
+
           <div className="relative">
             <Search className="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-[#89938D]" />
             <input
@@ -185,72 +249,96 @@ export default function TimelineCard({
                 </tr>
               </thead>
               <tbody className="divide-y divide-[#DDE5DF]/60">
-                {filteredTimeline.map((item) => (
-                  <tr key={item.id} className="hover:bg-[#F7F9F7] transition-colors">
-                    <td className="py-2.5 px-3 font-semibold text-[#17231B]">
-                      {item.aktivitas}
-                    </td>
-                    <td className="py-2.5 px-3 text-[#5F6B63]">
-                      {formatDateShort(item.tanggalRealisasi)}
-                    </td>
-                    <td className="py-2.5 px-3 text-center font-mono font-medium">
-                      {item.umur !== null && item.umur !== undefined ? `${item.umur} Bln` : "-"}
-                    </td>
-                    {/* Hasil */}
-                    <td
-                      className="py-2.5 px-3 text-right font-mono text-[#17231B]"
-                      title={item.hasil !== null ? `Nilai asli: ${item.hasil}` : undefined}
-                    >
-                      {formatDecimal2(item.hasil)}
-                    </td>
-                    <td className="py-2.5 px-3 text-center text-[#5F6B63]">{item.uom || "-"}</td>
-                    {/* TK */}
-                    <td
-                      className="py-2.5 px-3 text-right font-mono text-[#17231B]"
-                      title={item.tk !== null ? `Nilai asli: ${item.tk}` : undefined}
-                    >
-                      {formatDecimal2(item.tk)}
-                    </td>
-                    {/* Kapasitas/TK */}
-                    <td
-                      className="py-2.5 px-3 text-right font-mono text-[#17231B]"
-                      title={
-                        item.kapasitasPerTk !== null
-                          ? `Nilai asli: ${item.kapasitasPerTk}`
-                          : undefined
-                      }
-                    >
-                      {formatDecimal2(item.kapasitasPerTk)}
-                    </td>
-                    {/* Total Cost */}
-                    <td className="py-2.5 px-3 text-right font-mono font-bold text-[#17231B]">
-                      {formatCurrencyRp(item.totalCost)}
-                    </td>
-                    {/* Upah */}
-                    <td className="py-2.5 px-3 text-right font-mono text-[#5F6B63]">
-                      {formatCurrencyRp(item.upah)}
-                    </td>
-                    {/* Charge */}
-                    <td className="py-2.5 px-3 text-right font-mono text-[#5F6B63]">
-                      {formatCurrencyRp(item.charge)}
-                    </td>
-                    {/* Material: Hanya bisa dipencet jika ada nilainya (> 0 dan hasMaterials true), jika "-" maka tetap text biasa "-" */}
-                    <td className="py-2.5 px-3 text-right font-mono">
-                      {item.hasMaterials && typeof item.material === "number" && item.material > 0 ? (
-                        <button
-                          onClick={() => onOpenMaterialModal(item.id)}
-                          title="Klik untuk melihat rincian bahan kimia & material"
-                          className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-[#16823B]/10 hover:bg-[#16823B] text-[#16823B] hover:text-white font-bold transition-all cursor-pointer group"
-                        >
-                          <FlaskConical className="w-3 h-3 text-[#16823B] group-hover:text-white" />
-                          <span>{formatCurrencyRp(item.material)}</span>
-                        </button>
-                      ) : (
-                        <span className="text-[#5F6B63]">-</span>
-                      )}
-                    </td>
-                  </tr>
-                ))}
+                {filteredTimeline.map((item) => {
+                  const divisor = getDivisor(item);
+                  const totalCostPerArea = calcCostPerArea(item.totalCost, divisor);
+                  const upahPerArea = calcCostPerArea(item.upah, divisor);
+                  const chargePerArea = calcCostPerArea(item.charge, divisor);
+                  const materialPerArea = calcCostPerArea(item.material, divisor);
+
+                  return (
+                    <tr key={item.id} className="hover:bg-[#F7F9F7] transition-colors">
+                      <td className="py-2.5 px-3 font-semibold text-[#17231B]">
+                        {item.aktivitas}
+                      </td>
+                      <td className="py-2.5 px-3 text-[#5F6B63]">
+                        {formatDateShort(item.tanggalRealisasi)}
+                      </td>
+                      <td className="py-2.5 px-3 text-center font-mono font-medium">
+                        {item.umur !== null && item.umur !== undefined ? `${item.umur} Bln` : "-"}
+                      </td>
+                      {/* Hasil */}
+                      <td
+                        className="py-2.5 px-3 text-right font-mono text-[#17231B]"
+                        title={item.hasil !== null ? `Nilai asli: ${item.hasil}` : undefined}
+                      >
+                        {formatDecimal2(item.hasil)}
+                      </td>
+                      <td className="py-2.5 px-3 text-center text-[#5F6B63]">{item.uom || "-"}</td>
+                      {/* TK */}
+                      <td
+                        className="py-2.5 px-3 text-right font-mono text-[#17231B]"
+                        title={item.tk !== null ? `Nilai asli: ${item.tk}` : undefined}
+                      >
+                        {formatDecimal2(item.tk)}
+                      </td>
+                      {/* Kapasitas/TK */}
+                      <td
+                        className="py-2.5 px-3 text-right font-mono text-[#17231B]"
+                        title={
+                          item.kapasitasPerTk !== null
+                            ? `Nilai asli: ${item.kapasitasPerTk}`
+                            : undefined
+                        }
+                      >
+                        {formatDecimal2(item.kapasitasPerTk)}
+                      </td>
+                      {/* Total Cost */}
+                      <td
+                        className="py-2.5 px-3 text-right font-mono font-bold text-[#17231B]"
+                        title={buildCostTooltip(item.totalCost, divisor)}
+                      >
+                        {formatCurrencyRp(totalCostPerArea)}
+                      </td>
+                      {/* Upah */}
+                      <td
+                        className="py-2.5 px-3 text-right font-mono text-[#5F6B63]"
+                        title={buildCostTooltip(item.upah, divisor)}
+                      >
+                        {formatCurrencyRp(upahPerArea)}
+                      </td>
+                      {/* Charge */}
+                      <td
+                        className="py-2.5 px-3 text-right font-mono text-[#5F6B63]"
+                        title={buildCostTooltip(item.charge, divisor)}
+                      >
+                        {formatCurrencyRp(chargePerArea)}
+                      </td>
+                      {/* Material: Hanya bisa dipencet jika ada nilainya (> 0 dan hasMaterials true), jika "-" maka tetap text biasa "-" */}
+                      <td
+                        className="py-2.5 px-3 text-right font-mono"
+                        title={buildCostTooltip(item.material, divisor)}
+                      >
+                        {item.hasMaterials && typeof item.material === "number" && item.material > 0 ? (
+                          <button
+                            onClick={() => onOpenMaterialModal(item.id)}
+                            title={`Klik untuk melihat rincian bahan kimia & material${
+                              buildCostTooltip(item.material, divisor)
+                                ? ` (${buildCostTooltip(item.material, divisor)})`
+                                : ""
+                            }`}
+                            className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-[#16823B]/10 hover:bg-[#16823B] text-[#16823B] hover:text-white font-bold transition-all cursor-pointer group"
+                          >
+                            <FlaskConical className="w-3 h-3 text-[#16823B] group-hover:text-white" />
+                            <span>{formatCurrencyRp(materialPerArea)}</span>
+                          </button>
+                        ) : (
+                          <span className="text-[#5F6B63]">{formatCurrencyRp(materialPerArea)}</span>
+                        )}
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>
