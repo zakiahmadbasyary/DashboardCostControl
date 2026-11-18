@@ -41,8 +41,8 @@ const TABS: TabMeta[] = [
     key: "timeline",
     label: "Data Timeline",
     icon: FileSpreadsheet,
-    description: "Tampilan persis kolom berkas Excel Data Timeline: Transaksi realisasi ditambah kolom kuantitas bahan kimia dinamis.",
-    badge: "Timeline + Bahan Kimia",
+    description: "Tampilan persis kolom berkas Excel Data Timeline: Transaksi realisasi ditambah kolom kuantitas bahan material dinamis.",
+    badge: "Timeline + Bahan Material",
   },
   {
     key: "aktivitas",
@@ -162,7 +162,7 @@ export default function AdminPreviewPage() {
               activeTab === "lokasi"
                 ? "Cari lokasi / wilayah / jenis / status..."
                 : activeTab === "timeline"
-                ? "Cari lokasi / aktivitas / nama bahan kimia..."
+                ? "Cari lokasi / aktivitas / nama bahan material..."
                 : "Cari lokasi / aktivitas / kode / grup..."
             }
             value={searchQuery}
@@ -253,7 +253,7 @@ export default function AdminPreviewPage() {
                     <th
                       key={matName}
                       className="py-3 px-3 text-right whitespace-nowrap sticky top-0 z-20 border-b border-[#DDE5DF] bg-[#EFF6FF] text-blue-900 font-semibold"
-                      title={`Kuantitas bahan kimia ${matName}`}
+                      title={`Kuantitas bahan material ${matName}`}
                     >
                       {matName}
                     </th>

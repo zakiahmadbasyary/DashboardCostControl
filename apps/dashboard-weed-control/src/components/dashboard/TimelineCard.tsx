@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { TimelineItem, LocationItem } from "@/types/dashboard";
+import { weedDashboardService, MaterialDetailResponse } from "@/services/weedDashboardService";
 import {
   Clock,
   Search,
@@ -18,7 +19,6 @@ import {
 interface TimelineCardProps {
   selectedLocation: LocationItem | null;
   timeline: TimelineItem[];
-  onOpenMaterialModal: (timelineId: string) => void;
   loading?: boolean;
   selectedActivity?: string | null;
   onResetActivityFilter?: () => void;
@@ -29,7 +29,6 @@ type AreaBasis = "lokasi" | "hasil";
 export default function TimelineCard({
   selectedLocation,
   timeline,
-  onOpenMaterialModal,
   loading,
   selectedActivity,
   onResetActivityFilter,
@@ -37,10 +36,69 @@ export default function TimelineCard({
   const [searchQuery, setSearchQuery] = useState("");
   const [areaBasis, setAreaBasis] = useState<AreaBasis>("lokasi");
 
-  // Reset search on location change
+  // State untuk panel Detail Material (sebelah kanan 35%)
+  const [selectedMaterialItem, setSelectedMaterialItem] = useState<TimelineItem | null>(null);
+  const [materialData, setMaterialData] = useState<MaterialDetailResponse | null>(null);
+  const [loadingMaterials, setLoadingMaterials] = useState(false);
+  const [materialError, setMaterialError] = useState<string | null>(null);
+
+  // Reset search & detail material saat lokasi berubah
   useEffect(() => {
     setSearchQuery("");
+    setSelectedMaterialItem(null);
+    setMaterialData(null);
+    setMaterialError(null);
   }, [selectedLocation]);
+
+  // Reset detail material saat filter aktivitas atau daftar timeline berubah
+  useEffect(() => {
+    setSelectedMaterialItem(null);
+    setMaterialData(null);
+    setMaterialError(null);
+  }, [selectedActivity, timeline]);
+
+  // Fetch data material saat baris timeline dipilih
+  useEffect(() => {
+    if (!selectedMaterialItem) {
+      setMaterialData(null);
+      setMaterialError(null);
+      setLoadingMaterials(false);
+      return;
+    }
+
+    if (!selectedMaterialItem.hasMaterials) {
+      setMaterialData({ timeline: null, materials: [], total: 0 });
+      setMaterialError(null);
+      setLoadingMaterials(false);
+      return;
+    }
+
+    let isMounted = true;
+    setLoadingMaterials(true);
+    setMaterialError(null);
+
+    weedDashboardService
+      .getMaterials(selectedMaterialItem.id)
+      .then((res) => {
+        if (isMounted) {
+          setMaterialData(res);
+        }
+      })
+      .catch((err: any) => {
+        if (isMounted) {
+          setMaterialError(err.message || "Gagal memuat rincian bahan material");
+        }
+      })
+      .finally(() => {
+        if (isMounted) {
+          setLoadingMaterials(false);
+        }
+      });
+
+    return () => {
+      isMounted = false;
+    };
+  }, [selectedMaterialItem]);
 
   // Sort timeline by date ascending (terkecil ke terbesar / tanggal terlama ke terbaru)
   const sortedTimeline = React.useMemo(() => {
@@ -73,6 +131,15 @@ export default function TimelineCard({
       );
     });
   }, [sortedTimeline, selectedActivity, searchQuery]);
+
+  // Filter hanya material yang memiliki nilai (> 0, bukan 0, bukan null, bukan "-")
+  const validMaterials = React.useMemo(() => {
+    return (materialData?.materials || []).filter((mat) => {
+      if (mat.quantity === null || mat.quantity === undefined) return false;
+      const val = typeof mat.quantity === "number" ? mat.quantity : parseFloat(String(mat.quantity));
+      return !isNaN(val) && val > 0;
+    });
+  }, [materialData]);
 
   if (!selectedLocation) {
     return (
@@ -119,8 +186,18 @@ export default function TimelineCard({
     return `Biaya asli: ${formatCurrencyRp(rawVal)} ÷ ${basisLabel}`;
   };
 
+  const formatDosis2 = (val: number | null): string => {
+    if (val === null || isNaN(val)) return "-";
+    return new Intl.NumberFormat("id-ID", {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    }).format(val);
+  };
+
+  const selectedMaterialDivisor = selectedMaterialItem ? getDivisor(selectedMaterialItem) : null;
+
   return (
-    <div className="bg-white border border-[#DDE5DF] rounded-2xl p-5 sm:p-6 shadow-xs flex flex-col gap-4">
+    <div className="bg-white border border-[#DDE5DF] rounded-2xl p-4 sm:p-5 shadow-xs flex flex-col gap-4">
       {/* Header Bar */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-[#DDE5DF]/70">
         <div className="flex items-center gap-2.5">
@@ -152,7 +229,7 @@ export default function TimelineCard({
               )}
             </div>
             <p className="text-xs text-[#5F6B63] mt-0.5">
-              Riwayat lengkap aplikasi lapangan, tenaga kerja, upah, charge, dan pemakaian bahan kimia
+              Riwayat lengkap aplikasi lapangan, tenaga kerja, upah, charge, dan pemakaian bahan material
             </p>
           </div>
         </div>
@@ -173,7 +250,7 @@ export default function TimelineCard({
                   ? "bg-[#16823B] text-white shadow-2xs"
                   : "text-[#5F6B63] hover:text-[#17231B]"
               }`}
-              title={`Bagi biaya dengan Luas Lokasi (${formatDecimal2(selectedLocation.luas)} Ha)`}
+              title={`Bagi biaya & dosis dengan Luas Lokasi (${formatDecimal2(selectedLocation.luas)} Ha)`}
             >
               Luas Lokasi
             </button>
@@ -185,7 +262,7 @@ export default function TimelineCard({
                   ? "bg-[#16823B] text-white shadow-2xs"
                   : "text-[#5F6B63] hover:text-[#17231B]"
               }`}
-              title="Bagi biaya dengan Luas Hasil pada masing-masing baris transaksi"
+              title="Bagi biaya & dosis dengan Luas Hasil pada masing-masing baris transaksi"
             >
               Luas Hasil
             </button>
@@ -204,7 +281,7 @@ export default function TimelineCard({
         </div>
       </div>
 
-      {/* Table Area (Maksimal 8 data tampak, selebihnya scroll vertikal) */}
+      {/* Main Content Split: 65% Left (Timeline Table) + 35% Right (Detail Material Table) */}
       {loading ? (
         <div className="py-12 flex flex-col items-center justify-center">
           <div className="w-6 h-6 border-2 border-[#16823B] border-t-transparent rounded-full animate-spin mb-2" />
@@ -230,131 +307,296 @@ export default function TimelineCard({
           )}
         </div>
       ) : (
-        <>
-          <div className="overflow-x-auto rounded-xl border border-[#DDE5DF] max-h-[350px] overflow-y-auto">
-            <table className="w-full text-xs text-left whitespace-nowrap">
-              <thead className="bg-[#F7F9F7] text-[#17231B] uppercase font-bold border-b border-[#DDE5DF] sticky top-0 z-10 shadow-2xs">
-                <tr>
-                  <th className="py-2.5 px-3">Aktivitas</th>
-                  <th className="py-2.5 px-3">Tgl Realisasi</th>
-                  <th className="py-2.5 px-3 text-center">Umur</th>
-                  <th className="py-2.5 px-3 text-right">Hasil</th>
-                  <th className="py-2.5 px-3 text-center">UoM</th>
-                  <th className="py-2.5 px-3 text-right">TK</th>
-                  <th className="py-2.5 px-3 text-right">Kapasitas/TK</th>
-                  <th className="py-2.5 px-3 text-right">Total Cost</th>
-                  <th className="py-2.5 px-3 text-right">Upah</th>
-                  <th className="py-2.5 px-3 text-right">Charge</th>
-                  <th className="py-2.5 px-3 text-right">Material</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-[#DDE5DF]/60">
-                {filteredTimeline.map((item) => {
-                  const divisor = getDivisor(item);
-                  const totalCostPerArea = calcCostPerArea(item.totalCost, divisor);
-                  const upahPerArea = calcCostPerArea(item.upah, divisor);
-                  const chargePerArea = calcCostPerArea(item.charge, divisor);
-                  const materialPerArea = calcCostPerArea(item.material, divisor);
+        <div className="flex flex-col lg:flex-row gap-4 items-stretch">
+          {/* ================= BAGIAN KIRI: 65% (Tabel Timeline - Tanpa Scroll Samping di Desktop) ================= */}
+          <div className="w-full lg:w-[65%] min-w-0 flex flex-col justify-between gap-2.5">
+            <div className="overflow-x-auto rounded-xl border border-[#DDE5DF] max-h-[360px] overflow-y-auto">
+              <table className="w-full min-w-[640px] lg:min-w-0 text-[10px] xl:text-[10.5px] 2xl:text-[11px] text-left border-collapse">
+                <thead className="bg-[#F7F9F7] text-[#17231B] uppercase text-[9px] xl:text-[9.5px] 2xl:text-[10px] leading-tight font-bold border-b border-[#DDE5DF] sticky top-0 z-10 shadow-2xs">
+                  <tr>
+                    <th className="py-2 px-1.5 xl:px-2">Aktivitas</th>
+                    <th className="py-2 px-1 xl:px-1.5 whitespace-normal">Tgl Realisasi</th>
+                    <th className="py-2 px-1 xl:px-1.5 text-center">Umur</th>
+                    <th className="py-2 px-1 xl:px-1.5 text-right">Hasil</th>
+                    <th className="py-2 px-1 xl:px-1.5 text-center">UoM</th>
+                    <th className="py-2 px-1 xl:px-1.5 text-right">TK</th>
+                    <th className="py-2 px-1 xl:px-1.5 text-right whitespace-normal">Kapasitas/TK</th>
+                    <th className="py-2 px-1 xl:px-1.5 text-right whitespace-normal">Total Cost</th>
+                    <th className="py-2 px-1 xl:px-1.5 text-right">Upah</th>
+                    <th className="py-2 px-1 xl:px-1.5 text-right">Charge</th>
+                    <th className="py-2 px-1.5 xl:px-2 text-right">Material</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-[#DDE5DF]/60 leading-snug">
+                  {filteredTimeline.map((item) => {
+                    const divisor = getDivisor(item);
+                    const totalCostPerArea = calcCostPerArea(item.totalCost, divisor);
+                    const upahPerArea = calcCostPerArea(item.upah, divisor);
+                    const chargePerArea = calcCostPerArea(item.charge, divisor);
+                    const materialPerArea = calcCostPerArea(item.material, divisor);
+                    const isMaterialSelected = selectedMaterialItem?.id === item.id;
 
-                  return (
-                    <tr key={item.id} className="hover:bg-[#F7F9F7] transition-colors">
-                      <td className="py-2.5 px-3 font-semibold text-[#17231B]">
-                        {item.aktivitas}
-                      </td>
-                      <td className="py-2.5 px-3 text-[#5F6B63]">
-                        {formatDateShort(item.tanggalRealisasi)}
-                      </td>
-                      <td className="py-2.5 px-3 text-center font-mono font-medium">
-                        {item.umur !== null && item.umur !== undefined ? `${item.umur} Bln` : "-"}
-                      </td>
-                      {/* Hasil */}
-                      <td
-                        className="py-2.5 px-3 text-right font-mono text-[#17231B]"
-                        title={item.hasil !== null ? `Nilai asli: ${item.hasil}` : undefined}
+                    return (
+                      <tr
+                        key={item.id}
+                        onClick={() => setSelectedMaterialItem(item)}
+                        title="Klik baris untuk melihat detail dosis material"
+                        className={`transition-colors cursor-pointer group ${
+                          isMaterialSelected
+                            ? "bg-[#EAF3EC] border-l-4 border-[#16823B]"
+                            : "hover:bg-[#F7F9F7]"
+                        }`}
                       >
-                        {formatDecimal2(item.hasil)}
-                      </td>
-                      <td className="py-2.5 px-3 text-center text-[#5F6B63]">{item.uom || "-"}</td>
-                      {/* TK */}
-                      <td
-                        className="py-2.5 px-3 text-right font-mono text-[#17231B]"
-                        title={item.tk !== null ? `Nilai asli: ${item.tk}` : undefined}
-                      >
-                        {formatDecimal2(item.tk)}
-                      </td>
-                      {/* Kapasitas/TK */}
-                      <td
-                        className="py-2.5 px-3 text-right font-mono text-[#17231B]"
-                        title={
-                          item.kapasitasPerTk !== null
-                            ? `Nilai asli: ${item.kapasitasPerTk}`
-                            : undefined
-                        }
-                      >
-                        {formatDecimal2(item.kapasitasPerTk)}
-                      </td>
-                      {/* Total Cost */}
-                      <td
-                        className="py-2.5 px-3 text-right font-mono font-bold text-[#17231B]"
-                        title={buildCostTooltip(item.totalCost, divisor)}
-                      >
-                        {formatCurrencyRp(totalCostPerArea)}
-                      </td>
-                      {/* Upah */}
-                      <td
-                        className="py-2.5 px-3 text-right font-mono text-[#5F6B63]"
-                        title={buildCostTooltip(item.upah, divisor)}
-                      >
-                        {formatCurrencyRp(upahPerArea)}
-                      </td>
-                      {/* Charge */}
-                      <td
-                        className="py-2.5 px-3 text-right font-mono text-[#5F6B63]"
-                        title={buildCostTooltip(item.charge, divisor)}
-                      >
-                        {formatCurrencyRp(chargePerArea)}
-                      </td>
-                      {/* Material: Hanya bisa dipencet jika ada nilainya (> 0 dan hasMaterials true), jika "-" maka tetap text biasa "-" */}
-                      <td
-                        className="py-2.5 px-3 text-right font-mono"
-                        title={buildCostTooltip(item.material, divisor)}
-                      >
-                        {item.hasMaterials && typeof item.material === "number" && item.material > 0 ? (
-                          <button
-                            onClick={() => onOpenMaterialModal(item.id)}
-                            title={`Klik untuk melihat rincian bahan kimia & material${
-                              buildCostTooltip(item.material, divisor)
-                                ? ` (${buildCostTooltip(item.material, divisor)})`
-                                : ""
-                            }`}
-                            className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-[#16823B]/10 hover:bg-[#16823B] text-[#16823B] hover:text-white font-bold transition-all cursor-pointer group"
-                          >
-                            <FlaskConical className="w-3 h-3 text-[#16823B] group-hover:text-white" />
-                            <span>{formatCurrencyRp(materialPerArea)}</span>
-                          </button>
-                        ) : (
-                          <span className="text-[#5F6B63]">{formatCurrencyRp(materialPerArea)}</span>
-                        )}
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
+                        <td className="py-2 px-1.5 xl:px-2 font-semibold text-[#17231B] whitespace-normal break-words max-w-[125px] xl:max-w-[165px]">
+                          <div className="flex items-center gap-1.5">
+                            {isMaterialSelected && (
+                              <span className="w-1.5 h-1.5 rounded-full bg-[#16823B] shrink-0 animate-pulse" />
+                            )}
+                            <span
+                              className={
+                                isMaterialSelected
+                                  ? "text-[#16823B] font-bold"
+                                  : "group-hover:text-[#16823B] transition-colors"
+                              }
+                            >
+                              {item.aktivitas}
+                            </span>
+                          </div>
+                        </td>
+                        <td className="py-2 px-1 xl:px-1.5 text-[#5F6B63] tabular-nums whitespace-nowrap">
+                          {formatDateShort(item.tanggalRealisasi)}
+                        </td>
+                        <td className="py-2 px-1 xl:px-1.5 text-center tabular-nums font-medium whitespace-nowrap">
+                          {item.umur !== null && item.umur !== undefined ? `${item.umur} Bln` : "-"}
+                        </td>
+                        {/* Hasil */}
+                        <td
+                          className="py-2 px-1 xl:px-1.5 text-right tabular-nums text-[#17231B] whitespace-nowrap"
+                          title={item.hasil !== null ? `Nilai asli: ${item.hasil}` : undefined}
+                        >
+                          {formatDecimal2(item.hasil)}
+                        </td>
+                        <td className="py-2 px-1 xl:px-1.5 text-center text-[#5F6B63] whitespace-nowrap">
+                          {item.uom || "-"}
+                        </td>
+                        {/* TK */}
+                        <td
+                          className="py-2 px-1 xl:px-1.5 text-right tabular-nums text-[#17231B] whitespace-nowrap"
+                          title={item.tk !== null ? `Nilai asli: ${item.tk}` : undefined}
+                        >
+                          {formatDecimal2(item.tk)}
+                        </td>
+                        {/* Kapasitas/TK */}
+                        <td
+                          className="py-2 px-1 xl:px-1.5 text-right tabular-nums text-[#17231B] whitespace-nowrap"
+                          title={
+                            item.kapasitasPerTk !== null
+                              ? `Nilai asli: ${item.kapasitasPerTk}`
+                              : undefined
+                          }
+                        >
+                          {formatDecimal2(item.kapasitasPerTk)}
+                        </td>
+                        {/* Total Cost */}
+                        <td
+                          className="py-2 px-1 xl:px-1.5 text-right tabular-nums font-bold text-[#17231B] whitespace-nowrap"
+                          title={buildCostTooltip(item.totalCost, divisor)}
+                        >
+                          {formatCurrencyRp(totalCostPerArea)}
+                        </td>
+                        {/* Upah */}
+                        <td
+                          className="py-2 px-1 xl:px-1.5 text-right tabular-nums text-[#5F6B63] whitespace-nowrap"
+                          title={buildCostTooltip(item.upah, divisor)}
+                        >
+                          {formatCurrencyRp(upahPerArea)}
+                        </td>
+                        {/* Charge */}
+                        <td
+                          className="py-2 px-1 xl:px-1.5 text-right tabular-nums text-[#5F6B63] whitespace-nowrap"
+                          title={buildCostTooltip(item.charge, divisor)}
+                        >
+                          {formatCurrencyRp(chargePerArea)}
+                        </td>
+                        {/* Material */}
+                        <td
+                          className="py-2 px-1.5 xl:px-2 text-right tabular-nums whitespace-nowrap"
+                          title={buildCostTooltip(item.material, divisor)}
+                        >
+                          {item.hasMaterials && typeof item.material === "number" && item.material > 0 ? (
+                            <span
+                              className={`inline-flex items-center gap-0.5 xl:gap-1 px-1.5 py-0.5 rounded-md font-bold transition-all ${
+                                isMaterialSelected
+                                  ? "bg-[#16823B] text-white shadow-xs"
+                                  : "bg-[#16823B]/10 group-hover:bg-[#16823B] text-[#16823B] group-hover:text-white"
+                              }`}
+                            >
+                              <FlaskConical
+                                className={`w-2.5 h-2.5 xl:w-3 xl:h-3 shrink-0 ${
+                                  isMaterialSelected
+                                    ? "text-white"
+                                    : "text-[#16823B] group-hover:text-white"
+                                }`}
+                              />
+                              <span>{formatCurrencyRp(materialPerArea)}</span>
+                            </span>
+                          ) : (
+                            <span className="text-[#5F6B63]">{formatCurrencyRp(materialPerArea)}</span>
+                          )}
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
 
-          {/* Table Summary Footer */}
-          <div className="flex items-center justify-between text-xs text-[#5F6B63] pt-2 border-t border-[#DDE5DF]/80">
-            <span>
-              Menampilkan <strong className="text-[#16823B] font-bold">{filteredTimeline.length}</strong> transaksi
-            </span>
-            {filteredTimeline.length > 8 && (
-              <span className="text-[11px] text-[#89938D]">
-                * Scroll ke bawah pada tabel untuk melihat data lainnya
+            {/* Table Summary Footer */}
+            <div className="flex items-center justify-between text-xs text-[#5F6B63] pt-1 border-t border-[#DDE5DF]/80">
+              <span>
+                Menampilkan <strong className="text-[#16823B] font-bold">{filteredTimeline.length}</strong> transaksi
               </span>
-            )}
+              {filteredTimeline.length > 8 && (
+                <span className="text-[11px] text-[#89938D]">
+                  * Scroll ke bawah pada tabel untuk melihat data lainnya
+                </span>
+              )}
+            </div>
           </div>
-        </>
+
+          {/* ================= BAGIAN KANAN: 35% (Tabel Detail Material) ================= */}
+          <div className="w-full lg:w-[35%] flex-1 min-w-0 bg-[#F7F9F7]/70 border border-[#DDE5DF] rounded-xl p-4 flex flex-col justify-between gap-3">
+            <div className="flex flex-col gap-3 flex-1 min-h-0">
+              {/* Header Panel Detail Material */}
+              <div className="flex items-start justify-between gap-2 pb-2.5 border-b border-[#DDE5DF]/80">
+                <div className="flex items-center gap-2 min-w-0">
+                  <div className="p-1.5 rounded-lg bg-[#16823B]/10 text-[#16823B] shrink-0">
+                    <FlaskConical className="w-4 h-4" />
+                  </div>
+                  <div className="min-w-0">
+                    <h4 className="font-bold text-sm text-[#17231B] leading-tight">
+                      Detail Material
+                    </h4>
+                    {selectedMaterialItem ? (
+                      <p className="text-[11px] text-[#5F6B63] truncate mt-0.5">
+                        <strong className="text-[#16823B]">{selectedMaterialItem.aktivitas}</strong> •{" "}
+                        {formatDateShort(selectedMaterialItem.tanggalRealisasi)}
+                      </p>
+                    ) : (
+                      <p className="text-[11px] text-[#89938D] mt-0.5">
+                        Rincian nama material & dosis aplikasi
+                      </p>
+                    )}
+                  </div>
+                </div>
+
+                {selectedMaterialItem && (
+                  <button
+                    type="button"
+                    onClick={() => setSelectedMaterialItem(null)}
+                    className="p-1 rounded-lg text-[#5F6B63] hover:text-[#17231B] hover:bg-[#DDE5DF]/50 transition-colors cursor-pointer shrink-0"
+                    title="Tutup detail material"
+                  >
+                    <X className="w-3.5 h-3.5" />
+                  </button>
+                )}
+              </div>
+
+              {/* Body Panel Detail Material */}
+              {!selectedMaterialItem ? (
+                <div className="flex-1 flex flex-col items-center justify-center text-center p-6 bg-white rounded-xl border border-dashed border-[#DDE5DF] min-h-[220px]">
+                  <div className="p-2.5 rounded-full bg-[#EAF3EC] text-[#16823B] mb-2.5">
+                    <FlaskConical className="w-5 h-5" />
+                  </div>
+                  <p className="text-xs font-medium text-[#5F6B63] max-w-[240px] leading-relaxed">
+                    Klik salah satu baris transaksi di tabel kiri untuk melihat detail dosis material
+                  </p>
+                </div>
+              ) : loadingMaterials ? (
+                <div className="flex-1 flex flex-col items-center justify-center py-10 bg-white rounded-xl border border-[#DDE5DF] min-h-[220px]">
+                  <div className="w-5 h-5 border-2 border-[#16823B] border-t-transparent rounded-full animate-spin mb-2" />
+                  <p className="text-xs font-semibold text-[#5F6B63]">
+                    Memuat detail material...
+                  </p>
+                </div>
+              ) : materialError ? (
+                <div className="flex-1 flex flex-col items-center justify-center p-6 text-center bg-rose-50 rounded-xl border border-rose-200 min-h-[220px]">
+                  <AlertCircle className="w-5 h-5 text-rose-600 mb-1.5" />
+                  <p className="text-xs font-bold text-rose-700">{materialError}</p>
+                </div>
+              ) : validMaterials.length === 0 ? (
+                <div className="flex-1 flex flex-col items-center justify-center p-6 text-center bg-white rounded-xl border border-dashed border-[#DDE5DF] min-h-[220px]">
+                  <p className="text-xs text-[#5F6B63]">
+                    Tidak ada data bahan material dengan nilai tercatat untuk transaksi ini.
+                  </p>
+                </div>
+              ) : (
+                <div className="overflow-x-auto rounded-xl border border-[#DDE5DF] bg-white max-h-[275px] overflow-y-auto">
+                  <table className="w-full text-xs text-left">
+                    <thead className="bg-[#F7F9F7] text-[#17231B] uppercase font-bold border-b border-[#DDE5DF] sticky top-0 z-10 shadow-2xs">
+                      <tr>
+                        <th className="py-2.5 px-3">Nama Material</th>
+                        <th className="py-2.5 px-3 text-right whitespace-nowrap">Dosis</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-[#DDE5DF]/60">
+                      {validMaterials.map((mat) => {
+                        const dosis =
+                          selectedMaterialDivisor !== null && selectedMaterialDivisor > 0
+                            ? mat.quantity / selectedMaterialDivisor
+                            : null;
+                        const basisLabel =
+                          areaBasis === "lokasi"
+                            ? `Luas Lokasi (${formatDecimal2(selectedLocation.luas)} Ha)`
+                            : `Luas Hasil (${
+                                selectedMaterialDivisor ? formatDecimal2(selectedMaterialDivisor) : "0"
+                              })`;
+
+                        return (
+                          <tr key={mat.id} className="hover:bg-[#F7F9F7] transition-colors">
+                            <td className="py-2.5 px-3 font-semibold text-[#17231B]">
+                              {mat.namaMaterial}
+                            </td>
+                            <td
+                              className="py-2.5 px-3 text-right font-mono font-bold text-[#16823B] whitespace-nowrap"
+                              title={`Quantity asli: ${mat.quantity} ÷ ${basisLabel}`}
+                            >
+                              {formatDosis2(dosis)}
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+
+            {/* Footer Panel Detail Material */}
+            <div className="flex items-center justify-between text-[11px] text-[#5F6B63] pt-1 border-t border-[#DDE5DF]/80">
+              <span>
+                {selectedMaterialItem && !loadingMaterials && !materialError ? (
+                  <>
+                    <strong className="text-[#16823B] font-bold">{validMaterials.length}</strong>{" "}
+                    material
+                  </>
+                ) : (
+                  "Detail Material"
+                )}
+              </span>
+              <span className="text-[10px] text-[#89938D]">
+                Basis:{" "}
+                <strong className="text-[#5F6B63]">
+                  {areaBasis === "lokasi"
+                    ? `Luas Lokasi (${formatDecimal2(selectedLocation.luas)} Ha)`
+                    : selectedMaterialItem
+                    ? `Luas Hasil (${formatDecimal2(selectedMaterialItem.hasil)})`
+                    : "Luas Hasil"}
+                </strong>
+              </span>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

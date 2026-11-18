@@ -87,7 +87,7 @@ export default function MaterialModal({
             </div>
             <div>
               <h3 className="font-extrabold text-base text-white">
-                Rincian Bahan Kimia & Material
+                Rincian Bahan Material
               </h3>
               <p className="text-xs text-emerald-100">
                 {timelineInfo ? (
@@ -127,7 +127,7 @@ export default function MaterialModal({
           ) : materials.length === 0 ? (
             <div className="p-8 text-center bg-[#F7F9F7] rounded-xl border border-dashed border-[#DDE5DF]">
               <p className="text-xs text-[#5F6B63]">
-                Tidak ada data bahan kimia atau material dengan nilai tercatat untuk transaksi ini.
+                Tidak ada data bahan material dengan nilai tercatat untuk transaksi ini.
               </p>
             </div>
           ) : (
@@ -148,7 +148,7 @@ export default function MaterialModal({
                 <table className="w-full text-xs text-left">
                   <thead className="bg-[#F7F9F7] text-[#17231B] uppercase font-bold border-b border-[#DDE5DF]">
                     <tr>
-                      <th className="py-2.5 px-3">Nama Material / Kimia</th>
+                      <th className="py-2.5 px-3">Nama Material</th>
                       <th className="py-2.5 px-3 text-right">Quantity</th>
                     </tr>
                   </thead>

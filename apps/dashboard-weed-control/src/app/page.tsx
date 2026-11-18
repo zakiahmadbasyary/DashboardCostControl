@@ -8,7 +8,6 @@ import LocationListCard from "@/components/dashboard/LocationListCard";
 import LocationDetailCard from "@/components/dashboard/LocationDetailCard";
 import ActivityAndCostCard from "@/components/dashboard/ActivityAndCostCard";
 import TimelineCard from "@/components/dashboard/TimelineCard";
-import MaterialModal from "@/components/dashboard/MaterialModal";
 
 import {
   MainFilterState,
@@ -73,9 +72,6 @@ export default function WeedControlDashboardPage() {
   const [chartData, setChartData] = useState<AgeCostDataPoint[]>([]);
   const [timelineData, setTimelineData] = useState<TimelineItem[]>([]);
   const [selectedActivity, setSelectedActivity] = useState<string | null>(null);
-
-  // Popup Modal Material
-  const [selectedTimelineId, setSelectedTimelineId] = useState<string | null>(null);
 
   // 5. Loading States
   const [loadingFilters, setLoadingFilters] = useState<boolean>(true);
@@ -415,19 +411,12 @@ export default function WeedControlDashboardPage() {
           <TimelineCard
             selectedLocation={selectedLocation}
             timeline={timelineData}
-            onOpenMaterialModal={(timelineId) => setSelectedTimelineId(timelineId)}
             loading={loadingTimeline}
             selectedActivity={selectedActivity}
             onResetActivityFilter={handleResetActivityFilter}
           />
         </section>
       </main>
-
-      {/* Section 7: Material Modal Popup */}
-      <MaterialModal
-        timelineId={selectedTimelineId}
-        onClose={() => setSelectedTimelineId(null)}
-      />
 
       {/* Footer matching WIP style */}
       <footer className="border-t border-[#DDE5DF] bg-white py-6 text-center text-xs text-[#5F6B63] mt-12">
