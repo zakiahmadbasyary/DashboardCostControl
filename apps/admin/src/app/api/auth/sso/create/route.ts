@@ -5,15 +5,31 @@ import { cookies } from "next/headers";
 import crypto from "crypto";
 
 const ALLOWED_DASHBOARD_CODES = [
+  // Nanas
   "wip",
   "hpp",
-  "capex",
-  "opex",
+  "harga_material",
+  "weed_control",
   "irigasi",
   "sulam",
-  "weed_control",
-  "harga_material",
+  // Pepaya
+  "pepaya_wip",
+  "pepaya_hpp",
+  "pepaya_sulam",
+  // OtherCrop
+  "othercrop_wip",
+  "othercrop_hpp",
+  "othercrop_sulam",
+  // Bibit
+  "bibit_wip_sucker",
+  "bibit_hpp_sucker",
+  "bibit_wip_storing",
+  "bibit_hpp_storing",
+  // Overhead
+  "capex",
+  "opex",
   "poll_pg1",
+  // Legacy Aliases
   "dashboard_a",
   "dashboard_b",
   "dashboard_c",

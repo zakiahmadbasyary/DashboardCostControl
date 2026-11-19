@@ -90,7 +90,7 @@ export const UnderConstructionView: React.FC<UnderConstructionViewProps> = ({
         <div className="border-t border-[#DDE5DF] bg-white px-4 py-3 space-y-2 shadow-lg max-h-[80vh] overflow-y-auto">
           <div className="w-full max-w-[95%] mx-auto space-y-3">
             <div className="text-[11px] font-bold text-[#5F6B63] uppercase tracking-wider px-1">
-              Navigasi Dashboard Cost Control (9 Menu)
+              Navigasi Dashboard Cost Control
             </div>
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-3 gap-2">
               {navItems.map((item) => {
