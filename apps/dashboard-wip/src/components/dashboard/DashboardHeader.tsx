@@ -319,12 +319,12 @@ export default function DashboardHeader({ lastUpdated }: DashboardHeaderProps = 
               </a>
 
               <a
-                href="/admin"
+                href={adminUrl}
                 className="hidden sm:inline-flex items-center gap-2 px-3.5 sm:px-4.5 py-1.5 sm:py-2 rounded-xl bg-[#16823B] hover:bg-[#126B30] text-white font-bold text-xs sm:text-sm transition-all shadow-xs"
-                title="Buka Panel Admin WIP"
+                title="Buka Admin Pusat"
               >
                 <ShieldCheck className="w-4 h-4 text-emerald-200" />
-                <span>Admin WIP</span>
+                <span>Admin Pusat</span>
               </a>
 
               {/* Hamburger Button for Mobile only (md:hidden) */}
@@ -425,11 +425,11 @@ export default function DashboardHeader({ lastUpdated }: DashboardHeaderProps = 
                   <span>Portal Utama</span>
                 </a>
                 <a
-                  href="/admin"
+                  href={adminUrl}
                   className="w-full text-center py-2.5 rounded-xl bg-[#16823B] hover:bg-[#126B30] text-white font-bold text-xs flex items-center justify-center gap-1.5 shadow-xs"
                 >
                   <ShieldCheck className="w-3.5 h-3.5 text-emerald-200" />
-                  <span>Admin WIP</span>
+                  <span>Admin Pusat</span>
                 </a>
               </div>
             </div>
